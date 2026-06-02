@@ -46,27 +46,71 @@ export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSetting
 
   const handleAddAllowed = () => {
     if (!newAllowed.trim()) return;
-    setAllowedPhrases([...allowedPhrases, newAllowed.trim()]);
+    const updated = [...allowedPhrases, newAllowed.trim()];
+    setAllowedPhrases(updated);
     setNewAllowed('');
+    onSaveSettings({
+      apiKey: localApiKey,
+      playbookSettings: {
+        useGemini,
+        customSystemPrompt,
+        allowedPhrases: updated,
+        forbiddenPhrases,
+        trainingLogs
+      }
+    });
   };
 
   const handleAddForbidden = () => {
     if (!newForbidden.trim()) return;
-    setForbiddenPhrases([...forbiddenPhrases, newForbidden.trim()]);
+    const updated = [...forbiddenPhrases, newForbidden.trim()];
+    setForbiddenPhrases(updated);
     setNewForbidden('');
+    onSaveSettings({
+      apiKey: localApiKey,
+      playbookSettings: {
+        useGemini,
+        customSystemPrompt,
+        allowedPhrases,
+        forbiddenPhrases: updated,
+        trainingLogs
+      }
+    });
   };
 
   const handleRemoveAllowed = (idx) => {
-    setAllowedPhrases(allowedPhrases.filter((_, i) => i !== idx));
+    const updated = allowedPhrases.filter((_, i) => i !== idx);
+    setAllowedPhrases(updated);
+    onSaveSettings({
+      apiKey: localApiKey,
+      playbookSettings: {
+        useGemini,
+        customSystemPrompt,
+        allowedPhrases: updated,
+        forbiddenPhrases,
+        trainingLogs
+      }
+    });
   };
 
   const handleRemoveForbidden = (idx) => {
-    setForbiddenPhrases(forbiddenPhrases.filter((_, i) => i !== idx));
+    const updated = forbiddenPhrases.filter((_, i) => i !== idx);
+    setForbiddenPhrases(updated);
+    onSaveSettings({
+      apiKey: localApiKey,
+      playbookSettings: {
+        useGemini,
+        customSystemPrompt,
+        allowedPhrases,
+        forbiddenPhrases: updated,
+        trainingLogs
+      }
+    });
   };
 
   const [trainingLogs, setTrainingLogs] = useState(playbookSettings.trainingLogs || [
     `### BEST BUY COACHING LOG: RICKY
-Focus: 5-Star Surveys
+Focus: 5 Star Surveys
 
 --------------------------------------------------
 1. THE CORE OBJECTIVE (WHAT / HOW / WHY)
@@ -106,13 +150,35 @@ Focus: 5-Star Surveys
 
   const handleAddTrainingLog = () => {
     if (!newTrainingLog.trim()) return;
-    setTrainingLogs([...trainingLogs, newTrainingLog.trim()]);
+    const updated = [...trainingLogs, newTrainingLog.trim()];
+    setTrainingLogs(updated);
     setNewTrainingLog('');
     setIsAddingLog(false);
+    onSaveSettings({
+      apiKey: localApiKey,
+      playbookSettings: {
+        useGemini,
+        customSystemPrompt,
+        allowedPhrases,
+        forbiddenPhrases,
+        trainingLogs: updated
+      }
+    });
   };
 
   const handleRemoveTrainingLog = (idx) => {
-    setTrainingLogs(trainingLogs.filter((_, i) => i !== idx));
+    const updated = trainingLogs.filter((_, i) => i !== idx);
+    setTrainingLogs(updated);
+    onSaveSettings({
+      apiKey: localApiKey,
+      playbookSettings: {
+        useGemini,
+        customSystemPrompt,
+        allowedPhrases,
+        forbiddenPhrases,
+        trainingLogs: updated
+      }
+    });
   };
 
   const handleSave = () => {

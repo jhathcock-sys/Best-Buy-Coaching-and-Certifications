@@ -28,7 +28,44 @@ export default function App() {
     useGemini: false,
     customSystemPrompt: '',
     allowedPhrases: ['My Best Buy Plus', 'My Best Buy Total', 'Geek Squad Protection', 'AppleCare+'],
-    forbiddenPhrases: ['warranty', 'pushy', 'contract']
+    forbiddenPhrases: ['warranty', 'pushy', 'contract'],
+    trainingLogs: [
+      `### BEST BUY COACHING LOG: RICKY
+Focus: 5 Star Surveys
+
+--------------------------------------------------
+1. THE CORE OBJECTIVE (WHAT / HOW / WHY)
+--------------------------------------------------
+* WHAT we need them to do:
+  Deliver a warmer checkout experience and explicitly ask for 5-star survey feedback at checkout.
+
+* HOW we need them to do it:
+  Slow down, write your name on the receipt sleeve, make direct eye contact, and say: "I hope I made your shopping easy today. My name is Ricky; please take 30 seconds to let me know how I did on the 5-star survey!"
+
+* WHY we need them to do it:
+  Ensures customer loyalty, measures our store service indices, and highlights excellent human work on the checkout floor.
+
+--------------------------------------------------
+2. CURRENT STRENGTHS (DOING WELL)
+--------------------------------------------------
+* What they are currently doing well:
+  Excellent transactional speeds, zero cashier queue backlog, and highly professional checkout processing.
+
+--------------------------------------------------
+3. PERFORMANCE METRIC GAP
+--------------------------------------------------
+* Gap we are trying to fill:
+  Ricky has 0 5 Star surveys this month (store standard is maintaining 2+ five-star survey mentions per week).
+
+--------------------------------------------------
+4. EXPECTATIONS & VALIDATION METHOD
+--------------------------------------------------
+* Expectation of results:
+  Secure at least 2 five-star survey mentions this week and maintain a 4.8+ survey average.
+
+* How we will validate:
+  Leader will perform 3 checkout observations this week and review the Sunday 5 Star survey comment log.`
+    ]
   });
 
   const [metrics, setMetrics] = useState({
@@ -137,6 +174,48 @@ export default function App() {
         // Force useGemini to true if an environment key is loaded and no custom override is in localStorage
         if (hasEnvKey && (!savedKey || savedKey.trim().length < 10)) {
           parsed.useGemini = true;
+        }
+        
+        // Safeguard trainingLogs: if they upgraded from an older version of saved settings that didn't have trainingLogs, populate it!
+        if (!parsed.trainingLogs || !Array.isArray(parsed.trainingLogs)) {
+          parsed.trainingLogs = [
+            `### BEST BUY COACHING LOG: RICKY
+Focus: 5 Star Surveys
+
+--------------------------------------------------
+1. THE CORE OBJECTIVE (WHAT / HOW / WHY)
+--------------------------------------------------
+* WHAT we need them to do:
+  Deliver a warmer checkout experience and explicitly ask for 5-star survey feedback at checkout.
+
+* HOW we need them to do it:
+  Slow down, write your name on the receipt sleeve, make direct eye contact, and say: "I hope I made your shopping easy today. My name is Ricky; please take 30 seconds to let me know how I did on the 5-star survey!"
+
+* WHY we need them to do it:
+  Ensures customer loyalty, measures our store service indices, and highlights excellent human work on the checkout floor.
+
+--------------------------------------------------
+2. CURRENT STRENGTHS (DOING WELL)
+--------------------------------------------------
+* What they are currently doing well:
+  Excellent transactional speeds, zero cashier queue backlog, and highly professional checkout processing.
+
+--------------------------------------------------
+3. PERFORMANCE METRIC GAP
+--------------------------------------------------
+* Gap we are trying to fill:
+  Ricky has 0 5 Star surveys this month (store standard is maintaining 2+ five-star survey mentions per week).
+
+--------------------------------------------------
+4. EXPECTATIONS & VALIDATION METHOD
+--------------------------------------------------
+* Expectation of results:
+  Secure at least 2 five-star survey mentions this week and maintain a 4.8+ survey average.
+
+* How we will validate:
+  Leader will perform 3 checkout observations this week and review the Sunday 5 Star survey comment log.`
+          ];
+          localStorage.setItem('bby_playbook_settings', JSON.stringify(parsed));
         }
         setPlaybookSettings(parsed);
       } catch (e) {

@@ -624,7 +624,7 @@ export async function generateCoachingLogGemini(apiKey, name, gapType, gapDetail
       
       SECTION 1: THE CORE OBJECTIVE (WHAT / HOW / WHY)
       - What we need them to do: [Clear behavioral action, e.g. Introduce My Best Buy Total early]
-      - How we need them to do it: [Step-by-step how to pitch it in discovery]
+      - How we need them to do it: [Step-by-step how to pitch it. You MUST explicitly structure this behavioral plan using the Best Buy "DISC" model. Break it down strictly using: "[Discover] ... [Inspire] ... [Solve] ... [Close] ..."]
       - Why we need them to do it: [Value to customer and store goals]
       
       SECTION 2: CURRENT STRENGTHS

@@ -116,20 +116,27 @@ export default function App() {
   // Initialize and load state from localStorage on startup
   useEffect(() => {
     const savedKey = localStorage.getItem('bby_api_key');
-    if (savedKey) {
+    const hasEnvKey = !!(import.meta.env.VITE_GEMINI_API_KEY && import.meta.env.VITE_GEMINI_API_KEY.trim().length > 10);
+
+    if (savedKey && savedKey.trim().length > 10) {
       setApiKey(savedKey);
-    } else if (import.meta.env.VITE_GEMINI_API_KEY) {
+    } else if (hasEnvKey) {
       setApiKey(import.meta.env.VITE_GEMINI_API_KEY);
     }
 
     const savedSettings = localStorage.getItem('bby_playbook_settings');
     if (savedSettings) {
       try {
-        setPlaybookSettings(JSON.parse(savedSettings));
+        const parsed = JSON.parse(savedSettings);
+        // Force useGemini to true if an environment key is loaded and no custom override is in localStorage
+        if (hasEnvKey && (!savedKey || savedKey.trim().length < 10)) {
+          parsed.useGemini = true;
+        }
+        setPlaybookSettings(parsed);
       } catch (e) {
         console.error(e);
       }
-    } else if (import.meta.env.VITE_GEMINI_API_KEY) {
+    } else if (hasEnvKey) {
       setPlaybookSettings(prev => ({ ...prev, useGemini: true }));
     }
 

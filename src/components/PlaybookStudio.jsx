@@ -1,13 +1,29 @@
 import React, { useState } from 'react';
 import { ShieldAlert, Sparkles, Key, Check, Plus, Trash2, BookOpen, Compass } from 'lucide-react';
 
-export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSettings, deptGoals = {}, onSaveDeptGoals }) {
+export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSettings, deptGoals = {}, onSaveDeptGoals, dbConnected, onSaveFirebaseConfig }) {
   const [useGemini, setUseGemini] = useState(playbookSettings.useGemini);
   const [localApiKey, setLocalApiKey] = useState(apiKey || '');
   const [customSystemPrompt, setCustomSystemPrompt] = useState(playbookSettings.customSystemPrompt || '');
   
   const [selectedDept, setSelectedDept] = useState('Front End');
   const [editedGoals, setEditedGoals] = useState({ ...deptGoals });
+
+  // Firebase Cloud Configuration States
+  const [firebaseConfig, setFirebaseConfig] = useState(() => {
+    try {
+      const saved = localStorage.getItem('bby_firebase_config');
+      if (saved) return JSON.parse(saved);
+    } catch(e) {}
+    return {
+      apiKey: '',
+      authDomain: '',
+      projectId: '',
+      storageBucket: '',
+      messagingSenderId: '',
+      appId: ''
+    };
+  });
 
   React.useEffect(() => {
     setEditedGoals({ ...deptGoals });
@@ -615,6 +631,133 @@ Focus: 5 Star Surveys
               + Add Past Coaching Exemplar to Training Corpus
             </button>
           )}
+        </div>
+      </div>
+
+      {/* Collaborative Cloud Configuration Panel */}
+      <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', border: dbConnected ? '1.5px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--border-glass)', marginTop: '1.5rem' }}>
+        <div>
+          <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: dbConnected ? 'var(--success)' : '#fff' }}>
+            <Compass size={20} color={dbConnected ? 'var(--success)' : 'var(--bby-blue)'} /> Collaborative Cloud Sync (Firebase Firestore)
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.825rem', lineHeight: 1.4 }}>
+            Enable multi-leader synchronization! By connecting a free **Firebase Cloud Database**, all members of store leadership can access, view, and edit the exact same shared roster, month archives, targets, and exemplars in real-time across Chrome, Safari, mobile devices, and office computers.
+          </p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+          <div className="form-group">
+            <label className="form-label" style={{ fontSize: '0.75rem' }}>Firebase API Key:</label>
+            <input 
+              type="password" 
+              className="form-control" 
+              placeholder="e.g. AIzaSyA1..."
+              style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+              value={firebaseConfig.apiKey}
+              onChange={(e) => setFirebaseConfig({ ...firebaseConfig, apiKey: e.target.value })}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label" style={{ fontSize: '0.75rem' }}>Firebase Project ID:</label>
+            <input 
+              type="text" 
+              className="form-control" 
+              placeholder="e.g. bluecoach-bby-894"
+              style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+              value={firebaseConfig.projectId}
+              onChange={(e) => setFirebaseConfig({ ...firebaseConfig, projectId: e.target.value })}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label" style={{ fontSize: '0.75rem' }}>Auth Domain (Optional):</label>
+            <input 
+              type="text" 
+              className="form-control" 
+              placeholder="e.g. project-id.firebaseapp.com"
+              style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+              value={firebaseConfig.authDomain}
+              onChange={(e) => setFirebaseConfig({ ...firebaseConfig, authDomain: e.target.value })}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label" style={{ fontSize: '0.75rem' }}>Storage Bucket (Optional):</label>
+            <input 
+              type="text" 
+              className="form-control" 
+              placeholder="e.g. project-id.appspot.com"
+              style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+              value={firebaseConfig.storageBucket}
+              onChange={(e) => setFirebaseConfig({ ...firebaseConfig, storageBucket: e.target.value })}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label" style={{ fontSize: '0.75rem' }}>Messaging Sender ID (Optional):</label>
+            <input 
+              type="text" 
+              className="form-control" 
+              placeholder="e.g. 8493019482"
+              style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+              value={firebaseConfig.messagingSenderId}
+              onChange={(e) => setFirebaseConfig({ ...firebaseConfig, messagingSenderId: e.target.value })}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label" style={{ fontSize: '0.75rem' }}>App ID (Optional):</label>
+            <input 
+              type="text" 
+              className="form-control" 
+              placeholder="e.g. 1:84930:web:8a92f..."
+              style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+              value={firebaseConfig.appId}
+              onChange={(e) => setFirebaseConfig({ ...firebaseConfig, appId: e.target.value })}
+            />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', alignItems: 'center', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+          {dbConnected && (
+            <span style={{ fontSize: '0.8rem', color: 'var(--success)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+              ✓ Cloud Database Synced successfully!
+            </span>
+          )}
+          
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            {dbConnected && (
+              <button 
+                className="btn btn-secondary" 
+                style={{ padding: '0.55rem 1.25rem', borderColor: 'var(--error)', color: 'var(--error)' }}
+                onClick={() => {
+                  if (confirm("Are you sure you want to disconnect from the Cloud Database? This browser will return to Local Offline Sandbox Mode.")) {
+                    onSaveFirebaseConfig(null);
+                    setFirebaseConfig({
+                      apiKey: '',
+                      authDomain: '',
+                      projectId: '',
+                      storageBucket: '',
+                      messagingSenderId: '',
+                      appId: ''
+                    });
+                  }
+                }}
+              >
+                Disconnect Cloud
+              </button>
+            )}
+            
+            <button 
+              className="btn btn-primary" 
+              style={{ padding: '0.55rem 1.25rem', background: dbConnected ? 'rgba(255,255,255,0.08)' : 'var(--bby-blue)', color: dbConnected ? '#fff' : undefined }}
+              onClick={() => {
+                if (!firebaseConfig.apiKey.trim() || !firebaseConfig.projectId.trim()) {
+                  alert("API Key and Project ID are required to initialize Firebase Cloud!");
+                  return;
+                }
+                onSaveFirebaseConfig(firebaseConfig);
+              }}
+            >
+              {dbConnected ? 'Update Cloud Credentials' : 'Connect Cloud Database'}
+            </button>
+          </div>
         </div>
       </div>
 

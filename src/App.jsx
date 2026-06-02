@@ -6,6 +6,19 @@ import CertificationCenter from './components/CertificationCenter';
 import CoachSimulator from './components/CoachSimulator';
 import PlaybookStudio from './components/PlaybookStudio';
 import { Compass, Award, Users, BookOpen, LayoutDashboard, Key, Sparkles, ShieldCheck, ClipboardList } from 'lucide-react';
+import { 
+  isFirebaseConnected, 
+  subscribeToActivePeriod, 
+  subscribeToRosterHistory, 
+  subscribeToPlaybookSettings, 
+  subscribeToDeptGoals, 
+  saveActivePeriodToCloud, 
+  saveRosterHistoryToCloud, 
+  savePlaybookSettingsToCloud, 
+  saveDeptGoalsToCloud,
+  seedOfflineDataToCloud,
+  initFirebase
+} from './services/firebase';
 
 const INITIAL_ROSTER = [
   { id: 'yinel', name: 'Yinel', dept: 'Front End', hours: 34.5, memberships: 10, creditCards: 1, warranty: 22.2, surveys: 2, rph: 744, gap: 'BBY Credit Cards (1 App)' },
@@ -114,6 +127,25 @@ Focus: 5 Star Surveys
   const [activePeriod, setActivePeriod] = useState('May 2026');
   const [selectedCoachingRosterEmployee, setSelectedCoachingRosterEmployee] = useState(null);
   const [prefillBuilderData, setPrefillBuilderData] = useState(null);
+
+  // Cloud Synchronization state
+  const [dbConnected, setDbConnected] = useState(isFirebaseConnected());
+
+  const handleSaveFirebaseConfig = (config) => {
+    if (config) {
+      localStorage.setItem('bby_firebase_config', JSON.stringify(config));
+      const database = initFirebase(config);
+      setDbConnected(!!database);
+      if (database) {
+        alert("Connected to Firebase Cloud Database! Roster data, department targets, and exemplar templates are now synchronized in real-time.");
+      }
+    } else {
+      localStorage.removeItem('bby_firebase_config');
+      initFirebase(null);
+      setDbConnected(false);
+      alert("Switched back to Local Offline Sandbox Mode successfully.");
+    }
+  };
   
   // Department-specific Goals Matrix (dynamic store benchmarks)
   const [deptGoals, setDeptGoals] = useState({
@@ -325,12 +357,71 @@ Focus: 5 Star Surveys
     }
   }, []);
 
+  // Subscribe to real-time Cloud Sync
+  useEffect(() => {
+    if (!dbConnected) return;
+
+    // Seed existing offline data from localStorage to cloud if cloud database is empty!
+    const seedCloud = async () => {
+      const savedSettings = localStorage.getItem('bby_playbook_settings');
+      const savedGoals = localStorage.getItem('bby_dept_goals');
+      const savedHistory = localStorage.getItem('bby_roster_history');
+      const savedPeriod = localStorage.getItem('bby_active_period');
+
+      await seedOfflineDataToCloud({
+        activePeriod: savedPeriod || 'May 2026',
+        rosterHistory: savedHistory ? JSON.parse(savedHistory) : null,
+        playbookSettings: savedSettings ? JSON.parse(savedSettings) : null,
+        deptGoals: savedGoals ? JSON.parse(savedGoals) : null
+      });
+    };
+    seedCloud();
+
+    // Subscribe to active period
+    const unsubPeriod = subscribeToActivePeriod((p) => {
+      if (p) setActivePeriod(p);
+    });
+
+    // Subscribe to roster history
+    const unsubRoster = subscribeToRosterHistory((h) => {
+      if (h) setRosterHistory(h);
+    });
+
+    // Subscribe to playbook settings
+    const unsubPlaybook = subscribeToPlaybookSettings((s) => {
+      if (s) {
+        // Force useGemini to true if an environment key is loaded and no custom override is in localStorage
+        const hasEnvKey = !!(import.meta.env.VITE_GEMINI_API_KEY && import.meta.env.VITE_GEMINI_API_KEY.trim().length > 10);
+        const savedKey = localStorage.getItem('bby_api_key');
+        if (hasEnvKey && (!savedKey || savedKey.trim().length < 10)) {
+          s.useGemini = true;
+        }
+        setPlaybookSettings(s);
+      }
+    });
+
+    // Subscribe to department goals
+    const unsubGoals = subscribeToDeptGoals((g) => {
+      if (g) setDeptGoals(g);
+    });
+
+    return () => {
+      if (unsubPeriod) unsubPeriod();
+      if (unsubRoster) unsubRoster();
+      if (unsubPlaybook) unsubPlaybook();
+      if (unsubGoals) unsubGoals();
+    };
+  }, [dbConnected]);
+
   // Save Settings
   const handleSaveSettings = ({ apiKey: newKey, playbookSettings: newSettings }) => {
     setApiKey(newKey);
     setPlaybookSettings(newSettings);
     localStorage.setItem('bby_api_key', newKey);
     localStorage.setItem('bby_playbook_settings', JSON.stringify(newSettings));
+    if (dbConnected) {
+      savePlaybookSettingsToCloud(newSettings);
+    }
   };
 
   // Import custom scenario generated from past coachings
@@ -402,6 +493,9 @@ Focus: 5 Star Surveys
     const newHistory = { ...rosterHistory, [activePeriod]: updatedRoster };
     setRosterHistory(newHistory);
     localStorage.setItem('bby_roster_history', JSON.stringify(newHistory));
+    if (dbConnected) {
+      saveRosterHistoryToCloud(newHistory);
+    }
   };
 
   const handleUpdateEmployeeDept = (empId, newDept) => {
@@ -453,6 +547,10 @@ Focus: 5 Star Surveys
     setActivePeriod(newPeriodName);
     localStorage.setItem('bby_roster_history', JSON.stringify(newHistory));
     localStorage.setItem('bby_active_period', newPeriodName);
+    if (dbConnected) {
+      saveRosterHistoryToCloud(newHistory);
+      saveActivePeriodToCloud(newPeriodName);
+    }
   };
 
   return (
@@ -510,16 +608,23 @@ Focus: 5 Star Surveys
         </ul>
 
         {/* Sidebar Footer Status Indicator */}
-        <div className="sidebar-footer">
-          {playbookSettings.useGemini && apiKey.trim().length > 10 ? (
-            <div className="api-key-indicator" style={{ background: 'var(--info-glow)', border: '1px solid rgba(6,182,212,0.15)' }}>
-              <div className="indicator-dot active" />
-              <span style={{ color: '#a5f3fc' }}>Gemini Free Mode Active</span>
+        <div className="sidebar-footer" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          {dbConnected ? (
+            <div className="api-key-indicator" style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+              <div className="indicator-dot active" style={{ background: 'var(--success)', boxShadow: '0 0 8px rgba(16, 185, 129, 0.4)' }} />
+              <span style={{ color: '#a7f3d0' }}>Cloud Database Synced</span>
             </div>
           ) : (
             <div className="api-key-indicator" style={{ background: 'var(--warning-glow)', border: '1px solid rgba(245,158,11,0.15)' }}>
               <div className="indicator-dot inactive" style={{ background: 'var(--bby-yellow)', boxShadow: '0 0 8px rgba(255, 230, 0, 0.4)' }} />
               <span style={{ color: '#fde047' }}>Local Sandbox Active</span>
+            </div>
+          )}
+
+          {playbookSettings.useGemini && apiKey.trim().length > 10 && (
+            <div className="api-key-indicator" style={{ background: 'var(--info-glow)', border: '1px solid rgba(6,182,212,0.15)' }}>
+              <div className="indicator-dot active" />
+              <span style={{ color: '#a5f3fc' }}>Gemini Free Mode Active</span>
             </div>
           )}
         </div>
@@ -541,7 +646,11 @@ Focus: 5 Star Surveys
             roster={rosterHistory[activePeriod] || []}
             activePeriod={activePeriod}
             rosterHistory={rosterHistory}
-            onChangePeriod={(p) => { setActivePeriod(p); localStorage.setItem('bby_active_period', p); }}
+            onChangePeriod={(p) => { 
+              setActivePeriod(p); 
+              localStorage.setItem('bby_active_period', p); 
+              if (dbConnected) saveActivePeriodToCloud(p);
+            }}
             onCoachEmployee={handleCoachEmployeeFromRoster}
             onCreateLog={handleCreateLogFromRoster}
             deptGoals={deptGoals}
@@ -606,7 +715,10 @@ Focus: 5 Star Surveys
             onSaveDeptGoals={(newGoals) => {
               setDeptGoals(newGoals);
               localStorage.setItem('bby_dept_goals', JSON.stringify(newGoals));
+              if (dbConnected) saveDeptGoalsToCloud(newGoals);
             }}
+            dbConnected={dbConnected}
+            onSaveFirebaseConfig={handleSaveFirebaseConfig}
           />
         )}
       </main>

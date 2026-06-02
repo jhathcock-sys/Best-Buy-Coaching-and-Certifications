@@ -79,12 +79,36 @@ export default function App() {
   
   // Department-specific Goals Matrix (dynamic store benchmarks)
   const [deptGoals, setDeptGoals] = useState({
-    'General Sales': { memberships: 3, creditCards: 2, warranty: 11.0, surveys: 1.0, rph: 640 },
-    'Appliances': { memberships: 2, creditCards: 2, warranty: 12.0, surveys: 1.0, rph: 1200 },
-    'Computing': { memberships: 4, creditCards: 2, warranty: 11.0, surveys: 1.0, rph: 900 },
-    'Mobile': { memberships: 3, creditCards: 2, warranty: 8.0, surveys: 1.0, rph: 700 },
-    'Home Theatre': { memberships: 4, creditCards: 2, warranty: 11.0, surveys: 1.0, rph: 800 },
-    'Geek Squad': { memberships: 5, creditCards: 1, warranty: 12.0, surveys: 1.0, rph: 500 }
+    'General Sales': { 
+      memberships: 8.0, membershipsType: 'Hours', 
+      creditCards: 12.5, creditCardsType: 'Hours', 
+      warranty: 11.0, surveys: 1.0, rph: 640 
+    },
+    'Appliances': { 
+      memberships: 15000, membershipsType: 'Dollars', 
+      creditCards: 10000, creditCardsType: 'Dollars', 
+      warranty: 12.0, surveys: 1.0, rph: 1200 
+    },
+    'Computing': { 
+      memberships: 8000, membershipsType: 'Dollars', 
+      creditCards: 10000, creditCardsType: 'Dollars', 
+      warranty: 11.0, surveys: 1.0, rph: 900 
+    },
+    'Mobile': { 
+      memberships: 6000, membershipsType: 'Dollars', 
+      creditCards: 8000, creditCardsType: 'Dollars', 
+      warranty: 8.0, surveys: 1.0, rph: 700 
+    },
+    'Home Theatre': { 
+      memberships: 10000, membershipsType: 'Dollars', 
+      creditCards: 12000, creditCardsType: 'Dollars', 
+      warranty: 11.0, surveys: 1.0, rph: 800 
+    },
+    'Geek Squad': { 
+      memberships: 5000, membershipsType: 'Dollars', 
+      creditCards: 15000, creditCardsType: 'Dollars', 
+      warranty: 12.0, surveys: 1.0, rph: 500 
+    }
   });
   
   const [showCertModal, setShowCertModal] = useState(null);

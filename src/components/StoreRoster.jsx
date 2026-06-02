@@ -15,16 +15,43 @@ export default function StoreRoster({ roster, onCoachEmployee, onCreateLog, dept
   const DEPARTMENTS = ['All', 'General Sales', 'Appliances', 'Computing', 'Mobile', 'Home Theatre', 'Geek Squad'];
 
   // Audits employee metrics dynamically based on their department goals!
-  const getMetricClass = (val, type, dept) => {
+  const getMetricClass = (val, type, dept, emp) => {
     const goals = deptGoals[dept] || deptGoals['General Sales'];
     const target = goals[type];
-    
+    const typeKey = type + 'Type';
+    const isHoursType = goals[typeKey] === 'Hours';
+    const isDollarsType = goals[typeKey] === 'Dollars';
+
     if (type === 'memberships') {
+      if (isHoursType) {
+        // Evaluate memberships by Hours Worked Pace (1 membership per X hours)
+        // lower pace (fewer hours per membership) is better!
+        const pace = emp.hours / (val || 0.001);
+        return pace <= target ? 'text-success' : pace <= target + 3.0 ? 'text-warning' : 'text-danger';
+      } else if (isDollarsType) {
+        // Evaluate memberships by Dollar Revenue Pace (1 membership per $D revenue)
+        // lower pace (fewer dollars per membership) is better!
+        const revenue = emp.hours * emp.rph;
+        const pace = revenue / (val || 0.001);
+        return pace <= target ? 'text-success' : pace <= target + 2000 ? 'text-warning' : 'text-danger';
+      }
       return val >= target ? 'text-success' : val >= target - 1 ? 'text-warning' : 'text-danger';
     }
+
     if (type === 'creditCards') {
+      if (isHoursType) {
+        // Evaluate credit cards by Hours Worked Pace (1 app per X hours)
+        const pace = emp.hours / (val || 0.001);
+        return pace <= target ? 'text-success' : pace <= target + 4.0 ? 'text-warning' : 'text-danger';
+      } else if (isDollarsType) {
+        // Evaluate credit cards by Dollar Revenue Pace (1 app per $D revenue)
+        const revenue = emp.hours * emp.rph;
+        const pace = revenue / (val || 0.001);
+        return pace <= target ? 'text-success' : pace <= target + 3000 ? 'text-warning' : 'text-danger';
+      }
       return val >= target ? 'text-success' : val >= target - 1 ? 'text-warning' : 'text-danger';
     }
+
     if (type === 'warranty') {
       return val >= target ? 'text-success' : val >= target - 3.0 ? 'text-warning' : 'text-danger';
     }
@@ -33,6 +60,27 @@ export default function StoreRoster({ roster, onCoachEmployee, onCreateLog, dept
     }
     if (type === 'rph') {
       return val >= target ? 'text-success' : val >= target - 150 ? 'text-warning' : 'text-danger';
+    }
+    return '';
+  };
+
+  const getPaceText = (val, type, dept, emp) => {
+    const goals = deptGoals[dept] || deptGoals['General Sales'];
+    const typeKey = type + 'Type';
+    const isHoursType = goals[typeKey] === 'Hours';
+    const isDollarsType = goals[typeKey] === 'Dollars';
+
+    if (!val || val === 0) return 'No pace';
+
+    if (isHoursType) {
+      // 1 app/memb per X hours
+      const pace = emp.hours / val;
+      return `1 in ${pace.toFixed(1)} hrs`;
+    } else if (isDollarsType) {
+      // 1 app/memb per $D revenue
+      const revenue = emp.hours * emp.rph;
+      const pace = revenue / val;
+      return `1 in $${Math.round(pace / 100) / 10}k rev`;
     }
     return '';
   };
@@ -146,19 +194,25 @@ export default function StoreRoster({ roster, onCoachEmployee, onCreateLog, dept
                     <td style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>
                       {emp.dept}
                     </td>
-                    <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={getMetricClass(emp.memberships, 'memberships', emp.dept)}>
-                      {emp.memberships} Membs
+                    <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={getMetricClass(emp.memberships, 'memberships', emp.dept, emp)}>
+                      <div>{emp.memberships} Membs</div>
+                      <div style={{ fontSize: '0.7rem', fontWeight: 500, color: 'var(--text-secondary)', marginTop: '0.15rem' }}>
+                        ({getPaceText(emp.memberships, 'memberships', emp.dept, emp)})
+                      </div>
                     </td>
-                    <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={getMetricClass(emp.creditCards, 'creditCards', emp.dept)}>
-                      {emp.creditCards} Apps
+                    <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={getMetricClass(emp.creditCards, 'creditCards', emp.dept, emp)}>
+                      <div>{emp.creditCards} Apps</div>
+                      <div style={{ fontSize: '0.7rem', fontWeight: 500, color: 'var(--text-secondary)', marginTop: '0.15rem' }}>
+                        ({getPaceText(emp.creditCards, 'creditCards', emp.dept, emp)})
+                      </div>
                     </td>
-                    <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={getMetricClass(emp.warranty, 'warranty', emp.dept)}>
+                    <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={getMetricClass(emp.warranty, 'warranty', emp.dept, emp)}>
                       {emp.warranty}%
                     </td>
-                    <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={getMetricClass(emp.surveys, 'surveys', emp.dept)}>
+                    <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={getMetricClass(emp.surveys, 'surveys', emp.dept, emp)}>
                       {emp.surveys === 0.2 ? 'Failing' : `${emp.surveys} Five-Star`}
                     </td>
-                    <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={getMetricClass(emp.rph, 'rph', emp.dept)}>
+                    <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={getMetricClass(emp.rph, 'rph', emp.dept, emp)}>
                       ${emp.rph}
                     </td>
                     <td style={{ padding: '1rem 1.5rem' }}>
@@ -215,8 +269,12 @@ export default function StoreRoster({ roster, onCoachEmployee, onCreateLog, dept
                 {dept}
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', color: 'var(--text-secondary)' }}>
-                <div><strong>Memberships:</strong> {targets.memberships} goal</div>
-                <div><strong>BBY Cards:</strong> {targets.creditCards} apps goal</div>
+                <div>
+                  <strong>Memberships:</strong> {targets.membershipsType === 'Hours' ? `1 in ${targets.memberships} hrs` : targets.membershipsType === 'Dollars' ? `1 in $${(targets.memberships / 1000).toFixed(0)}k sales` : `${targets.memberships} goal`}
+                </div>
+                <div>
+                  <strong>BBY Cards:</strong> {targets.creditCardsType === 'Hours' ? `1 in ${targets.creditCards} hrs` : targets.creditCardsType === 'Dollars' ? `1 in $${(targets.creditCards / 1000).toFixed(0)}k sales` : `${targets.creditCards} goal`}
+                </div>
                 <div><strong>GSP Attach:</strong> {targets.warranty}% attach</div>
                 <div><strong>CSAT surveys:</strong> {targets.surveys} five-star</div>
                 <div><strong>RPH index:</strong> ${targets.rph}/hr target</div>

@@ -14,12 +14,13 @@ export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSetting
   }, [deptGoals]);
 
   const handleGoalChange = (metric, val) => {
-    const numericVal = parseFloat(val) || 0;
+    const isTypeField = metric.endsWith('Type');
+    const processedVal = isTypeField ? val : (parseFloat(val) || 0);
     setEditedGoals(prev => ({
       ...prev,
       [selectedDept]: {
         ...prev[selectedDept],
-        [metric]: numericVal
+        [metric]: processedVal
       }
     }));
   };
@@ -372,49 +373,94 @@ Focus: 5-Star Surveys
               Editing targets for {selectedDept}
             </span>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.25rem' }}>
-              <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.725rem' }}>Memberships Goal:</label>
-                <input 
-                  type="number" 
-                  className="form-control"
-                  value={editedGoals[selectedDept]?.memberships || 0}
-                  onChange={(e) => handleGoalChange('memberships', e.target.value)}
-                  style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
-                />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.25rem' }}>
+              
+              {/* Memberships Config Section */}
+              <div style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-glass)', borderRadius: '10px' }}>
+                <label className="form-label" style={{ fontSize: '0.75rem', color: '#fff', display: 'block', marginBottom: '0.5rem' }}>
+                  Memberships (Plus/Total) Evaluation
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.5rem' }}>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <select 
+                      className="form-control"
+                      value={editedGoals[selectedDept]?.membershipsType || 'Hours'}
+                      onChange={(e) => handleGoalChange('membershipsType', e.target.value)}
+                      style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                    >
+                      <option value="Hours">Hours worked (1 per X hrs)</option>
+                      <option value="Dollars">Dollar sales (1 per $D sales)</option>
+                    </select>
+                  </div>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <input 
+                      type="number" 
+                      className="form-control"
+                      value={editedGoals[selectedDept]?.memberships || 0}
+                      onChange={(e) => handleGoalChange('memberships', e.target.value)}
+                      placeholder="Target value"
+                      style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.725rem' }}>BBY Cards Goal:</label>
-                <input 
-                  type="number" 
-                  className="form-control"
-                  value={editedGoals[selectedDept]?.creditCards || 0}
-                  onChange={(e) => handleGoalChange('creditCards', e.target.value)}
-                  style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
-                />
+
+              {/* Credit Cards Config Section */}
+              <div style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-glass)', borderRadius: '10px' }}>
+                <label className="form-label" style={{ fontSize: '0.75rem', color: '#fff', display: 'block', marginBottom: '0.5rem' }}>
+                  BBY Credit Cards (Apps) Evaluation
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.5rem' }}>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <select 
+                      className="form-control"
+                      value={editedGoals[selectedDept]?.creditCardsType || 'Hours'}
+                      onChange={(e) => handleGoalChange('creditCardsType', e.target.value)}
+                      style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                    >
+                      <option value="Hours">Hours worked (1 per X hrs)</option>
+                      <option value="Dollars">Dollar sales (1 per $D sales)</option>
+                    </select>
+                  </div>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <input 
+                      type="number" 
+                      className="form-control"
+                      value={editedGoals[selectedDept]?.creditCards || 0}
+                      onChange={(e) => handleGoalChange('creditCards', e.target.value)}
+                      placeholder="Target value"
+                      style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.725rem' }}>GSP Attach % Goal:</label>
-                <input 
-                  type="number" 
-                  step="0.1"
-                  className="form-control"
-                  value={editedGoals[selectedDept]?.warranty || 0}
-                  onChange={(e) => handleGoalChange('warranty', e.target.value)}
-                  style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
-                />
+
+              {/* Dynamic GSP & CSAT Section */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.725rem' }}>GSP Attach % Goal:</label>
+                  <input 
+                    type="number" 
+                    step="0.1"
+                    className="form-control"
+                    value={editedGoals[selectedDept]?.warranty || 0}
+                    onChange={(e) => handleGoalChange('warranty', e.target.value)}
+                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                  />
+                </div>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.725rem' }}>CSAT surveys Goal:</label>
+                  <input 
+                    type="number" 
+                    step="0.1"
+                    className="form-control"
+                    value={editedGoals[selectedDept]?.surveys || 0}
+                    onChange={(e) => handleGoalChange('surveys', e.target.value)}
+                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                  />
+                </div>
               </div>
-              <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.725rem' }}>CSAT surveys Goal:</label>
-                <input 
-                  type="number" 
-                  step="0.1"
-                  className="form-control"
-                  value={editedGoals[selectedDept]?.surveys || 0}
-                  onChange={(e) => handleGoalChange('surveys', e.target.value)}
-                  style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
-                />
-              </div>
+
             </div>
 
             <div className="form-group">

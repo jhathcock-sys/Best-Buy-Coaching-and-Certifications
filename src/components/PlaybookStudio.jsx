@@ -6,7 +6,7 @@ export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSetting
   const [localApiKey, setLocalApiKey] = useState(apiKey || '');
   const [customSystemPrompt, setCustomSystemPrompt] = useState(playbookSettings.customSystemPrompt || '');
   
-  const [selectedDept, setSelectedDept] = useState('General Sales');
+  const [selectedDept, setSelectedDept] = useState('Front End');
   const [editedGoals, setEditedGoals] = useState({ ...deptGoals });
 
   React.useEffect(() => {

@@ -8,10 +8,10 @@ import PlaybookStudio from './components/PlaybookStudio';
 import { Compass, Award, Users, BookOpen, LayoutDashboard, Key, Sparkles, ShieldCheck, ClipboardList } from 'lucide-react';
 
 const INITIAL_ROSTER = [
-  { id: 'yinel', name: 'Yinel', dept: 'General Sales', hours: 34.5, memberships: 10, creditCards: 1, warranty: 22.2, surveys: 2, rph: 744, gap: 'BBY Credit Cards (1 App)' },
+  { id: 'yinel', name: 'Yinel', dept: 'Front End', hours: 34.5, memberships: 10, creditCards: 1, warranty: 22.2, surveys: 2, rph: 744, gap: 'BBY Credit Cards (1 App)' },
   { id: 'julianna', name: 'Julianna', dept: 'Computing', hours: 78.0, memberships: 6, creditCards: 2, warranty: 11.2, surveys: 1, rph: 1049, gap: 'None' },
   { id: 'muntarin', name: 'Muntarin', dept: 'Home Theatre', hours: 51.4, memberships: 4, creditCards: 0, warranty: 17.1, surveys: 1, rph: 868, gap: 'BBY Credit Cards (0 Apps)' },
-  { id: 'ricky', name: 'Ricky', dept: 'General Sales', hours: 59.9, memberships: 3, creditCards: 7, warranty: 11.5, surveys: 0, rph: 649, gap: '5-Star Surveys (0 CSAT)' },
+  { id: 'ricky', name: 'Ricky', dept: 'Front End', hours: 59.9, memberships: 3, creditCards: 7, warranty: 11.5, surveys: 0, rph: 649, gap: '5-Star Surveys (0 CSAT)' },
   { id: 'paulie', name: 'Paul / Paulie', dept: 'Appliances', hours: 25.0, memberships: 3, creditCards: 2, warranty: 11.6, surveys: 0, rph: 1436, gap: '5-Star Surveys (0 CSAT)' },
   { id: 'daniel', name: 'Daniel', dept: 'Mobile', hours: 30.8, memberships: 3, creditCards: 2, warranty: 7.5, surveys: 1, rph: 1386, gap: 'GSP Attach (7.5% vs 12.0%)' },
   { id: 'kevin', name: 'Kevin', dept: 'Geek Squad', hours: 43.6, memberships: 2, creditCards: 5, warranty: 4.0, surveys: 0, rph: 1460, gap: 'GSP Attach (4.0% vs 12.0%)' },
@@ -79,7 +79,7 @@ export default function App() {
   
   // Department-specific Goals Matrix (dynamic store benchmarks)
   const [deptGoals, setDeptGoals] = useState({
-    'General Sales': { 
+    'Front End': { 
       memberships: 8.0, membershipsType: 'Hours', 
       creditCards: 12.5, creditCardsType: 'Hours', 
       warranty: 11.0, surveys: 1.0, rph: 640 
@@ -179,7 +179,15 @@ export default function App() {
     const savedGoals = localStorage.getItem('bby_dept_goals');
     if (savedGoals) {
       try {
-        setDeptGoals(JSON.parse(savedGoals));
+        const parsed = JSON.parse(savedGoals);
+        if (parsed['General Sales']) {
+          parsed['Front End'] = parsed['General Sales'];
+          delete parsed['General Sales'];
+          setDeptGoals(parsed);
+          localStorage.setItem('bby_dept_goals', JSON.stringify(parsed));
+        } else {
+          setDeptGoals(parsed);
+        }
       } catch (e) {
         console.error(e);
       }
@@ -189,7 +197,7 @@ export default function App() {
     if (savedRoster) {
       try {
         const parsed = JSON.parse(savedRoster);
-        if (parsed.some(e => e.id === 'jordan') || !parsed.some(e => e.id === 'yinel') || !parsed.some(e => e.id === 'yinel' && 'hours' in e)) {
+        if (parsed.some(e => e.dept === 'General Sales') || parsed.some(e => e.id === 'jordan') || !parsed.some(e => e.id === 'yinel') || !parsed.some(e => e.id === 'yinel' && 'hours' in e)) {
           setRoster(INITIAL_ROSTER);
           localStorage.setItem('bby_roster', JSON.stringify(INITIAL_ROSTER));
         } else {

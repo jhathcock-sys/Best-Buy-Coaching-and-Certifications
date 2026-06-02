@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Users, Search, AlertTriangle, CheckCircle, TrendingUp, Sparkles, Clock, HelpCircle } from 'lucide-react';
 
 export default function StoreRoster({ roster, onCoachEmployee, onCreateLog, deptGoals = {
-  'General Sales': { memberships: 3, creditCards: 2, warranty: 11.0, surveys: 1.0, rph: 640 },
+  'Front End': { memberships: 3, creditCards: 2, warranty: 11.0, surveys: 1.0, rph: 640 },
   'Appliances': { memberships: 2, creditCards: 2, warranty: 12.0, surveys: 1.0, rph: 1200 },
   'Computing': { memberships: 4, creditCards: 2, warranty: 11.0, surveys: 1.0, rph: 900 },
   'Mobile': { memberships: 3, creditCards: 2, warranty: 8.0, surveys: 1.0, rph: 700 },
@@ -12,7 +12,7 @@ export default function StoreRoster({ roster, onCoachEmployee, onCreateLog, dept
   const [searchTerm, setSearchTerm] = useState('');
   const [activeDept, setActiveDept] = useState('All');
 
-  const DEPARTMENTS = ['All', 'General Sales', 'Appliances', 'Computing', 'Mobile', 'Home Theatre', 'Geek Squad'];
+  const DEPARTMENTS = ['All', 'Front End', 'Appliances', 'Computing', 'Mobile', 'Home Theatre', 'Geek Squad'];
 
   const DEFAULT_GOALS = {
     memberships: 8.0, membershipsType: 'Hours', 
@@ -22,7 +22,7 @@ export default function StoreRoster({ roster, onCoachEmployee, onCreateLog, dept
 
   // Audits employee metrics dynamically based on their department goals!
   const getMetricClass = (val, type, dept, emp) => {
-    const goals = (deptGoals && (deptGoals[dept] || deptGoals['General Sales'])) || DEFAULT_GOALS;
+    const goals = (deptGoals && (deptGoals[dept] || deptGoals['Front End'])) || DEFAULT_GOALS;
     const target = goals[type] !== undefined ? goals[type] : (DEFAULT_GOALS[type] || 0);
     const typeKey = type + 'Type';
     const isHoursType = goals[typeKey] === 'Hours';
@@ -71,7 +71,7 @@ export default function StoreRoster({ roster, onCoachEmployee, onCreateLog, dept
   };
 
   const getPaceText = (val, type, dept, emp) => {
-    const goals = (deptGoals && (deptGoals[dept] || deptGoals['General Sales'])) || DEFAULT_GOALS;
+    const goals = (deptGoals && (deptGoals[dept] || deptGoals['Front End'])) || DEFAULT_GOALS;
     const typeKey = type + 'Type';
     const isHoursType = goals[typeKey] === 'Hours';
     const isDollarsType = goals[typeKey] === 'Dollars';

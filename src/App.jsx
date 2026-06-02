@@ -116,7 +116,11 @@ export default function App() {
   // Initialize and load state from localStorage on startup
   useEffect(() => {
     const savedKey = localStorage.getItem('bby_api_key');
-    if (savedKey) setApiKey(savedKey);
+    if (savedKey) {
+      setApiKey(savedKey);
+    } else if (import.meta.env.VITE_GEMINI_API_KEY) {
+      setApiKey(import.meta.env.VITE_GEMINI_API_KEY);
+    }
 
     const savedSettings = localStorage.getItem('bby_playbook_settings');
     if (savedSettings) {
@@ -125,6 +129,8 @@ export default function App() {
       } catch (e) {
         console.error(e);
       }
+    } else if (import.meta.env.VITE_GEMINI_API_KEY) {
+      setPlaybookSettings(prev => ({ ...prev, useGemini: true }));
     }
 
     const savedMetrics = localStorage.getItem('bby_metrics');

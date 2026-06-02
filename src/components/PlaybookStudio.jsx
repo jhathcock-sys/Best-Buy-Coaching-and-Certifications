@@ -362,7 +362,7 @@ Focus: 5-Star Surveys
               onChange={(e) => setSelectedDept(e.target.value)}
               style={{ fontSize: '0.85rem' }}
             >
-              {Object.keys(deptGoals).map(d => (
+              {Object.keys(deptGoals || {}).map(d => (
                 <option key={d} value={d}>{d}</option>
               ))}
             </select>

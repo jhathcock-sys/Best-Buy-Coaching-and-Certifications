@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { EMPLOYEE_SCENARIOS, runOfflineEmployeeCoachingStep, evaluateCoachingSession, generateCoachingLogGemini } from '../services/ai';
 import { Users, Sparkles, MessageSquare, ArrowLeft, RefreshCw, Send, HelpCircle, FileText, Check, Copy, AlertCircle } from 'lucide-react';
 
-export default function CoachSimulator({ apiKey, playbookSettings, preselectedEmployee, clearPreselectedEmployee, prefillBuilderData, clearPrefillBuilderData, onImportScenario, initialTab = 'sim' }) {
+export default function CoachSimulator({ apiKey, playbookSettings, customScenarios = [], preselectedEmployee, clearPreselectedEmployee, prefillBuilderData, clearPrefillBuilderData, onImportScenario, initialTab = 'sim' }) {
   // Tabs: 'sim' (coaching practice simulation), 'builder' (4-section coaching log builder)
   const [activeTab, setActiveTab] = useState(initialTab);
   
@@ -123,7 +123,7 @@ export default function CoachSimulator({ apiKey, playbookSettings, preselectedEm
   useEffect(() => {
     if (prefillBuilderData) {
       const getPrefillGapType = () => {
-        const gap = prefillBuilderData.gap.toLowerCase();
+        const gap = (prefillBuilderData.gap || '').toLowerCase();
         if (gap.includes('membership')) return 'Memberships';
         if (gap.includes('card') || gap.includes('credit')) return 'BBY Credit Card';
         if (gap.includes('gsp') || gap.includes('warranty') || gap.includes('protection')) return 'Warranty/GSP';
@@ -132,13 +132,13 @@ export default function CoachSimulator({ apiKey, playbookSettings, preselectedEm
       };
 
       setBuilderForm({
-        employeeName: prefillBuilderData.name,
+        employeeName: prefillBuilderData.name || '',
         what: '',
         how: '',
         why: '',
-        strengths: prefillBuilderData.memberships >= 5.0 ? 'Incredible membership attach rate and strong floor presence!' : 'Friendly greetings, proactive attitude on the floor.',
+        strengths: (prefillBuilderData.memberships || 0) >= 5.0 ? 'Incredible membership attach rate and strong floor presence!' : 'Friendly greetings, proactive attitude on the floor.',
         metricGap: getPrefillGapType(),
-        gapDetails: `${prefillBuilderData.gap} (RPH: $${prefillBuilderData.rph}, surveys: ${prefillBuilderData.surveys})`,
+        gapDetails: `${prefillBuilderData.gap || ''} (RPH: $${prefillBuilderData.rph || 0}, surveys: ${prefillBuilderData.surveys || 0})`,
         expectation: `Raise metrics to meet store benchmarks over the next 14 days.`,
         validation: `Store leader will perform counter observations and check weekly reporting.`
       });
@@ -238,6 +238,95 @@ Metric Focus: ${builderForm.metricGap}
     setTimeout(() => setCopySuccess(false), 3000);
   };
 
+  const startCoaching = (employee) => {
+    setSelectedEmployee(employee);
+    setSessionActive(true);
+    setMessages([
+      { sender: 'employee', text: employee.initialGreeting }
+    ]);
+    setCompletedCoachSteps({
+      goal: false,
+      reality: false,
+      options: false,
+      will: false
+    });
+    setCurrentCoachStep('goal');
+    setEvaluation(null);
+  };
+
+  const finishCoaching = () => {
+    const history = {
+      messages: messages,
+      completedCoachSteps: completedCoachSteps,
+      currentCoachStep: currentCoachStep
+    };
+    const evalResult = evaluateCoachingSession(history);
+    setEvaluation(evalResult);
+  };
+
+  const handleImportPastCoaching = () => {
+    if (!importText.trim()) {
+      alert("Please paste some coaching text first!");
+      return;
+    }
+    
+    let name = "Advisor";
+    let gap = "Memberships";
+    
+    // NLP parsing
+    const nameMatch = importText.match(/(?:coaching log|employee|name|advisor):\s*([a-zA-Z\s\/]+)/i) || 
+                      importText.match(/(?:log for|coaching):\s*([a-zA-Z\s\/]+)/i) ||
+                      importText.match(/^([a-zA-Z\s\/]+)\s+(?:is struggling|has a gap|needs)/im);
+                      
+    if (nameMatch) {
+      name = nameMatch[1].trim().split('\n')[0].split('(')[0].trim();
+    }
+    
+    const gapMatch = importText.match(/(?:gap|opportunity|focus|metric):\s*([a-zA-Z0-9\s%\-\+\/\$]+)/i) ||
+                     importText.match(/(?:struggling with|low on):\s*([a-zA-Z0-9\s%\-\+\/\$]+)/i);
+                     
+    if (gapMatch) {
+      gap = gapMatch[1].trim().split('\n')[0].trim();
+    } else {
+      const lowerText = importText.toLowerCase();
+      if (lowerText.includes('membership') || lowerText.includes('total') || lowerText.includes('plus')) {
+        gap = 'Memberships';
+      } else if (lowerText.includes('credit card') || lowerText.includes('card') || lowerText.includes('app')) {
+        gap = 'BBY Credit Cards';
+      } else if (lowerText.includes('gsp') || lowerText.includes('warranty') || lowerText.includes('protection')) {
+        gap = 'GSP Attach';
+      } else if (lowerText.includes('survey') || lowerText.includes('csat') || lowerText.includes('5-star')) {
+        gap = '5-Star Surveys';
+      } else if (lowerText.includes('rph') || lowerText.includes('revenue')) {
+        gap = 'RPH';
+      }
+    }
+    
+    const customScen = {
+      id: `imported-${Date.now()}`,
+      title: `Imported: ${name} (${gap})`,
+      role: 'Employee',
+      name: `${name} (Imported)`,
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+      description: `Custom scenario extracted from pasted coaching notes. Focus Area: ${gap}.`,
+      metricGap: gap,
+      initialGreeting: `Hey Boss. I read your feedback notes about my gap in ${gap}. I want to do better, but I'm really struggling on the floor. Can you help me figure out what I should do?`,
+      personality: 'Receptive and willing to learn, but needs specific, actionable guidance.',
+      coachingGoal: `Coach ${name} to close their performance gap in ${gap}.`
+    };
+    
+    if (onImportScenario) {
+      onImportScenario(customScen);
+    }
+    
+    setParseLogs({ name, gap });
+    setImportSuccess(true);
+    setImportText('');
+    setTimeout(() => {
+      setImportSuccess(false);
+    }, 5000);
+  };
+
   const handleSend = () => {
     if (!inputVal.trim()) return;
     const currentMsg = inputVal;
@@ -307,7 +396,7 @@ Metric Focus: ${builderForm.metricGap}
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              {EMPLOYEE_SCENARIOS.map(employee => (
+              {[...(Array.isArray(EMPLOYEE_SCENARIOS) ? EMPLOYEE_SCENARIOS : []), ...(Array.isArray(customScenarios) ? customScenarios : [])].map(employee => (
                 <div 
                   key={employee.id} 
                   style={{ 

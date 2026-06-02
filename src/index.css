@@ -689,6 +689,12 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(255, 255, 255, 0.05);
 }
 
+select.form-control,
+select.form-control option {
+  background-color: #111625 !important;
+  color: #ffffff !important;
+}
+
 .form-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

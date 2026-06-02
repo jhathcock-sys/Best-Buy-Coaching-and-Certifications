@@ -380,6 +380,7 @@ export default function App() {
           <CoachSimulator 
             apiKey={apiKey}
             playbookSettings={playbookSettings}
+            customScenarios={customScenarios}
             preselectedEmployee={selectedCoachingRosterEmployee}
             clearPreselectedEmployee={() => setSelectedCoachingRosterEmployee(null)}
             prefillBuilderData={prefillBuilderData}
@@ -393,6 +394,7 @@ export default function App() {
           <CoachSimulator 
             apiKey={apiKey}
             playbookSettings={playbookSettings}
+            customScenarios={customScenarios}
             preselectedEmployee={selectedCoachingRosterEmployee}
             clearPreselectedEmployee={() => setSelectedCoachingRosterEmployee(null)}
             prefillBuilderData={prefillBuilderData}

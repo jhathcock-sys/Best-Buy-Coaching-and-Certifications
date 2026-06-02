@@ -14,10 +14,16 @@ export default function StoreRoster({ roster, onCoachEmployee, onCreateLog, dept
 
   const DEPARTMENTS = ['All', 'General Sales', 'Appliances', 'Computing', 'Mobile', 'Home Theatre', 'Geek Squad'];
 
+  const DEFAULT_GOALS = {
+    memberships: 8.0, membershipsType: 'Hours', 
+    creditCards: 12.5, creditCardsType: 'Hours', 
+    warranty: 11.0, surveys: 1.0, rph: 640 
+  };
+
   // Audits employee metrics dynamically based on their department goals!
   const getMetricClass = (val, type, dept, emp) => {
-    const goals = deptGoals[dept] || deptGoals['General Sales'];
-    const target = goals[type];
+    const goals = (deptGoals && (deptGoals[dept] || deptGoals['General Sales'])) || DEFAULT_GOALS;
+    const target = goals[type] !== undefined ? goals[type] : (DEFAULT_GOALS[type] || 0);
     const typeKey = type + 'Type';
     const isHoursType = goals[typeKey] === 'Hours';
     const isDollarsType = goals[typeKey] === 'Dollars';
@@ -65,7 +71,7 @@ export default function StoreRoster({ roster, onCoachEmployee, onCreateLog, dept
   };
 
   const getPaceText = (val, type, dept, emp) => {
-    const goals = deptGoals[dept] || deptGoals['General Sales'];
+    const goals = (deptGoals && (deptGoals[dept] || deptGoals['General Sales'])) || DEFAULT_GOALS;
     const typeKey = type + 'Type';
     const isHoursType = goals[typeKey] === 'Hours';
     const isDollarsType = goals[typeKey] === 'Dollars';
@@ -254,7 +260,7 @@ export default function StoreRoster({ roster, onCoachEmployee, onCreateLog, dept
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-          {Object.entries(deptGoals).map(([dept, targets]) => (
+          {Object.entries(deptGoals || {}).map(([dept, targets]) => (
             <div 
               key={dept} 
               style={{ 

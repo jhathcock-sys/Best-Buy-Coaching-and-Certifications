@@ -73,7 +73,8 @@ export default function App() {
   const [customScenarios, setCustomScenarios] = useState([]);
   
   // Store Roster Performance State
-  const [roster, setRoster] = useState(INITIAL_ROSTER);
+  const [rosterHistory, setRosterHistory] = useState({ 'May 2026': INITIAL_ROSTER });
+  const [activePeriod, setActivePeriod] = useState('May 2026');
   const [selectedCoachingRosterEmployee, setSelectedCoachingRosterEmployee] = useState(null);
   const [prefillBuilderData, setPrefillBuilderData] = useState(null);
   
@@ -212,22 +213,36 @@ export default function App() {
       }
     }
 
-    const savedRoster = localStorage.getItem('bby_roster');
-    if (savedRoster) {
+    const savedHistory = localStorage.getItem('bby_roster_history');
+    if (savedHistory) {
       try {
-        const parsed = JSON.parse(savedRoster);
-        // Reset roster if Jordan is found, or if Yinel is still assigned to General Sales (so she migrates to Front End, while Ricky remains General Sales)
-        if (parsed.some(e => e.id === 'jordan') || parsed.some(e => e.id === 'yinel' && e.dept === 'General Sales') || !parsed.some(e => e.id === 'yinel') || !parsed.some(e => e.id === 'yinel' && 'hours' in e)) {
-          setRoster(INITIAL_ROSTER);
-          localStorage.setItem('bby_roster', JSON.stringify(INITIAL_ROSTER));
-        } else {
-          setRoster(parsed);
-        }
+        setRosterHistory(JSON.parse(savedHistory));
       } catch (e) {
         console.error(e);
       }
     } else {
-      localStorage.setItem('bby_roster', JSON.stringify(INITIAL_ROSTER));
+      const savedRoster = localStorage.getItem('bby_roster');
+      if (savedRoster) {
+        try {
+          const parsed = JSON.parse(savedRoster);
+          let rosterToMigrate = parsed;
+          if (parsed.some(e => e.id === 'jordan') || parsed.some(e => e.id === 'yinel' && e.dept === 'General Sales') || !parsed.some(e => e.id === 'yinel') || !parsed.some(e => e.id === 'yinel' && 'hours' in e)) {
+            rosterToMigrate = INITIAL_ROSTER;
+          }
+          const migrated = { 'May 2026': rosterToMigrate };
+          setRosterHistory(migrated);
+          localStorage.setItem('bby_roster_history', JSON.stringify(migrated));
+        } catch (e) {
+          setRosterHistory({ 'May 2026': INITIAL_ROSTER });
+        }
+      } else {
+        setRosterHistory({ 'May 2026': INITIAL_ROSTER });
+      }
+    }
+
+    const savedPeriod = localStorage.getItem('bby_active_period');
+    if (savedPeriod) {
+      setActivePeriod(savedPeriod);
     }
   }, []);
 
@@ -304,21 +319,61 @@ export default function App() {
     setActiveView('builder');
   };
 
+  const handleUpdateRosterHistory = (updatedRoster) => {
+    const newHistory = { ...rosterHistory, [activePeriod]: updatedRoster };
+    setRosterHistory(newHistory);
+    localStorage.setItem('bby_roster_history', JSON.stringify(newHistory));
+  };
+
   const handleUpdateEmployeeDept = (empId, newDept) => {
-    const updatedRoster = roster.map(emp => {
+    const updated = (rosterHistory[activePeriod] || []).map(emp => {
       if (emp.id === empId) {
         return { ...emp, dept: newDept };
       }
       return emp;
     });
-    setRoster(updatedRoster);
-    localStorage.setItem('bby_roster', JSON.stringify(updatedRoster));
+    handleUpdateRosterHistory(updated);
   };
 
   const handleAddEmployee = (newEmp) => {
-    const updatedRoster = [...roster, newEmp];
-    setRoster(updatedRoster);
-    localStorage.setItem('bby_roster', JSON.stringify(updatedRoster));
+    const updated = [...(rosterHistory[activePeriod] || []), newEmp];
+    handleUpdateRosterHistory(updated);
+  };
+
+  const handleEditEmployee = (empId, updatedFields) => {
+    const updated = (rosterHistory[activePeriod] || []).map(emp => {
+      if (emp.id === empId) {
+        return { ...emp, ...updatedFields };
+      }
+      return emp;
+    });
+    handleUpdateRosterHistory(updated);
+  };
+
+  const handleCreatePeriodArchive = (newPeriodName, copyOption) => {
+    const currentRoster = rosterHistory[activePeriod] || [];
+    let newRoster = [];
+    if (copyOption === 'roster-only') {
+      newRoster = currentRoster.map(emp => ({
+        ...emp,
+        hours: 0,
+        memberships: 0,
+        creditCards: 0,
+        warranty: 0,
+        surveys: 5.0,
+        rph: 0,
+        gap: 'None'
+      }));
+    } else if (copyOption === 'roster-and-metrics') {
+      newRoster = currentRoster.map(emp => ({ ...emp }));
+    } else {
+      newRoster = [];
+    }
+    const newHistory = { ...rosterHistory, [newPeriodName]: newRoster };
+    setRosterHistory(newHistory);
+    setActivePeriod(newPeriodName);
+    localStorage.setItem('bby_roster_history', JSON.stringify(newHistory));
+    localStorage.setItem('bby_active_period', newPeriodName);
   };
 
   return (
@@ -404,12 +459,17 @@ export default function App() {
 
         {activeView === 'roster' && (
           <StoreRoster 
-            roster={roster}
+            roster={rosterHistory[activePeriod] || []}
+            activePeriod={activePeriod}
+            rosterHistory={rosterHistory}
+            onChangePeriod={(p) => { setActivePeriod(p); localStorage.setItem('bby_active_period', p); }}
             onCoachEmployee={handleCoachEmployeeFromRoster}
             onCreateLog={handleCreateLogFromRoster}
             deptGoals={deptGoals}
             onUpdateEmployeeDept={handleUpdateEmployeeDept}
             onAddEmployee={handleAddEmployee}
+            onEditEmployee={handleEditEmployee}
+            onCreatePeriod={handleCreatePeriodArchive}
           />
         )}
         

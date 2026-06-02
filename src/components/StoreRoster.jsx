@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Users, Search, AlertTriangle, CheckCircle, TrendingUp, Sparkles, Clock, HelpCircle } from 'lucide-react';
 
-export default function StoreRoster({ roster, onCoachEmployee, onCreateLog, onUpdateEmployeeDept, deptGoals = {
+export default function StoreRoster({ roster, onCoachEmployee, onCreateLog, onUpdateEmployeeDept, onAddEmployee, deptGoals = {
   'Front End': { memberships: 3, creditCards: 2, warranty: 11.0, surveys: 1.0, rph: 640 },
   'General Sales': { memberships: 3, creditCards: 2, warranty: 11.0, surveys: 1.0, rph: 640 },
   'Appliances': { memberships: 2, creditCards: 2, warranty: 12.0, surveys: 1.0, rph: 1200 },
@@ -12,6 +12,53 @@ export default function StoreRoster({ roster, onCoachEmployee, onCreateLog, onUp
 } }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeDept, setActiveDept] = useState('All');
+  
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newEmpForm, setNewEmpForm] = useState({
+    name: '',
+    dept: 'Front End',
+    hours: '',
+    memberships: '',
+    creditCards: '',
+    warranty: '',
+    surveys: '',
+    rph: '',
+    gap: 'None'
+  });
+
+  const handleSubmitAddEmployee = () => {
+    if (!newEmpForm.name.trim()) {
+      alert("Please enter the associate's name!");
+      return;
+    }
+    const newEmp = {
+      id: `emp-${Date.now()}`,
+      name: newEmpForm.name.trim(),
+      dept: newEmpForm.dept,
+      hours: parseFloat(newEmpForm.hours) || 0,
+      memberships: parseInt(newEmpForm.memberships) || 0,
+      creditCards: parseInt(newEmpForm.creditCards) || 0,
+      warranty: parseFloat(newEmpForm.warranty) || 0.0,
+      surveys: newEmpForm.surveys === 'Failing' || newEmpForm.surveys === 'failing' ? 0.2 : parseFloat(newEmpForm.surveys) || 0.0,
+      rph: parseInt(newEmpForm.rph) || 0,
+      gap: newEmpForm.gap || 'None'
+    };
+    if (onAddEmployee) {
+      onAddEmployee(newEmp);
+    }
+    setNewEmpForm({
+      name: '',
+      dept: 'Front End',
+      hours: '',
+      memberships: '',
+      creditCards: '',
+      warranty: '',
+      surveys: '',
+      rph: '',
+      gap: 'None'
+    });
+    setShowAddForm(false);
+  };
 
   const DEPARTMENTS = ['All', 'Front End', 'General Sales', 'Appliances', 'Computing', 'Mobile', 'Home Theatre', 'Geek Squad'];
 
@@ -140,19 +187,151 @@ export default function StoreRoster({ roster, onCoachEmployee, onCreateLog, onUp
           ))}
         </div>
 
-        {/* Search Bar */}
-        <div style={{ position: 'relative', width: '300px' }}>
-          <input 
-            type="text" 
-            className="form-control" 
-            style={{ paddingLeft: '2.5rem', paddingRight: '1rem', height: '38px', fontSize: '0.85rem' }}
-            placeholder="Search associates by name..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', top: '11px', left: '0.85rem' }} />
+        {/* Action block with Toggle and Search */}
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <button 
+            className="btn btn-accent" 
+            style={{ padding: '0.55rem 1rem', fontSize: '0.8rem', color: '#000', height: '38px' }} 
+            onClick={() => setShowAddForm(!showAddForm)}
+          >
+            {showAddForm ? 'Close Form' : '+ Add Associate'}
+          </button>
+
+          <div style={{ position: 'relative', width: '220px' }}>
+            <input 
+              type="text" 
+              className="form-control" 
+              style={{ paddingLeft: '2.5rem', paddingRight: '1rem', height: '38px', fontSize: '0.85rem' }}
+              placeholder="Search associates by name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', top: '11px', left: '0.85rem' }} />
+          </div>
         </div>
       </div>
+
+      {/* Collapsible Add Associate Card */}
+      {showAddForm && (
+        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', border: '1.5px solid var(--bby-blue)', padding: '1.5rem 2rem', animation: 'fadeIn 0.3s ease' }}>
+          <h3 style={{ fontSize: '1.2rem', color: '#fff', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', fontFamily: 'var(--font-heading)', letterSpacing: '-0.01em' }}>
+            Add New Associate to Roster
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+            <div className="form-group">
+              <label className="form-label" style={{ fontSize: '0.8rem' }}>Associate Name:</label>
+              <input 
+                type="text" 
+                className="form-control" 
+                placeholder="e.g. Sarah Jennings"
+                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+                value={newEmpForm.name}
+                onChange={(e) => setNewEmpForm({ ...newEmpForm, name: e.target.value })}
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label" style={{ fontSize: '0.8rem' }}>Department:</label>
+              <select 
+                className="form-control"
+                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+                value={newEmpForm.dept}
+                onChange={(e) => setNewEmpForm({ ...newEmpForm, dept: e.target.value })}
+              >
+                {DEPARTMENTS.filter(d => d !== 'All').map(d => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label" style={{ fontSize: '0.8rem' }}>Monthly Hours Worked:</label>
+              <input 
+                type="number" 
+                className="form-control" 
+                placeholder="e.g. 45.5"
+                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+                value={newEmpForm.hours}
+                onChange={(e) => setNewEmpForm({ ...newEmpForm, hours: e.target.value })}
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label" style={{ fontSize: '0.8rem' }}>Memberships Attach:</label>
+              <input 
+                type="number" 
+                className="form-control" 
+                placeholder="e.g. 6"
+                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+                value={newEmpForm.memberships}
+                onChange={(e) => setNewEmpForm({ ...newEmpForm, memberships: e.target.value })}
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label" style={{ fontSize: '0.8rem' }}>Credit Card Apps:</label>
+              <input 
+                type="number" 
+                className="form-control" 
+                placeholder="e.g. 3"
+                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+                value={newEmpForm.creditCards}
+                onChange={(e) => setNewEmpForm({ ...newEmpForm, creditCards: e.target.value })}
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label" style={{ fontSize: '0.8rem' }}>GSP/Warranty Attach %:</label>
+              <input 
+                type="number" 
+                className="form-control" 
+                placeholder="e.g. 10.5"
+                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+                value={newEmpForm.warranty}
+                onChange={(e) => setNewEmpForm({ ...newEmpForm, warranty: e.target.value })}
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label" style={{ fontSize: '0.8rem' }}>5-Star Survey CSAT (1-5 or Failing):</label>
+              <input 
+                type="text" 
+                className="form-control" 
+                placeholder="e.g. 4.8 or Failing"
+                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+                value={newEmpForm.surveys}
+                onChange={(e) => setNewEmpForm({ ...newEmpForm, surveys: e.target.value })}
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label" style={{ fontSize: '0.8rem' }}>RPH ($ index):</label>
+              <input 
+                type="number" 
+                className="form-control" 
+                placeholder="e.g. 950"
+                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+                value={newEmpForm.rph}
+                onChange={(e) => setNewEmpForm({ ...newEmpForm, rph: e.target.value })}
+              />
+            </div>
+          </div>
+          
+          <div className="form-group">
+            <label className="form-label" style={{ fontSize: '0.8rem' }}>Opportunity Gap Description (or None):</label>
+            <input 
+              type="text" 
+              className="form-control" 
+              placeholder="e.g. GSP Attach (4.0% vs 12.0%) or None"
+              style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+              value={newEmpForm.gap}
+              onChange={(e) => setNewEmpForm({ ...newEmpForm, gap: e.target.value })}
+            />
+          </div>
+
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+            <button className="btn btn-secondary" style={{ padding: '0.55rem 1.25rem' }} onClick={() => setShowAddForm(false)}>
+              Cancel
+            </button>
+            <button className="btn btn-primary" style={{ padding: '0.55rem 1.25rem' }} onClick={handleSubmitAddEmployee}>
+              Add Associate to Roster
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Roster Table Card */}
       <div className="glass-card" style={{ padding: '0', overflow: 'hidden' }}>

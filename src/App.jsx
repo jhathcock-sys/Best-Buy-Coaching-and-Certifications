@@ -315,6 +315,12 @@ export default function App() {
     localStorage.setItem('bby_roster', JSON.stringify(updatedRoster));
   };
 
+  const handleAddEmployee = (newEmp) => {
+    const updatedRoster = [...roster, newEmp];
+    setRoster(updatedRoster);
+    localStorage.setItem('bby_roster', JSON.stringify(updatedRoster));
+  };
+
   return (
     <div className="app-container">
       {/* Sidebar Navigation */}
@@ -403,6 +409,7 @@ export default function App() {
             onCreateLog={handleCreateLogFromRoster}
             deptGoals={deptGoals}
             onUpdateEmployeeDept={handleUpdateEmployeeDept}
+            onAddEmployee={handleAddEmployee}
           />
         )}
         

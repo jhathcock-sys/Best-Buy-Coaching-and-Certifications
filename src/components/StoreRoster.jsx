@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
 import { Users, Search, AlertTriangle, CheckCircle, TrendingUp, Sparkles, Clock, HelpCircle } from 'lucide-react';
 
-// Department-specific Goals Matrix (Standard Best Buy Performance targets)
-const DEPT_GOALS = {
+export default function StoreRoster({ roster, onCoachEmployee, onCreateLog, deptGoals = {
   'General Sales': { memberships: 3, creditCards: 2, warranty: 11.0, surveys: 1.0, rph: 640 },
   'Appliances': { memberships: 2, creditCards: 2, warranty: 12.0, surveys: 1.0, rph: 1200 },
   'Computing': { memberships: 4, creditCards: 2, warranty: 11.0, surveys: 1.0, rph: 900 },
   'Mobile': { memberships: 3, creditCards: 2, warranty: 8.0, surveys: 1.0, rph: 700 },
   'Home Theatre': { memberships: 4, creditCards: 2, warranty: 11.0, surveys: 1.0, rph: 800 },
   'Geek Squad': { memberships: 5, creditCards: 1, warranty: 12.0, surveys: 1.0, rph: 500 }
-};
-
-export default function StoreRoster({ roster, onCoachEmployee, onCreateLog }) {
+} }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeDept, setActiveDept] = useState('All');
 
@@ -19,7 +16,7 @@ export default function StoreRoster({ roster, onCoachEmployee, onCreateLog }) {
 
   // Audits employee metrics dynamically based on their department goals!
   const getMetricClass = (val, type, dept) => {
-    const goals = DEPT_GOALS[dept] || DEPT_GOALS['General Sales'];
+    const goals = deptGoals[dept] || deptGoals['General Sales'];
     const target = goals[type];
     
     if (type === 'memberships') {
@@ -203,7 +200,7 @@ export default function StoreRoster({ roster, onCoachEmployee, onCreateLog }) {
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-          {Object.entries(DEPT_GOALS).map(([dept, targets]) => (
+          {Object.entries(deptGoals).map(([dept, targets]) => (
             <div 
               key={dept} 
               style={{ 

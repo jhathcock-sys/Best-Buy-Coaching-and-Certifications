@@ -77,6 +77,16 @@ export default function App() {
   const [selectedCoachingRosterEmployee, setSelectedCoachingRosterEmployee] = useState(null);
   const [prefillBuilderData, setPrefillBuilderData] = useState(null);
   
+  // Department-specific Goals Matrix (dynamic store benchmarks)
+  const [deptGoals, setDeptGoals] = useState({
+    'General Sales': { memberships: 3, creditCards: 2, warranty: 11.0, surveys: 1.0, rph: 640 },
+    'Appliances': { memberships: 2, creditCards: 2, warranty: 12.0, surveys: 1.0, rph: 1200 },
+    'Computing': { memberships: 4, creditCards: 2, warranty: 11.0, surveys: 1.0, rph: 900 },
+    'Mobile': { memberships: 3, creditCards: 2, warranty: 8.0, surveys: 1.0, rph: 700 },
+    'Home Theatre': { memberships: 4, creditCards: 2, warranty: 11.0, surveys: 1.0, rph: 800 },
+    'Geek Squad': { memberships: 5, creditCards: 1, warranty: 12.0, surveys: 1.0, rph: 500 }
+  });
+  
   const [showCertModal, setShowCertModal] = useState(null);
 
   // Initialize and load state from localStorage on startup
@@ -124,6 +134,15 @@ export default function App() {
     if (savedCustomScenarios) {
       try {
         setCustomScenarios(JSON.parse(savedCustomScenarios));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    const savedGoals = localStorage.getItem('bby_dept_goals');
+    if (savedGoals) {
+      try {
+        setDeptGoals(JSON.parse(savedGoals));
       } catch (e) {
         console.error(e);
       }
@@ -306,6 +325,7 @@ export default function App() {
             roster={roster}
             onCoachEmployee={handleCoachEmployeeFromRoster}
             onCreateLog={handleCreateLogFromRoster}
+            deptGoals={deptGoals}
           />
         )}
         
@@ -357,6 +377,11 @@ export default function App() {
             apiKey={apiKey}
             playbookSettings={playbookSettings}
             onSaveSettings={handleSaveSettings}
+            deptGoals={deptGoals}
+            onSaveDeptGoals={(newGoals) => {
+              setDeptGoals(newGoals);
+              localStorage.setItem('bby_dept_goals', JSON.stringify(newGoals));
+            }}
           />
         )}
       </main>

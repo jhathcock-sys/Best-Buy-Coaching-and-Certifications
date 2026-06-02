@@ -1,11 +1,36 @@
 import React, { useState } from 'react';
-import { ShieldAlert, Sparkles, Key, Check, Plus, Trash2, BookOpen } from 'lucide-react';
+import { ShieldAlert, Sparkles, Key, Check, Plus, Trash2, BookOpen, Compass } from 'lucide-react';
 
-export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSettings }) {
+export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSettings, deptGoals = {}, onSaveDeptGoals }) {
   const [useGemini, setUseGemini] = useState(playbookSettings.useGemini);
   const [localApiKey, setLocalApiKey] = useState(apiKey || '');
   const [customSystemPrompt, setCustomSystemPrompt] = useState(playbookSettings.customSystemPrompt || '');
   
+  const [selectedDept, setSelectedDept] = useState('General Sales');
+  const [editedGoals, setEditedGoals] = useState({ ...deptGoals });
+
+  React.useEffect(() => {
+    setEditedGoals({ ...deptGoals });
+  }, [deptGoals]);
+
+  const handleGoalChange = (metric, val) => {
+    const numericVal = parseFloat(val) || 0;
+    setEditedGoals(prev => ({
+      ...prev,
+      [selectedDept]: {
+        ...prev[selectedDept],
+        [metric]: numericVal
+      }
+    }));
+  };
+
+  const handleSaveGoals = () => {
+    if (onSaveDeptGoals) {
+      onSaveDeptGoals(editedGoals);
+      alert(`${selectedDept} performance goals updated successfully!`);
+    }
+  };
+
   const [allowedPhrases, setAllowedPhrases] = useState(playbookSettings.allowedPhrases || [
     'My Best Buy Plus', 'My Best Buy Total', 'Geek Squad Protection', 'AppleCare+'
   ]);
@@ -317,6 +342,96 @@ Focus: 5-Star Surveys
             </div>
           </div>
 
+        </div>
+
+        {/* Department Specific Goals Configurator Card */}
+        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginTop: '2rem' }}>
+          <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--bby-yellow)' }}>
+            <Compass size={20} color="var(--bby-yellow)" /> Department Goals Configurator
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: 1.4 }}>
+            Adapt store benchmarks dynamically by department. These goals are utilized across your roster dynamic audits and simulator scoring!
+          </p>
+
+          <div className="form-group">
+            <label className="form-label">Select Department to Configure:</label>
+            <select 
+              className="form-control"
+              value={selectedDept}
+              onChange={(e) => setSelectedDept(e.target.value)}
+              style={{ fontSize: '0.85rem' }}
+            >
+              {Object.keys(deptGoals).map(d => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-glass)', padding: '1rem', borderRadius: '12px' }}>
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em' }}>
+              Editing targets for {selectedDept}
+            </span>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.25rem' }}>
+              <div className="form-group">
+                <label className="form-label" style={{ fontSize: '0.725rem' }}>Memberships Goal:</label>
+                <input 
+                  type="number" 
+                  className="form-control"
+                  value={editedGoals[selectedDept]?.memberships || 0}
+                  onChange={(e) => handleGoalChange('memberships', e.target.value)}
+                  style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label" style={{ fontSize: '0.725rem' }}>BBY Cards Goal:</label>
+                <input 
+                  type="number" 
+                  className="form-control"
+                  value={editedGoals[selectedDept]?.creditCards || 0}
+                  onChange={(e) => handleGoalChange('creditCards', e.target.value)}
+                  style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label" style={{ fontSize: '0.725rem' }}>GSP Attach % Goal:</label>
+                <input 
+                  type="number" 
+                  step="0.1"
+                  className="form-control"
+                  value={editedGoals[selectedDept]?.warranty || 0}
+                  onChange={(e) => handleGoalChange('warranty', e.target.value)}
+                  style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label" style={{ fontSize: '0.725rem' }}>CSAT surveys Goal:</label>
+                <input 
+                  type="number" 
+                  step="0.1"
+                  className="form-control"
+                  value={editedGoals[selectedDept]?.surveys || 0}
+                  onChange={(e) => handleGoalChange('surveys', e.target.value)}
+                  style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" style={{ fontSize: '0.725rem' }}>RPH index Target ($/hr):</label>
+              <input 
+                type="number" 
+                className="form-control"
+                value={editedGoals[selectedDept]?.rph || 0}
+                onChange={(e) => handleGoalChange('rph', e.target.value)}
+                style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+              />
+            </div>
+
+            <button className="btn btn-primary" style={{ width: '100%', padding: '0.5rem', fontSize: '0.8rem' }} onClick={handleSaveGoals}>
+              Save {selectedDept} Targets
+            </button>
+          </div>
         </div>
 
       </div>

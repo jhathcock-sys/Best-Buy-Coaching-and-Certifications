@@ -304,6 +304,17 @@ export default function App() {
     setActiveView('builder');
   };
 
+  const handleUpdateEmployeeDept = (empId, newDept) => {
+    const updatedRoster = roster.map(emp => {
+      if (emp.id === empId) {
+        return { ...emp, dept: newDept };
+      }
+      return emp;
+    });
+    setRoster(updatedRoster);
+    localStorage.setItem('bby_roster', JSON.stringify(updatedRoster));
+  };
+
   return (
     <div className="app-container">
       {/* Sidebar Navigation */}
@@ -391,6 +402,7 @@ export default function App() {
             onCoachEmployee={handleCoachEmployeeFromRoster}
             onCreateLog={handleCreateLogFromRoster}
             deptGoals={deptGoals}
+            onUpdateEmployeeDept={handleUpdateEmployeeDept}
           />
         )}
         

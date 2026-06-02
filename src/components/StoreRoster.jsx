@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Users, Search, AlertTriangle, CheckCircle, TrendingUp, Sparkles, Clock, HelpCircle } from 'lucide-react';
 
-export default function StoreRoster({ roster, onCoachEmployee, onCreateLog, deptGoals = {
+export default function StoreRoster({ roster, onCoachEmployee, onCreateLog, onUpdateEmployeeDept, deptGoals = {
   'Front End': { memberships: 3, creditCards: 2, warranty: 11.0, surveys: 1.0, rph: 640 },
   'General Sales': { memberships: 3, creditCards: 2, warranty: 11.0, surveys: 1.0, rph: 640 },
   'Appliances': { memberships: 2, creditCards: 2, warranty: 12.0, surveys: 1.0, rph: 1200 },
@@ -198,8 +198,27 @@ export default function StoreRoster({ roster, onCoachEmployee, onCreateLog, dept
                     <td style={{ padding: '1rem 1rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
                       {emp.hours} hrs
                     </td>
-                    <td style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>
-                      {emp.dept}
+                    <td style={{ padding: '0.5rem 1.5rem' }}>
+                      <select 
+                        className="form-control"
+                        style={{ 
+                          padding: '0.4rem 0.8rem', 
+                          fontSize: '0.8rem', 
+                          background: 'rgba(11,15,25,0.6)', 
+                          border: '1px solid var(--border-glass)',
+                          borderRadius: '8px',
+                          color: 'var(--text-secondary)',
+                          cursor: 'pointer',
+                          width: 'auto',
+                          minWidth: '130px'
+                        }}
+                        value={emp.dept}
+                        onChange={(e) => onUpdateEmployeeDept && onUpdateEmployeeDept(emp.id, e.target.value)}
+                      >
+                        {DEPARTMENTS.filter(d => d !== 'All').map(d => (
+                          <option key={d} value={d}>{d}</option>
+                        ))}
+                      </select>
                     </td>
                     <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={getMetricClass(emp.memberships, 'memberships', emp.dept, emp)}>
                       <div>{emp.memberships} Membs</div>

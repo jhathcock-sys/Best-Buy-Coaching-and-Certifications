@@ -3,6 +3,7 @@ import { Users, Search, AlertTriangle, CheckCircle, TrendingUp, Sparkles, Clock,
 
 export default function StoreRoster({ roster, onCoachEmployee, onCreateLog, deptGoals = {
   'Front End': { memberships: 3, creditCards: 2, warranty: 11.0, surveys: 1.0, rph: 640 },
+  'General Sales': { memberships: 3, creditCards: 2, warranty: 11.0, surveys: 1.0, rph: 640 },
   'Appliances': { memberships: 2, creditCards: 2, warranty: 12.0, surveys: 1.0, rph: 1200 },
   'Computing': { memberships: 4, creditCards: 2, warranty: 11.0, surveys: 1.0, rph: 900 },
   'Mobile': { memberships: 3, creditCards: 2, warranty: 8.0, surveys: 1.0, rph: 700 },
@@ -12,7 +13,7 @@ export default function StoreRoster({ roster, onCoachEmployee, onCreateLog, dept
   const [searchTerm, setSearchTerm] = useState('');
   const [activeDept, setActiveDept] = useState('All');
 
-  const DEPARTMENTS = ['All', 'Front End', 'Appliances', 'Computing', 'Mobile', 'Home Theatre', 'Geek Squad'];
+  const DEPARTMENTS = ['All', 'Front End', 'General Sales', 'Appliances', 'Computing', 'Mobile', 'Home Theatre', 'Geek Squad'];
 
   const DEFAULT_GOALS = {
     memberships: 8.0, membershipsType: 'Hours', 

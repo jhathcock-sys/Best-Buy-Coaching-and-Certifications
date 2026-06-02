@@ -221,6 +221,34 @@ export default function StoreRoster({
     );
   };
 
+  const getEmployeeGap = (emp) => {
+    const gaps = [];
+    
+    // memberships
+    if (getMetricClass(emp.memberships, 'memberships', emp.dept, emp) === 'text-danger') {
+      gaps.push('Memberships');
+    }
+    // creditCards
+    if (getMetricClass(emp.creditCards, 'creditCards', emp.dept, emp) === 'text-danger') {
+      gaps.push('Credit Cards');
+    }
+    // warranty
+    if (getMetricClass(emp.warranty, 'warranty', emp.dept, emp) === 'text-danger') {
+      gaps.push('GSP Attach');
+    }
+    // surveys
+    if (getMetricClass(emp.surveys, 'surveys', emp.dept, emp) === 'text-danger') {
+      gaps.push('5 Star Surveys');
+    }
+    // rph
+    if (getMetricClass(emp.rph, 'rph', emp.dept, emp) === 'text-danger') {
+      gaps.push('RPH');
+    }
+    
+    if (gaps.length === 0) return 'None';
+    return gaps.join(' & ');
+  };
+
   const filteredRoster = roster.filter(emp => {
     const matchesSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDept = activeDept === 'All' || emp.dept === activeDept;
@@ -485,11 +513,11 @@ export default function StoreRoster({
               />
             </div>
             <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>5-Star Survey CSAT (1-5 or Failing):</label>
+              <label className="form-label" style={{ fontSize: '0.8rem' }}>5 Star Surveys (Count or Failing):</label>
               <input 
                 type="text" 
                 className="form-control" 
-                placeholder="e.g. 4.8 or Failing"
+                placeholder="e.g. 4 or Failing"
                 style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                 value={newEmpForm.surveys}
                 onChange={(e) => setNewEmpForm({ ...newEmpForm, surveys: e.target.value })}
@@ -543,7 +571,7 @@ export default function StoreRoster({
                 <th style={{ padding: '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>Memberships</th>
                 <th style={{ padding: '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>BBY Cards</th>
                 <th style={{ padding: '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>Warranty/GSP</th>
-                <th style={{ padding: '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>5-Star CSAT</th>
+                <th style={{ padding: '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>5 Star</th>
                 <th style={{ padding: '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>RPH</th>
                 <th style={{ padding: '1.25rem 1.5rem', fontWeight: 600 }}>Status</th>
                 <th style={{ padding: '1.25rem 1.5rem', fontWeight: 600, textAlign: 'right' }}>Actions</th>
@@ -613,13 +641,13 @@ export default function StoreRoster({
                       {emp.warranty}%
                     </td>
                     <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={getMetricClass(emp.surveys, 'surveys', emp.dept, emp)}>
-                      {emp.surveys === 0.2 ? 'Failing' : `${emp.surveys} Five-Star`}
+                      {emp.surveys === 0.2 ? 'Failing' : `${emp.surveys} 5 Star`}
                     </td>
                     <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={getMetricClass(emp.rph, 'rph', emp.dept, emp)}>
                       ${emp.rph}
                     </td>
                     <td style={{ padding: '1rem 1.5rem' }}>
-                      {getStatusBadge(emp.gap)}
+                      {getStatusBadge(getEmployeeGap(emp))}
                     </td>
                     <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
                       <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
@@ -633,14 +661,14 @@ export default function StoreRoster({
                         <button 
                           className="btn btn-secondary" 
                           style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem' }}
-                          onClick={() => onCoachEmployee(emp)}
+                          onClick={() => onCoachEmployee({ ...emp, gap: getEmployeeGap(emp) })}
                         >
                           Coach
                         </button>
                         <button 
                           className="btn btn-accent" 
                           style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', color: '#000' }}
-                          onClick={() => onCreateLog(emp)}
+                          onClick={() => onCreateLog({ ...emp, gap: getEmployeeGap(emp) })}
                         >
                           Log Builder
                         </button>
@@ -686,7 +714,7 @@ export default function StoreRoster({
                   <strong>BBY Cards:</strong> {targets.creditCardsType === 'Hours' ? `1 in ${targets.creditCards} hrs` : targets.creditCardsType === 'Dollars' ? `1 in $${(targets.creditCards / 1000).toFixed(0)}k sales` : `${targets.creditCards} goal`}
                 </div>
                 <div><strong>GSP Attach:</strong> {targets.warranty}% attach</div>
-                <div><strong>CSAT surveys:</strong> {targets.surveys} five-star</div>
+                <div><strong>5 Star Surveys:</strong> {targets.surveys} mentions</div>
                 <div><strong>RPH index:</strong> ${targets.rph}/hr target</div>
               </div>
             </div>
@@ -786,7 +814,7 @@ export default function StoreRoster({
                 </div>
                 
                 <div className="form-group">
-                  <label className="form-label" style={{ fontSize: '0.8rem' }}>5-Star CSAT (1-5 or Failing):</label>
+                  <label className="form-label" style={{ fontSize: '0.8rem' }}>5 Star Surveys (Count or Failing):</label>
                   <input 
                     type="text" 
                     className="form-control" 

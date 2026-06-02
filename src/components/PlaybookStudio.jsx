@@ -90,7 +90,7 @@ Focus: 5-Star Surveys
 3. PERFORMANCE METRIC GAP
 --------------------------------------------------
 * Gap we are trying to fill:
-  Ricky has 0 CSAT ratings this month (store standard is maintaining 2+ five-star survey mentions per week).
+  Ricky has 0 5 Star surveys this month (store standard is maintaining 2+ five-star survey mentions per week).
 
 --------------------------------------------------
 4. EXPECTATIONS & VALIDATION METHOD
@@ -99,7 +99,7 @@ Focus: 5-Star Surveys
   Secure at least 2 five-star survey mentions this week and maintain a 4.8+ survey average.
 
 * How we will validate:
-  Leader will perform 3 checkout observations this week and review the Sunday CSAT comment log.`
+  Leader will perform 3 checkout observations this week and review the Sunday 5 Star survey comment log.`
   ]);
   const [newTrainingLog, setNewTrainingLog] = useState('');
   const [isAddingLog, setIsAddingLog] = useState(false);
@@ -449,7 +449,7 @@ Focus: 5-Star Surveys
                   />
                 </div>
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.725rem' }}>CSAT surveys Goal:</label>
+                  <label className="form-label" style={{ fontSize: '0.725rem' }}>5 Star Surveys Goal:</label>
                   <input 
                     type="number" 
                     step="0.1"

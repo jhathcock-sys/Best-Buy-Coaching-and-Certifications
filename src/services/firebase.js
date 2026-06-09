@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore, doc, onSnapshot, setDoc, getDoc } from 'firebase/firestore';
+import { getFirestore, enableIndexedDbPersistence, doc, onSnapshot, setDoc, getDoc } from 'firebase/firestore';
 
 let app = null;
 let db = null;
@@ -44,6 +44,16 @@ export const initFirebase = (customConfig = null) => {
       app = getApp();
     }
     db = getFirestore(app);
+
+    // Enable offline local database caching and synchronization
+    enableIndexedDbPersistence(db).catch((err) => {
+      if (err.code === 'failed-precondition') {
+        console.warn('Firestore persistence failed: Multiple tabs open.');
+      } else if (err.code === 'unimplemented') {
+        console.warn('Firestore persistence failed: Browser not supported.');
+      }
+    });
+
     return db;
   } catch (e) {
     console.error('Firebase initialization failed:', e);

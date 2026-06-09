@@ -1,8 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { EMPLOYEE_SCENARIOS, runOfflineEmployeeCoachingStep, evaluateCoachingSession, generateCoachingLogGemini } from '../services/ai';
-import { Users, Sparkles, MessageSquare, ArrowLeft, RefreshCw, Send, HelpCircle, FileText, Check, Copy, AlertCircle } from 'lucide-react';
+import { Users, Sparkles, MessageSquare, ArrowLeft, RefreshCw, Send, HelpCircle, FileText, Check, Copy, AlertCircle, Volume2 } from 'lucide-react';
 
 export default function CoachSimulator({ apiKey, playbookSettings, customScenarios = [], preselectedEmployee, clearPreselectedEmployee, prefillBuilderData, clearPrefillBuilderData, onImportScenario, initialTab = 'sim' }) {
+  const allEmployees = useMemo(() => [
+    ...(Array.isArray(EMPLOYEE_SCENARIOS) ? EMPLOYEE_SCENARIOS : []), 
+    ...(Array.isArray(customScenarios) ? customScenarios : [])
+  ], [customScenarios]);
+
   // Tabs: 'sim' (coaching practice simulation), 'builder' (4-section coaching log builder)
   const [activeTab, setActiveTab] = useState(initialTab);
   
@@ -40,10 +45,73 @@ export default function CoachSimulator({ apiKey, playbookSettings, customScenari
     metricGap: 'Memberships',
     gapDetails: '',
     expectation: '',
-    validation: ''
+    validation: '',
+    discFocus: 'Solve',
+    rawObservation: ''
   });
   const [isGeneratingLog, setIsGeneratingLog] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+
+  // Speech synthesis states
+  const [isPlayingSpeech, setIsPlayingSpeech] = useState(false);
+  const [isPausedSpeech, setIsPausedSpeech] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  const handleSpeech = () => {
+    if (!window.speechSynthesis) {
+      alert("Text-to-speech is not supported in this browser.");
+      return;
+    }
+
+    if (isPlayingSpeech) {
+      if (isPausedSpeech) {
+        window.speechSynthesis.resume();
+        setIsPausedSpeech(false);
+      } else {
+        window.speechSynthesis.pause();
+        setIsPausedSpeech(true);
+      }
+      return;
+    }
+
+    const text = compileCoachingLogText();
+    // Clean up markdown formatting for better reading
+    const cleanText = text
+      .replace(/## 📋 /g, '')
+      .replace(/\* \*\*(.*?)\*\*/g, '$1')
+      .replace(/\-\-\-/g, '')
+      .replace(/### 🔍 /g, '')
+      .replace(/\*/g, '');
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.onend = () => {
+      setIsPlayingSpeech(false);
+      setIsPausedSpeech(false);
+    };
+    utterance.onerror = () => {
+      setIsPlayingSpeech(false);
+      setIsPausedSpeech(false);
+    };
+
+    setIsPlayingSpeech(true);
+    setIsPausedSpeech(false);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const handleStopSpeech = () => {
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    setIsPlayingSpeech(false);
+    setIsPausedSpeech(false);
+  };
 
   // Pre-configured Best Buy Templates
   const TEMPLATES = {
@@ -56,7 +124,9 @@ export default function CoachSimulator({ apiKey, playbookSettings, customScenari
       metricGap: 'Memberships',
       gapDetails: 'Membership Attach is at 2.1% vs store goal of 5.0%.',
       expectation: 'Achieve a consistent 5.0% membership attach rate over the next two weeks.',
-      validation: 'Leader will perform 3 side-by-side floor observations and check weekly reporting.'
+      validation: 'Leader will perform 3 side-by-side floor observations and check weekly reporting.',
+      discFocus: 'Solve',
+      rawObservation: ''
     },
     gsp: {
       employeeName: 'Marcus',
@@ -67,7 +137,9 @@ export default function CoachSimulator({ apiKey, playbookSettings, customScenari
       metricGap: 'Warranty/GSP',
       gapDetails: 'GSP Attach rate is currently 4.8% vs store goal of 12.0%.',
       expectation: 'Offer GSP on 100% of qualified transactions to hit 10% GSP attach rate by next week.',
-      validation: 'Leader will audit hardware protection attach rates on the Sunday report and run checkout register observation logs.'
+      validation: 'Leader will audit hardware protection attach rates on the Sunday report and run checkout register observation logs.',
+      discFocus: 'Solve',
+      rawObservation: ''
     },
     card: {
       employeeName: 'Taylor',
@@ -78,7 +150,9 @@ export default function CoachSimulator({ apiKey, playbookSettings, customScenari
       metricGap: 'BBY Credit Card',
       gapDetails: 'BBY Credit Card apps are at 2 submissions vs monthly goal of 8.',
       expectation: 'Propose financing or rewards on all transactions exceeding $300 today.',
-      validation: 'Validate through counter observation side-by-sides and check submitted apps weekly.'
+      validation: 'Validate through counter observation side-by-sides and check submitted apps weekly.',
+      discFocus: 'Discover',
+      rawObservation: ''
     },
     surveys: {
       employeeName: 'Alex',
@@ -89,7 +163,9 @@ export default function CoachSimulator({ apiKey, playbookSettings, customScenari
       metricGap: '5-Star Surveys',
       gapDetails: 'Average customer survey index is at 4.2 stars vs goal of 4.8 stars.',
       expectation: 'Increase 5-Star ratings to maintain a 4.8+ survey index over the next 30 days.',
-      validation: 'Audit 5-star comments weekly and observe customer checkout interactions.'
+      validation: 'Audit 5-star comments weekly and observe customer checkout interactions.',
+      discFocus: 'Close',
+      rawObservation: ''
     }
   };
 
@@ -140,7 +216,9 @@ export default function CoachSimulator({ apiKey, playbookSettings, customScenari
         metricGap: getPrefillGapType(),
         gapDetails: `${prefillBuilderData.gap || ''} (RPH: $${prefillBuilderData.rph || 0}, surveys: ${prefillBuilderData.surveys || 0})`,
         expectation: `Raise metrics to meet store benchmarks over the next 14 days.`,
-        validation: `Store leader will perform counter observations and check weekly reporting.`
+        validation: `Store leader will perform counter observations and check weekly reporting.`,
+        discFocus: 'Solve',
+        rawObservation: ''
       });
       
       setActiveTab('builder');
@@ -170,6 +248,7 @@ export default function CoachSimulator({ apiKey, playbookSettings, customScenari
         builderForm.metricGap,
         builderForm.gapDetails || "Needs performance coaching to meet store targets",
         builderForm.strengths,
+        builderForm.rawObservation,
         playbookSettings
       );
       
@@ -181,7 +260,8 @@ export default function CoachSimulator({ apiKey, playbookSettings, customScenari
           why: data.why,
           strengths: data.strengths,
           expectation: data.expectation,
-          validation: data.validation
+          validation: data.validation,
+          discFocus: data.discStep || prev.discFocus
         }));
       }
     } catch (e) {
@@ -193,42 +273,19 @@ export default function CoachSimulator({ apiKey, playbookSettings, customScenari
 
   // Compile formatted Markdown output
   const compileCoachingLogText = () => {
-    return `### BEST BUY COACHING LOG: ${builderForm.employeeName.toUpperCase()}
-Date: ${new Date().toLocaleDateString()}
-Metric Focus: ${builderForm.metricGap}
+    return `## 📋 Coaching Plan: ${builderForm.employeeName || '[Employee Name]'} — DISC Focus: ${builderForm.discFocus || 'Solve'}
 
---------------------------------------------------
-1. THE CORE OBJECTIVE (WHAT / HOW / WHY)
---------------------------------------------------
-* WHAT we need them to do:
-  ${builderForm.what || 'Pending...'}
+* **What**: ${builderForm.what || 'Pending...'}
+* **How**: ${builderForm.how || 'Pending...'}
+* **Why**: ${builderForm.why || 'Pending...'}
+* **Behavior**: ${builderForm.expectation || 'Pending...'}
+* **Validation**: ${builderForm.validation || 'Pending...'}
 
-* HOW we need them to do it:
-  ${builderForm.how || 'Pending...'}
-
-* WHY we need them to do it:
-  ${builderForm.why || 'Pending...'}
-
---------------------------------------------------
-2. CURRENT STRENGTHS (DOING WELL)
---------------------------------------------------
-* What they are currently doing well:
-  ${builderForm.strengths || 'Pending...'}
-
---------------------------------------------------
-3. PERFORMANCE METRIC GAP
---------------------------------------------------
-* Gap we are trying to fill:
-  ${builderForm.gapDetails || 'Pending...'}
-
---------------------------------------------------
-4. EXPECTATIONS & VALIDATION METHOD
---------------------------------------------------
-* Expectation of results:
-  ${builderForm.expectation || 'Pending...'}
-
-* How we will validate:
-  ${builderForm.validation || 'Pending...'}`;
+---
+### 🔍 Background & Performance Context
+* **Observed Strengths**: ${builderForm.strengths || 'None logged.'}
+* **Performance Gap / Metric Focus**: ${builderForm.gapDetails || 'None logged.'}
+* **Coaching Date**: ${new Date().toLocaleDateString()}`;
   };
 
   const handleCopyToClipboard = () => {
@@ -396,7 +453,7 @@ Metric Focus: ${builderForm.metricGap}
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              {[...(Array.isArray(EMPLOYEE_SCENARIOS) ? EMPLOYEE_SCENARIOS : []), ...(Array.isArray(customScenarios) ? customScenarios : [])].map(employee => (
+              {allEmployees.map(employee => (
                 <div 
                   key={employee.id} 
                   style={{ 
@@ -527,6 +584,36 @@ Metric Focus: ${builderForm.metricGap}
                     <option value="RPH">RPH (Revenue Per Hour)</option>
                   </select>
                 </div>
+                <div className="form-group">
+                  <label className="form-label">DISC Focus Step:</label>
+                  <select 
+                    className="form-control"
+                    value={builderForm.discFocus}
+                    onChange={(e) => setBuilderForm({ ...builderForm, discFocus: e.target.value })}
+                  >
+                    <option value="Discover">Discover</option>
+                    <option value="Inspire">Inspire</option>
+                    <option value="Solve">Solve</option>
+                    <option value="Close">Close</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Raw Observation input block */}
+              <div style={{ border: '1px solid var(--border-glass)', borderRadius: '12px', padding: '1rem 1.25rem', background: 'rgba(255,255,255,0.01)' }}>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>Raw Observation notes / Observed floor behaviors:</span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>(Used by AI Generator)</span>
+                  </label>
+                  <textarea 
+                    className="form-control" 
+                    rows={2} 
+                    placeholder="Describe raw behaviors or specific observed metrics (e.g. Marcus pitched GSP at register but not during demo; client refused due to budget limit)."
+                    value={builderForm.rawObservation}
+                    onChange={(e) => setBuilderForm({ ...builderForm, rawObservation: e.target.value })}
+                  />
+                </div>
               </div>
 
               {/* Section 1: The Core Objective */}
@@ -592,28 +679,28 @@ Metric Focus: ${builderForm.metricGap}
                 />
               </div>
 
-              {/* Section 4: Expectations & Validation */}
+              {/* Section 4: Behavior & Validation */}
               <div style={{ border: '1px solid var(--border-glass)', borderRadius: '12px', padding: '1.25rem', background: 'rgba(16,185,129,0.02)' }}>
                 <h4 style={{ fontSize: '0.95rem', color: 'var(--success)', marginBottom: '1rem', fontFamily: 'var(--font-heading)' }}>
-                  SECTION 4: EXPECTATIONS & VALIDATION
+                  SECTION 4: BEHAVIOR & VALIDATION
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div className="form-group">
-                    <label className="form-label">Expectations of results (SMART target):</label>
+                    <label className="form-label">Behavior (Observable change marking success):</label>
                     <textarea 
                       className="form-control" 
                       rows={2} 
-                      placeholder="e.g. Elevate GSP Attach to 10% by next week."
+                      placeholder="e.g. Associate consistently presents My Best Buy Plus/Total options to every customer, resulting in 10% attach rate."
                       value={builderForm.expectation}
                       onChange={(e) => setBuilderForm({ ...builderForm, expectation: e.target.value })}
                     />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">How leaders will validate / audit results:</label>
+                    <label className="form-label">Validation (Follow-up observation plan):</label>
                     <textarea 
                       className="form-control" 
                       rows={2} 
-                      placeholder="e.g. Leader will perform 3 side-by-side floor observations and check weekly reporting."
+                      placeholder="e.g. Will perform 3 side-by-side observations during the peak hour on Friday."
                       value={builderForm.validation}
                       onChange={(e) => setBuilderForm({ ...builderForm, validation: e.target.value })}
                     />
@@ -659,21 +746,54 @@ Metric Focus: ${builderForm.metricGap}
                 <span className="tag-pill" style={{ fontSize: '0.7rem' }}>Best Buy Standard Layout</span>
               </div>
 
-              <textarea 
-                className="form-control" 
-                style={{ 
-                  flex: 1, 
-                  fontFamily: 'monospace', 
-                  fontSize: '0.8rem', 
-                  lineHeight: 1.4, 
-                  background: 'rgba(11,15,25,0.7)', 
-                  borderColor: 'rgba(255,255,255,0.05)', 
-                  resize: 'none',
-                  minHeight: '400px'
-                }}
-                readOnly
-                value={compileCoachingLogText()}
-              />
+              {isGeneratingLog ? (
+                <div style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1.25rem',
+                  padding: '1.5rem',
+                  background: 'rgba(11,15,25,0.7)',
+                  border: '1px solid rgba(255,255,255,0.05)',
+                  borderRadius: '12px',
+                  minHeight: '400px',
+                  justifyContent: 'center'
+                }}>
+                  {/* Pulsing skeleton bars */}
+                  <div className="skeleton-pulse" style={{ height: '24px', width: '60%', background: 'rgba(255,255,255,0.08)', borderRadius: '6px' }}></div>
+                  <div className="skeleton-pulse" style={{ height: '14px', width: '90%', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', marginTop: '0.5rem' }}></div>
+                  <div className="skeleton-pulse" style={{ height: '14px', width: '85%', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}></div>
+                  <div className="skeleton-pulse" style={{ height: '14px', width: '40%', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}></div>
+                  
+                  <div className="skeleton-pulse" style={{ height: '20px', width: '45%', background: 'rgba(255,255,255,0.08)', borderRadius: '6px', marginTop: '1.25rem' }}></div>
+                  <div className="skeleton-pulse" style={{ height: '14px', width: '95%', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', marginTop: '0.5rem' }}></div>
+                  <div className="skeleton-pulse" style={{ height: '14px', width: '70%', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}></div>
+                  
+                  <div className="skeleton-pulse" style={{ height: '20px', width: '50%', background: 'rgba(255,255,255,0.08)', borderRadius: '6px', marginTop: '1.25rem' }}></div>
+                  <div className="skeleton-pulse" style={{ height: '14px', width: '88%', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', marginTop: '0.5rem' }}></div>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', marginTop: '1.5rem', color: 'var(--text-secondary)' }}>
+                    <Sparkles className="typing-dots" size={24} style={{ color: 'var(--bby-yellow)' }} />
+                    <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Gemini is drafting your GROW coaching plan...</span>
+                  </div>
+                </div>
+              ) : (
+                <textarea 
+                  className="form-control" 
+                  style={{ 
+                    flex: 1, 
+                    fontFamily: 'monospace', 
+                    fontSize: '0.8rem', 
+                    lineHeight: 1.4, 
+                    background: 'rgba(11,15,25,0.7)', 
+                    borderColor: 'rgba(255,255,255,0.05)', 
+                    resize: 'none',
+                    minHeight: '400px'
+                  }}
+                  readOnly
+                  value={compileCoachingLogText()}
+                />
+              )}
 
               {copySuccess && (
                 <div style={{ padding: '0.75rem 1rem', background: 'var(--success-glow)', border: '1.5px solid rgba(16, 185, 129, 0.2)', borderRadius: '10px', fontSize: '0.8rem', color: '#a7f3d0', marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -681,13 +801,54 @@ Metric Focus: ${builderForm.metricGap}
                 </div>
               )}
 
-              <button 
-                className="btn btn-primary" 
-                style={{ width: '100%', marginTop: '1rem' }}
-                onClick={handleCopyToClipboard}
-              >
-                <Copy size={16} /> Copy Formatted Coaching Log
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem' }}>
+                <button 
+                  className="btn btn-primary" 
+                  style={{ width: '100%' }}
+                  onClick={handleCopyToClipboard}
+                >
+                  <Copy size={16} /> Copy Formatted Coaching Log
+                </button>
+                
+                {/* Text-to-Speech Control Center */}
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '0.5rem', 
+                  padding: '0.85rem 1rem', 
+                  background: 'rgba(255,255,255,0.02)', 
+                  border: '1px solid var(--border-glass)', 
+                  borderRadius: '12px' 
+                }}>
+                  <h4 style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+                    <Volume2 size={15} color="var(--bby-yellow)" /> Coaching Plan Reader (Text-to-Speech)
+                  </h4>
+                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+                    <button 
+                      className={`btn ${isPlayingSpeech && !isPausedSpeech ? 'btn-secondary' : 'btn-accent'}`} 
+                      style={{ flex: 1, padding: '0.4rem 0.8rem', fontSize: '0.75rem', height: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}
+                      onClick={handleSpeech}
+                    >
+                      <Volume2 size={13} /> {isPlayingSpeech ? (isPausedSpeech ? 'Resume' : 'Pause') : 'Read Plan Aloud'}
+                    </button>
+                    {isPlayingSpeech && (
+                      <button 
+                        className="btn btn-secondary" 
+                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', height: 'auto' }}
+                        onClick={handleStopSpeech}
+                      >
+                        Stop
+                      </button>
+                    )}
+                  </div>
+                  {isPlayingSpeech && (
+                    <div style={{ fontSize: '0.675rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <span className="pulse-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--bby-yellow)', display: 'inline-block' }}></span>
+                      <span>{isPausedSpeech ? 'Paused' : 'Currently speaking...'}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 

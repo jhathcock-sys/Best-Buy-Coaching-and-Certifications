@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { STANDARD_SCENARIOS, runOfflineSimulationStep, runGeminiSimulationStep, evaluateSessionOffline, evaluateSessionGemini } from '../services/ai';
 import { MessageSquare, ArrowLeft, RefreshCw, Send, Award, CheckCircle, Sparkles, BookOpen } from 'lucide-react';
 
@@ -17,6 +17,7 @@ export default function RoleplayCenter({ apiKey, playbookSettings, onCompleteRol
   });
   
   const [isLoading, setIsLoading] = useState(false);
+  const [isEvaluating, setIsEvaluating] = useState(false);
   const [evaluation, setEvaluation] = useState(null);
   const [customScenarios, setCustomScenarios] = useState([]);
   
@@ -34,7 +35,7 @@ export default function RoleplayCenter({ apiKey, playbookSettings, onCompleteRol
     }
   }, []);
 
-  const allScenarios = [...STANDARD_SCENARIOS, ...customScenarios];
+  const allScenarios = useMemo(() => [...STANDARD_SCENARIOS, ...customScenarios], [customScenarios]);
 
   // Auto-scroll chat
   useEffect(() => {
@@ -99,6 +100,7 @@ export default function RoleplayCenter({ apiKey, playbookSettings, onCompleteRol
 
   const endAndEvaluate = async () => {
     setIsLoading(true);
+    setIsEvaluating(true);
     try {
       const history = {
         messages: messages,
@@ -136,6 +138,7 @@ export default function RoleplayCenter({ apiKey, playbookSettings, onCompleteRol
       console.error(err);
     } finally {
       setIsLoading(false);
+      setIsEvaluating(false);
     }
   };
 
@@ -225,9 +228,31 @@ export default function RoleplayCenter({ apiKey, playbookSettings, onCompleteRol
 
       {/* 2. LIVE SIMULATION PLAY ARENA */}
       {sessionActive && !evaluation && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
-          {/* Top Control Bar */}
+        isEvaluating ? (
+          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', padding: '3rem', minHeight: '500px', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
+            <div style={{ position: 'relative', width: '120px', height: '120px' }}>
+              <div className="skeleton-pulse" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '50%', border: '8px solid rgba(255, 230, 0, 0.05)', borderTopColor: 'var(--bby-yellow)', animation: 'spin 1.5s linear infinite' }}></div>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
+                <Sparkles size={36} color="var(--bby-yellow)" className="typing-dots" />
+              </div>
+            </div>
+            
+            <div style={{ maxWidth: '450px', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              <h3 style={{ fontSize: '1.4rem', color: '#fff', fontWeight: 700 }}>AI Performance Audit in progress</h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.5 }}>
+                Gemini is grading your consultative discovery questions, verifying your membership values pitch, checking GSP warranty attachments, and parsing final credit card close rewards.
+              </p>
+            </div>
+
+            <div style={{ width: '100%', maxWidth: '300px', display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
+              <div className="skeleton-pulse" style={{ height: '12px', width: '100%', background: 'rgba(255,255,255,0.06)', borderRadius: '6px' }}></div>
+              <div className="skeleton-pulse" style={{ height: '12px', width: '80%', background: 'rgba(255,255,255,0.06)', borderRadius: '6px', alignSelf: 'center' }}></div>
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            
+            {/* Top Control Bar */}
           <div className="glass-card" style={{ padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
               <button className="btn btn-secondary btn-icon" onClick={() => setSessionActive(false)}>
@@ -368,11 +393,10 @@ export default function RoleplayCenter({ apiKey, playbookSettings, onCompleteRol
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}><strong>Needs:</strong> {selectedScenario.needs}</p>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}><strong>Style:</strong> {selectedScenario.difficulty === 'Easy' ? 'Quickly cooperative' : 'Will bring up multiple financial/risk objections.'}</p>
               </div>
-            </div>
-
           </div>
-
-        </div>
+          </div>
+          </div>
+        )
       )}
 
       {/* 3. EVALUATION FEEDBACK DASHBOARD VIEW */}

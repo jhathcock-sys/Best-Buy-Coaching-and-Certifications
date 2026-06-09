@@ -104,6 +104,79 @@ export const EMPLOYEE_SCENARIOS = [
   }
 ];
 
+// Pre-defined offline simulation dialogue database for standard scenarios
+const OFFLINE_DIALOGUES = {
+  'computing-college': {
+    connect: {
+      met: "Thanks for greeting me so nicely. Yes, my freshman is heading to college for engineering. We want something that will last him all four years, but honestly, it needs to be reliable. He's a bit clumsy, and I don't want to have to buy a new computer in a year. What do you recommend?",
+      unmet: "Hello... yes, I just need a computer for my son. What computers do you have? (Tip: Build a connection, introduce yourself, ask his name or congrats on college!)"
+    },
+    discover: {
+      met: "He'll be doing a lot of intensive coding, 3D modeling, and general coursework. He prefers something lighter so he can carry it between dorms and classes easily. Our budget is around $1,200, but we can stretch a bit if it really makes a difference. What's a good brand?",
+      unmet: "Well, like I said, he is going to college. Do you have a list of required laptops? Or do you just pick one off the shelf? (Tip: Ask about his major, daily usage, screen size preferences, or budget!)"
+    },
+    recommend: {
+      metMembership: "Oh, so the My Best Buy Total membership gives us free shipping, discounts, and tech support? That sounds useful, but $179 is a lot to add today on top of the laptop. Also, what happens if he drops the laptop and cracks the screen? Is that covered in the membership?",
+      metNoMembership: "That laptop looks beautiful and extremely fast! But wow, $1,199 is right at our budget limit. Does this come with any setup help or tech support? Or any discounts?",
+      unmet: "I'm not sure about these laptops. Why should I buy this one instead of just ordering something online? (Tip: Propose a specific laptop model like a MacBook or Premium Windows device, and introduce My Best Buy Plus/Total membership!)"
+    },
+    protect: {
+      met: "Wow, Geek Squad Protection covering accidental drops and spills is huge! Especially since it's included or discounted with the Total membership. That gives me real peace of mind. Okay, we should definitely do that laptop, the protection, and the membership. Is there any way to split up this total cost over time?",
+      unmet: "I am really worried about him dropping it, but adding even more money for protection is hard. Is there no other way to get it covered? (Tip: Recommend Geek Squad Protection (GSP) or AppleCare+, highlighting drop/spill protection!)"
+    },
+    close: {
+      met: "Really? 12 months interest-free financing or 10% back in rewards on our first purchase today with the Best Buy Card? That is perfect! That completely solves the budget stretch. Let's do the application and get everything rung up today. Thank you so much, you made this so easy and human!",
+      unmet: "Okay, so the total is pretty high. I guess I'll just put it on my debit card, unless there are any special payment programs or rewards we get for spending this much today? (Tip: Propose the Best Buy Credit Card, explaining the 12-month interest-free financing or 10% back in rewards!)"
+    }
+  },
+  'ht-gaming': {
+    connect: {
+      met: "Yeah, I just got the PS5 Pro, and I want a TV that can actually support its full graphical capabilities. I've heard OLED has the best picture quality and low input lag, but they seem pretty pricey. What do you recommend?",
+      unmet: "Hello. I am looking for a TV. I heard OLED is good. What do you have? (Tip: Ask his name, build a connection, and congratulate him or ask about his gaming setup!)"
+    },
+    discover: {
+      met: "I'll be setting this up in my bedroom, which gets a moderate amount of light. I want something around 55 or 65 inches, and it needs to support 120Hz refresh rates and HDMI 2.1 for the PS5 Pro. I'll also be wall-mounting it. What models should I look at?",
+      unmet: "Well, I just want a TV that looks good. What features should I care about for gaming? (Tip: Ask about his room light levels, TV size preference, wall-mounting plans, or audio setup!)"
+    },
+    recommend: {
+      metMembership: "The LG OLED C4 sounds awesome for gaming! But you mentioned the My Best Buy Total membership for $179. I only buy a TV once every few years, so I don't see why a membership makes sense for me. Does it include mounting/installation help?",
+      metNoMembership: "The LG OLED C4 looks absolutely gorgeous! But $1,599 is a big investment. Does this include any delivery, setup help, or technical support? Or is there any membership discount?",
+      unmet: "I'm not sure which TV to choose. Why should I buy an OLED here instead of just looking online? (Tip: Propose a specific OLED model like the LG C4, and introduce My Best Buy Plus/Total membership!)"
+    },
+    protect: {
+      met: "Oh, so Geek Squad Protection covers screen burn-in and panel degradation? That's actually my biggest fear with OLEDs. And getting it discounted with the membership is a nice touch. I'll definitely add the protection plan.",
+      unmet: "Doesn't it already come with a manufacturer warranty? Why pay extra for Geek Squad protection? (Tip: Recommend Geek Squad Protection (GSP), highlighting screen burn-in coverage!)"
+    },
+    close: {
+      met: "Wow, 12 months interest-free financing or 10% back in rewards on this purchase with the Best Buy Card? That makes a $1,600 TV purchase a lot easier to manage. Let's do the credit card application and get the TV and mounting set up!",
+      unmet: "I'm ready to buy, but paying $1,600 out of pocket all at once is a bit steep. (Tip: Close by offering Best Buy Card financing options or 10% back in rewards!)"
+    }
+  },
+  'geek-repair': {
+    connect: {
+      met: "Thank you for being so kind. I get so nervous with technology. Every time I open the computer, these loud red screens pop up saying my bank details are stolen. I haven't clicked anything, but I am terrified. Can you help me clean this computer?",
+      unmet: "Hello, my computer is acting up. It has warning popups. Can you fix it? (Tip: Build rapport, reassure her, let her know it's a common scam, and ask her name!)"
+    },
+    discover: {
+      met: "The computer is about three years old. I mostly use it to look at pictures of my grandchildren, send emails, and check my news. I have all my family photos saved on there, and I don't want to lose them. Is there any way to back them up?",
+      unmet: "Well, I don't know much about computers. What do you need to know to fix it? (Tip: Ask about her computer's age, whether she has important backups/photos, and what she uses it for!)"
+    },
+    recommend: {
+      metMembership: "So this My Best Buy Total membership for $179 includes the virus clean-up and a year of unlimited support? That sounds nice, but I only need this fixed once. Why should I pay for a whole year?",
+      metNoMembership: "So you can clean it up for me? That's wonderful. But what does it cost to fix it and make sure it doesn't happen again? Do you have any support plans?",
+      unmet: "I don't know if I should just buy a new computer or try to fix this one. What do you recommend? (Tip: Propose a professional Geek Squad diagnostic/cleanup, and introduce My Best Buy Total for support!)"
+    },
+    protect: {
+      met: "Having 24/7 support and security software like Webroot included makes me feel much safer. If another popup appears, I can just call you or bring it in. That really gives me peace of mind. Let's do the membership and cleanup.",
+      unmet: "How do I know this won't happen again next week? Is there some software or extra help? (Tip: Recommend security software and ongoing support options to give her peace of mind!)"
+    },
+    close: {
+      met: "Thank you so much! You made this so easy and pleasant. Let's write up the work order, set up the appointment, and get this taken care of.",
+      unmet: "Okay, let's get it set up, what are the next steps to get it checked in? (Tip: Close the session by finalizing the service order and setting up her check-in appointment!)"
+    }
+  }
+};
+
 // Offline Sandbox Dialogue Simulation Engine
 export function runOfflineSimulationStep(message, history, scenario, guidelines) {
   const lowercaseMsg = message.toLowerCase();
@@ -113,7 +186,8 @@ export function runOfflineSimulationStep(message, history, scenario, guidelines)
   let currentActiveStep = history.currentActiveStep || 'connect';
   let responseText = "";
   
-  // 1. Analyze Advisor's message for Sales Flow checkpoints
+  const scid = scenario.id;
+  const isStandard = OFFLINE_DIALOGUES[scid] !== undefined;
   
   // Welcome / Connect
   if (currentActiveStep === 'connect') {
@@ -121,9 +195,13 @@ export function runOfflineSimulationStep(message, history, scenario, guidelines)
     if (metConnect || lowercaseMsg.length > 15) {
       completedSteps.connect = true;
       currentActiveStep = 'discover';
-      responseText = `Thanks for greeting me so nicely. Yes, my freshman is heading to college for engineering. We want something that will last him all four years, but honestly, it needs to be reliable. He's a bit clumsy, and I don't want to have to buy a new computer in a year. What do you recommend?`;
+      responseText = isStandard 
+        ? OFFLINE_DIALOGUES[scid].connect.met 
+        : `Thanks for greeting me so nicely. Yes, my name is ${scenario.name || 'Customer'}. I am looking for a product that fits my needs: ${scenario.needs || 'good performance'}.`;
     } else {
-      responseText = `Hello... yes, I just need a computer for my son. What computers do you have? (Tip: Build a connection, introduce yourself, ask his name or congrats on college!)`;
+      responseText = isStandard 
+        ? OFFLINE_DIALOGUES[scid].connect.unmet 
+        : `Hello... yes, my name is ${scenario.name || 'Customer'}. What options do you have? (Tip: Build a connection, introduce yourself, ask his name or congrats!)`;
     }
   }
   
@@ -133,9 +211,13 @@ export function runOfflineSimulationStep(message, history, scenario, guidelines)
     if (metDiscover) {
       completedSteps.discover = true;
       currentActiveStep = 'recommend';
-      responseText = `He'll be doing a lot of intensive coding, 3D modeling, and general coursework. He prefers something lighter so he can carry it between dorms and classes easily. Our budget is around $1,200, but we can stretch a bit if it really makes a difference. What's a good brand?`;
+      responseText = isStandard 
+        ? OFFLINE_DIALOGUES[scid].discover.met 
+        : `I'm looking for something that addresses my needs: ${scenario.needs || 'good reliability'}. What specific models do you recommend?`;
     } else {
-      responseText = `Well, like I said, he is going to college. Do you have a list of required laptops? Or do you just pick one off the shelf? (Tip: Ask about his major, daily usage, screen size preferences, or budget!)`;
+      responseText = isStandard 
+        ? OFFLINE_DIALOGUES[scid].discover.unmet 
+        : `Well, what features should I look for? (Tip: Ask about their usage, preferences, room/setup details, or budget!)`;
     }
   }
   
@@ -145,13 +227,19 @@ export function runOfflineSimulationStep(message, history, scenario, guidelines)
     const metRecommend = scenario.successKeywords.recommend.some(kw => lowercaseMsg.includes(kw));
     
     if (metRecommend && !pitchedMembership) {
-      responseText = `That laptop looks beautiful and extremely fast! But wow, $1,199 is right at our budget limit. Does this come with any setup help or tech support? Or any discounts?`;
+      responseText = isStandard 
+        ? OFFLINE_DIALOGUES[scid].recommend.metNoMembership 
+        : `That sounds like a great recommendation! But does this come with any setup help or tech support? Or any discounts?`;
     } else if (metRecommend && pitchedMembership) {
       completedSteps.recommend = true;
       currentActiveStep = 'protect';
-      responseText = `Oh, so the My Best Buy Total membership gives us free shipping, discounts, and tech support? That sounds useful, but $179 is a lot to add today on top of the laptop. Also, what happens if he drops the laptop and cracks the screen? Is that covered in the membership?`;
+      responseText = isStandard 
+        ? OFFLINE_DIALOGUES[scid].recommend.metMembership 
+        : `Oh, so the My Best Buy Total membership gives us setup help, support, and discounts? That sounds useful, but adding that on top is a lot. Also, what happens if this product breaks? Is that covered in the membership?`;
     } else {
-      responseText = `I'm not sure about these laptops. Why should I buy this one instead of just ordering something online? (Tip: Propose a specific laptop model like a MacBook or Premium Windows device, and introduce My Best Buy Plus/Total membership!)`;
+      responseText = isStandard 
+        ? OFFLINE_DIALOGUES[scid].recommend.unmet 
+        : `I'm not sure which option to choose. Why should I buy this product here? (Tip: Propose a specific product model, and introduce My Best Buy Plus/Total membership!)`;
     }
   }
   
@@ -161,9 +249,13 @@ export function runOfflineSimulationStep(message, history, scenario, guidelines)
     if (metProtect) {
       completedSteps.protect = true;
       currentActiveStep = 'close';
-      responseText = `Wow, Geek Squad Protection covering accidental drops and spills is huge! Especially since it's included or discounted with the Total membership. That gives me real peace of mind. Okay, we should definitely do that laptop, the protection, and the membership. Is there any way to split up this total cost over time?`;
+      responseText = isStandard 
+        ? OFFLINE_DIALOGUES[scid].protect.met 
+        : `Wow, Geek Squad Protection covering accidental damage/spills is huge! Especially since it's included or discounted with the Total membership. That gives me real peace of mind. Okay, let's do the product, the protection, and the membership. Is there any way to split up this total cost over time?`;
     } else {
-      responseText = `I am really worried about him dropping it, but adding even more money for protection is hard. Is there no other way to get it covered? (Tip: Recommend Geek Squad Protection (GSP) or AppleCare+, highlighting drop/spill protection!)`;
+      responseText = isStandard 
+        ? OFFLINE_DIALOGUES[scid].protect.unmet 
+        : `I am worried about it breaking, but adding even more money for protection is hard. Is there no other way to get it covered? (Tip: Recommend Geek Squad Protection (GSP) or AppleCare+, highlighting accidental coverage!)`;
     }
   }
   
@@ -172,9 +264,13 @@ export function runOfflineSimulationStep(message, history, scenario, guidelines)
     const pitchedCard = lowercaseMsg.includes('card') || lowercaseMsg.includes('financing') || lowercaseMsg.includes('rewards') || lowercaseMsg.includes('credit');
     if (pitchedCard) {
       completedSteps.close = true;
-      responseText = `Really? 12 months interest-free financing or 10% back in rewards on our first purchase today with the Best Buy Card? That is perfect! That completely solves the budget stretch. Let's do the application and get everything rung up today. Thank you so much, you made this so easy and human!`;
+      responseText = isStandard 
+        ? OFFLINE_DIALOGUES[scid].close.met 
+        : `Really? 12 months interest-free financing or 10% back in rewards on our first purchase today with the Best Buy Card? That is perfect! That completely solves the budget stretch. Let's do the application and get everything rung up today. Thank you so much, you made this so easy and human!`;
     } else {
-      responseText = `Okay, so the total is pretty high. I guess I'll just put it on my debit card, unless there are any special payment programs or rewards we get for spending this much today? (Tip: Propose the Best Buy Credit Card, explaining the 12-month interest-free financing or 10% back in rewards!)`;
+      responseText = isStandard 
+        ? OFFLINE_DIALOGUES[scid].close.unmet 
+        : `Okay, so the total is pretty high. I guess I'll just put it on my debit card, unless there are any special payment programs or rewards we get for spending this much today? (Tip: Propose the Best Buy Credit Card, explaining the 12-month interest-free financing or 10% back in rewards!)`;
     }
   }
   
@@ -452,8 +548,8 @@ export async function runGeminiSimulationStep(apiKey, message, history, scenario
 
       Current Sales Flow Stages to watch:
       1. Welcome/Connect (building rapport, greeting)
-      2. Understand/Discover (asking open-ended usage questions, major, setup)
-      3. Recommend/Sell (laptop match, My Best Buy membership mention)
+      2. Understand/Discover (asking open-ended usage questions, preferences, setup)
+      3. Recommend/Sell (product recommendation, My Best Buy membership mention)
       4. Protect (Geek Squad Protection/AppleCare recommendation)
       5. Close (Best Buy Credit Card financing/rewards pitch, finalize sale)
 
@@ -596,7 +692,7 @@ export async function evaluateSessionGemini(apiKey, history, scenario, playbookS
 }
 
 // Generate structured 4-Section Coaching Log using Gemini
-export async function generateCoachingLogGemini(apiKey, name, gapType, gapDetails, positives, playbookSettings) {
+export async function generateCoachingLogGemini(apiKey, name, gapType, gapDetails, positives, rawObservation, playbookSettings) {
   try {
     const aiInstance = new GoogleGenerativeAI(apiKey);
     const model = aiInstance.getGenerativeModel({ model: 'gemini-1.5-flash' });
@@ -612,30 +708,38 @@ export async function generateCoachingLogGemini(apiKey, name, gapType, gapDetail
     }
     
     const prompt = `
-      You are a Best Buy Store Leader / Coach. Build a formal employee coaching log using the Best Buy 4-Section Coaching Framework.
-      Employee: ${name}
-      Metric Gap Type: ${gapType}
-      Gap Details: ${gapDetails}
-      What they are currently doing well: ${positives || 'Highly friendly and connects well with customers.'}
+      You are an expert Retail Management Performance Coach and administrative assistant specializing in Best Buy's employee development frameworks. Your role is to help a Store Supervisor instantly generate structured, actionable coaching plans for employees based on the store's specific frameworks.
+      
+      Employee Name: ${name}
+      Focus Area (Metric Gap): ${gapType}
+      Raw Input/Gap Details: ${gapDetails || 'Needs performance coaching to meet store targets'}
+      Observed Strengths: ${positives || 'Highly friendly and connects well with customers.'}
+      Raw Observation / Floor Behavior: ${rawObservation || 'None provided.'}
       
       ${fewShotTrainingText}
+
+      ${playbookSettings && playbookSettings.customSystemPrompt ? `ADDITIONAL CUSTOM COACHING GUIDELINES:\n${playbookSettings.customSystemPrompt}` : ''}
       
-      Generate a professional coaching log with exactly these 4 sections:
+      ### 1. THE SALES FRAMEWORK (DISC):
+      When analyzing the scenario or coaching focus, you must ground your recommendations in the DISC selling process defined below:
+      * **Discover**: Asking open-ended questions to gain insight into the customer's needs/solutions, uncovering their current membership status, and early-introducing the Best Buy Credit Card.
+      * **Inspire**: Building excitement through physical or experiential product demonstrations (e.g., testing a soundbar, demoing Microsoft 365 features, putting a device directly in the customer’s hands).
+      * **Solve**: Building the complete solution. This includes pitching Geek Squad Protection (GSP), applicable services, necessary accessories, and the appropriate My Best Buy membership offerings.
+      * **Close**: Securing the business and finalizing the transition to checkout (e.g., "I can ring you out right here," "I'll grab that box for you," or leveraging supply chain by ordering for home delivery/store pickup).
+
+      Translate this input into a highly structured coaching plan using the exact framework below:
       
-      SECTION 1: THE CORE OBJECTIVE (WHAT / HOW / WHY)
-      - What we need them to do: [Clear behavioral action, e.g. Introduce My Best Buy Total early]
-      - How we need them to do it: [Step-by-step how to pitch it. You MUST explicitly structure this behavioral plan using the Best Buy "DISC" model. Break it down strictly using: "[Discover] ... [Inspire] ... [Solve] ... [Close] ..."]
-      - Why we need them to do it: [Value to customer and store goals]
+      ### 2. THE OUTPUT STRUCTURE:
+      Every coaching plan you generate must map to this exact layout:
+      - **what**: 1-2 bullet points explicitly detailing the specific area, tool, pitch, or DISC step the employee needs to focus on during their interactions.
+      - **how**: 1-2 bullet points describing the exact, actionable behavior change. You MUST include specific wording, scripting, or phrasing examples the employee should use on the floor.
+      - **why**: 1-2 bullet points explaining the business or customer impact, directly tied to a key metric (e.g., Membership Efficiency, BP Efficiency, Paid Member Services, GSP Attachment, or Net Promoter Score).
+      - **expectation** (Behavior): 1-2 bullet points summarizing the exact, observable behavior change that marks a successful transition on the sales floor.
+      - **validation**: A clear statement detailing when and how the supervisor will actively observe, follow up, and validate that the coached behavior is being utilized.
       
-      SECTION 2: CURRENT STRENGTHS
-      - What they are currently doing well: [Emphasize their positive skills]
-      
-      SECTION 3: METRIC GAP
-      - Gap we are trying to fill: [Compare their performance to store goals]
-      
-      SECTION 4: EXPECTATIONS & VALIDATION
-      - Expectation of results: [SMART goal targets]
-      - How we will validate: [How leader will observe or check dashboard]
+      ### OPERATIONAL RULES:
+      1. **Tone**: Direct, professional, floor-ready, and encouraging. Use retail-accurate terminology (e.g., Core, Blue Shirts, Code 1s, Walk out Working).
+      2. **Missing Information**: If the supervisor provides a quick, raw note that lacks context for a section (like the Validation timeline), make a logical, high-standard retail assumption, but highlight it (e.g. by adding "[Verify this date/count]") so the supervisor can quickly edit it.
       
       You must reply strictly in a structured JSON format matching this schema:
       {
@@ -645,7 +749,8 @@ export async function generateCoachingLogGemini(apiKey, name, gapType, gapDetail
         "strengths": "string",
         "metricGap": "string",
         "expectation": "string",
-        "validation": "string"
+        "validation": "string",
+        "discStep": "Discover" | "Inspire" | "Solve" | "Close"
       }
     `;
     

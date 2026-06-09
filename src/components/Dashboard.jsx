@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Award, TrendingUp, Compass, ShieldCheck, CreditCard, Star, DollarSign, ArrowUpRight, MessageSquare, Play } from 'lucide-react';
 
 export default function Dashboard({ metrics, certifications, recentSessions, onNavigate }) {
@@ -36,7 +36,7 @@ export default function Dashboard({ metrics, certifications, recentSessions, onN
   };
 
   // Get active suggestions based on metric thresholds
-  const getSuggestions = () => {
+  const suggestions = useMemo(() => {
     const list = [];
     if (metrics.memberships < 60) {
       list.push({
@@ -75,9 +75,11 @@ export default function Dashboard({ metrics, certifications, recentSessions, onN
       });
     }
     return list;
-  };
+  }, [metrics]);
 
-  const activeCerts = certifications.filter(c => c.earned).length;
+  const activeCerts = useMemo(() => {
+    return certifications.filter(c => c.earned).length;
+  }, [certifications]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
@@ -153,7 +155,7 @@ export default function Dashboard({ metrics, certifications, recentSessions, onN
               <TrendingUp size={20} color="var(--bby-yellow)" /> Smart Co-Coach Recommendations
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {getSuggestions().map(s => (
+              {suggestions.map(s => (
                 <div 
                   key={s.id} 
                   style={{ 

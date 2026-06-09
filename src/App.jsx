@@ -20,6 +20,17 @@ import {
   initFirebase
 } from './services/firebase';
 
+// Safe JSON Parse helper to prevent localStorage corruption crashes
+const safeJsonParse = (str, fallback) => {
+  if (!str) return fallback;
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    console.error('JSON parsing failed:', e);
+    return fallback;
+  }
+};
+
 const INITIAL_ROSTER = [
   { id: 'yinel', name: 'Yinel', dept: 'Front End', hours: 34.5, memberships: 10, creditCards: 1, warranty: 22.2, surveys: 2, rph: 744, gap: 'BBY Credit Cards (1 App)' },
   { id: 'julianna', name: 'Julianna', dept: 'Computing', hours: 78.0, memberships: 6, creditCards: 2, warranty: 11.2, surveys: 1, rph: 1049, gap: 'None' },
@@ -43,41 +54,19 @@ export default function App() {
     allowedPhrases: ['My Best Buy Plus', 'My Best Buy Total', 'Geek Squad Protection', 'AppleCare+'],
     forbiddenPhrases: ['warranty', 'pushy', 'contract'],
     trainingLogs: [
-      `### BEST BUY COACHING LOG: RICKY
-Focus: 5 Star Surveys
+      `## 📋 Coaching Plan: Ricky / 5-Star Surveys
 
---------------------------------------------------
-1. THE CORE OBJECTIVE (WHAT / HOW / WHY)
---------------------------------------------------
-* WHAT we need them to do:
-  Deliver a warmer checkout experience and explicitly ask for 5-star survey feedback at checkout.
+* **What**: Deliver a warmer checkout experience and explicitly ask for 5-star survey feedback at checkout.
+* **How**: Slow down, write your name on the receipt sleeve, make direct eye contact, and say: "I hope I made your shopping easy today. My name is Ricky; please take 30 seconds to let me know how I did on the 5-star survey!"
+* **Why**: Ensures customer loyalty, measures our store service indices, and highlights excellent human work on the checkout floor.
+* **Behavior**: Secure at least 2 five-star survey mentions this week and maintain a 4.8+ survey average.
+* **Validation**: Leader will perform 3 checkout observations this week and review the Sunday 5 Star survey comment log.
 
-* HOW we need them to do it:
-  Slow down, write your name on the receipt sleeve, make direct eye contact, and say: "I hope I made your shopping easy today. My name is Ricky; please take 30 seconds to let me know how I did on the 5-star survey!"
-
-* WHY we need them to do it:
-  Ensures customer loyalty, measures our store service indices, and highlights excellent human work on the checkout floor.
-
---------------------------------------------------
-2. CURRENT STRENGTHS (DOING WELL)
---------------------------------------------------
-* What they are currently doing well:
-  Excellent transactional speeds, zero cashier queue backlog, and highly professional checkout processing.
-
---------------------------------------------------
-3. PERFORMANCE METRIC GAP
---------------------------------------------------
-* Gap we are trying to fill:
-  Ricky has 0 5 Star surveys this month (store standard is maintaining 2+ five-star survey mentions per week).
-
---------------------------------------------------
-4. EXPECTATIONS & VALIDATION METHOD
---------------------------------------------------
-* Expectation of results:
-  Secure at least 2 five-star survey mentions this week and maintain a 4.8+ survey average.
-
-* How we will validate:
-  Leader will perform 3 checkout observations this week and review the Sunday 5 Star survey comment log.`
+---
+### 🔍 Background & Performance Context
+* **Observed Strengths**: Excellent transactional speeds, zero cashier queue backlog, and highly professional checkout processing.
+* **Performance Gap / Metric Focus**: Ricky has 0 5 Star surveys this month (store standard is maintaining 2+ five-star survey mentions per week).
+* **Coaching Date**: 6/6/2026`
     ]
   });
 
@@ -200,150 +189,107 @@ Focus: 5 Star Surveys
     }
 
     const savedSettings = localStorage.getItem('bby_playbook_settings');
-    if (savedSettings) {
-      try {
-        const parsed = JSON.parse(savedSettings);
-        // Force useGemini to true if an environment key is loaded and no custom override is in localStorage
-        if (hasEnvKey && (!savedKey || savedKey.trim().length < 10)) {
-          parsed.useGemini = true;
-        }
-        
-        // Safeguard trainingLogs: if they upgraded from an older version of saved settings that didn't have trainingLogs, populate it!
-        if (!parsed.trainingLogs || !Array.isArray(parsed.trainingLogs)) {
-          parsed.trainingLogs = [
-            `### BEST BUY COACHING LOG: RICKY
-Focus: 5 Star Surveys
-
---------------------------------------------------
-1. THE CORE OBJECTIVE (WHAT / HOW / WHY)
---------------------------------------------------
-* WHAT we need them to do:
-  Deliver a warmer checkout experience and explicitly ask for 5-star survey feedback at checkout.
-
-* HOW we need them to do it:
-  Slow down, write your name on the receipt sleeve, make direct eye contact, and say: "I hope I made your shopping easy today. My name is Ricky; please take 30 seconds to let me know how I did on the 5-star survey!"
-
-* WHY we need them to do it:
-  Ensures customer loyalty, measures our store service indices, and highlights excellent human work on the checkout floor.
-
---------------------------------------------------
-2. CURRENT STRENGTHS (DOING WELL)
---------------------------------------------------
-* What they are currently doing well:
-  Excellent transactional speeds, zero cashier queue backlog, and highly professional checkout processing.
-
---------------------------------------------------
-3. PERFORMANCE METRIC GAP
---------------------------------------------------
-* Gap we are trying to fill:
-  Ricky has 0 5 Star surveys this month (store standard is maintaining 2+ five-star survey mentions per week).
-
---------------------------------------------------
-4. EXPECTATIONS & VALIDATION METHOD
---------------------------------------------------
-* Expectation of results:
-  Secure at least 2 five-star survey mentions this week and maintain a 4.8+ survey average.
-
-* How we will validate:
-  Leader will perform 3 checkout observations this week and review the Sunday 5 Star survey comment log.`
-          ];
-          localStorage.setItem('bby_playbook_settings', JSON.stringify(parsed));
-        }
-        setPlaybookSettings(parsed);
-      } catch (e) {
-        console.error(e);
+    let parsedSettings = safeJsonParse(savedSettings, null);
+    if (parsedSettings) {
+      // Force useGemini to true if an environment key is loaded and no custom override is in localStorage
+      if (hasEnvKey && (!savedKey || savedKey.trim().length < 10)) {
+        parsedSettings.useGemini = true;
       }
+      
+      // Safeguard trainingLogs: if they upgraded from an older version of saved settings that didn't have trainingLogs, populate it!
+      if (!parsedSettings.trainingLogs || !Array.isArray(parsedSettings.trainingLogs)) {
+        parsedSettings.trainingLogs = [
+          `## 📋 Coaching Plan: Ricky / 5-Star Surveys
+
+* **What**: Deliver a warmer checkout experience and explicitly ask for 5-star survey feedback at checkout.
+* **How**: Slow down, write your name on the receipt sleeve, make direct eye contact, and say: "I hope I made your shopping easy today. My name is Ricky; please take 30 seconds to let me know how I did on the 5-star survey!"
+* **Why**: Ensures customer loyalty, measures our store service indices, and highlights excellent human work on the checkout floor.
+* **Behavior**: Secure at least 2 five-star survey mentions this week and maintain a 4.8+ survey average.
+* **Validation**: Leader will perform 3 checkout observations this week and review the Sunday 5 Star survey comment log.
+
+---
+### 🔍 Background & Performance Context
+* **Observed Strengths**: Excellent transactional speeds, zero cashier queue backlog, and highly professional checkout processing.
+* **Performance Gap / Metric Focus**: Ricky has 0 5 Star surveys this month (store standard is maintaining 2+ five-star survey mentions per week).
+* **Coaching Date**: 6/6/2026`
+        ];
+        localStorage.setItem('bby_playbook_settings', JSON.stringify(parsedSettings));
+      }
+      setPlaybookSettings(parsedSettings);
     } else if (hasEnvKey) {
       setPlaybookSettings(prev => ({ ...prev, useGemini: true }));
     }
 
     const savedMetrics = localStorage.getItem('bby_metrics');
     if (savedMetrics) {
-      try {
-        setMetrics(JSON.parse(savedMetrics));
-      } catch (e) {
-        console.error(e);
-      }
+      const metricsData = safeJsonParse(savedMetrics, null);
+      if (metricsData) setMetrics(metricsData);
     }
 
     const savedCerts = localStorage.getItem('bby_certifications');
     if (savedCerts) {
-      try {
-        setCertifications(JSON.parse(savedCerts));
-      } catch (e) {
-        console.error(e);
-      }
+      const certsData = safeJsonParse(savedCerts, null);
+      if (certsData) setCertifications(certsData);
     }
 
     const savedSessions = localStorage.getItem('bby_recent_sessions');
     if (savedSessions) {
-      try {
-        setRecentSessions(JSON.parse(savedSessions));
-      } catch (e) {
-        console.error(e);
-      }
+      const sessionsData = safeJsonParse(savedSessions, null);
+      if (sessionsData) setRecentSessions(sessionsData);
     }
 
     const savedCustomScenarios = localStorage.getItem('bby_custom_scenarios');
     if (savedCustomScenarios) {
-      try {
-        setCustomScenarios(JSON.parse(savedCustomScenarios));
-      } catch (e) {
-        console.error(e);
-      }
+      const customData = safeJsonParse(savedCustomScenarios, null);
+      if (customData) setCustomScenarios(customData);
     }
 
     const savedGoals = localStorage.getItem('bby_dept_goals');
     if (savedGoals) {
-      try {
-        const parsed = JSON.parse(savedGoals);
+      const parsedGoals = safeJsonParse(savedGoals, null);
+      if (parsedGoals) {
         // Safely introduce Front End goals without wiping out General Sales!
         let changed = false;
-        if (!parsed['Front End']) {
-          parsed['Front End'] = { 
+        if (!parsedGoals['Front End']) {
+          parsedGoals['Front End'] = { 
             memberships: 8.0, membershipsType: 'Hours', 
             creditCards: 12.5, creditCardsType: 'Hours', 
             warranty: 11.0, surveys: 1.0, rph: 640 
           };
           changed = true;
         }
-        if (!parsed['General Sales']) {
-          parsed['General Sales'] = { 
+        if (!parsedGoals['General Sales']) {
+          parsedGoals['General Sales'] = { 
             memberships: 5000, membershipsType: 'Dollars', 
             creditCards: 8000, creditCardsType: 'Dollars', 
             warranty: 11.0, surveys: 1.0, rph: 640 
           };
           changed = true;
         }
-        setDeptGoals(parsed);
+        setDeptGoals(parsedGoals);
         if (changed) {
-          localStorage.setItem('bby_dept_goals', JSON.stringify(parsed));
+          localStorage.setItem('bby_dept_goals', JSON.stringify(parsedGoals));
         }
-      } catch (e) {
-        console.error(e);
       }
     }
 
     const savedHistory = localStorage.getItem('bby_roster_history');
     if (savedHistory) {
-      try {
-        setRosterHistory(JSON.parse(savedHistory));
-      } catch (e) {
-        console.error(e);
-      }
+      const historyData = safeJsonParse(savedHistory, null);
+      if (historyData) setRosterHistory(historyData);
     } else {
       const savedRoster = localStorage.getItem('bby_roster');
       if (savedRoster) {
-        try {
-          const parsed = JSON.parse(savedRoster);
-          let rosterToMigrate = parsed;
-          if (parsed.some(e => e.id === 'jordan') || parsed.some(e => e.id === 'yinel' && e.dept === 'General Sales') || !parsed.some(e => e.id === 'yinel') || !parsed.some(e => e.id === 'yinel' && 'hours' in e)) {
+        const parsedRoster = safeJsonParse(savedRoster, null);
+        if (parsedRoster && Array.isArray(parsedRoster)) {
+          let rosterToMigrate = parsedRoster;
+          if (parsedRoster.some(e => e.id === 'jordan') || parsedRoster.some(e => e.id === 'yinel' && e.dept === 'General Sales') || !parsedRoster.some(e => e.id === 'yinel') || !parsedRoster.some(e => e.id === 'yinel' && 'hours' in e)) {
             rosterToMigrate = INITIAL_ROSTER;
           }
           const migrated = { 'May 2026': rosterToMigrate };
           setRosterHistory(migrated);
           localStorage.setItem('bby_roster_history', JSON.stringify(migrated));
-        } catch (e) {
+        } else {
           setRosterHistory({ 'May 2026': INITIAL_ROSTER });
         }
       } else {
@@ -370,9 +316,9 @@ Focus: 5 Star Surveys
 
       await seedOfflineDataToCloud({
         activePeriod: savedPeriod || 'May 2026',
-        rosterHistory: savedHistory ? JSON.parse(savedHistory) : null,
-        playbookSettings: savedSettings ? JSON.parse(savedSettings) : null,
-        deptGoals: savedGoals ? JSON.parse(savedGoals) : null
+        rosterHistory: safeJsonParse(savedHistory, null),
+        playbookSettings: safeJsonParse(savedSettings, null),
+        deptGoals: safeJsonParse(savedGoals, null)
       });
     };
     seedCloud();

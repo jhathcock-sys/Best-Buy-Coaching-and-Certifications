@@ -29,6 +29,8 @@ export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSetting
     setEditedGoals({ ...deptGoals });
   }, [deptGoals]);
 
+  const deptKeys = React.useMemo(() => Object.keys(deptGoals || {}), [deptGoals]);
+
   const handleGoalChange = (metric, val) => {
     const isTypeField = metric.endsWith('Type');
     const processedVal = isTypeField ? val : (parseFloat(val) || 0);
@@ -125,41 +127,19 @@ export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSetting
   };
 
   const [trainingLogs, setTrainingLogs] = useState(playbookSettings.trainingLogs || [
-    `### BEST BUY COACHING LOG: RICKY
-Focus: 5 Star Surveys
+    `## 📋 Coaching Plan: Ricky / 5-Star Surveys
 
---------------------------------------------------
-1. THE CORE OBJECTIVE (WHAT / HOW / WHY)
---------------------------------------------------
-* WHAT we need them to do:
-  Deliver a warmer checkout experience and explicitly ask for 5-star survey feedback at checkout.
+* **What**: Deliver a warmer checkout experience and explicitly ask for 5-star survey feedback at checkout.
+* **How**: Slow down, write your name on the receipt sleeve, make direct eye contact, and say: "I hope I made your shopping easy today. My name is Ricky; please take 30 seconds to let me know how I did on the 5-star survey!"
+* **Why**: Ensures customer loyalty, measures our store service indices, and highlights excellent human work on the checkout floor.
+* **Behavior**: Secure at least 2 five-star survey mentions this week and maintain a 4.8+ survey average.
+* **Validation**: Leader will perform 3 checkout observations this week and review the Sunday 5 Star survey comment log.
 
-* HOW we need them to do it:
-  Slow down, write your name on the receipt sleeve, make direct eye contact, and say: "I hope I made your shopping easy today. My name is Ricky; please take 30 seconds to let me know how I did on the 5-star survey!"
-
-* WHY we need them to do it:
-  Ensures customer loyalty, measures our store service indices, and highlights excellent human work on the checkout floor.
-
---------------------------------------------------
-2. CURRENT STRENGTHS (DOING WELL)
---------------------------------------------------
-* What they are currently doing well:
-  Excellent transactional speeds, zero cashier queue backlog, and highly professional checkout processing.
-
---------------------------------------------------
-3. PERFORMANCE METRIC GAP
---------------------------------------------------
-* Gap we are trying to fill:
-  Ricky has 0 5 Star surveys this month (store standard is maintaining 2+ five-star survey mentions per week).
-
---------------------------------------------------
-4. EXPECTATIONS & VALIDATION METHOD
---------------------------------------------------
-* Expectation of results:
-  Secure at least 2 five-star survey mentions this week and maintain a 4.8+ survey average.
-
-* How we will validate:
-  Leader will perform 3 checkout observations this week and review the Sunday 5 Star survey comment log.`
+---
+### 🔍 Background & Performance Context
+* **Observed Strengths**: Excellent transactional speeds, zero cashier queue backlog, and highly professional checkout processing.
+* **Performance Gap / Metric Focus**: Ricky has 0 5 Star surveys this month (store standard is maintaining 2+ five-star survey mentions per week).
+* **Coaching Date**: 6/6/2026`
   ]);
   const [newTrainingLog, setNewTrainingLog] = useState('');
   const [isAddingLog, setIsAddingLog] = useState(false);
@@ -444,7 +424,7 @@ Focus: 5 Star Surveys
               onChange={(e) => setSelectedDept(e.target.value)}
               style={{ fontSize: '0.85rem' }}
             >
-              {Object.keys(deptGoals || {}).map(d => (
+              {deptKeys.map(d => (
                 <option key={d} value={d}>{d}</option>
               ))}
             </select>

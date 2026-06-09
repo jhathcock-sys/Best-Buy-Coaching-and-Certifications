@@ -155,19 +155,34 @@ h1, h2, h3, h4, h5, h6 {
   text-decoration: none;
   font-weight: 500;
   cursor: pointer;
-  transition: var(--transition-normal);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid transparent;
+  position: relative;
 }
 
-.menu-item:hover, .menu-item.active {
+.menu-item:hover {
   color: var(--text-primary);
   background: rgba(255, 255, 255, 0.04);
+  transform: translateX(4px);
 }
 
 .menu-item.active {
+  color: var(--text-primary);
   background: rgba(0, 70, 190, 0.15);
-  border-color: rgba(0, 70, 190, 0.3);
-  box-shadow: inset 0 0 10px rgba(0, 70, 190, 0.1);
+  border-color: rgba(0, 70, 190, 0.35);
+  box-shadow: inset 0 0 12px rgba(0, 70, 190, 0.15);
+}
+
+.menu-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 25%;
+  height: 50%;
+  width: 4px;
+  background: var(--bby-yellow);
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 10px var(--bby-yellow);
 }
 
 .menu-item-icon {
@@ -215,13 +230,14 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 20px;
   padding: 2rem;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-  transition: var(--transition-normal);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-card:hover {
   background: var(--bg-card-hover);
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
+  border-color: rgba(0, 70, 190, 0.45);
+  box-shadow: 0 12px 40px 0 rgba(0, 70, 190, 0.15), 0 0 15px 0 rgba(0, 70, 190, 0.1);
+  transform: translateY(-2px);
 }
 
 /* Interactive Elements */
@@ -319,6 +335,11 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   margin-bottom: 1rem;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.metric-card:hover .metric-circle-container {
+  transform: scale(1.08);
 }
 
 .metric-svg {
@@ -890,4 +911,49 @@ select.form-control option {
   .sidebar-footer {
     display: none;
   }
+}
+
+/* Accessible Outlines */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.menu-item:focus-visible {
+  outline: 2.5px solid var(--bby-yellow) !important;
+  outline-offset: 2.5px !important;
+}
+
+/* Responsive visibility utilities */
+.desktop-only {
+  display: block !important;
+}
+.mobile-only {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+  .mobile-only {
+    display: flex !important; /* flex matches the card list layout */
+    flex-direction: column;
+  }
+}
+
+/* Pulsing Skeleton Loader Animation */
+@keyframes skeletonPulse {
+  0% {
+    opacity: 0.65;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0.65;
+  }
+}
+
+.skeleton-pulse {
+  animation: skeletonPulse 1.5s infinite ease-in-out;
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Users, Search, AlertTriangle, CheckCircle, TrendingUp, Sparkles, Clock, HelpCircle } from 'lucide-react';
 
 export default function StoreRoster({ 
@@ -23,7 +23,15 @@ export default function StoreRoster({
   } 
 }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [tempSearch, setTempSearch] = useState('');
   const [activeDept, setActiveDept] = useState('All');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchTerm(tempSearch);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [tempSearch]);
   
   const [showAddForm, setShowAddForm] = useState(false);
   const [newEmpForm, setNewEmpForm] = useState({
@@ -249,11 +257,13 @@ export default function StoreRoster({
     return gaps.join(' & ');
   };
 
-  const filteredRoster = roster.filter(emp => {
-    const matchesSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDept = activeDept === 'All' || emp.dept === activeDept;
-    return matchesSearch && matchesDept;
-  });
+  const filteredRoster = useMemo(() => {
+    return roster.filter(emp => {
+      const matchesSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesDept = activeDept === 'All' || emp.dept === activeDept;
+      return matchesSearch && matchesDept;
+    });
+  }, [roster, searchTerm, activeDept]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -363,8 +373,8 @@ export default function StoreRoster({
               className="form-control" 
               style={{ paddingLeft: '2.5rem', paddingRight: '1rem', height: '38px', fontSize: '0.85rem' }}
               placeholder="Search by name..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={tempSearch}
+              onChange={(e) => setTempSearch(e.target.value)}
             />
             <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', top: '11px', left: '0.85rem' }} />
           </div>
@@ -561,7 +571,8 @@ export default function StoreRoster({
 
       {/* Roster Table Card */}
       <div className="glass-card" style={{ padding: '0', overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
+        {/* Desktop View */}
+        <div className="desktop-only" style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
             <thead>
               <tr style={{ background: 'rgba(16, 24, 48, 0.7)', borderBottom: '1px solid var(--border-glass)', color: 'var(--text-secondary)' }}>
@@ -679,6 +690,153 @@ export default function StoreRoster({
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Stacked Card View */}
+        <div className="mobile-only" style={{ padding: '1rem', gap: '1rem' }}>
+          {filteredRoster.length === 0 ? (
+            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+              <Users size={32} color="var(--text-muted)" style={{ marginBottom: '0.75rem', opacity: 0.5 }} />
+              <p>No associates match your active filters.</p>
+            </div>
+          ) : (
+            filteredRoster.map(emp => {
+              const gap = getEmployeeGap(emp);
+              return (
+                <div 
+                  key={emp.id} 
+                  style={{ 
+                    background: 'rgba(255, 255, 255, 0.02)', 
+                    border: '1px solid var(--border-glass)', 
+                    borderRadius: '16px', 
+                    padding: '1.25rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1rem'
+                  }}
+                >
+                  {/* Header: Name, Hours, and Status */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#fff', fontWeight: 600 }}>{emp.name}</h4>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                        {emp.hours} hrs worked
+                      </div>
+                    </div>
+                    {getStatusBadge(gap)}
+                  </div>
+
+                  {/* Department Selector */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Dept:</span>
+                    <select 
+                      className="form-control"
+                      style={{ 
+                        padding: '0.3rem 0.6rem', 
+                        fontSize: '0.8rem', 
+                        background: 'rgba(11,15,25,0.6)', 
+                        border: '1px solid var(--border-glass)',
+                        borderRadius: '8px',
+                        color: 'var(--text-secondary)',
+                        cursor: 'pointer',
+                        width: 'auto',
+                      }}
+                      value={emp.dept}
+                      onChange={(e) => onUpdateEmployeeDept && onUpdateEmployeeDept(emp.id, e.target.value)}
+                    >
+                      {DEPARTMENTS.filter(d => d !== 'All').map(d => (
+                        <option key={d} value={d}>{d}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Metrics 3x2 Grid */}
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(3, 1fr)', 
+                    gap: '0.75rem', 
+                    background: 'rgba(0,0,0,0.15)', 
+                    padding: '0.75rem', 
+                    borderRadius: '12px',
+                    border: '1px solid rgba(255,255,255,0.02)'
+                  }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Membs</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: '0.15rem' }} className={getMetricClass(emp.memberships, 'memberships', emp.dept, emp)}>
+                        {emp.memberships}
+                      </span>
+                      <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', marginTop: '0.05rem' }}>
+                        ({getPaceText(emp.memberships, 'memberships', emp.dept, emp)})
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Cards</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: '0.15rem' }} className={getMetricClass(emp.creditCards, 'creditCards', emp.dept, emp)}>
+                        {emp.creditCards}
+                      </span>
+                      <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', marginTop: '0.05rem' }}>
+                        ({getPaceText(emp.creditCards, 'creditCards', emp.dept, emp)})
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>GSP%</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: '0.15rem' }} className={getMetricClass(emp.warranty, 'warranty', emp.dept, emp)}>
+                        {emp.warranty}%
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Surveys</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: '0.15rem' }} className={getMetricClass(emp.surveys, 'surveys', emp.dept, emp)}>
+                        {emp.surveys === 0.2 ? 'Fail' : emp.surveys}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>RPH</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: '0.15rem' }} className={getMetricClass(emp.rph, 'rph', emp.dept, emp)}>
+                        ${emp.rph}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Pace</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: '0.15rem', color: '#fff' }}>
+                        {emp.dept === 'Computing' ? 'Comp' : emp.dept === 'Home Theatre' ? 'HT' : emp.dept.substring(0, 4)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Actions Buttons */}
+                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem', width: '100%' }}>
+                    <button 
+                      className="btn btn-secondary" 
+                      style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.02)', textAlign: 'center' }}
+                      onClick={() => handleStartEdit(emp)}
+                    >
+                      Edit
+                    </button>
+                    <button 
+                      className="btn btn-secondary" 
+                      style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', textAlign: 'center' }}
+                      onClick={() => onCoachEmployee({ ...emp, gap })}
+                    >
+                      Coach
+                    </button>
+                    <button 
+                      className="btn btn-accent" 
+                      style={{ flex: 1.2, padding: '0.5rem', fontSize: '0.75rem', color: '#000', textAlign: 'center' }}
+                      onClick={() => onCreateLog({ ...emp, gap })}
+                    >
+                      Log Builder
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 

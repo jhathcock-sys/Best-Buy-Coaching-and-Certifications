@@ -1,7 +1,19 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Award, TrendingUp, Compass, ShieldCheck, CreditCard, Star, DollarSign, ArrowUpRight, MessageSquare, Play, ClipboardList } from 'lucide-react';
 
-export default function Dashboard({ metrics, certifications, recentSessions, onNavigate }) {
+export default function Dashboard({ metrics, certifications, recentSessions, onNavigate, roster = [] }) {
+  const [rankMetric, setRankMetric] = useState('memberships');
+
+  const leaderboardData = useMemo(() => {
+    if (!Array.isArray(roster)) return [];
+    return [...roster]
+      .sort((a, b) => {
+        const valA = rankMetric === 'surveys' && a.surveys === 0.2 ? 0 : parseFloat(a[rankMetric]) || 0;
+        const valB = rankMetric === 'surveys' && b.surveys === 0.2 ? 0 : parseFloat(b[rankMetric]) || 0;
+        return valB - valA;
+      })
+      .slice(0, 5);
+  }, [roster, rankMetric]);
   // Circular Gauge Helper
   const CircularGauge = ({ value, max = 100, label, suffix = "%", color, icon: Icon, description }) => {
     const percentage = Math.min((value / max) * 100, 100);
@@ -239,6 +251,81 @@ export default function Dashboard({ metrics, certifications, recentSessions, onN
               <button className="btn btn-secondary" style={{ width: '100%', padding: '0.65rem' }} onClick={() => onNavigate('certification')}>
                 View Certification Center
               </button>
+            </div>
+          </div>
+
+          {/* Store Performance Leaderboard */}
+          <div className="glass-card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+                <TrendingUp size={20} color="var(--bby-yellow)" /> Store Leaderboard
+              </h3>
+              <select 
+                value={rankMetric} 
+                onChange={(e) => setRankMetric(e.target.value)}
+                className="form-control"
+                style={{ 
+                  width: 'auto', 
+                  padding: '0.35rem 1.75rem 0.35rem 0.75rem', 
+                  fontSize: '0.8rem', 
+                  height: '32px',
+                  background: 'rgba(11, 15, 25, 0.8)',
+                  borderColor: 'var(--border-glass)',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="memberships">Memberships</option>
+                <option value="creditCards">Credit Cards</option>
+                <option value="warranty">GSP Attach %</option>
+                <option value="surveys">Surveys</option>
+                <option value="rph">RPH Index</option>
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {leaderboardData.length === 0 ? (
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', padding: '1rem' }}>No roster data available for rankings.</p>
+              ) : (
+                leaderboardData.map((emp, index) => {
+                  const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}th`;
+                  const valDisplay = 
+                    rankMetric === 'memberships' ? `${emp.memberships} Membs` :
+                    rankMetric === 'creditCards' ? `${emp.creditCards} Apps` :
+                    rankMetric === 'warranty' ? `${emp.warranty}% GSP` :
+                    rankMetric === 'surveys' ? (emp.surveys === 0.2 ? 'Failing' : `${emp.surveys} ★`) :
+                    `$${emp.rph}/hr`;
+
+                  return (
+                    <div 
+                      key={emp.id} 
+                      style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center', 
+                        padding: '0.75rem 1rem', 
+                        background: 'rgba(255, 255, 255, 0.01)', 
+                        border: '1px solid var(--border-glass)',
+                        borderRadius: '12px' 
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <span style={{ fontSize: '1rem', fontWeight: 800, width: '28px', color: index < 3 ? 'inherit' : 'var(--text-muted)' }}>
+                          {medal}
+                        </span>
+                        <div>
+                          <h4 style={{ fontSize: '0.85rem', margin: 0, color: '#fff' }}>{emp.name}</h4>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{emp.dept}</span>
+                        </div>
+                      </div>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: index === 0 ? 'var(--bby-yellow)' : 'var(--text-secondary)' }}>
+                        {valDisplay}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
         </div>

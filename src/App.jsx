@@ -5,7 +5,8 @@ import RoleplayCenter from './components/RoleplayCenter';
 import CertificationCenter from './components/CertificationCenter';
 import CoachSimulator from './components/CoachSimulator';
 import PlaybookStudio from './components/PlaybookStudio';
-import { Compass, Award, Users, BookOpen, LayoutDashboard, Key, Sparkles, ShieldCheck, ClipboardList } from 'lucide-react';
+import CoachingHistory from './components/CoachingHistory';
+import { Compass, Award, Users, BookOpen, LayoutDashboard, Key, Sparkles, ShieldCheck, ClipboardList, Archive } from 'lucide-react';
 import { 
   isFirebaseConnected, 
   subscribeToActivePeriod, 
@@ -415,6 +416,15 @@ export default function App() {
     }
   };
 
+  const handleDeleteCoachingSession = (index) => {
+    const updatedSessions = recentSessions.filter((_, idx) => idx !== index);
+    setRecentSessions(updatedSessions);
+    localStorage.setItem('bby_recent_sessions', JSON.stringify(updatedSessions));
+    if (dbConnected) {
+      saveRecentSessionsToCloud(updatedSessions);
+    }
+  };
+
   // Complete Roleplay
   const handleCompleteRoleplay = ({ scenarioId, category, customerName, avatar, score, passed, growReport, metrics: newMetrics }) => {
     // 1. Add session log
@@ -590,6 +600,12 @@ export default function App() {
             <Sparkles className="menu-item-icon" /> Coaching Generator
           </li>
           <li 
+            className={`menu-item ${activeView === 'history' ? 'active' : ''}`}
+            onClick={() => setActiveView('history')}
+          >
+            <Archive className="menu-item-icon" /> History Hub
+          </li>
+          <li 
             className={`menu-item ${activeView === 'playbook' ? 'active' : ''}`}
             onClick={() => setActiveView('playbook')}
           >
@@ -628,6 +644,7 @@ export default function App() {
             certifications={certifications}
             recentSessions={recentSessions}
             onNavigate={setActiveView}
+            roster={rosterHistory[activePeriod] || []}
           />
         )}
 
@@ -713,7 +730,53 @@ export default function App() {
             onSaveFirebaseConfig={handleSaveFirebaseConfig}
           />
         )}
+
+        {activeView === 'history' && (
+          <CoachingHistory 
+            recentSessions={recentSessions}
+            onDeleteSession={handleDeleteCoachingSession}
+          />
+        )}
       </main>
+
+      {/* Mobile-Only Bottom Navigation Bar */}
+      <div className="bottom-nav">
+        <button 
+          className={`bottom-nav-item ${activeView === 'dashboard' ? 'active' : ''}`}
+          onClick={() => setActiveView('dashboard')}
+        >
+          <LayoutDashboard size={20} />
+          <span>Dash</span>
+        </button>
+        <button 
+          className={`bottom-nav-item ${activeView === 'roster' ? 'active' : ''}`}
+          onClick={() => setActiveView('roster')}
+        >
+          <ClipboardList size={20} />
+          <span>Roster</span>
+        </button>
+        <button 
+          className={`bottom-nav-item ${activeView === 'roleplay' ? 'active' : ''}`}
+          onClick={() => setActiveView('roleplay')}
+        >
+          <Compass size={20} />
+          <span>Arena</span>
+        </button>
+        <button 
+          className={`bottom-nav-item ${activeView === 'coach' || activeView === 'builder' ? 'active' : ''}`}
+          onClick={() => setActiveView('coach')}
+        >
+          <Users size={20} />
+          <span>Coach</span>
+        </button>
+        <button 
+          className={`bottom-nav-item ${activeView === 'history' ? 'active' : ''}`}
+          onClick={() => setActiveView('history')}
+        >
+          <Archive size={20} />
+          <span>History</span>
+        </button>
+      </div>
 
       {/* DYNAMIC CONGRATULATORY AWARD CERTIFICATE MODAL */}
       {showCertModal && (

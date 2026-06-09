@@ -758,6 +758,7 @@ export default function App() {
             onImportScenario={handleImportScenario}
             onLogCoachingSession={handleLogCoachingSession}
             initialTab="sim"
+            onNavigate={setActiveView}
           />
         )}
 
@@ -773,6 +774,7 @@ export default function App() {
             onImportScenario={handleImportScenario}
             onLogCoachingSession={handleLogCoachingSession}
             initialTab="builder"
+            onNavigate={setActiveView}
           />
         )}
 

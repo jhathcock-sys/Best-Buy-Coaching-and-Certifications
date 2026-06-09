@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { EMPLOYEE_SCENARIOS, runOfflineEmployeeCoachingStep, evaluateCoachingSession, generateCoachingLogGemini } from '../services/ai';
+import { EMPLOYEE_SCENARIOS, runOfflineEmployeeCoachingStep, evaluateCoachingSession, generateCoachingLogGemini, generateCoachingLogLocal } from '../services/ai';
 import { Users, Sparkles, MessageSquare, ArrowLeft, RefreshCw, Send, HelpCircle, FileText, Check, Copy, AlertCircle, Volume2 } from 'lucide-react';
 
 export default function CoachSimulator({ 
@@ -12,7 +12,8 @@ export default function CoachSimulator({
   clearPrefillBuilderData, 
   onImportScenario, 
   onLogCoachingSession,
-  initialTab = 'sim' 
+  initialTab = 'sim',
+  onNavigate
 }) {
   const allEmployees = useMemo(() => [
     ...(Array.isArray(EMPLOYEE_SCENARIOS) ? EMPLOYEE_SCENARIOS : []), 
@@ -57,7 +58,7 @@ export default function CoachSimulator({
     gapDetails: '',
     expectation: '',
     validation: '',
-    discFocus: 'Solve',
+    discFocus: ['Solve'],
     rawObservation: ''
   });
   const [isGeneratingLog, setIsGeneratingLog] = useState(false);
@@ -228,7 +229,7 @@ export default function CoachSimulator({
         gapDetails: `${prefillBuilderData.gap || ''} (RPH: $${prefillBuilderData.rph || 0}, surveys: ${prefillBuilderData.surveys || 0})`,
         expectation: `Raise metrics to meet store benchmarks over the next 14 days.`,
         validation: `Store leader will perform counter observations and check weekly reporting.`,
-        discFocus: 'Solve',
+        discFocus: ['Solve'],
         rawObservation: ''
       });
       
@@ -239,44 +240,93 @@ export default function CoachSimulator({
 
   const loadTemplate = (type) => {
     if (TEMPLATES[type]) {
-      setBuilderForm(TEMPLATES[type]);
+      const template = TEMPLATES[type];
+      setBuilderForm({
+        ...template,
+        discFocus: Array.isArray(template.discFocus) ? template.discFocus : [template.discFocus]
+      });
     }
   };
 
-  // Run a generative auto-fill using Gemini AI
+  // Run a generative auto-fill using Gemini AI (or Local Offline Engine fallback)
   const handleAIFillCoachingLog = async () => {
-    if (!apiKey || apiKey.trim().length < 10) return;
     if (!builderForm.employeeName.trim()) {
-      alert("Please enter the Employee Name first so the AI can customize the log!");
+      alert("Please enter the Employee Name first so the system can customize the log!");
       return;
     }
     
     setIsGeneratingLog(true);
+    const hasApiKey = apiKey && apiKey.trim().length > 10;
+    
     try {
-      const data = await generateCoachingLogGemini(
-        apiKey,
-        builderForm.employeeName,
-        builderForm.metricGap,
-        builderForm.gapDetails || "Needs performance coaching to meet store targets",
-        builderForm.strengths,
-        builderForm.rawObservation,
-        playbookSettings
-      );
-      
-      if (data) {
+      if (hasApiKey) {
+        const data = await generateCoachingLogGemini(
+          apiKey,
+          builderForm.employeeName,
+          builderForm.metricGap,
+          builderForm.gapDetails || "Needs performance coaching to meet store targets",
+          builderForm.strengths,
+          builderForm.rawObservation,
+          playbookSettings,
+          builderForm.discFocus
+        );
+        
+        if (data) {
+          setBuilderForm(prev => ({
+            ...prev,
+            what: data.what,
+            how: data.how,
+            why: data.why,
+            strengths: data.strengths || prev.strengths,
+            expectation: data.expectation,
+            validation: data.validation,
+            discFocus: data.discStep ? (Array.isArray(prev.discFocus) ? [data.discStep] : data.discStep) : prev.discFocus
+          }));
+        }
+      } else {
+        // Local offline generator fallback
+        // Add a small delay for premium feels and skeletals
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        const localData = generateCoachingLogLocal(
+          builderForm.employeeName,
+          builderForm.metricGap,
+          builderForm.gapDetails,
+          builderForm.strengths,
+          builderForm.rawObservation,
+          builderForm.discFocus
+        );
+        
         setBuilderForm(prev => ({
           ...prev,
-          what: data.what,
-          how: data.how,
-          why: data.why,
-          strengths: data.strengths,
-          expectation: data.expectation,
-          validation: data.validation,
-          discFocus: data.discStep || prev.discFocus
+          what: localData.what,
+          how: localData.how,
+          why: localData.why,
+          strengths: localData.strengths,
+          expectation: localData.expectation,
+          validation: localData.validation
         }));
       }
     } catch (e) {
       console.error(e);
+      alert("An error occurred during cloud generation. Falling back to local offline generation.");
+      const localData = generateCoachingLogLocal(
+        builderForm.employeeName,
+        builderForm.metricGap,
+        builderForm.gapDetails,
+        builderForm.strengths,
+        builderForm.rawObservation,
+        builderForm.discFocus
+      );
+      setBuilderForm(prev => ({
+        ...prev,
+        what: localData.what,
+        how: localData.how,
+        why: localData.why,
+        strengths: localData.strengths,
+        expectation: localData.expectation,
+        validation: localData.validation
+      }));
     } finally {
       setIsGeneratingLog(false);
     }
@@ -284,7 +334,11 @@ export default function CoachSimulator({
 
   // Compile formatted Markdown output
   const compileCoachingLogText = () => {
-    return `## 📋 Coaching Plan: ${builderForm.employeeName || '[Employee Name]'} — DISC Focus: ${builderForm.discFocus || 'Solve'}
+    const focusSteps = Array.isArray(builderForm.discFocus) 
+      ? builderForm.discFocus.join(', ') 
+      : (builderForm.discFocus || 'Solve');
+
+    return `## 📋 Coaching Plan: ${builderForm.employeeName || '[Employee Name]'} — DISC Focus: ${focusSteps}
 
 * **What**: ${builderForm.what || 'Pending...'}
 * **How**: ${builderForm.how || 'Pending...'}
@@ -605,18 +659,49 @@ export default function CoachSimulator({
                     <option value="RPH">RPH (Revenue Per Hour)</option>
                   </select>
                 </div>
-                <div className="form-group">
-                  <label className="form-label">DISC Focus Step:</label>
-                  <select 
-                    className="form-control"
-                    value={builderForm.discFocus}
-                    onChange={(e) => setBuilderForm({ ...builderForm, discFocus: e.target.value })}
-                  >
-                    <option value="Discover">Discover</option>
-                    <option value="Inspire">Inspire</option>
-                    <option value="Solve">Solve</option>
-                    <option value="Close">Close</option>
-                  </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">DISC Focus Step(s):</label>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.35rem' }}>
+                  {['Discover', 'Inspire', 'Solve', 'Close'].map(step => {
+                    const isSelected = Array.isArray(builderForm.discFocus) 
+                      ? builderForm.discFocus.includes(step) 
+                      : builderForm.discFocus === step;
+                    return (
+                      <button
+                        key={step}
+                        type="button"
+                        className={`btn ${isSelected ? 'btn-primary' : 'btn-secondary'}`}
+                        style={{
+                          padding: '0.5rem 1.25rem',
+                          fontSize: '0.85rem',
+                          borderRadius: '8px',
+                          background: isSelected ? 'var(--bby-blue)' : 'rgba(255, 255, 255, 0.03)',
+                          borderColor: isSelected ? 'var(--bby-blue)' : 'var(--border-glass)',
+                          color: isSelected ? '#fff' : 'var(--text-secondary)',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          transition: 'all var(--transition-fast)'
+                        }}
+                        onClick={() => {
+                          let currentList = Array.isArray(builderForm.discFocus) 
+                            ? [...builderForm.discFocus] 
+                            : [builderForm.discFocus];
+                          if (currentList.includes(step)) {
+                            if (currentList.length > 1) {
+                              currentList = currentList.filter(s => s !== step);
+                            }
+                          } else {
+                            currentList.push(step);
+                          }
+                          setBuilderForm({ ...builderForm, discFocus: currentList });
+                        }}
+                      >
+                        {step}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -729,11 +814,11 @@ export default function CoachSimulator({
                 </div>
               </div>
 
-              {/* AI Auto-generate helper block */}
-              {apiKey && apiKey.trim().length > 10 ? (
+              {/* Auto-generate helper block */}
+              <div style={{ marginTop: '0.5rem' }}>
                 <button 
                   className="btn btn-accent" 
-                  style={{ width: '100%', marginTop: '0.5rem' }} 
+                  style={{ width: '100%' }} 
                   onClick={handleAIFillCoachingLog}
                   disabled={isGeneratingLog}
                 >
@@ -743,16 +828,27 @@ export default function CoachSimulator({
                     </div>
                   ) : (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
-                      <Sparkles size={16} /> Auto-Generate 4-Section Coaching Plan using Gemini
+                      <Sparkles size={16} /> Auto-Generate 4-Section Coaching Plan
                     </div>
                   )}
                 </button>
-              ) : (
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', padding: '0.75rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-glass)', borderRadius: '10px', fontSize: '0.725rem', color: 'var(--text-muted)' }}>
-                  <AlertCircle size={14} />
-                  <span>Configure your Google AI Studio API key in the **Playbook Studio** to unlock AI Auto-Fills.</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.35rem', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                  {apiKey && apiKey.trim().length > 10 ? (
+                    <span style={{ color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <span className="indicator-dot active" style={{ width: '6px', height: '6px', background: 'var(--success)' }} /> Gemini Cloud AI Active
+                    </span>
+                  ) : (
+                    <span style={{ color: 'var(--bby-yellow)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <span className="indicator-dot active" style={{ width: '6px', height: '6px', background: 'var(--bby-yellow)' }} /> Local Offline Engine Active
+                    </span>
+                  )}
+                  {(!apiKey || apiKey.trim().length < 10) && (
+                    <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => onNavigate && onNavigate('playbook')}>
+                      Activate Gemini AI key
+                    </span>
+                  )}
                 </div>
-              )}
+              </div>
 
             </div>
           </div>

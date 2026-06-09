@@ -692,7 +692,7 @@ export async function evaluateSessionGemini(apiKey, history, scenario, playbookS
 }
 
 // Generate structured 4-Section Coaching Log using Gemini
-export async function generateCoachingLogGemini(apiKey, name, gapType, gapDetails, positives, rawObservation, playbookSettings) {
+export async function generateCoachingLogGemini(apiKey, name, gapType, gapDetails, positives, rawObservation, playbookSettings, selectedDiscSteps) {
   try {
     const aiInstance = new GoogleGenerativeAI(apiKey);
     const model = aiInstance.getGenerativeModel({ model: 'gemini-1.5-flash' });
@@ -707,6 +707,8 @@ export async function generateCoachingLogGemini(apiKey, name, gapType, gapDetail
       `;
     }
     
+    const stepsText = Array.isArray(selectedDiscSteps) ? selectedDiscSteps.join(', ') : (selectedDiscSteps || 'Solve');
+    
     const prompt = `
       You are an expert Retail Management Performance Coach and administrative assistant specializing in Best Buy's employee development frameworks. Your role is to help a Store Supervisor instantly generate structured, actionable coaching plans for employees based on the store's specific frameworks.
       
@@ -715,17 +717,20 @@ export async function generateCoachingLogGemini(apiKey, name, gapType, gapDetail
       Raw Input/Gap Details: ${gapDetails || 'Needs performance coaching to meet store targets'}
       Observed Strengths: ${positives || 'Highly friendly and connects well with customers.'}
       Raw Observation / Floor Behavior: ${rawObservation || 'None provided.'}
+      Selected DISC Steps to Focus On: ${stepsText}
       
       ${fewShotTrainingText}
 
       ${playbookSettings && playbookSettings.customSystemPrompt ? `ADDITIONAL CUSTOM COACHING GUIDELINES:\n${playbookSettings.customSystemPrompt}` : ''}
       
       ### 1. THE SALES FRAMEWORK (DISC):
-      When analyzing the scenario or coaching focus, you must ground your recommendations in the DISC selling process defined below:
+      When analyzing the scenario or coaching focus, you must ground your recommendations in the DISC selling process defined below. Pay specific attention to the steps selected by the supervisor (${stepsText}):
       * **Discover**: Asking open-ended questions to gain insight into the customer's needs/solutions, uncovering their current membership status, and early-introducing the Best Buy Credit Card.
       * **Inspire**: Building excitement through physical or experiential product demonstrations (e.g., testing a soundbar, demoing Microsoft 365 features, putting a device directly in the customer’s hands).
       * **Solve**: Building the complete solution. This includes pitching Geek Squad Protection (GSP), applicable services, necessary accessories, and the appropriate My Best Buy membership offerings.
       * **Close**: Securing the business and finalizing the transition to checkout (e.g., "I can ring you out right here," "I'll grab that box for you," or leveraging supply chain by ordering for home delivery/store pickup).
+      
+      Ground your recommendations and the 'how' scripting directly in these selected steps: ${stepsText}.
 
       Translate this input into a highly structured coaching plan using the exact framework below:
       
@@ -766,5 +771,64 @@ export async function generateCoachingLogGemini(apiKey, name, gapType, gapDetail
     console.error('Gemini Coaching Log generation error:', e);
     return null;
   }
+}
+
+// Generate structured 4-Section Coaching Log Offline/Locally
+export function generateCoachingLogLocal(name, gapType, gapDetails, positives, rawObservation, selectedDiscSteps) {
+  const stepsText = Array.isArray(selectedDiscSteps) ? selectedDiscSteps.join(', ') : (selectedDiscSteps || 'Solve');
+  const formattedObs = rawObservation ? ` Based on observation: "${rawObservation}".` : '';
+
+  let what = '';
+  let how = '';
+  let why = '';
+  let strengths = positives || `Demonstrates high professionalism, warm customer connections, and maintains good checkout pace.`;
+  let calculatedGapDetails = gapDetails || `Needs focused development in ${gapType} attachment/objection handling to meet standard benchmarks.`;
+  let expectation = '';
+  let validation = '';
+
+  const cleanGapType = String(gapType).toLowerCase();
+
+  if (cleanGapType.includes('membership')) {
+    what = `Uncover customer membership status early in the conversation and pitch My Best Buy Plus/Total benefits. Focus on ${stepsText} steps.`;
+    how = `Always ask: "Are you currently a My Best Buy member?" and match benefits: "With My Best Buy Total, this purchase includes 24/7 tech support and protection coverage."${formattedObs}`;
+    why = `Secures customer lifetime value, builds paid member loyalty, and drives store paid services attach metrics.`;
+    expectation = `Consistently introduce the membership program on at least 70% of customer interactions, aiming for 2+ new paid memberships weekly.`;
+    validation = `Leader will perform 3 side-by-side floor observations during peak weekend shifts to verify membership pitching behaviors.`;
+  } else if (cleanGapType.includes('card') || cleanGapType.includes('credit')) {
+    what = `Early-introduce the Best Buy Credit Card rewards and financing benefits during consultative solution building. Focus on ${stepsText} steps.`;
+    how = `Say: "By putting this on your Best Buy Card, you'll earn 5% back in rewards today—that is $50 back on this purchase!" Address objections with interest-free financing options.${formattedObs}`;
+    why = `Decreases sales floor purchase friction, increases average transaction ticket size, and meets store financing benchmarks.`;
+    expectation = `Pitch credit card benefits to all clients making hardware purchases over $150, target 1+ card application submitted weekly.`;
+    validation = `Leader will shadow 3 checkout transactions to monitor financing pitches and objection handling techniques.`;
+  } else if (cleanGapType.includes('warranty') || cleanGapType.includes('protection') || cleanGapType.includes('gsp')) {
+    what = `Pitch Geek Squad Protection or AppleCare+ as a complete safety solution when presenting hardware options. Focus on ${stepsText} steps.`;
+    how = `Say: "I always recommend adding Geek Squad Protection because it covers accidental drops, spills, and hardware failures for peace of mind."${formattedObs}`;
+    why = `Safeguards client technology investments, increases store paid services profitability, and supports store benchmarks.`;
+    expectation = `Present GSP or AppleCare+ on 100% of eligible hardware devices, maintaining a department attach index of 12%+.`;
+    validation = `Leader will review the weekly department protection attach reports and perform follow-up shadowing on Monday.`;
+  } else if (cleanGapType.includes('survey') || cleanGapType.includes('star')) {
+    what = `Establish strong checkout rapport and explicitly request a 5-star customer feedback survey. Focus on ${stepsText} steps.`;
+    how = `Slow down, write your name on the receipt sleeve, and say: "I hope I made your checkout easy today! My name is ${name || 'Advisor'}. If you get a survey in your email, please take 30 seconds to rate my service 5 stars!"${formattedObs}`;
+    why = `Improves Net Promoter Score (NPS), drives customer retention index, and showcases team member service quality.`;
+    expectation = `Ensure the receipt sleeve is personalized and the survey pitch is delivered to at least 5 clients daily, aiming for 2+ positive weekly mentions.`;
+    validation = `Leader will shadow the register queue for 30 minutes during peak hours to verify receipt sleeve usage.`;
+  } else {
+    // RPH or Fallback
+    what = `Deliver a complete solution to every customer by pitching appropriate accessories and services alongside hardware. Focus on ${stepsText} steps.`;
+    how = `Map the full setup: "To get the most out of your new device, let's add the essential setup accessories and backup protection." Address objections with value benefits.${formattedObs}`;
+    why = `Raises overall Revenue Per Hour (RPH) performance to align with the store target of $1,200/hr.`;
+    expectation = `Consistently add at least 2 attachment items to hardware quotes, targeting a weekly average RPH of $1,200+.`;
+    validation = `Leader will review hourly sales ledger data on the employee performance dashboard next Friday.`;
+  }
+
+  return {
+    what,
+    how,
+    why,
+    strengths,
+    gapDetails: calculatedGapDetails,
+    expectation,
+    validation
+  };
 }
 

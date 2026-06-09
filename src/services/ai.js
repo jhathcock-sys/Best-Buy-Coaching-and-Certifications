@@ -517,8 +517,8 @@ export function isGeminiAvailable(apiKey) {
 // Initialize Gemini Client
 function getGeminiModel(apiKey) {
   const aiInstance = new GoogleGenerativeAI(apiKey);
-  // Using 1.5-flash which has a great free tier
-  return aiInstance.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  // Using the latest Gemini 3.5 Flash model which has a great free tier
+  return aiInstance.getGenerativeModel({ model: 'gemini-3.5-flash' });
 }
 
 // Run a Generative simulation step using Gemini
@@ -695,7 +695,7 @@ export async function evaluateSessionGemini(apiKey, history, scenario, playbookS
 export async function generateCoachingLogGemini(apiKey, name, gapType, gapDetails, positives, rawObservation, playbookSettings, selectedDiscSteps) {
   try {
     const aiInstance = new GoogleGenerativeAI(apiKey);
-    const model = aiInstance.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-flash' });
     
     let fewShotTrainingText = '';
     if (playbookSettings && playbookSettings.trainingLogs && playbookSettings.trainingLogs.length > 0) {

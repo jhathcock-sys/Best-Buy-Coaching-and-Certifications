@@ -221,11 +221,35 @@ export const saveMetricsToCloud = async (metrics) => {
   }
 };
 
+// Subscribe to Follow-Up Tasks
+export const subscribeToFollowUpTasks = (onUpdate) => {
+  const ref = getStoreDocRef('followUpTasks');
+  if (!ref) return null;
+  return onSnapshot(ref, (snap) => {
+    if (snap.exists()) {
+      onUpdate(snap.data().tasks || []);
+    }
+  });
+};
+
+// Write Follow-Up Tasks
+export const saveFollowUpTasksToCloud = async (tasks) => {
+  const ref = getStoreDocRef('followUpTasks');
+  if (!ref) return false;
+  try {
+    await setDoc(ref, { tasks }, { merge: true });
+    return true;
+  } catch (e) {
+    console.error('Failed to save followUpTasks to cloud:', e);
+    return false;
+  }
+};
+
 // Seed initial offline data to cloud when connecting first time!
 export const seedOfflineDataToCloud = async (offlineData) => {
   if (!db) return false;
   try {
-    const { activePeriod, rosterHistory, playbookSettings, deptGoals, recentSessions, metrics } = offlineData;
+    const { activePeriod, rosterHistory, playbookSettings, deptGoals, recentSessions, metrics, followUpTasks } = offlineData;
     
     // Check if cloud data exists first to avoid blindly overwriting existing cloud data!
     const activePeriodSnap = await getDoc(getStoreDocRef('activePeriod'));
@@ -256,6 +280,11 @@ export const seedOfflineDataToCloud = async (offlineData) => {
     const metricsSnap = await getDoc(getStoreDocRef('metrics'));
     if (!metricsSnap.exists() && metrics) {
       await saveMetricsToCloud(metrics);
+    }
+
+    const followUpSnap = await getDoc(getStoreDocRef('followUpTasks'));
+    if (!followUpSnap.exists() && followUpTasks) {
+      await saveFollowUpTasksToCloud(followUpTasks);
     }
 
     return true;

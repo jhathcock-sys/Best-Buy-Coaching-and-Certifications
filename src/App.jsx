@@ -6,6 +6,7 @@ import CertificationCenter from './components/CertificationCenter';
 import CoachSimulator from './components/CoachSimulator';
 import PlaybookStudio from './components/PlaybookStudio';
 import CoachingHistory from './components/CoachingHistory';
+import LiveFloorShadow from './components/LiveFloorShadow';
 import { Compass, Award, Users, BookOpen, LayoutDashboard, Key, Sparkles, ShieldCheck, ClipboardList, Archive } from 'lucide-react';
 import { 
   isFirebaseConnected, 
@@ -15,12 +16,14 @@ import {
   subscribeToDeptGoals, 
   subscribeToRecentSessions,
   subscribeToMetrics,
+  subscribeToFollowUpTasks,
   saveActivePeriodToCloud, 
   saveRosterHistoryToCloud, 
   savePlaybookSettingsToCloud, 
   saveDeptGoalsToCloud,
   saveRecentSessionsToCloud,
   saveMetricsToCloud,
+  saveFollowUpTasksToCloud,
   seedOfflineDataToCloud,
   initFirebase
 } from './services/firebase';
@@ -121,6 +124,9 @@ export default function App() {
   const [activePeriod, setActivePeriod] = useState('May 2026');
   const [selectedCoachingRosterEmployee, setSelectedCoachingRosterEmployee] = useState(null);
   const [prefillBuilderData, setPrefillBuilderData] = useState(null);
+
+  // Follow-up Commitments / Tasks State
+  const [followUpTasks, setFollowUpTasks] = useState([]);
 
   // Cloud Synchronization state
   const [dbConnected, setDbConnected] = useState(isFirebaseConnected());
@@ -306,6 +312,12 @@ export default function App() {
     if (savedPeriod) {
       setActivePeriod(savedPeriod);
     }
+
+    const savedFollowUp = localStorage.getItem('bby_follow_up_tasks');
+    if (savedFollowUp) {
+      const parsedFollowUp = safeJsonParse(savedFollowUp, null);
+      if (parsedFollowUp) setFollowUpTasks(parsedFollowUp);
+    }
   }, []);
 
   // Subscribe to real-time Cloud Sync
@@ -320,6 +332,7 @@ export default function App() {
       const savedPeriod = localStorage.getItem('bby_active_period');
       const savedSessions = localStorage.getItem('bby_recent_sessions');
       const savedMetrics = localStorage.getItem('bby_metrics');
+      const savedFollowUp = localStorage.getItem('bby_follow_up_tasks');
 
       await seedOfflineDataToCloud({
         activePeriod: savedPeriod || 'May 2026',
@@ -327,7 +340,8 @@ export default function App() {
         playbookSettings: safeJsonParse(savedSettings, null),
         deptGoals: safeJsonParse(savedGoals, null),
         recentSessions: safeJsonParse(savedSessions, null),
-        metrics: safeJsonParse(savedMetrics, null)
+        metrics: safeJsonParse(savedMetrics, null),
+        followUpTasks: safeJsonParse(savedFollowUp, null)
       });
     };
     seedCloud();
@@ -370,6 +384,11 @@ export default function App() {
       if (m) setMetrics(m);
     });
 
+    // Subscribe to follow-up tasks
+    const unsubFollowUp = subscribeToFollowUpTasks((tasks) => {
+      if (tasks) setFollowUpTasks(tasks);
+    });
+
     return () => {
       if (unsubPeriod) unsubPeriod();
       if (unsubRoster) unsubRoster();
@@ -377,8 +396,33 @@ export default function App() {
       if (unsubGoals) unsubGoals();
       if (unsubSessions) unsubSessions();
       if (unsubMetrics) unsubMetrics();
+      if (unsubFollowUp) unsubFollowUp();
     };
   }, [dbConnected]);
+
+  // Add Follow-Up Task
+  const handleAddFollowUpTask = (task) => {
+    const newTask = {
+      ...task,
+      id: 'task_' + Date.now()
+    };
+    const updated = [...followUpTasks, newTask];
+    setFollowUpTasks(updated);
+    localStorage.setItem('bby_follow_up_tasks', JSON.stringify(updated));
+    if (dbConnected) {
+      saveFollowUpTasksToCloud(updated);
+    }
+  };
+
+  // Complete Follow-Up Task
+  const handleCompleteFollowUpTask = (taskId) => {
+    const updated = followUpTasks.map(t => t.id === taskId ? { ...t, completed: true } : t);
+    setFollowUpTasks(updated);
+    localStorage.setItem('bby_follow_up_tasks', JSON.stringify(updated));
+    if (dbConnected) {
+      saveFollowUpTasksToCloud(updated);
+    }
+  };
 
   // Save Settings
   const handleSaveSettings = ({ apiKey: newKey, playbookSettings: newSettings }) => {
@@ -576,6 +620,12 @@ export default function App() {
             <ClipboardList className="menu-item-icon" /> Store Roster
           </li>
           <li 
+            className={`menu-item ${activeView === 'shadow' ? 'active' : ''}`}
+            onClick={() => setActiveView('shadow')}
+          >
+            <ShieldCheck className="menu-item-icon" /> Floor Shadowing
+          </li>
+          <li 
             className={`menu-item ${activeView === 'roleplay' ? 'active' : ''}`}
             onClick={() => setActiveView('roleplay')}
           >
@@ -645,6 +695,17 @@ export default function App() {
             recentSessions={recentSessions}
             onNavigate={setActiveView}
             roster={rosterHistory[activePeriod] || []}
+            followUpTasks={followUpTasks}
+            onCompleteFollowUpTask={handleCompleteFollowUpTask}
+          />
+        )}
+
+        {activeView === 'shadow' && (
+          <LiveFloorShadow 
+            roster={rosterHistory[activePeriod] || []}
+            onLogCoachingSession={handleLogCoachingSession}
+            onAddFollowUpTask={handleAddFollowUpTask}
+            onNavigate={setActiveView}
           />
         )}
 
@@ -754,6 +815,13 @@ export default function App() {
         >
           <ClipboardList size={20} />
           <span>Roster</span>
+        </button>
+        <button 
+          className={`bottom-nav-item ${activeView === 'shadow' ? 'active' : ''}`}
+          onClick={() => setActiveView('shadow')}
+        >
+          <ShieldCheck size={20} />
+          <span>Shadow</span>
         </button>
         <button 
           className={`bottom-nav-item ${activeView === 'roleplay' ? 'active' : ''}`}

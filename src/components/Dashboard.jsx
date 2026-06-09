@@ -1,8 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import { Award, TrendingUp, Compass, ShieldCheck, CreditCard, Star, DollarSign, ArrowUpRight, MessageSquare, Play, ClipboardList } from 'lucide-react';
 
-export default function Dashboard({ metrics, certifications, recentSessions, onNavigate, roster = [] }) {
+export default function Dashboard({ metrics, certifications, recentSessions, onNavigate, roster = [], followUpTasks = [], onCompleteFollowUpTask }) {
   const [rankMetric, setRankMetric] = useState('memberships');
+
+  const pendingTasks = useMemo(() => {
+    return (followUpTasks || []).filter(task => !task.completed);
+  }, [followUpTasks]);
 
   const leaderboardData = useMemo(() => {
     if (!Array.isArray(roster)) return [];
@@ -330,59 +334,151 @@ export default function Dashboard({ metrics, certifications, recentSessions, onN
           </div>
         </div>
 
-        {/* Right Column: Recent Sessions Log */}
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column' }}>
-          <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <MessageSquare size={20} color="var(--info)" /> Recent Coaching & Roleplay Sessions
-          </h3>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {recentSessions.length === 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                <MessageSquare size={48} color="var(--text-muted)" style={{ marginBottom: '1rem', opacity: 0.5 }} />
-                <p style={{ fontSize: '0.95rem' }}>No roleplays completed yet.</p>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Start your first training customer simulation to see metrics and feedback logs.</p>
+        {/* Right Column: Active Validation Commitments & Recent Sessions Log */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          
+          {/* Active Validation Commitments Panel */}
+          <div className="glass-card">
+            <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <ShieldCheck size={20} color="var(--bby-yellow)" /> Active Validation Commitments
+            </h3>
+            
+            {pendingTasks.length === 0 ? (
+              <div style={{ 
+                padding: '1.5rem', 
+                borderRadius: '12px', 
+                background: 'var(--success-glow)', 
+                border: '1.5px solid rgba(16, 185, 129, 0.15)',
+                textAlign: 'center'
+              }}>
+                <p style={{ fontSize: '0.95rem', color: '#a7f3d0', fontWeight: '600', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                  <Check size={16} /> All commitments completed!
+                </p>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+                  No pending floor shadowings scheduled at this time.
+                </p>
               </div>
             ) : (
-              recentSessions.map((session, index) => (
-                <div 
-                  key={index} 
-                  style={{ 
-                    padding: '1rem', 
-                    background: 'rgba(255,255,255,0.02)', 
-                    border: '1px solid var(--border-glass)', 
-                    borderRadius: '12px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.5rem'
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <img src={session.avatar} alt="" style={{ width: 28, height: 28, borderRadius: '50%' }} />
-                      <h4 style={{ fontSize: '0.9rem' }}>{session.customerName}</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {pendingTasks.map(task => (
+                  <div 
+                    key={task.id} 
+                    style={{ 
+                      padding: '1.25rem', 
+                      background: 'rgba(255, 255, 255, 0.02)', 
+                      border: '1px solid var(--border-glass)',
+                      borderRadius: '12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.75rem',
+                      transition: 'border-color var(--transition-fast)'
+                    }}
+                    className="commitment-card-hover"
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <div>
+                        <h4 style={{ fontSize: '1rem', margin: 0, color: '#fff', fontWeight: 600 }}>{task.employeeName}</h4>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{task.department}</span>
+                      </div>
+                      <span style={{ 
+                        fontSize: '0.75rem', 
+                        color: 'var(--bby-yellow)', 
+                        background: 'rgba(255, 230, 0, 0.06)', 
+                        padding: '0.25rem 0.6rem', 
+                        borderRadius: '8px',
+                        border: '1px solid rgba(255, 230, 0, 0.2)',
+                        fontWeight: 600
+                      }}>
+                        Due {new Date(task.dueDate + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                      </span>
                     </div>
-                    <span style={{ 
-                      fontSize: '0.8rem', 
-                      fontWeight: 700, 
-                      padding: '0.25rem 0.5rem', 
-                      borderRadius: '6px', 
-                      background: session.score >= 80 ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)',
-                      color: session.score >= 80 ? 'var(--success)' : 'var(--error)'
-                    }}>
-                      Score: {session.score}%
-                    </span>
+                    
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4, margin: 0 }}>
+                      {task.action}
+                    </p>
+                    
+                    <button 
+                      className="btn"
+                      style={{ 
+                        alignSelf: 'flex-start', 
+                        padding: '0.4rem 0.85rem', 
+                        fontSize: '0.75rem', 
+                        background: 'rgba(16, 185, 129, 0.12)', 
+                        border: '1.5px solid rgba(16, 185, 129, 0.25)',
+                        color: 'var(--success)',
+                        borderRadius: '8px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
+                        transition: 'background var(--transition-fast)'
+                      }}
+                      onClick={() => onCompleteFollowUpTask(task.id)}
+                    >
+                      <Check size={14} /> Complete Shadowing
+                    </button>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                    <span>Category: {session.category}</span>
-                    <span>{session.date}</span>
-                  </div>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '0.5rem', marginTop: '0.25rem' }}>
-                    "{session.notes.substring(0, 100)}..."
-                  </p>
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </div>
+
+          {/* Recent Sessions Log */}
+          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column' }}>
+            <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <MessageSquare size={20} color="var(--info)" /> Recent Coaching & Roleplay Sessions
+            </h3>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {recentSessions.length === 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                  <MessageSquare size={48} color="var(--text-muted)" style={{ marginBottom: '1rem', opacity: 0.5 }} />
+                  <p style={{ fontSize: '0.95rem' }}>No roleplays completed yet.</p>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Start your first training customer simulation to see metrics and feedback logs.</p>
+                </div>
+              ) : (
+                recentSessions.map((session, index) => (
+                  <div 
+                    key={index} 
+                    style={{ 
+                      padding: '1rem', 
+                      background: 'rgba(255,255,255,0.02)', 
+                      border: '1px solid var(--border-glass)', 
+                      borderRadius: '12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.5rem'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <img src={session.avatar} alt="" style={{ width: 28, height: 28, borderRadius: '50%' }} />
+                        <h4 style={{ fontSize: '0.9rem' }}>{session.customerName}</h4>
+                      </div>
+                      <span style={{ 
+                        fontSize: '0.8rem', 
+                        fontWeight: 700, 
+                        padding: '0.25rem 0.5rem', 
+                        borderRadius: '6px', 
+                        background: session.score >= 80 ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                        color: session.score >= 80 ? 'var(--success)' : 'var(--error)'
+                      }}>
+                        Score: {session.score}%
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                      <span>Category: {session.category}</span>
+                      <span>{session.date}</span>
+                    </div>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '0.5rem', marginTop: '0.25rem' }}>
+                      "{session.notes.substring(0, 100)}..."
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
         </div>
 
       </div>

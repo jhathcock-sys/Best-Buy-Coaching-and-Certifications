@@ -2,7 +2,18 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { EMPLOYEE_SCENARIOS, runOfflineEmployeeCoachingStep, evaluateCoachingSession, generateCoachingLogGemini } from '../services/ai';
 import { Users, Sparkles, MessageSquare, ArrowLeft, RefreshCw, Send, HelpCircle, FileText, Check, Copy, AlertCircle, Volume2 } from 'lucide-react';
 
-export default function CoachSimulator({ apiKey, playbookSettings, customScenarios = [], preselectedEmployee, clearPreselectedEmployee, prefillBuilderData, clearPrefillBuilderData, onImportScenario, initialTab = 'sim' }) {
+export default function CoachSimulator({ 
+  apiKey, 
+  playbookSettings, 
+  customScenarios = [], 
+  preselectedEmployee, 
+  clearPreselectedEmployee, 
+  prefillBuilderData, 
+  clearPrefillBuilderData, 
+  onImportScenario, 
+  onLogCoachingSession,
+  initialTab = 'sim' 
+}) {
   const allEmployees = useMemo(() => [
     ...(Array.isArray(EMPLOYEE_SCENARIOS) ? EMPLOYEE_SCENARIOS : []), 
     ...(Array.isArray(customScenarios) ? customScenarios : [])
@@ -319,6 +330,16 @@ export default function CoachSimulator({ apiKey, playbookSettings, customScenari
     };
     const evalResult = evaluateCoachingSession(history);
     setEvaluation(evalResult);
+    
+    if (onLogCoachingSession) {
+      onLogCoachingSession({
+        customerName: selectedEmployee.name || 'Advisor',
+        category: 'Coaching Practice',
+        avatar: selectedEmployee.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+        score: evalResult.score,
+        notes: evalResult.feedback || 'Completed GROW Coaching practice session.'
+      });
+    }
   };
 
   const handleImportPastCoaching = () => {
@@ -803,7 +824,26 @@ export default function CoachSimulator({ apiKey, playbookSettings, customScenari
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem' }}>
                 <button 
-                  className="btn btn-primary" 
+                  className="btn btn-accent" 
+                  style={{ width: '100%', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                  onClick={() => {
+                    handleCopyToClipboard();
+                    if (onLogCoachingSession) {
+                      onLogCoachingSession({
+                        customerName: builderForm.employeeName || 'Advisor',
+                        category: 'Floor Observation',
+                        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+                        score: 100,
+                        notes: `Focus Area: ${builderForm.metricGap}. DISC: ${builderForm.discFocus}. WHAT: ${builderForm.what}`
+                      });
+                    }
+                  }}
+                >
+                  <Sparkles size={16} /> Log & Copy Observation
+                </button>
+
+                <button 
+                  className="btn btn-secondary" 
                   style={{ width: '100%' }}
                   onClick={handleCopyToClipboard}
                 >

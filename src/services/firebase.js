@@ -173,11 +173,59 @@ export const saveDeptGoalsToCloud = async (goals) => {
   }
 };
 
+// Subscribe to Recent Sessions
+export const subscribeToRecentSessions = (onUpdate) => {
+  const ref = getStoreDocRef('recentSessions');
+  if (!ref) return null;
+  return onSnapshot(ref, (snap) => {
+    if (snap.exists()) {
+      onUpdate(snap.data().sessions || []);
+    }
+  });
+};
+
+// Write Recent Sessions
+export const saveRecentSessionsToCloud = async (sessions) => {
+  const ref = getStoreDocRef('recentSessions');
+  if (!ref) return false;
+  try {
+    await setDoc(ref, { sessions }, { merge: true });
+    return true;
+  } catch (e) {
+    console.error('Failed to save recentSessions to cloud:', e);
+    return false;
+  }
+};
+
+// Subscribe to Metrics
+export const subscribeToMetrics = (onUpdate) => {
+  const ref = getStoreDocRef('metrics');
+  if (!ref) return null;
+  return onSnapshot(ref, (snap) => {
+    if (snap.exists()) {
+      onUpdate(snap.data().metrics);
+    }
+  });
+};
+
+// Write Metrics
+export const saveMetricsToCloud = async (metrics) => {
+  const ref = getStoreDocRef('metrics');
+  if (!ref) return false;
+  try {
+    await setDoc(ref, { metrics }, { merge: true });
+    return true;
+  } catch (e) {
+    console.error('Failed to save metrics to cloud:', e);
+    return false;
+  }
+};
+
 // Seed initial offline data to cloud when connecting first time!
 export const seedOfflineDataToCloud = async (offlineData) => {
   if (!db) return false;
   try {
-    const { activePeriod, rosterHistory, playbookSettings, deptGoals } = offlineData;
+    const { activePeriod, rosterHistory, playbookSettings, deptGoals, recentSessions, metrics } = offlineData;
     
     // Check if cloud data exists first to avoid blindly overwriting existing cloud data!
     const activePeriodSnap = await getDoc(getStoreDocRef('activePeriod'));
@@ -200,9 +248,20 @@ export const seedOfflineDataToCloud = async (offlineData) => {
       await saveDeptGoalsToCloud(deptGoals);
     }
 
+    const sessionsSnap = await getDoc(getStoreDocRef('recentSessions'));
+    if (!sessionsSnap.exists() && recentSessions) {
+      await saveRecentSessionsToCloud(recentSessions);
+    }
+
+    const metricsSnap = await getDoc(getStoreDocRef('metrics'));
+    if (!metricsSnap.exists() && metrics) {
+      await saveMetricsToCloud(metrics);
+    }
+
     return true;
   } catch (e) {
     console.error('Failed to seed offline data:', e);
     return false;
   }
 };
+

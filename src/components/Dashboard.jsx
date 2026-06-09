@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Award, TrendingUp, Compass, ShieldCheck, CreditCard, Star, DollarSign, ArrowUpRight, MessageSquare, Play } from 'lucide-react';
+import { Award, TrendingUp, Compass, ShieldCheck, CreditCard, Star, DollarSign, ArrowUpRight, MessageSquare, Play, ClipboardList } from 'lucide-react';
 
 export default function Dashboard({ metrics, certifications, recentSessions, onNavigate }) {
   // Circular Gauge Helper
@@ -141,6 +141,14 @@ export default function Dashboard({ metrics, certifications, recentSessions, onN
           <div style={{ fontFamily: 'var(--font-heading)', fontSize: '2rem', fontWeight: 800 }}>${metrics.rph}</div>
           <div className="metric-label" style={{ marginTop: '0.25rem' }}>RPH</div>
           <div className="metric-sub">Revenue Per Hour (Goal: $1,200)</div>
+        </div>
+        <div className="glass-card metric-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div style={{ background: 'rgba(16, 185, 129, 0.08)', padding: '1rem', borderRadius: '50%', marginBottom: '1rem', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+            <ClipboardList size={32} color="var(--success)" />
+          </div>
+          <div style={{ fontFamily: 'var(--font-heading)', fontSize: '2rem', fontWeight: 800 }}>{recentSessions ? recentSessions.length : 0}</div>
+          <div className="metric-label" style={{ marginTop: '0.25rem' }}>Observations Logged</div>
+          <div className="metric-sub">Coaching & Roleplays Completed</div>
         </div>
       </div>
 

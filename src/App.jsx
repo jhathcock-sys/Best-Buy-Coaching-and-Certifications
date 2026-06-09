@@ -12,10 +12,14 @@ import {
   subscribeToRosterHistory, 
   subscribeToPlaybookSettings, 
   subscribeToDeptGoals, 
+  subscribeToRecentSessions,
+  subscribeToMetrics,
   saveActivePeriodToCloud, 
   saveRosterHistoryToCloud, 
   savePlaybookSettingsToCloud, 
   saveDeptGoalsToCloud,
+  saveRecentSessionsToCloud,
+  saveMetricsToCloud,
   seedOfflineDataToCloud,
   initFirebase
 } from './services/firebase';
@@ -313,12 +317,16 @@ export default function App() {
       const savedGoals = localStorage.getItem('bby_dept_goals');
       const savedHistory = localStorage.getItem('bby_roster_history');
       const savedPeriod = localStorage.getItem('bby_active_period');
+      const savedSessions = localStorage.getItem('bby_recent_sessions');
+      const savedMetrics = localStorage.getItem('bby_metrics');
 
       await seedOfflineDataToCloud({
         activePeriod: savedPeriod || 'May 2026',
         rosterHistory: safeJsonParse(savedHistory, null),
         playbookSettings: safeJsonParse(savedSettings, null),
-        deptGoals: safeJsonParse(savedGoals, null)
+        deptGoals: safeJsonParse(savedGoals, null),
+        recentSessions: safeJsonParse(savedSessions, null),
+        metrics: safeJsonParse(savedMetrics, null)
       });
     };
     seedCloud();
@@ -351,11 +359,23 @@ export default function App() {
       if (g) setDeptGoals(g);
     });
 
+    // Subscribe to recent sessions
+    const unsubSessions = subscribeToRecentSessions((s) => {
+      if (s) setRecentSessions(s);
+    });
+
+    // Subscribe to metrics
+    const unsubMetrics = subscribeToMetrics((m) => {
+      if (m) setMetrics(m);
+    });
+
     return () => {
       if (unsubPeriod) unsubPeriod();
       if (unsubRoster) unsubRoster();
       if (unsubPlaybook) unsubPlaybook();
       if (unsubGoals) unsubGoals();
+      if (unsubSessions) unsubSessions();
+      if (unsubMetrics) unsubMetrics();
     };
   }, [dbConnected]);
 
@@ -377,6 +397,24 @@ export default function App() {
     localStorage.setItem('bby_custom_scenarios', JSON.stringify(updated));
   };
 
+  // Log Coaching Session (Optimistic Update)
+  const handleLogCoachingSession = (session) => {
+    const newSession = {
+      customerName: session.customerName,
+      category: session.category || 'Coaching',
+      avatar: session.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+      score: session.score || 100,
+      date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      notes: session.notes || ''
+    };
+    const updatedSessions = [newSession, ...recentSessions].slice(0, 15);
+    setRecentSessions(updatedSessions);
+    localStorage.setItem('bby_recent_sessions', JSON.stringify(updatedSessions));
+    if (dbConnected) {
+      saveRecentSessionsToCloud(updatedSessions);
+    }
+  };
+
   // Complete Roleplay
   const handleCompleteRoleplay = ({ scenarioId, category, customerName, avatar, score, passed, growReport, metrics: newMetrics }) => {
     // 1. Add session log
@@ -391,6 +429,9 @@ export default function App() {
     const updatedSessions = [newSession, ...recentSessions].slice(0, 15);
     setRecentSessions(updatedSessions);
     localStorage.setItem('bby_recent_sessions', JSON.stringify(updatedSessions));
+    if (dbConnected) {
+      saveRecentSessionsToCloud(updatedSessions);
+    }
 
     // 2. Average in metrics if passed
     if (passed && newMetrics) {
@@ -403,6 +444,9 @@ export default function App() {
       };
       setMetrics(averagedMetrics);
       localStorage.setItem('bby_metrics', JSON.stringify(averagedMetrics));
+      if (dbConnected) {
+        saveMetricsToCloud(averagedMetrics);
+      }
     }
 
     // 3. Award certification if requirement is met
@@ -634,6 +678,7 @@ export default function App() {
             prefillBuilderData={prefillBuilderData}
             clearPrefillBuilderData={() => setPrefillBuilderData(null)}
             onImportScenario={handleImportScenario}
+            onLogCoachingSession={handleLogCoachingSession}
             initialTab="sim"
           />
         )}
@@ -648,6 +693,7 @@ export default function App() {
             prefillBuilderData={prefillBuilderData}
             clearPrefillBuilderData={() => setPrefillBuilderData(null)}
             onImportScenario={handleImportScenario}
+            onLogCoachingSession={handleLogCoachingSession}
             initialTab="builder"
           />
         )}

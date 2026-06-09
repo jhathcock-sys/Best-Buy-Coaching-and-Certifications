@@ -52,6 +52,7 @@ export default function StoreRoster({
   const [copyOption, setCopyOption] = useState('roster-only');
   
   const [editingEmployee, setEditingEmployee] = useState(null);
+  const [currentEditStep, setCurrentEditStep] = useState(1);
   const [editForm, setEditForm] = useState({
     name: '',
     dept: 'Front End',
@@ -66,6 +67,7 @@ export default function StoreRoster({
 
   const handleStartEdit = (emp) => {
     setEditingEmployee(emp);
+    setCurrentEditStep(1);
     setEditForm({
       name: emp.name,
       dept: emp.dept,
@@ -897,125 +899,274 @@ export default function StoreRoster({
             </div>
             
             <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxHeight: '80vh', overflowY: 'auto' }}>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '-0.5rem' }}>
-                Modify performance metrics for the active period (<strong>{activePeriod}</strong>). The metrics will be audited dynamically against <strong>{editForm.dept}</strong> goals.
+              
+              {/* Wizard Step Progress Indicator */}
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                background: 'rgba(0, 70, 190, 0.1)', 
+                border: '1px solid var(--border-glass)', 
+                borderRadius: '12px',
+                padding: '0.65rem 1rem',
+                marginBottom: '0.5rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', opacity: currentEditStep === 1 ? 1 : 0.5 }}>
+                  <span style={{ 
+                    background: currentEditStep === 1 ? 'var(--bby-blue)' : 'rgba(255,255,255,0.1)', 
+                    color: '#fff', 
+                    width: '20px', 
+                    height: '20px', 
+                    borderRadius: '50%', 
+                    display: 'inline-flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    fontSize: '0.75rem',
+                    fontWeight: 700
+                  }}>1</span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Profile</span>
+                </div>
+                <div style={{ width: '20px', height: '1px', background: 'rgba(255,255,255,0.1)' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', opacity: currentEditStep === 2 ? 1 : 0.5 }}>
+                  <span style={{ 
+                    background: currentEditStep === 2 ? 'var(--bby-blue)' : 'rgba(255,255,255,0.1)', 
+                    color: '#fff', 
+                    width: '20px', 
+                    height: '20px', 
+                    borderRadius: '50%', 
+                    display: 'inline-flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    fontSize: '0.75rem',
+                    fontWeight: 700
+                  }}>2</span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Targets</span>
+                </div>
+                <div style={{ width: '20px', height: '1px', background: 'rgba(255,255,255,0.1)' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', opacity: currentEditStep === 3 ? 1 : 0.5 }}>
+                  <span style={{ 
+                    background: currentEditStep === 3 ? 'var(--bby-blue)' : 'rgba(255,255,255,0.1)', 
+                    color: '#fff', 
+                    width: '20px', 
+                    height: '20px', 
+                    borderRadius: '50%', 
+                    display: 'inline-flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    fontSize: '0.75rem',
+                    fontWeight: 700
+                  }}>3</span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Ratings</span>
+                </div>
+              </div>
+
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '-0.25rem' }}>
+                Period: <strong>{activePeriod}</strong> | Audited against <strong>{editForm.dept}</strong> goals.
               </p>
               
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
-                <div className="form-group">
-                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Associate Name:</label>
-                  <input 
-                    type="text" 
-                    className="form-control" 
-                    style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                    value={editForm.name}
-                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  />
+              {/* STEP 1: General Info */}
+              {currentEditStep === 1 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.25s ease' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '0.8rem' }}>Associate Name:</label>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+                      value={editForm.name}
+                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '0.8rem' }}>Department:</label>
+                    <select 
+                      className="form-control"
+                      style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+                      value={editForm.dept}
+                      onChange={(e) => setEditForm({ ...editForm, dept: e.target.value })}
+                    >
+                      {DEPARTMENTS.filter(d => d !== 'All').map(d => (
+                        <option key={d} value={d}>{d}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '0.8rem' }}>Hours Worked:</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, hours: Math.max(0, parseFloat((parseFloat(prev.hours) - 1).toFixed(1))) }))}>-</button>
+                      <input 
+                        type="number" 
+                        className="form-control" 
+                        style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
+                        value={editForm.hours}
+                        onChange={(e) => setEditForm({ ...editForm, hours: e.target.value })}
+                      />
+                      <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, hours: parseFloat((parseFloat(prev.hours) + 1).toFixed(1)) }))}>+</button>
+                    </div>
+                  </div>
                 </div>
-                
-                <div className="form-group">
-                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Department:</label>
-                  <select 
-                    className="form-control"
-                    style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                    value={editForm.dept}
-                    onChange={(e) => setEditForm({ ...editForm, dept: e.target.value })}
-                  >
-                    {DEPARTMENTS.filter(d => d !== 'All').map(d => (
-                      <option key={d} value={d}>{d}</option>
-                    ))}
-                  </select>
+              )}
+
+              {/* STEP 2: Attach Targets */}
+              {currentEditStep === 2 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.25s ease' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '0.8rem' }}>Memberships Attach:</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, memberships: Math.max(0, parseInt(prev.memberships) - 1) }))}>-</button>
+                      <input 
+                        type="number" 
+                        className="form-control" 
+                        style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
+                        value={editForm.memberships}
+                        onChange={(e) => setEditForm({ ...editForm, memberships: e.target.value })}
+                      />
+                      <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, memberships: parseInt(prev.memberships) + 1 }))}>+</button>
+                    </div>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '0.8rem' }}>BBY Credit Card Apps:</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, creditCards: Math.max(0, parseInt(prev.creditCards) - 1) }))}>-</button>
+                      <input 
+                        type="number" 
+                        className="form-control" 
+                        style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
+                        value={editForm.creditCards}
+                        onChange={(e) => setEditForm({ ...editForm, creditCards: e.target.value })}
+                      />
+                      <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, creditCards: parseInt(prev.creditCards) + 1 }))}>+</button>
+                    </div>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '0.8rem' }}>GSP/Warranty Attach %:</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, warranty: Math.max(0, parseFloat((parseFloat(prev.warranty) - 1).toFixed(1))) }))}>-</button>
+                      <input 
+                        type="number" 
+                        className="form-control" 
+                        style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
+                        value={editForm.warranty}
+                        onChange={(e) => setEditForm({ ...editForm, warranty: e.target.value })}
+                      />
+                      <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, warranty: parseFloat((parseFloat(prev.warranty) + 1).toFixed(1)) }))}>+</button>
+                    </div>
+                  </div>
                 </div>
-                
-                <div className="form-group">
-                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Hours Worked:</label>
-                  <input 
-                    type="number" 
-                    className="form-control" 
-                    style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                    value={editForm.hours}
-                    onChange={(e) => setEditForm({ ...editForm, hours: e.target.value })}
-                  />
+              )}
+
+              {/* STEP 3: Quality & Gap */}
+              {currentEditStep === 3 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.25s ease' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '0.8rem' }}>5 Star Surveys:</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <button 
+                        type="button" 
+                        className="stepper-btn" 
+                        onClick={() => {
+                          setEditForm(prev => {
+                            if (prev.surveys === 'Failing') {
+                              return { ...prev, surveys: '0' };
+                            }
+                            const val = parseInt(prev.surveys) || 0;
+                            if (val <= 0) {
+                              return { ...prev, surveys: 'Failing' };
+                            }
+                            return { ...prev, surveys: (val - 1).toString() };
+                          });
+                        }}
+                      >-</button>
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
+                        value={editForm.surveys}
+                        onChange={(e) => setEditForm({ ...editForm, surveys: e.target.value })}
+                      />
+                      <button 
+                        type="button" 
+                        className="stepper-btn" 
+                        onClick={() => {
+                          setEditForm(prev => {
+                            if (prev.surveys === 'Failing') {
+                              return { ...prev, surveys: '1' };
+                            }
+                            const val = parseInt(prev.surveys) || 0;
+                            return { ...prev, surveys: (val + 1).toString() };
+                          });
+                        }}
+                      >+</button>
+                    </div>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '0.8rem' }}>RPH index ($):</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, rph: Math.max(0, parseInt(prev.rph) - 50) }))}>-50</button>
+                      <input 
+                        type="number" 
+                        className="form-control" 
+                        style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
+                        value={editForm.rph}
+                        onChange={(e) => setEditForm({ ...editForm, rph: e.target.value })}
+                      />
+                      <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, rph: parseInt(prev.rph) + 50 }))}>+50</button>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '0.8rem' }}>Opportunity Gap Description:</label>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+                      value={editForm.gap}
+                      onChange={(e) => setEditForm({ ...editForm, gap: e.target.value })}
+                    />
+                  </div>
                 </div>
-                
-                <div className="form-group">
-                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Memberships Attach:</label>
-                  <input 
-                    type="number" 
-                    className="form-control" 
-                    style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                    value={editForm.memberships}
-                    onChange={(e) => setEditForm({ ...editForm, memberships: e.target.value })}
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label className="form-label" style={{ fontSize: '0.8rem' }}>BBY Credit Card Apps:</label>
-                  <input 
-                    type="number" 
-                    className="form-control" 
-                    style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                    value={editForm.creditCards}
-                    onChange={(e) => setEditForm({ ...editForm, creditCards: e.target.value })}
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label className="form-label" style={{ fontSize: '0.8rem' }}>GSP/Warranty Attach %:</label>
-                  <input 
-                    type="number" 
-                    className="form-control" 
-                    style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                    value={editForm.warranty}
-                    onChange={(e) => setEditForm({ ...editForm, warranty: e.target.value })}
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label className="form-label" style={{ fontSize: '0.8rem' }}>5 Star Surveys (Count or Failing):</label>
-                  <input 
-                    type="text" 
-                    className="form-control" 
-                    style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                    value={editForm.surveys}
-                    onChange={(e) => setEditForm({ ...editForm, surveys: e.target.value })}
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label className="form-label" style={{ fontSize: '0.8rem' }}>RPH index ($):</label>
-                  <input 
-                    type="number" 
-                    className="form-control" 
-                    style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                    value={editForm.rph}
-                    onChange={(e) => setEditForm({ ...editForm, rph: e.target.value })}
-                  />
-                </div>
-              </div>
+              )}
               
-              <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.8rem' }}>Opportunity Gap Description:</label>
-                <input 
-                  type="text" 
-                  className="form-control" 
-                  style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                  value={editForm.gap}
-                  onChange={(e) => setEditForm({ ...editForm, gap: e.target.value })}
-                />
-              </div>
-              
-              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
-                <button className="btn btn-secondary" style={{ padding: '0.55rem 1.25rem' }} onClick={() => setEditingEmployee(null)}>
-                  Discard
-                </button>
+              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'space-between', marginTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
                 <button 
-                  className="btn btn-primary" 
-                  style={{ padding: '0.55rem 1.25rem', background: 'var(--bby-blue)' }} 
-                  onClick={handleSaveEdit}
+                  type="button"
+                  className="btn btn-secondary" 
+                  style={{ padding: '0.55rem 1.25rem' }} 
+                  onClick={() => {
+                    if (currentEditStep > 1) {
+                      setCurrentEditStep(currentEditStep - 1);
+                    } else {
+                      setEditingEmployee(null);
+                    }
+                  }}
                 >
-                  Save Metrics
+                  {currentEditStep > 1 ? 'Back' : 'Discard'}
                 </button>
+                
+                {currentEditStep < 3 ? (
+                  <button 
+                    type="button"
+                    className="btn btn-primary" 
+                    style={{ padding: '0.55rem 1.25rem', background: 'var(--bby-blue)' }} 
+                    onClick={() => setCurrentEditStep(currentEditStep + 1)}
+                  >
+                    Next
+                  </button>
+                ) : (
+                  <button 
+                    type="button"
+                    className="btn btn-primary" 
+                    style={{ padding: '0.55rem 1.25rem', background: 'var(--success)' }} 
+                    onClick={handleSaveEdit}
+                  >
+                    Save Metrics
+                  </button>
+                )}
               </div>
             </div>
           </div>

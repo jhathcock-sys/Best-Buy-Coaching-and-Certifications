@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Award, TrendingUp, Compass, ShieldCheck, CreditCard, Star, DollarSign, ArrowUpRight, MessageSquare, Play, ClipboardList, Check, AlertCircle } from 'lucide-react';
+import { Award, TrendingUp, Compass, ShieldCheck, CreditCard, Star, DollarSign, ArrowUpRight, MessageSquare, Play, ClipboardList, Check, AlertCircle, Sparkles } from 'lucide-react';
 export default function Dashboard({ 
   metrics, 
   certifications, 
@@ -149,14 +149,28 @@ export default function Dashboard({
       .slice(0, 5);
   }, [roster, rankMetric]);
   // Circular Gauge Helper
-  const CircularGauge = ({ value, max = 100, label, suffix = "%", color, icon: Icon, description }) => {
+  const CircularGauge = ({ value, max = 100, label, prefix = "", suffix = "%", color, icon: Icon, description }) => {
     const percentage = Math.min((value / max) * 100, 100);
     const radius = 40;
     const circumference = 2 * Math.PI * radius;
     const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
     return (
-      <div className="glass-card metric-card">
+      <div 
+        className="glass-card metric-card" 
+        style={{ 
+          transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease',
+          cursor: 'pointer' 
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-6px)';
+          e.currentTarget.style.boxShadow = `0 12px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.02), 0 0 15px ${color}20`;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = 'none';
+        }}
+      >
         <div className="metric-circle-container">
           <svg className="metric-svg">
             <circle className="metric-circle-bg" cx="55" cy="55" r={radius} />
@@ -168,15 +182,19 @@ export default function Dashboard({
               stroke={color}
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+              style={{ filter: `drop-shadow(0 0 4px ${color}80)` }}
             />
           </svg>
-          <div className="metric-val">
-            {value}{suffix}
+          <div className="metric-val" style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center' }}>
+            {prefix && <span style={{ fontSize: '0.85rem', opacity: 0.8, marginRight: '1px' }}>{prefix}</span>}
+            <span style={{ fontSize: value >= 1000 ? '1.15rem' : '1.35rem' }}>{value}</span>
+            {suffix && <span style={{ fontSize: '0.8rem', opacity: 0.8, marginLeft: '1px' }}>{suffix}</span>}
           </div>
         </div>
-        <div className="metric-label">{label}</div>
-        <div className="metric-sub">{description}</div>
-        <Icon style={{ color: color, position: 'absolute', top: '1rem', right: '1rem', opacity: 0.15, width: 24, height: 24 }} />
+        <div className="metric-label" style={{ fontWeight: 700, color: '#fff', fontSize: '0.9rem' }}>{label}</div>
+        <div className="metric-sub" style={{ fontSize: '0.75rem', marginTop: '0.15rem' }}>{description}</div>
+        <Icon style={{ color: color, position: 'absolute', top: '1rem', right: '1rem', opacity: 0.15, width: 22, height: 22 }} />
       </div>
     );
   };
@@ -411,14 +429,15 @@ export default function Dashboard({
           icon={Compass} 
           description="Plus & Total Memberships"
         />
-        <div className="glass-card metric-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <div style={{ background: 'rgba(255, 230, 0, 0.08)', padding: '1rem', borderRadius: '50%', marginBottom: '1rem', border: '1px solid rgba(255, 230, 0, 0.2)' }}>
-            <CreditCard size={32} color="var(--bby-yellow)" />
-          </div>
-          <div style={{ fontFamily: 'var(--font-heading)', fontSize: '2rem', fontWeight: 800 }}>{metrics.creditCards}</div>
-          <div className="metric-label" style={{ marginTop: '0.25rem' }}>BBY Credit Cards</div>
-          <div className="metric-sub">Submitted Applications</div>
-        </div>
+        <CircularGauge 
+          value={metrics.creditCards} 
+          max={10}
+          label="BBY Credit Cards" 
+          suffix=""
+          color="var(--bby-yellow)" 
+          icon={CreditCard} 
+          description="Submitted Applications (Goal: 10)"
+        />
         <CircularGauge 
           value={metrics.warranty} 
           label="Protection Attach" 
@@ -436,22 +455,25 @@ export default function Dashboard({
           icon={Star} 
           description="Customer Survey Index"
         />
-        <div className="glass-card metric-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <div style={{ background: 'rgba(6, 182, 212, 0.08)', padding: '1rem', borderRadius: '50%', marginBottom: '1rem', border: '1px solid rgba(6, 182, 212, 0.2)' }}>
-            <DollarSign size={32} color="var(--info)" />
-          </div>
-          <div style={{ fontFamily: 'var(--font-heading)', fontSize: '2rem', fontWeight: 800 }}>${metrics.rph}</div>
-          <div className="metric-label" style={{ marginTop: '0.25rem' }}>RPH</div>
-          <div className="metric-sub">Revenue Per Hour (Goal: $1,200)</div>
-        </div>
-        <div className="glass-card metric-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <div style={{ background: 'rgba(16, 185, 129, 0.08)', padding: '1rem', borderRadius: '50%', marginBottom: '1rem', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-            <ClipboardList size={32} color="var(--success)" />
-          </div>
-          <div style={{ fontFamily: 'var(--font-heading)', fontSize: '2rem', fontWeight: 800 }}>{recentSessions ? recentSessions.length : 0}</div>
-          <div className="metric-label" style={{ marginTop: '0.25rem' }}>Observations Logged</div>
-          <div className="metric-sub">Coaching & Roleplays Completed</div>
-        </div>
+        <CircularGauge 
+          value={metrics.rph} 
+          max={1200}
+          label="RPH" 
+          prefix="$"
+          suffix=""
+          color="var(--bby-blue)" 
+          icon={DollarSign} 
+          description="Revenue Per Hour (Goal: $1,200)"
+        />
+        <CircularGauge 
+          value={recentSessions ? recentSessions.length : 0} 
+          max={15}
+          label="Observations Logged" 
+          suffix=""
+          color="var(--success)" 
+          icon={ClipboardList} 
+          description="Coaching & Roleplays Completed"
+        />
       </div>
       
       {/* Performance Trends Chart */}
@@ -507,6 +529,10 @@ export default function Dashboard({
                 <stop offset="0%" stopColor="var(--bby-yellow)" stopOpacity="0.3"/>
                 <stop offset="100%" stopColor="var(--bby-yellow)" stopOpacity="0.0"/>
               </linearGradient>
+              <filter id="glow-effect" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="5" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
             </defs>
 
             {/* Grid Lines */}
@@ -532,7 +558,12 @@ export default function Dashboard({
 
             {/* Render Areas */}
             <path d={areaPath} fill={chartMetric === 'memberships' ? 'url(#chart-blue)' : 'url(#chart-yellow)'} />
-            <path d={linePath} fill="none" stroke={chartMetric === 'memberships' ? 'var(--bby-blue)' : 'var(--bby-yellow)'} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+            
+            {/* Glow Path */}
+            <path d={linePath} fill="none" stroke={chartMetric === 'memberships' ? 'var(--bby-blue)' : 'var(--bby-yellow)'} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" opacity="0.3" filter="url(#glow-effect)" />
+            
+            {/* Main Path */}
+            <path d={linePath} fill="none" stroke={chartMetric === 'memberships' ? 'var(--bby-blue)' : 'var(--bby-yellow)'} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
 
             {/* Points and Hover Labels */}
             {points.map((p, idx) => (
@@ -607,6 +638,28 @@ export default function Dashboard({
             );
           })}
         </div>
+
+        <div style={{ 
+          marginTop: '1.5rem', 
+          paddingTop: '1rem', 
+          borderTop: '1px solid var(--border-glass)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '0.75rem',
+          width: '100%'
+        }}>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <span style={{ width: 8, height: 8, borderRadius: '2px', background: 'hsl(0, 70%, 20%)', display: 'inline-block', border: '1px solid hsl(0, 70%, 35%)' }}></span>
+            0 Observations (Attention Required)
+          </span>
+          <div style={{ display: 'flex', gap: '0.25rem', height: '6px', width: '120px', borderRadius: '3px', background: 'linear-gradient(90deg, hsl(0, 70%, 20%), hsl(90, 70%, 20%), hsl(180, 70%, 20%))' }}></div>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            4+ Observations (Zoned & Covered)
+            <span style={{ width: 8, height: 8, borderRadius: '2px', background: 'hsl(180, 70%, 20%)', display: 'inline-block', border: '1px solid hsl(180, 70%, 35%)' }}></span>
+          </span>
+        </div>
       </div>
 
       {/* Main Sections Grid */}
@@ -616,9 +669,31 @@ export default function Dashboard({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           {/* Automated Coaching Recommendations Engine */}
           <div className="glass-card">
-            <h3 style={{ fontSize: '1.25rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <TrendingUp size={20} color="var(--error)" /> Daily Coaching Priorities
-            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+                <TrendingUp size={20} color="var(--error)" /> Daily Coaching Priorities
+              </h3>
+              <span 
+                style={{ 
+                  fontSize: '0.65rem', 
+                  background: 'rgba(239, 68, 68, 0.1)', 
+                  border: '1px solid rgba(239, 68, 68, 0.3)', 
+                  color: 'var(--error)', 
+                  padding: '0.2rem 0.5rem', 
+                  borderRadius: '20px', 
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.25rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  animation: 'skeletonPulse 2s ease-in-out infinite'
+                }}
+              >
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--error)', display: 'inline-block' }}></span>
+                Priority Engine Active
+              </span>
+            </div>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '1.25rem', marginTop: '-0.75rem' }}>
               Roster scan updates: priorities based on metric gaps, scheduled hours, Focus 5 status, and coaching recency.
             </p>
@@ -703,9 +778,29 @@ export default function Dashboard({
 
           {/* Coaching Recommendations */}
           <div className="glass-card">
-            <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <TrendingUp size={20} color="var(--bby-yellow)" /> Smart Co-Coach Recommendations
-            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+                <Sparkles size={20} color="var(--bby-yellow)" fill="var(--bby-yellow)" /> Smart Co-Coach Recommendations
+              </h3>
+              <span 
+                style={{ 
+                  fontSize: '0.65rem', 
+                  background: 'rgba(255, 230, 0, 0.08)', 
+                  border: '1px solid rgba(255, 230, 0, 0.3)', 
+                  color: 'var(--bby-yellow)', 
+                  padding: '0.2rem 0.5rem', 
+                  borderRadius: '20px', 
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.25rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}
+              >
+                🤖 Coach AI Ready
+              </span>
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {suggestions.map(s => (
                 <div 

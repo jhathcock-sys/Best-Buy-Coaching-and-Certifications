@@ -27,6 +27,9 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
   });
 
   const [leaderName, setLeaderName] = useState('');
+  const [dailyRevenueGoal, setDailyRevenueGoal] = useState('10000');
+  const [dailyAppsGoal, setDailyAppsGoal] = useState('10');
+  const [dailyPmsGoal, setDailyPmsGoal] = useState('15');
   const [isWeekend, setIsWeekend] = useState(isTodayWeekend());
   const [leaderTab, setLeaderTab] = useState('tracker');
   const [breakForm, setBreakForm] = useState({
@@ -56,8 +59,11 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
       leaderName: leaderName.trim(),
       date: new Date().toLocaleDateString(),
       isWeekend: isWeekend,
+      dailyRevenueGoal: parseFloat(dailyRevenueGoal) || 10000,
+      dailyAppsGoal: parseInt(dailyAppsGoal) || 10,
+      dailyPmsGoal: parseInt(dailyPmsGoal) || 15,
       hours: [
-        { hourNumber: 1, pms: 0, apps: 0 }
+        { hourNumber: 1, pms: 0, apps: 0, revenue: 0 }
       ],
       zoneAssignments: {
         'Computing': [],
@@ -79,7 +85,7 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
       ...activeShift,
       hours: [
         ...activeShift.hours,
-        { hourNumber: nextHour, pms: 0, apps: 0 }
+        { hourNumber: nextHour, pms: 0, apps: 0, revenue: 0 }
       ]
     };
     setActiveShift(updated);
@@ -112,6 +118,24 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
     });
   };
 
+  const handleUpdateRevenue = (hourIndex, value) => {
+    if (!activeShift) return;
+    const val = parseFloat(value) || 0;
+    const updatedHours = activeShift.hours.map((h, idx) => {
+      if (idx === hourIndex) {
+        return {
+          ...h,
+          revenue: val
+        };
+      }
+      return h;
+    });
+    setActiveShift({
+      ...activeShift,
+      hours: updatedHours
+    });
+  };
+
   // Status check helper
   const checkHourStatus = (pms, apps, isWeekendShift) => {
     const pmGoal = isWeekendShift ? 3 : 2;
@@ -125,6 +149,7 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
       // Calculate overall statistics
       const totalPms = activeShift.hours.reduce((sum, h) => sum + h.pms, 0);
       const totalApps = activeShift.hours.reduce((sum, h) => sum + h.apps, 0);
+      const totalRevenue = activeShift.hours.reduce((sum, h) => sum + (parseFloat(h.revenue) || 0), 0);
       const onTrackCount = activeShift.hours.filter(h => 
         checkHourStatus(h.pms, h.apps, activeShift.isWeekend)
       ).length;
@@ -135,6 +160,7 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
         endTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         totalPms,
         totalApps,
+        totalRevenue,
         totalHours: activeShift.hours.length,
         onTrackRatio
       };
@@ -149,6 +175,7 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
   const activeSummary = activeShift ? {
     totalPms: activeShift.hours.reduce((sum, h) => sum + h.pms, 0),
     totalApps: activeShift.hours.reduce((sum, h) => sum + h.apps, 0),
+    totalRevenue: activeShift.hours.reduce((sum, h) => sum + (parseFloat(h.revenue) || 0), 0),
     onTrackHours: activeShift.hours.filter(h => 
       checkHourStatus(h.pms, h.apps, activeShift.isWeekend)
     ).length,
@@ -322,6 +349,43 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
               </p>
             </div>
 
+            <div className="form-group" style={{ borderTop: '1px solid var(--border-glass)', paddingTop: '1.25rem' }}>
+              <label className="form-label" style={{ fontWeight: 700, marginBottom: '0.75rem', display: 'block' }}>Daily Performance Goals</label>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '1rem' }}>
+                <div>
+                  <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Revenue Goal ($)</label>
+                  <input 
+                    type="number" 
+                    className="form-control" 
+                    placeholder="e.g. 10000"
+                    value={dailyRevenueGoal}
+                    onChange={(e) => setDailyRevenueGoal(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Credit Cards (Apps)</label>
+                  <input 
+                    type="number" 
+                    className="form-control" 
+                    placeholder="e.g. 10"
+                    value={dailyAppsGoal}
+                    onChange={(e) => setDailyAppsGoal(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>PMs (Memberships)</label>
+                  <input 
+                    type="number" 
+                    className="form-control" 
+                    placeholder="e.g. 15"
+                    value={dailyPmsGoal}
+                    onChange={(e) => setDailyPmsGoal(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
             <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem' }}>
               Start Shift Monitoring
             </button>
@@ -346,6 +410,15 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
                   {activeShift.isWeekend ? 'Weekend Targets (3/3)' : 'Weekday Targets (2/2)'}
                 </span>
               </div>
+            </div>
+
+            {/* Total Revenue Shift Card */}
+            <div className="glass-card" style={{ padding: '1.25rem' }}>
+              <span style={{ fontSize: '0.725rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em' }}>Total Revenue</span>
+              <div style={{ fontSize: '2rem', fontFamily: 'var(--font-heading)', fontWeight: 800, marginTop: '0.2rem', color: 'var(--info)' }}>
+                ${activeSummary.totalRevenue.toLocaleString([], { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Accumulated across shift</span>
             </div>
 
             {/* Total PMs Shift Card */}
@@ -431,31 +504,134 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
 
           {leaderTab === 'tracker' ? (
             /* Hourly Tracker Log Form */
-            <div className="glass-card" style={{ padding: '2rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                <div>
-                  <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Hourly Floor Performance Log</h3>
-                  <p style={{ fontSize: '0.775rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>Increment Apps and PMs at the end of each hourly check.</p>
-                </div>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                  <button className="btn btn-secondary" onClick={handleAddHour} style={{ padding: '0.55rem 1rem', fontSize: '0.8rem' }}>
-                    + Add Next Hour
-                  </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+              
+              {/* Today's Goals & Target Progress Panel */}
+              <div className="glass-card" style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  🎯 Today's Goals & Shift Progress
+                </h3>
+                <p style={{ fontSize: '0.775rem', color: 'var(--text-secondary)', marginTop: '-0.75rem' }}>
+                  Track real-time progress against daily corporate targets. Customize daily goals inline as floor demands shift.
+                </p>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {/* Revenue Goal Progress */}
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <span style={{ fontSize: '0.825rem', fontWeight: 600, color: '#fff' }}>
+                        Daily Revenue Progress: <strong style={{ color: 'var(--info)' }}>${activeSummary.totalRevenue.toLocaleString([], { maximumFractionDigits: 0 })}</strong> of 
+                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>$</span>
+                        <input 
+                          type="number"
+                          className="form-control"
+                          style={{ width: '90px', padding: '0.2rem 0.4rem', fontSize: '0.8rem', margin: 0, textAlign: 'center', background: 'rgba(11,15,25,0.6)', border: '1px solid var(--border-glass)', borderRadius: '6px', color: '#fff' }}
+                          value={activeShift.dailyRevenueGoal || 10000}
+                          onChange={(e) => {
+                            const val = parseFloat(e.target.value) || 0;
+                            setActiveShift({ ...activeShift, dailyRevenueGoal: val });
+                          }}
+                        />
+                      </div>
+                    </div>
+                    {(() => {
+                      const goal = activeShift.dailyRevenueGoal || 10000;
+                      const pct = Math.min(Math.round((activeSummary.totalRevenue / goal) * 100), 100);
+                      return (
+                        <div style={{ width: '100%', height: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-glass)', borderRadius: '5px', overflow: 'hidden', position: 'relative' }}>
+                          <div style={{ width: `${pct}%`, height: '100%', background: 'linear-gradient(90deg, var(--bby-blue), var(--info))', transition: 'width 0.4s ease', borderRadius: '5px' }}></div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  {/* PMs Goal Progress */}
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <span style={{ fontSize: '0.825rem', fontWeight: 600, color: '#fff' }}>
+                        Daily PMs (Memberships) Progress: <strong style={{ color: 'var(--success)' }}>{activeSummary.totalPms}</strong> of 
+                      </span>
+                      <input 
+                        type="number"
+                        className="form-control"
+                        style={{ width: '70px', padding: '0.2rem 0.4rem', fontSize: '0.8rem', margin: 0, textAlign: 'center', background: 'rgba(11,15,25,0.6)', border: '1px solid var(--border-glass)', borderRadius: '6px', color: '#fff' }}
+                        value={activeShift.dailyPmsGoal || 15}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value) || 0;
+                          setActiveShift({ ...activeShift, dailyPmsGoal: val });
+                        }}
+                      />
+                    </div>
+                    {(() => {
+                      const goal = activeShift.dailyPmsGoal || 15;
+                      const pct = Math.min(Math.round((activeSummary.totalPms / goal) * 100), 100);
+                      return (
+                        <div style={{ width: '100%', height: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-glass)', borderRadius: '5px', overflow: 'hidden', position: 'relative' }}>
+                          <div style={{ width: `${pct}%`, height: '100%', background: 'linear-gradient(90deg, var(--success), #10b981)', transition: 'width 0.4s ease', borderRadius: '5px' }}></div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  {/* Apps Goal Progress */}
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <span style={{ fontSize: '0.825rem', fontWeight: 600, color: '#fff' }}>
+                        Daily Apps (Credit Cards) Progress: <strong style={{ color: 'var(--bby-yellow)' }}>{activeSummary.totalApps}</strong> of 
+                      </span>
+                      <input 
+                        type="number"
+                        className="form-control"
+                        style={{ width: '70px', padding: '0.2rem 0.4rem', fontSize: '0.8rem', margin: 0, textAlign: 'center', background: 'rgba(11,15,25,0.6)', border: '1px solid var(--border-glass)', borderRadius: '6px', color: '#fff' }}
+                        value={activeShift.dailyAppsGoal || 10}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value) || 0;
+                          setActiveShift({ ...activeShift, dailyAppsGoal: val });
+                        }}
+                      />
+                    </div>
+                    {(() => {
+                      const goal = activeShift.dailyAppsGoal || 10;
+                      const pct = Math.min(Math.round((activeSummary.totalApps / goal) * 100), 100);
+                      return (
+                        <div style={{ width: '100%', height: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-glass)', borderRadius: '5px', overflow: 'hidden', position: 'relative' }}>
+                          <div style={{ width: `${pct}%`, height: '100%', background: 'linear-gradient(90deg, var(--bby-yellow), #f59e0b)', transition: 'width 0.4s ease', borderRadius: '5px' }}></div>
+                        </div>
+                      );
+                    })()}
+                  </div>
                 </div>
               </div>
 
-              {/* Desktop Table View */}
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid var(--border-glass)', color: 'var(--text-secondary)', fontSize: '0.775rem' }}>
-                      <th style={{ padding: '1rem' }}>TIME INTERVAL</th>
-                      <th style={{ padding: '1rem', textAlign: 'center' }}>PMs (MEMBERSHIPS)</th>
-                      <th style={{ padding: '1rem', textAlign: 'center' }}>APPs (CREDIT CARDS)</th>
-                      <th style={{ padding: '1rem', textAlign: 'center' }}>STATUS</th>
-                      <th style={{ padding: '1rem', textAlign: 'right' }}>ACTIONS</th>
-                    </tr>
-                  </thead>
+              {/* Hourly Table Log Card */}
+              <div className="glass-card" style={{ padding: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                  <div>
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Hourly Floor Performance Log</h3>
+                    <p style={{ fontSize: '0.775rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>Increment Apps, PMs, and Revenue at the end of each hourly check.</p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button className="btn btn-secondary" onClick={handleAddHour} style={{ padding: '0.55rem 1rem', fontSize: '0.8rem' }}>
+                      + Add Next Hour
+                    </button>
+                  </div>
+                </div>
+
+                {/* Desktop Table View */}
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--border-glass)', color: 'var(--text-secondary)', fontSize: '0.775rem' }}>
+                        <th style={{ padding: '1rem' }}>TIME INTERVAL</th>
+                        <th style={{ padding: '1rem', textAlign: 'center' }}>PMs (MEMBERSHIPS)</th>
+                        <th style={{ padding: '1rem', textAlign: 'center' }}>APPs (CREDIT CARDS)</th>
+                        <th style={{ padding: '1rem', textAlign: 'center' }}>REVENUE GENERATED</th>
+                        <th style={{ padding: '1rem', textAlign: 'center' }}>STATUS</th>
+                        <th style={{ padding: '1rem', textAlign: 'right' }}>ACTIONS</th>
+                      </tr>
+                    </thead>
                   <tbody>
                     {activeShift.hours.map((hour, idx) => {
                       const onTrack = checkHourStatus(hour.pms, hour.apps, activeShift.isWeekend);
@@ -521,6 +697,31 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
                               >
                                 <Plus size={14} />
                               </button>
+                            </div>
+                          </td>
+
+                          {/* Hourly Revenue Input */}
+                          <td style={{ padding: '1rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
+                              <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>$</span>
+                              <input 
+                                type="number"
+                                className="form-control"
+                                style={{ 
+                                  width: '90px', 
+                                  textAlign: 'center', 
+                                  padding: '0.35rem 0.5rem', 
+                                  fontSize: '0.9rem', 
+                                  background: 'rgba(11, 15, 25, 0.6)', 
+                                  border: '1px solid var(--border-glass)',
+                                  borderRadius: '6px',
+                                  color: '#fff',
+                                  margin: 0
+                                }}
+                                value={hour.revenue || ''}
+                                onChange={(e) => handleUpdateRevenue(idx, e.target.value)}
+                                placeholder="0"
+                              />
                             </div>
                           </td>
 
@@ -596,6 +797,7 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
               </div>
 
             </div>
+          </div>
           ) : (
             /* Interactive Floor Zone & Break Scheduler Tab content */
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -637,6 +839,7 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
                   <th style={{ padding: '0.75rem 1rem' }}>FLOOR LEADER</th>
                   <th style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>TYPE</th>
                   <th style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>HOURS</th>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>TOTAL REVENUE</th>
                   <th style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>TOTAL PMs</th>
                   <th style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>TOTAL APPs</th>
                   <th style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>ON-TRACK RATE</th>
@@ -656,6 +859,9 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
                       )}
                     </td>
                     <td style={{ padding: '1rem', textAlign: 'center', color: '#fff' }}>{shift.totalHours} hrs</td>
+                    <td style={{ padding: '1rem', textAlign: 'center', color: 'var(--info)', fontWeight: 700 }}>
+                      ${shift.totalRevenue ? shift.totalRevenue.toLocaleString([], { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '$0.00'}
+                    </td>
                     <td style={{ padding: '1rem', textAlign: 'center', color: '#fff', fontWeight: 700 }}>{shift.totalPms}</td>
                     <td style={{ padding: '1rem', textAlign: 'center', color: '#fff', fontWeight: 700 }}>{shift.totalApps}</td>
                     <td style={{ padding: '1rem', textAlign: 'center' }}>

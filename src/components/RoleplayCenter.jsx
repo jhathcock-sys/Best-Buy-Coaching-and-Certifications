@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { STANDARD_SCENARIOS, runOfflineSimulationStep, runGeminiSimulationStep, evaluateSessionOffline, evaluateSessionGemini } from '../services/ai';
 import { MessageSquare, ArrowLeft, RefreshCw, Send, Award, CheckCircle, Sparkles, BookOpen } from 'lucide-react';
+import { useApp } from '../context/AppContext';
 
-export default function RoleplayCenter({ apiKey, playbookSettings, onCompleteRoleplay, onNavigate }) {
+export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay }) {
+  const { apiKey, setActiveView } = useApp();
   const [selectedScenario, setSelectedScenario] = useState(null);
   const [sessionActive, setSessionActive] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -108,7 +110,22 @@ export default function RoleplayCenter({ apiKey, playbookSettings, onCompleteRol
       };
       
       let result;
-      if (apiKey && apiKey.trim().length > 10) {
+      const isProMode = playbookSettings.aiMode === 'pro';
+      const hasApiKey = apiKey && apiKey.trim().length > 10;
+      
+      if (isProMode) {
+        const response = await fetch('/api/audit-dialogue', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            history,
+            scenario: selectedScenario,
+            playbookSettings
+          })
+        });
+        if (!response.ok) throw new Error('Premium dialogue audit failed.');
+        result = await response.json();
+      } else if (hasApiKey) {
         result = await evaluateSessionGemini(apiKey, history, selectedScenario, playbookSettings);
       } else {
         result = evaluateSessionOffline(history, selectedScenario, playbookSettings);
@@ -413,7 +430,7 @@ export default function RoleplayCenter({ apiKey, playbookSettings, onCompleteRol
               <button className="btn btn-secondary" onClick={() => startRoleplay(selectedScenario)}>
                 <RefreshCw size={14} /> Practice Again
               </button>
-              <button className="btn btn-primary" onClick={() => onNavigate('dashboard')}>
+              <button className="btn btn-primary" onClick={() => setActiveView('dashboard')}>
                 Return to Dashboard
               </button>
             </div>

@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore, enableIndexedDbPersistence, doc, onSnapshot, setDoc, getDoc } from 'firebase/firestore';
+import { getFirestore, enableIndexedDbPersistence, doc, onSnapshot, setDoc, getDoc, collection, addDoc, query, orderBy, limit, deleteDoc, getDocs } from 'firebase/firestore';
 
 let app = null;
 let db = null;
@@ -223,24 +223,96 @@ export const saveMetricsToCloud = async (metrics) => {
 
 // Subscribe to Follow-Up Tasks
 export const subscribeToFollowUpTasks = (onUpdate) => {
-  const ref = getStoreDocRef('followUpTasks');
-  if (!ref) return null;
-  return onSnapshot(ref, (snap) => {
-    if (snap.exists()) {
-      onUpdate(snap.data().tasks || []);
-    }
-  });
+  if (!db) return null;
+  try {
+    const colRef = collection(db, 'stores', 'store-1', 'followUpTasks');
+    const q = query(colRef, orderBy('timestamp', 'desc'));
+    return onSnapshot(q, (snap) => {
+      const tasks = [];
+      snap.forEach((doc) => {
+        tasks.push({ id: doc.id, ...doc.data() });
+      });
+      onUpdate(tasks);
+    });
+  } catch (e) {
+    console.error('Failed to subscribe to followUpTasks:', e);
+    return null;
+  }
 };
 
-// Write Follow-Up Tasks
-export const saveFollowUpTasksToCloud = async (tasks) => {
-  const ref = getStoreDocRef('followUpTasks');
-  if (!ref) return false;
+// Write Single Follow-Up Task
+export const saveFollowUpTaskToCloud = async (task) => {
+  if (!db) return false;
   try {
-    await setDoc(ref, { tasks }, { merge: true });
+    const docRef = doc(db, 'stores', 'store-1', 'followUpTasks', task.id);
+    await setDoc(docRef, {
+      ...task,
+      timestamp: task.timestamp || new Date().getTime()
+    }, { merge: true });
     return true;
   } catch (e) {
-    console.error('Failed to save followUpTasks to cloud:', e);
+    console.error('Failed to save task to cloud:', e);
+    return false;
+  }
+};
+
+// Delete Follow-Up Task
+export const deleteFollowUpTaskFromCloud = async (taskId) => {
+  if (!db) return false;
+  try {
+    const docRef = doc(db, 'stores', 'store-1', 'followUpTasks', taskId);
+    await deleteDoc(docRef);
+    return true;
+  } catch (e) {
+    console.error('Failed to delete task from cloud:', e);
+    return false;
+  }
+};
+
+// Subscribe to Floor Leader Shifts
+export const subscribeToFloorLeaderShifts = (onUpdate) => {
+  if (!db) return null;
+  try {
+    const colRef = collection(db, 'stores', 'store-1', 'floorLeaderShifts');
+    const q = query(colRef, orderBy('timestamp', 'desc'));
+    return onSnapshot(q, (snap) => {
+      const shifts = [];
+      snap.forEach((doc) => {
+        shifts.push({ id: doc.id, ...doc.data() });
+      });
+      onUpdate(shifts);
+    });
+  } catch (e) {
+    console.error('Failed to subscribe to floorLeaderShifts:', e);
+    return null;
+  }
+};
+
+// Write Single Floor Leader Shift
+export const saveFloorLeaderShiftToCloud = async (shift) => {
+  if (!db) return false;
+  try {
+    const docRef = doc(db, 'stores', 'store-1', 'floorLeaderShifts', shift.id);
+    await setDoc(docRef, {
+      ...shift,
+      timestamp: shift.timestamp || new Date().getTime()
+    }, { merge: true });
+    return true;
+  } catch (e) {
+    console.error('Failed to save floor leader shift to cloud:', e);
+    return false;
+  }
+};
+
+// Delete Floor Leader Shift
+export const deleteFloorLeaderShiftFromCloud = async (shiftId) => {
+  if (!db) return false;
+  try {
+    const docRef = doc(db, 'stores', 'store-1', 'floorLeaderShifts', shiftId);
+    await deleteDoc(docRef);
+    return true;
+  } catch (e) {
+    console.error('Failed to delete shift from cloud:', e);
     return false;
   }
 };
@@ -249,7 +321,7 @@ export const saveFollowUpTasksToCloud = async (tasks) => {
 export const seedOfflineDataToCloud = async (offlineData) => {
   if (!db) return false;
   try {
-    const { activePeriod, rosterHistory, playbookSettings, deptGoals, recentSessions, metrics, followUpTasks } = offlineData;
+    const { activePeriod, rosterHistory, playbookSettings, deptGoals, recentSessions, metrics, followUpTasks, floorLeaderShifts } = offlineData;
     
     // Check if cloud data exists first to avoid blindly overwriting existing cloud data!
     const activePeriodSnap = await getDoc(getStoreDocRef('activePeriod'));
@@ -282,14 +354,85 @@ export const seedOfflineDataToCloud = async (offlineData) => {
       await saveMetricsToCloud(metrics);
     }
 
-    const followUpSnap = await getDoc(getStoreDocRef('followUpTasks'));
-    if (!followUpSnap.exists() && followUpTasks) {
-      await saveFollowUpTasksToCloud(followUpTasks);
+    // Seed followUpTasks sub-collection
+    const tasksColRef = collection(db, 'stores', 'store-1', 'followUpTasks');
+    const tasksQuerySnap = await getDocs(query(tasksColRef, limit(1)));
+    if (tasksQuerySnap.empty && followUpTasks && Array.isArray(followUpTasks)) {
+      for (const t of followUpTasks) {
+        await saveFollowUpTaskToCloud(t);
+      }
+    }
+
+    // Seed floorLeaderShifts sub-collection
+    const shiftsColRef = collection(db, 'stores', 'store-1', 'floorLeaderShifts');
+    const shiftsQuerySnap = await getDocs(query(shiftsColRef, limit(1)));
+    if (shiftsQuerySnap.empty && floorLeaderShifts && Array.isArray(floorLeaderShifts)) {
+      for (const s of floorLeaderShifts) {
+        await saveFloorLeaderShiftToCloud(s);
+      }
+    }
+
+    // Seed coachingLogs sub-collection
+    const colRef = collection(db, 'stores', 'store-1', 'coachingLogs');
+    const q = query(colRef, limit(1));
+    const logsSnap = await getDocs(q);
+    if (logsSnap.empty && offlineData.coachingLogs && Array.isArray(offlineData.coachingLogs)) {
+      for (const log of offlineData.coachingLogs) {
+        await saveCoachingLogToCloud(log);
+      }
     }
 
     return true;
   } catch (e) {
     console.error('Failed to seed offline data:', e);
+    return false;
+  }
+};
+
+// Add coaching log to Firestore sub-collection
+export const saveCoachingLogToCloud = async (log) => {
+  if (!db) return null;
+  try {
+    const colRef = collection(db, 'stores', 'store-1', 'coachingLogs');
+    const docRef = await addDoc(colRef, {
+      ...log,
+      timestamp: log.timestamp || new Date().getTime()
+    });
+    return docRef.id;
+  } catch (e) {
+    console.error('Failed to add coaching log to cloud:', e);
+    return null;
+  }
+};
+
+// Subscribe to coaching logs
+export const subscribeToCoachingLogs = (onUpdate) => {
+  if (!db) return null;
+  try {
+    const colRef = collection(db, 'stores', 'store-1', 'coachingLogs');
+    const q = query(colRef, orderBy('timestamp', 'desc'));
+    return onSnapshot(q, (snap) => {
+      const logs = [];
+      snap.forEach((doc) => {
+        logs.push({ id: doc.id, ...doc.data() });
+      });
+      onUpdate(logs);
+    });
+  } catch (e) {
+    console.error('Failed to subscribe to coaching logs:', e);
+    return null;
+  }
+};
+
+// Delete coaching log from cloud
+export const deleteCoachingLogFromCloud = async (logId) => {
+  if (!db) return false;
+  try {
+    const docRef = doc(db, 'stores', 'store-1', 'coachingLogs', logId);
+    await deleteDoc(docRef);
+    return true;
+  } catch (e) {
+    console.error('Failed to delete coaching log:', e);
     return false;
   }
 };

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { EMPLOYEE_SCENARIOS, runOfflineEmployeeCoachingStep, evaluateCoachingSession, generateCoachingLogGemini, generateCoachingLogLocal } from '../services/ai';
 import { Users, Sparkles, MessageSquare, ArrowLeft, RefreshCw, Send, HelpCircle, FileText, Check, Copy, AlertCircle, Volume2 } from 'lucide-react';
+import { useApp } from '../context/AppContext';
 
 export default function CoachSimulator({ 
-  apiKey, 
   playbookSettings, 
   customScenarios = [], 
   preselectedEmployee, 
@@ -12,9 +12,9 @@ export default function CoachSimulator({
   clearPrefillBuilderData, 
   onImportScenario, 
   onLogCoachingSession,
-  initialTab = 'sim',
-  onNavigate
+  initialTab = 'sim'
 }) {
+  const { apiKey, setActiveView } = useApp();
   const allEmployees = useMemo(() => [
     ...(Array.isArray(EMPLOYEE_SCENARIOS) ? EMPLOYEE_SCENARIOS : []), 
     ...(Array.isArray(customScenarios) ? customScenarios : [])
@@ -22,6 +22,7 @@ export default function CoachSimulator({
 
   // Tabs: 'sim' (coaching practice simulation), 'builder' (4-section coaching log builder)
   const [activeTab, setActiveTab] = useState(initialTab);
+  const [outputViewMode, setOutputViewMode] = useState('grow'); // 'grow' or 'huddle'
   
   useEffect(() => {
     setActiveTab(initialTab);
@@ -93,10 +94,11 @@ export default function CoachSimulator({
       return;
     }
 
-    const text = compileCoachingLogText();
+    const text = outputViewMode === 'grow' ? compileCoachingLogText() : compileHuddleScriptText();
     // Clean up markdown formatting for better reading
     const cleanText = text
       .replace(/## 📋 /g, '')
+      .replace(/## 💬 /g, '')
       .replace(/\* \*\*(.*?)\*\*/g, '$1')
       .replace(/\-\-\-/g, '')
       .replace(/### 🔍 /g, '')
@@ -256,10 +258,39 @@ export default function CoachSimulator({
     }
     
     setIsGeneratingLog(true);
+    const isProMode = playbookSettings.aiMode === 'pro';
     const hasApiKey = apiKey && apiKey.trim().length > 10;
     
     try {
-      if (hasApiKey) {
+      if (isProMode) {
+        const response = await fetch('/api/generate-coaching', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: builderForm.employeeName,
+            gapType: builderForm.metricGap,
+            gapDetails: builderForm.gapDetails || "Needs performance coaching to meet store targets",
+            positives: builderForm.strengths,
+            rawObservation: builderForm.rawObservation,
+            playbookSettings,
+            selectedDiscSteps: builderForm.discFocus
+          })
+        });
+        if (!response.ok) throw new Error('Premium coaching log generation failed.');
+        const data = await response.json();
+        if (data) {
+          setBuilderForm(prev => ({
+            ...prev,
+            what: data.what,
+            how: data.how,
+            why: data.why,
+            strengths: data.strengths || prev.strengths,
+            expectation: data.expectation,
+            validation: data.validation,
+            discFocus: data.discStep ? (Array.isArray(prev.discFocus) ? [data.discStep] : data.discStep) : prev.discFocus
+          }));
+        }
+      } else if (hasApiKey) {
         const data = await generateCoachingLogGemini(
           apiKey,
           builderForm.employeeName,
@@ -353,8 +384,42 @@ export default function CoachSimulator({
 * **Coaching Date**: ${new Date().toLocaleDateString()}`;
   };
 
+  const compileHuddleScriptText = () => {
+    const name = builderForm.employeeName || '[Employee Name]';
+    const focusSteps = Array.isArray(builderForm.discFocus) 
+      ? builderForm.discFocus.join(', ') 
+      : (builderForm.discFocus || 'Solve');
+
+    return `## 💬 Leadership Huddle Script: 1-on-1 with ${name}
+DISC Coaching Focus: ${focusSteps}
+
+Hey ${name}, I wanted to pull you aside for a quick second to call out some awesome work. 
+
+First off, I really appreciate your energy on the floor. Especially, I noticed you do an awesome job with:
+👉 "${builderForm.strengths || '[Mention strengths]'}"
+
+This week, I want us to focus on moving the needle on your ${builderForm.gapDetails || '[Mention gap]'}. 
+
+Specifically, what I need you to do is:
+🎯 "${builderForm.what || '[Specific action plan details]'}"
+
+The best way to handle this during your customer conversations is:
+💡 "${builderForm.how || '[Specific DISC sales script guidelines]'}"
+
+This is super important because:
+🚀 "${builderForm.why || '[Why it helps the customer and store results]'}"
+
+Let's align to make this our standard behavior:
+📈 "${builderForm.expectation || '[Expected behavior targets]'}"
+
+I'm going to follow along and help support you on the floor this week:
+🔍 "${builderForm.validation || '[Leader observation and validation details]'}"
+
+Let's crush it! Let me know if you have any questions or need me to jump in and show you a demo on the floor.`;
+  };
+
   const handleCopyToClipboard = () => {
-    const text = compileCoachingLogText();
+    const text = outputViewMode === 'grow' ? compileCoachingLogText() : compileHuddleScriptText();
     navigator.clipboard.writeText(text);
     setCopySuccess(true);
     setTimeout(() => setCopySuccess(false), 3000);
@@ -386,8 +451,12 @@ export default function CoachSimulator({
     setEvaluation(evalResult);
     
     if (onLogCoachingSession) {
+      const isRoster = selectedEmployee.id && String(selectedEmployee.id).startsWith('roster-');
+      const rosterEmpId = isRoster ? String(selectedEmployee.id).substring(7) : null;
+      const cleanName = isRoster ? selectedEmployee.name.split(' (')[0] : selectedEmployee.name;
       onLogCoachingSession({
-        customerName: selectedEmployee.name || 'Advisor',
+        employeeId: rosterEmpId,
+        customerName: cleanName || 'Advisor',
         category: 'Coaching Practice',
         avatar: selectedEmployee.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
         score: evalResult.score,
@@ -843,7 +912,7 @@ export default function CoachSimulator({
                     </span>
                   )}
                   {(!apiKey || apiKey.trim().length < 10) && (
-                    <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => onNavigate && onNavigate('playbook')}>
+                    <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setActiveView && setActiveView('playbook')}>
                       Activate Gemini AI key
                     </span>
                   )}
@@ -895,21 +964,59 @@ export default function CoachSimulator({
                   </div>
                 </div>
               ) : (
-                <textarea 
-                  className="form-control" 
-                  style={{ 
-                    flex: 1, 
-                    fontFamily: 'monospace', 
-                    fontSize: '0.8rem', 
-                    lineHeight: 1.4, 
-                    background: 'rgba(11,15,25,0.7)', 
-                    borderColor: 'rgba(255,255,255,0.05)', 
-                    resize: 'none',
-                    minHeight: '400px'
-                  }}
-                  readOnly
-                  value={compileCoachingLogText()}
-                />
+                <>
+                  {/* Output Tab Mode Toggles */}
+                  <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', background: 'rgba(255,255,255,0.02)', padding: '0.2rem', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
+                    <button 
+                      type="button"
+                      className="btn btn-secondary" 
+                      style={{ 
+                        flex: 1,
+                        padding: '0.4rem 0.85rem', 
+                        fontSize: '0.75rem', 
+                        background: outputViewMode === 'grow' ? 'var(--bby-blue)' : 'transparent',
+                        borderColor: 'transparent',
+                        color: '#fff',
+                        margin: 0
+                      }}
+                      onClick={() => setOutputViewMode('grow')}
+                    >
+                      📋 GROW Plan
+                    </button>
+                    <button 
+                      type="button"
+                      className="btn btn-secondary" 
+                      style={{ 
+                        flex: 1,
+                        padding: '0.4rem 0.85rem', 
+                        fontSize: '0.75rem', 
+                        background: outputViewMode === 'huddle' ? 'var(--bby-blue)' : 'transparent',
+                        borderColor: 'transparent',
+                        color: '#fff',
+                        margin: 0
+                      }}
+                      onClick={() => setOutputViewMode('huddle')}
+                    >
+                      💬 Huddle Script
+                    </button>
+                  </div>
+
+                  <textarea 
+                    className="form-control" 
+                    style={{ 
+                      flex: 1, 
+                      fontFamily: 'monospace', 
+                      fontSize: '0.8rem', 
+                      lineHeight: 1.4, 
+                      background: 'rgba(11,15,25,0.7)', 
+                      borderColor: 'rgba(255,255,255,0.05)', 
+                      resize: 'none',
+                      minHeight: '400px'
+                    }}
+                    readOnly
+                    value={outputViewMode === 'grow' ? compileCoachingLogText() : compileHuddleScriptText()}
+                  />
+                </>
               )}
 
               {copySuccess && (

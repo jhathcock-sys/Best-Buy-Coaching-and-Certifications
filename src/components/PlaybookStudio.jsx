@@ -1,12 +1,109 @@
 import React, { useState } from 'react';
 import { ShieldAlert, Sparkles, Key, Check, Plus, Trash2, BookOpen, Compass } from 'lucide-react';
+import { useApp } from '../context/AppContext';
 
-export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSettings, deptGoals = {}, onSaveDeptGoals, dbConnected, onSaveFirebaseConfig }) {
-  const [useGemini, setUseGemini] = useState(playbookSettings.useGemini);
+export default function PlaybookStudio({ 
+  playbookSettings, 
+  onSaveSettings, 
+  deptGoals = {}, 
+  onSaveDeptGoals,
+  customScenarios = [],
+  onAddCustomScenario,
+  onDeleteCustomScenario
+}) {
+  const { apiKey, dbConnected, handleSaveFirebaseConfig } = useApp();
+  const [activeTab, setActiveTab] = useState('config'); // 'config' or 'scenarios'
+  
+  const [aiMode, setAiMode] = useState(playbookSettings.aiMode || (playbookSettings.useGemini ? 'flash' : 'local'));
   const [localApiKey, setLocalApiKey] = useState(apiKey || '');
   const [customSystemPrompt, setCustomSystemPrompt] = useState(playbookSettings.customSystemPrompt || '');
+  const [storePin, setStorePin] = useState(playbookSettings.storePin || '1234');
+
+  React.useEffect(() => {
+    if (playbookSettings.storePin) {
+      setStorePin(playbookSettings.storePin);
+    }
+  }, [playbookSettings.storePin]);
   
   const [selectedDept, setSelectedDept] = useState('Front End');
+
+  // Custom Scenario Builder States
+  const [scenTitle, setScenTitle] = useState('');
+  const [scenName, setScenName] = useState('');
+  const [scenAvatar, setScenAvatar] = useState('https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150');
+  const [scenDesc, setScenDesc] = useState('');
+  const [scenCategory, setScenCategory] = useState('Computing');
+  const [scenDifficulty, setScenDifficulty] = useState('Medium');
+  const [scenGreeting, setScenGreeting] = useState('');
+  const [scenNeeds, setScenNeeds] = useState('');
+  const [scenMembObj, setScenMembObj] = useState('');
+  const [scenProtObj, setScenProtObj] = useState('');
+  const [scenCardObj, setScenCardObj] = useState('');
+  const [scenConnectKw, setScenConnectKw] = useState('hello, hi, congrats');
+  const [scenDiscoverKw, setScenDiscoverKw] = useState('major, engineering, budget');
+  const [scenRecommendKw, setScenRecommendKw] = useState('laptop, total, membership');
+  const [scenProtectKw, setScenProtectKw] = useState('geek squad, gsp, drop');
+  const [scenCloseKw, setScenCloseKw] = useState('finance, card, rewards');
+
+  const AVATAR_OPTIONS = [
+    { label: 'Sarah (Computing)', url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150' },
+    { label: 'David (Home Theater)', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150' },
+    { label: 'Elena (Geek Squad)', url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150' },
+    { label: 'Victor (General)', url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150' },
+    { label: 'Jordan (Mobile)', url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' }
+  ];
+
+  const handleCreateScenario = (e) => {
+    e.preventDefault();
+    if (!scenTitle.trim() || !scenName.trim() || !scenGreeting.trim()) {
+      alert("Scenario Title, Customer Name, and Initial Greeting are required!");
+      return;
+    }
+
+    const cleanKeywords = (str) => {
+      return str.split(',').map(k => k.trim().toLowerCase()).filter(k => k.length > 0);
+    };
+
+    const newScenario = {
+      id: 'cust_' + Date.now(),
+      title: scenTitle.trim(),
+      role: 'Customer',
+      name: scenName.trim(),
+      avatar: scenAvatar,
+      description: scenDesc.trim() || `${scenName} shopping in ${scenCategory}.`,
+      category: scenCategory,
+      difficulty: scenDifficulty,
+      initialGreeting: scenGreeting.trim(),
+      needs: scenNeeds.trim() || 'General consultative assistance.',
+      objections: {
+        membership: scenMembObj.trim() || "Why does a membership cost so much?",
+        warranty: scenProtObj.trim() || "Doesn't it already come with a warranty?",
+        card: scenCardObj.trim() || "I don't think I need another credit card."
+      },
+      successKeywords: {
+        connect: cleanKeywords(scenConnectKw),
+        discover: cleanKeywords(scenDiscoverKw),
+        recommend: cleanKeywords(scenRecommendKw),
+        protect: cleanKeywords(scenProtectKw),
+        close: cleanKeywords(scenCloseKw)
+      }
+    };
+
+    if (onAddCustomScenario) {
+      onAddCustomScenario(newScenario);
+      alert(`Custom Scenario "${scenTitle}" created successfully! It is now selectable in the Consult Arena.`);
+      
+      // Reset fields
+      setScenTitle('');
+      setScenName('');
+      setScenDesc('');
+      setScenGreeting('');
+      setScenNeeds('');
+      setScenMembObj('');
+      setScenProtObj('');
+      setScenCardObj('');
+    }
+  };
   const [editedGoals, setEditedGoals] = useState({ ...deptGoals });
 
   // Firebase Cloud Configuration States
@@ -67,16 +164,7 @@ export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSetting
     const updated = [...allowedPhrases, newAllowed.trim()];
     setAllowedPhrases(updated);
     setNewAllowed('');
-    onSaveSettings({
-      apiKey: localApiKey,
-      playbookSettings: {
-        useGemini,
-        customSystemPrompt,
-        allowedPhrases: updated,
-        forbiddenPhrases,
-        trainingLogs
-      }
-    });
+    triggerSaveSettings({ allowedPhrases: updated });
   };
 
   const handleAddForbidden = () => {
@@ -84,46 +172,19 @@ export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSetting
     const updated = [...forbiddenPhrases, newForbidden.trim()];
     setForbiddenPhrases(updated);
     setNewForbidden('');
-    onSaveSettings({
-      apiKey: localApiKey,
-      playbookSettings: {
-        useGemini,
-        customSystemPrompt,
-        allowedPhrases,
-        forbiddenPhrases: updated,
-        trainingLogs
-      }
-    });
+    triggerSaveSettings({ forbiddenPhrases: updated });
   };
 
   const handleRemoveAllowed = (idx) => {
     const updated = allowedPhrases.filter((_, i) => i !== idx);
     setAllowedPhrases(updated);
-    onSaveSettings({
-      apiKey: localApiKey,
-      playbookSettings: {
-        useGemini,
-        customSystemPrompt,
-        allowedPhrases: updated,
-        forbiddenPhrases,
-        trainingLogs
-      }
-    });
+    triggerSaveSettings({ allowedPhrases: updated });
   };
 
   const handleRemoveForbidden = (idx) => {
     const updated = forbiddenPhrases.filter((_, i) => i !== idx);
     setForbiddenPhrases(updated);
-    onSaveSettings({
-      apiKey: localApiKey,
-      playbookSettings: {
-        useGemini,
-        customSystemPrompt,
-        allowedPhrases,
-        forbiddenPhrases: updated,
-        trainingLogs
-      }
-    });
+    triggerSaveSettings({ forbiddenPhrases: updated });
   };
 
   const [trainingLogs, setTrainingLogs] = useState(playbookSettings.trainingLogs || [
@@ -144,48 +205,58 @@ export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSetting
   const [newTrainingLog, setNewTrainingLog] = useState('');
   const [isAddingLog, setIsAddingLog] = useState(false);
 
+  const triggerSaveSettings = (overrides = {}) => {
+    const isFlash = aiMode === 'flash';
+    const isPro = aiMode === 'pro';
+    onSaveSettings({
+      apiKey: localApiKey,
+      playbookSettings: {
+        useGemini: isFlash || isPro,
+        aiMode,
+        customSystemPrompt,
+        allowedPhrases,
+        forbiddenPhrases,
+        trainingLogs,
+        storePin,
+        ...overrides
+      }
+    });
+  };
+
   const handleAddTrainingLog = () => {
     if (!newTrainingLog.trim()) return;
     const updated = [...trainingLogs, newTrainingLog.trim()];
     setTrainingLogs(updated);
     setNewTrainingLog('');
     setIsAddingLog(false);
-    onSaveSettings({
-      apiKey: localApiKey,
-      playbookSettings: {
-        useGemini,
-        customSystemPrompt,
-        allowedPhrases,
-        forbiddenPhrases,
-        trainingLogs: updated
-      }
-    });
+    triggerSaveSettings({ trainingLogs: updated });
   };
 
   const handleRemoveTrainingLog = (idx) => {
     const updated = trainingLogs.filter((_, i) => i !== idx);
     setTrainingLogs(updated);
-    onSaveSettings({
-      apiKey: localApiKey,
-      playbookSettings: {
-        useGemini,
-        customSystemPrompt,
-        allowedPhrases,
-        forbiddenPhrases,
-        trainingLogs: updated
-      }
-    });
+    triggerSaveSettings({ trainingLogs: updated });
   };
 
   const handleSave = () => {
+    const isFlash = aiMode === 'flash';
+    const isPro = aiMode === 'pro';
+    
+    if (!/^\d{4}$/.test(storePin)) {
+      alert("Error: Store Passcode PIN must be exactly 4 digits.");
+      return;
+    }
+
     onSaveSettings({
       apiKey: localApiKey,
       playbookSettings: {
-        useGemini: useGemini && localApiKey.trim().length > 10,
+        useGemini: isFlash || isPro,
+        aiMode,
         customSystemPrompt,
         allowedPhrases,
         forbiddenPhrases,
-        trainingLogs
+        trainingLogs,
+        storePin
       }
     });
 
@@ -202,22 +273,44 @@ export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSetting
           <h1 style={{ fontSize: '2.25rem', marginBottom: '0.5rem' }}>Playbook Studio</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Train the AI. Customize instructions, toggle dual-mode sandbox vs generative engines, and manage coaching vocabulary rules.</p>
         </div>
-        <button className="btn btn-accent" onClick={handleSave}>
-          Save Configuration
+        {activeTab === 'config' && (
+          <button className="btn btn-accent" onClick={handleSave}>
+            Save Configuration
+          </button>
+        )}
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border-glass)', paddingBottom: '0.75rem' }}>
+        <button 
+          className={`btn ${activeTab === 'config' ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={() => setActiveTab('config')}
+          style={{ margin: 0, padding: '0.55rem 1.25rem' }}
+        >
+          Playbook Configurations
+        </button>
+        <button 
+          className={`btn ${activeTab === 'scenarios' ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={() => setActiveTab('scenarios')}
+          style={{ margin: 0, padding: '0.55rem 1.25rem' }}
+        >
+          Visual Scenario Builder
         </button>
       </div>
 
-      {saveSuccess && (
-        <div style={{ padding: '1rem 1.5rem', background: 'var(--success-glow)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '12px', fontSize: '0.9rem', color: '#a7f3d0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Check size={18} /> Playbook Configurations Saved Successfully! Changes are now active across all simulators.
-        </div>
-      )}
+      {activeTab === 'config' ? (
+        <>
+          {saveSuccess && (
+            <div style={{ padding: '1rem 1.5rem', background: 'var(--success-glow)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '12px', fontSize: '0.9rem', color: '#a7f3d0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Check size={18} /> Playbook Configurations Saved Successfully! Changes are now active across all simulators.
+            </div>
+          )}
 
-      {/* Main Form Fields */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
-        
-        {/* Left Column: API & Engine Configuration */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          {/* Main Form Fields */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
+            
+            {/* Left Column: API & Engine Configuration */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           
           {/* Engine Mode Card */}
           <div className="glass-card">
@@ -243,12 +336,12 @@ export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSetting
                   <input 
                     type="radio" 
                     name="engine_mode" 
-                    checked={!useGemini} 
-                    onChange={() => setUseGemini(false)}
+                    checked={aiMode === 'local'} 
+                    onChange={() => setAiMode('local')}
                     style={{ marginTop: '0.25rem' }}
                   />
                   <div>
-                    <span style={{ fontSize: '0.95rem', fontWeight: 600 }}>Default Local Sandbox Engine (100% Free)</span>
+                    <span style={{ fontSize: '0.95rem', fontWeight: 600 }}>Standard Free: Default Local Sandbox Engine</span>
                     <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.15rem', lineHeight: 1.4 }}>
                       Runs entirely client-side inside the browser. Extremely fast, requires no tokens, works anywhere offline, and parses advisor answers through state-based NLP mapping.
                     </p>
@@ -271,13 +364,13 @@ export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSetting
                   <input 
                     type="radio" 
                     name="engine_mode" 
-                    checked={useGemini} 
-                    onChange={() => setUseGemini(true)}
+                    checked={aiMode === 'flash'} 
+                    onChange={() => setAiMode('flash')}
                     style={{ marginTop: '0.25rem' }}
                   />
                   <div>
                     <span style={{ fontSize: '0.95rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                      Generative Gemini Engine <Sparkles size={12} color="var(--bby-yellow)" />
+                      Standard Cloud: Gemini 3.5 Flash <Sparkles size={12} color="var(--bby-yellow)" />
                     </span>
                     <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.15rem', lineHeight: 1.4 }}>
                       Enables open-ended fluid conversation roleplays. Requires a Google AI Studio API key. Runs completely on the free-tier limits, resulting in zero overall token spend.
@@ -286,20 +379,68 @@ export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSetting
                 </label>
               </div>
 
-              {/* API Key Box */}
-              <div className="form-group" style={{ marginTop: '0.5rem' }}>
-                <label className="form-label">Google AI Studio API Key:</label>
-                <input 
-                  type="password" 
-                  className="form-control" 
-                  placeholder={useGemini ? "Enter your Gemini API key (AIzaSy...)" : "API Key optional in Sandbox mode"}
-                  value={localApiKey}
-                  onChange={(e) => setLocalApiKey(e.target.value)}
-                />
-                <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
-                  Your key is securely saved locally in your own browser's storage and never sent to any external server (except directly to the Google Gemini API endpoint).
-                </p>
+              <div 
+                style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '0.75rem', 
+                  background: 'rgba(255, 255, 255, 0.02)', 
+                  border: '1px solid var(--border-glass)',
+                  padding: '1.25rem', 
+                  borderRadius: '16px' 
+                }}
+              >
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
+                  <input 
+                    type="radio" 
+                    name="engine_mode" 
+                    checked={aiMode === 'pro'} 
+                    onChange={() => setAiMode('pro')}
+                    style={{ marginTop: '0.25rem' }}
+                  />
+                  <div>
+                    <span style={{ fontSize: '0.95rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--bby-yellow)' }}>
+                      Premium Pro: Gemini 3.1 Pro (Secure server-side API proxy) <Key size={12} color="var(--bby-yellow)" />
+                    </span>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.15rem', lineHeight: 1.4 }}>
+                      Unlocks Google's flagship reasoning model for high-fidelity Grow coaching logs and advanced dialogue auditing. Evaluates soft skills (empathy, rapport, active listening). No browser API key required.
+                    </p>
+                  </div>
+                </label>
               </div>
+
+              {/* API Key Box */}
+              {aiMode === 'flash' && (
+                <div className="form-group" style={{ marginTop: '0.5rem', animation: 'fadeIn 0.2s ease' }}>
+                  <label className="form-label">Google AI Studio API Key:</label>
+                  <input 
+                    type="password" 
+                    className="form-control" 
+                    placeholder="Enter your Gemini API key (AIzaSy...)"
+                    value={localApiKey}
+                    onChange={(e) => setLocalApiKey(e.target.value)}
+                  />
+                  <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
+                    Your key is securely saved locally in your own browser's storage and never sent to any external server (except directly to the Google Gemini API endpoint).
+                  </p>
+                  <div style={{
+                    marginTop: '0.75rem',
+                    padding: '0.75rem',
+                    borderRadius: '10px',
+                    background: 'rgba(245, 158, 11, 0.05)',
+                    border: '1px solid rgba(245, 158, 11, 0.2)',
+                    fontSize: '0.75rem',
+                    color: '#fef08a',
+                    lineHeight: '1.4'
+                  }}>
+                    <strong>⚠️ Security Recommendations:</strong>
+                    <ul style={{ margin: '0.25rem 0 0 0', paddingLeft: '1rem', listStyleType: 'disc' }}>
+                      <li>Ensure your Google AI Studio API Key is restricted to your target services.</li>
+                      <li>Configure rate limits and daily cost quotas in the Google AI Console to prevent abuse.</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
 
             </div>
           </div>
@@ -323,6 +464,35 @@ export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSetting
                 value={customSystemPrompt}
                 onChange={(e) => setCustomSystemPrompt(e.target.value)}
               />
+            </div>
+          </div>
+
+          {/* Security PIN Code Configuration Card */}
+          <div className="glass-card">
+            <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Key size={20} color="var(--bby-yellow)" /> Store Passcode PIN Security
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '1.5rem' }}>
+              Configure the 4-digit supervisor access passcode PIN. This passcode locks all dashboards, store rosters, and settings configurations from unauthorized advisor modifications.
+            </p>
+
+            <div className="form-group">
+              <label className="form-label">Supervisor 4-Digit PIN:</label>
+              <input 
+                type="text" 
+                maxLength={4}
+                className="form-control" 
+                placeholder="e.g. 1234"
+                value={storePin}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  setStorePin(val);
+                }}
+                style={{ letterSpacing: '0.25em', fontSize: '1.1rem', fontWeight: 'bold', width: '120px', textAlign: 'center' }}
+              />
+              <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
+                Default is 1234. Change this PIN to lock out access on floor tablets. PIN must be exactly 4 digits.
+              </p>
             </div>
           </div>
 
@@ -536,6 +706,48 @@ export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSetting
               />
             </div>
 
+            {/* Conditional targets for Computing/Home Theatre */}
+            {(selectedDept === 'Computing' || selectedDept === 'Home Theatre') && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', padding: '0.75rem', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-glass)', borderRadius: '10px' }}>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.725rem' }}>Basket size Goal ($):</label>
+                  <input 
+                    type="number" 
+                    className="form-control"
+                    value={editedGoals[selectedDept]?.basket || 0}
+                    onChange={(e) => handleGoalChange('basket', e.target.value)}
+                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                  />
+                </div>
+                {selectedDept === 'Computing' && (
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label" style={{ fontSize: '0.725rem' }}>M365 Attach % Goal:</label>
+                    <input 
+                      type="number" 
+                      step="0.1"
+                      className="form-control"
+                      value={editedGoals[selectedDept]?.m365 || 0}
+                      onChange={(e) => handleGoalChange('m365', e.target.value)}
+                      style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                    />
+                  </div>
+                )}
+                {selectedDept === 'Home Theatre' && (
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label" style={{ fontSize: '0.725rem' }}>Audio Attach % Goal:</label>
+                    <input 
+                      type="number" 
+                      step="0.1"
+                      className="form-control"
+                      value={editedGoals[selectedDept]?.audio || 0}
+                      onChange={(e) => handleGoalChange('audio', e.target.value)}
+                      style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
             <button className="btn btn-primary" style={{ width: '100%', padding: '0.5rem', fontSize: '0.8rem' }} onClick={handleSaveGoals}>
               Save {selectedDept} Targets
             </button>
@@ -694,6 +906,23 @@ export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSetting
           </div>
         </div>
 
+        <div style={{
+          padding: '1rem',
+          borderRadius: '12px',
+          background: 'rgba(239, 68, 68, 0.05)',
+          border: '1px solid rgba(239, 68, 68, 0.2)',
+          fontSize: '0.775rem',
+          color: '#fca5a5',
+          lineHeight: '1.4'
+        }}>
+          <strong>🔒 Security & Production Guidelines:</strong>
+          <ul style={{ margin: '0.25rem 0 0 0', paddingLeft: '1rem', listStyleType: 'disc' }}>
+            <li><strong>Domain Restrictions:</strong> In the Google Cloud Console (under Credentials), restrict your Firebase API Key to accept HTTP referrers only from your authorized hosting domain (e.g. <code>bbycoaching.web.app</code>).</li>
+            <li><strong>Firestore Security Rules:</strong> Configure Firestore security rules to allow read/write requests only to authenticated users or validate the store PIN structure to prevent unauthenticated data modifications.</li>
+            <li><strong>Local Storage Encryption:</strong> Keys are stored in plaintext locally. Limit access to authorized corporate hardware.</li>
+          </ul>
+        </div>
+
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', alignItems: 'center', marginTop: '0.5rem', flexWrap: 'wrap' }}>
           {dbConnected && (
             <span style={{ fontSize: '0.8rem', color: 'var(--success)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
@@ -708,7 +937,7 @@ export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSetting
                 style={{ padding: '0.55rem 1.25rem', borderColor: 'var(--error)', color: 'var(--error)' }}
                 onClick={() => {
                   if (confirm("Are you sure you want to disconnect from the Cloud Database? This browser will return to Local Offline Sandbox Mode.")) {
-                    onSaveFirebaseConfig(null);
+                    handleSaveFirebaseConfig(null);
                     setFirebaseConfig({
                       apiKey: '',
                       authDomain: '',
@@ -732,14 +961,257 @@ export default function PlaybookStudio({ apiKey, playbookSettings, onSaveSetting
                   alert("API Key and Project ID are required to initialize Firebase Cloud!");
                   return;
                 }
-                onSaveFirebaseConfig(firebaseConfig);
+                handleSaveFirebaseConfig(firebaseConfig);
               }}
             >
-              {dbConnected ? 'Update Cloud Credentials' : 'Connect Cloud Database'}
+              {dbConnected ? 'Update Connection' : 'Connect Cloud'}
             </button>
           </div>
         </div>
       </div>
+      </>
+      ) : (
+        /* VISUAL SCENARIO BUILDER VIEW */
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
+          
+          {/* Left Column: Builder Form */}
+          <form onSubmit={handleCreateScenario} className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '2rem' }}>
+            <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--bby-yellow)', margin: 0 }}>
+              <Sparkles size={20} color="var(--bby-yellow)" /> Create Custom Scenario
+            </h3>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label">Scenario Title:</label>
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  placeholder="e.g. Computing: Mac Upgrade"
+                  value={scenTitle} 
+                  onChange={(e) => setScenTitle(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Customer Name:</label>
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  placeholder="e.g. Marcus Vance"
+                  value={scenName} 
+                  onChange={(e) => setScenName(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label">Product Category:</label>
+                <select 
+                  className="form-control"
+                  value={scenCategory}
+                  onChange={(e) => setScenCategory(e.target.value)}
+                >
+                  <option value="Computing">Computing</option>
+                  <option value="Home Theater">Home Theater</option>
+                  <option value="Geek Squad Services">Geek Squad Services</option>
+                  <option value="Mobile">Mobile</option>
+                  <option value="Appliances">Appliances</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Difficulty:</label>
+                <select 
+                  className="form-control"
+                  value={scenDifficulty}
+                  onChange={(e) => setScenDifficulty(e.target.value)}
+                >
+                  <option value="Easy">Easy</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Hard">Hard</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Choose Customer Avatar:</label>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+                {AVATAR_OPTIONS.map((opt, idx) => (
+                  <img 
+                    key={idx}
+                    src={opt.url}
+                    alt={opt.label}
+                    title={opt.label}
+                    onClick={() => setScenAvatar(opt.url)}
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      cursor: 'pointer',
+                      border: scenAvatar === opt.url ? '2.5px solid var(--bby-yellow)' : '1px solid var(--border-glass)',
+                      boxShadow: scenAvatar === opt.url ? '0 0 10px rgba(253,216,53,0.3)' : 'none',
+                      transition: 'all 0.2s'
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Scenario Context Description:</label>
+              <input 
+                type="text" 
+                className="form-control" 
+                placeholder="Marcus wants to buy a Mac for video editing but has budget limits..."
+                value={scenDesc}
+                onChange={(e) => setScenDesc(e.target.value)}
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Initial Customer Greeting (Dialogue):</label>
+              <textarea 
+                className="form-control" 
+                rows={3}
+                style={{ resize: 'none' }}
+                placeholder="e.g. Hi, I need to get a new Apple laptop for video editing at film school, but they look so expensive..."
+                value={scenGreeting}
+                onChange={(e) => setScenGreeting(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Customer Specific Needs / Focus:</label>
+              <input 
+                type="text" 
+                className="form-control" 
+                placeholder="High RAM, graphic speed, M3 chip preference..."
+                value={scenNeeds}
+                onChange={(e) => setScenNeeds(e.target.value)}
+              />
+            </div>
+
+            <div style={{ borderTop: '1px solid var(--border-glass)', paddingTop: '1.25rem' }}>
+              <h4 style={{ fontSize: '0.95rem', color: 'var(--bby-yellow)', marginBottom: '1rem' }}>Dialogue Objections (Text prompts)</h4>
+              
+              <div className="form-group">
+                <label className="form-label" style={{ fontSize: '0.75rem' }}>Membership Objection:</label>
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  placeholder="e.g. I don't buy enough here to justify a yearly fee."
+                  value={scenMembObj}
+                  onChange={(e) => setScenMembObj(e.target.value)}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label" style={{ fontSize: '0.75rem' }}>Protection Objection:</label>
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  placeholder="e.g. Apple laptops are solid, why would I need Geek Squad?"
+                  value={scenProtObj}
+                  onChange={(e) => setScenProtObj(e.target.value)}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label" style={{ fontSize: '0.75rem' }}>Credit Card Objection:</label>
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  placeholder="e.g. I already have too many store cards, no thanks."
+                  value={scenCardObj}
+                  onChange={(e) => setScenCardObj(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div style={{ borderTop: '1px solid var(--border-glass)', paddingTop: '1.25rem' }}>
+              <h4 style={{ fontSize: '0.95rem', color: 'var(--success)', marginBottom: '0.75rem' }}>Success Keywords (Separated by commas)</h4>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.7rem' }}>Connect Step:</label>
+                  <input type="text" className="form-control" value={scenConnectKw} onChange={(e) => setScenConnectKw(e.target.value)} style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} />
+                </div>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.7rem' }}>Discover Step:</label>
+                  <input type="text" className="form-control" value={scenDiscoverKw} onChange={(e) => setScenDiscoverKw(e.target.value)} style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} />
+                </div>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.7rem' }}>Recommend Step:</label>
+                  <input type="text" className="form-control" value={scenRecommendKw} onChange={(e) => setScenRecommendKw(e.target.value)} style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} />
+                </div>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.7rem' }}>Protect Step:</label>
+                  <input type="text" className="form-control" value={scenProtectKw} onChange={(e) => setScenProtectKw(e.target.value)} style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} />
+                </div>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.7rem' }}>Close Step:</label>
+                  <input type="text" className="form-control" value={scenCloseKw} onChange={(e) => setScenCloseKw(e.target.value)} style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} />
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.75rem', marginTop: '1rem' }}>
+              Create & Install Roleplay Scenario
+            </button>
+          </form>
+
+          {/* Right Column: Custom Scenarios List */}
+          <div className="glass-card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div>
+              <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff', margin: 0 }}>
+                <Compass size={20} color="var(--bby-blue)" /> Custom Scenarios Library
+              </h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.775rem', marginTop: '0.15rem' }}>Active custom customer personas loaded into your local store consult database.</p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {customScenarios.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '3rem', border: '1.5px dashed var(--border-glass)', borderRadius: '16px', color: 'var(--text-muted)', fontSize: '0.825rem' }}>
+                  No custom roleplay scenarios added yet. Use the form on the left to configure your first one!
+                </div>
+              ) : (
+                customScenarios.map((scen) => (
+                  <div 
+                    key={scen.id}
+                    style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center', 
+                      padding: '1rem', 
+                      background: 'rgba(255, 255, 255, 0.01)', 
+                      border: '1px solid var(--border-glass)',
+                      borderRadius: '12px' 
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <img src={scen.avatar} alt="" style={{ width: '36px', height: '36px', borderRadius: '50%', border: '1px solid var(--border-glass)' }} />
+                      <div>
+                        <h4 style={{ fontSize: '0.95rem', margin: 0, color: '#fff', fontWeight: 600 }}>{scen.title}</h4>
+                        <span style={{ fontSize: '0.725rem', color: 'var(--text-secondary)' }}>Customer: {scen.name} | {scen.difficulty}</span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn-trash"
+                      style={{ background: 'transparent', border: 'none', color: 'var(--error)', cursor: 'pointer', padding: 0 }}
+                      onClick={() => onDeleteCustomScenario(scen.id)}
+                      title="Remove Custom Scenario"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+        </div>
+      )}
 
     </div>
   );

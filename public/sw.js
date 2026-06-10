@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bluecoach-assets-v1';
+const CACHE_NAME = 'bluecoach-assets-v2';
 
 // We pre-cache the root documents so they load immediately offline
 const PRECACHE_URLS = [
@@ -32,10 +32,11 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event: Stale-While-Revalidate caching strategy for static resources
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
+  // Only handle GET requests and http/https schemes (prevents chrome-extension caching crashes)
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
 
   // Exclude real-time synchronization channels (Firestore and Gemini AI API calls)
   if (

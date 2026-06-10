@@ -515,16 +515,18 @@ export function isGeminiAvailable(apiKey) {
 }
 
 // Initialize Gemini Client
-function getGeminiModel(apiKey) {
+function getGeminiModel(apiKey, playbookSettings) {
   const aiInstance = new GoogleGenerativeAI(apiKey);
-  // Using the latest Gemini 3.5 Flash model which has a great free tier
-  return aiInstance.getGenerativeModel({ model: 'gemini-3.5-flash' });
+  const isProMode = playbookSettings?.aiMode === 'pro';
+  // Use official stable Google AI Studio models: gemini-1.5-pro for complex auditing and GROW coaching logs, gemini-1.5-flash for fast simulation
+  const modelName = isProMode ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
+  return aiInstance.getGenerativeModel({ model: modelName });
 }
 
 // Run a Generative simulation step using Gemini
 export async function runGeminiSimulationStep(apiKey, message, history, scenario, playbookSettings) {
   try {
-    const model = getGeminiModel(apiKey);
+    const model = getGeminiModel(apiKey, playbookSettings);
     
     // Format conversation history
     const historyString = history.messages.map(m => {
@@ -626,7 +628,7 @@ export async function runGeminiSimulationStep(apiKey, message, history, scenario
 // Evaluate Roleplay session using Gemini
 export async function evaluateSessionGemini(apiKey, history, scenario, playbookSettings) {
   try {
-    const model = getGeminiModel(apiKey);
+    const model = getGeminiModel(apiKey, playbookSettings);
     
     const dialogueStr = history.messages.map(m => `${m.sender}: ${m.text}`).join('\n');
     
@@ -694,8 +696,7 @@ export async function evaluateSessionGemini(apiKey, history, scenario, playbookS
 // Generate structured 4-Section Coaching Log using Gemini
 export async function generateCoachingLogGemini(apiKey, name, gapType, gapDetails, positives, rawObservation, playbookSettings, selectedDiscSteps) {
   try {
-    const aiInstance = new GoogleGenerativeAI(apiKey);
-    const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-flash' });
+    const model = getGeminiModel(apiKey, playbookSettings);
     
     let fewShotTrainingText = '';
     if (playbookSettings && playbookSettings.trainingLogs && playbookSettings.trainingLogs.length > 0) {

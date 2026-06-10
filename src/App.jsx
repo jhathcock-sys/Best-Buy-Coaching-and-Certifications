@@ -7,9 +7,11 @@ import CoachSimulator from './components/CoachSimulator';
 import PlaybookStudio from './components/PlaybookStudio';
 import CoachingHistory from './components/CoachingHistory';
 import LiveFloorShadow from './components/LiveFloorShadow';
-import { Compass, Award, Users, BookOpen, LayoutDashboard, Key, Sparkles, ShieldCheck, ClipboardList, Archive } from 'lucide-react';
+import BreakroomTV from './components/BreakroomTV';
+import Login from './components/Login';
+import FloorLeaderTracker from './components/FloorLeaderTracker';
+import { Compass, Award, Users, BookOpen, LayoutDashboard, Key, Sparkles, ShieldCheck, ClipboardList, Archive, Tv, Clock, ChevronDown, ChevronRight } from 'lucide-react';
 import { 
-  isFirebaseConnected, 
   subscribeToActivePeriod, 
   subscribeToRosterHistory, 
   subscribeToPlaybookSettings, 
@@ -17,16 +19,13 @@ import {
   subscribeToRecentSessions,
   subscribeToMetrics,
   subscribeToFollowUpTasks,
-  saveActivePeriodToCloud, 
-  saveRosterHistoryToCloud, 
-  savePlaybookSettingsToCloud, 
-  saveDeptGoalsToCloud,
-  saveRecentSessionsToCloud,
-  saveMetricsToCloud,
-  saveFollowUpTasksToCloud,
+  subscribeToFloorLeaderShifts,
   seedOfflineDataToCloud,
-  initFirebase
+  subscribeToCoachingLogs
 } from './services/firebase';
+import { AppProvider, useApp } from './context/AppContext';
+import { useStore } from './store/useStore';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Safe JSON Parse helper to prevent localStorage corruption crashes
 const safeJsonParse = (str, fallback) => {
@@ -39,286 +38,116 @@ const safeJsonParse = (str, fallback) => {
   }
 };
 
-const INITIAL_ROSTER = [
-  { id: 'yinel', name: 'Yinel', dept: 'Front End', hours: 34.5, memberships: 10, creditCards: 1, warranty: 22.2, surveys: 2, rph: 744, gap: 'BBY Credit Cards (1 App)' },
-  { id: 'julianna', name: 'Julianna', dept: 'Computing', hours: 78.0, memberships: 6, creditCards: 2, warranty: 11.2, surveys: 1, rph: 1049, gap: 'None' },
-  { id: 'muntarin', name: 'Muntarin', dept: 'Home Theatre', hours: 51.4, memberships: 4, creditCards: 0, warranty: 17.1, surveys: 1, rph: 868, gap: 'BBY Credit Cards (0 Apps)' },
-  { id: 'ricky', name: 'Ricky', dept: 'General Sales', hours: 59.9, memberships: 3, creditCards: 7, warranty: 11.5, surveys: 0, rph: 649, gap: '5 Star Surveys' },
-  { id: 'paulie', name: 'Paul / Paulie', dept: 'Appliances', hours: 25.0, memberships: 3, creditCards: 2, warranty: 11.6, surveys: 0, rph: 1436, gap: '5 Star Surveys' },
-  { id: 'daniel', name: 'Daniel', dept: 'Mobile', hours: 30.8, memberships: 3, creditCards: 2, warranty: 7.5, surveys: 1, rph: 1386, gap: 'GSP Attach (7.5% vs 12.0%)' },
-  { id: 'kevin', name: 'Kevin', dept: 'Geek Squad', hours: 43.6, memberships: 2, creditCards: 5, warranty: 4.0, surveys: 0, rph: 1460, gap: 'GSP Attach (4.0% vs 12.0%)' },
-  { id: 'victor', name: 'Victor', dept: 'Home Theatre', hours: 129.1, memberships: 11, creditCards: 13, warranty: 8.0, surveys: 0.2, rph: 629, gap: '5 Star Surveys' },
-  { id: 'ivan', name: 'Ivan', dept: 'Computing', hours: 69.3, memberships: 2, creditCards: 1, warranty: 6.8, surveys: 1, rph: 792, gap: 'GSP Attach & Memberships' },
-  { id: 'avneet', name: 'Avneet', dept: 'Mobile', hours: 26.7, memberships: 2, creditCards: 1, warranty: 3.7, surveys: 1, rph: 404, gap: 'Multiple Gaps (1 Category)' }
-];
-
 export default function App() {
-  const [activeView, setActiveView] = useState('dashboard');
-  const [apiKey, setApiKey] = useState('');
+  return (
+    <ErrorBoundary>
+      <AppProvider>
+        <AppContent />
+      </AppProvider>
+    </ErrorBoundary>
+  );
+}
+
+
+function AppContent() {
+  const { 
+    activeView, 
+    setActiveView, 
+    apiKey, 
+    setApiKey, 
+    dbConnected, 
+    setDbConnected, 
+    handleSaveFirebaseConfig,
+    isAuthenticated,
+    storePin,
+    setStorePin,
+    login
+  } = useApp();
   
-  const [playbookSettings, setPlaybookSettings] = useState({
-    useGemini: false,
-    customSystemPrompt: '',
-    allowedPhrases: ['My Best Buy Plus', 'My Best Buy Total', 'Geek Squad Protection', 'AppleCare+'],
-    forbiddenPhrases: ['warranty', 'pushy', 'contract'],
-    trainingLogs: [
-      `## 📋 Coaching Plan: Ricky / 5-Star Surveys
+  // Zustand Store Selectors
+  const rosterHistory = useStore((state) => state.rosterHistory);
+  const activePeriod = useStore((state) => state.activePeriod);
+  const playbookSettings = useStore((state) => state.playbookSettings);
+  const metrics = useStore((state) => state.metrics);
+  const certifications = useStore((state) => state.certifications);
+  const recentSessions = useStore((state) => state.recentSessions);
+  const customScenarios = useStore((state) => state.customScenarios);
+  const followUpTasks = useStore((state) => state.followUpTasks);
+  const floorLeaderShifts = useStore((state) => state.floorLeaderShifts);
+  const coachingLogs = useStore((state) => state.coachingLogs);
+  const deptGoals = useStore((state) => state.deptGoals);
+  const showCertModal = useStore((state) => state.showCertModal);
 
-* **What**: Deliver a warmer checkout experience and explicitly ask for 5-star survey feedback at checkout.
-* **How**: Slow down, write your name on the receipt sleeve, make direct eye contact, and say: "I hope I made your shopping easy today. My name is Ricky; please take 30 seconds to let me know how I did on the 5-star survey!"
-* **Why**: Ensures customer loyalty, measures our store service indices, and highlights excellent human work on the checkout floor.
-* **Behavior**: Secure at least 2 five-star survey mentions this week and maintain a 4.8+ survey average.
-* **Validation**: Leader will perform 3 checkout observations this week and review the Sunday 5 Star survey comment log.
+  // Zustand Store Actions
+  const setRosterHistory = useStore((state) => state.setRosterHistory);
+  const setActivePeriod = useStore((state) => state.setActivePeriod);
+  const setPlaybookSettings = useStore((state) => state.setPlaybookSettings);
+  const setMetrics = useStore((state) => state.setMetrics);
+  const setCertifications = useStore((state) => state.setCertifications);
+  const setRecentSessions = useStore((state) => state.setRecentSessions);
+  const setFollowUpTasks = useStore((state) => state.setFollowUpTasks);
+  const setFloorLeaderShifts = useStore((state) => state.setFloorLeaderShifts);
+  const setCoachingLogs = useStore((state) => state.setCoachingLogs);
+  const setDeptGoals = useStore((state) => state.setDeptGoals);
+  const setShowCertModal = useStore((state) => state.setShowCertModal);
 
----
-### 🔍 Background & Performance Context
-* **Observed Strengths**: Excellent transactional speeds, zero cashier queue backlog, and highly professional checkout processing.
-* **Performance Gap / Metric Focus**: Ricky has 0 5 Star surveys this month (store standard is maintaining 2+ five-star survey mentions per week).
-* **Coaching Date**: 6/6/2026`
-    ]
-  });
+  const addFollowUpTask = useStore((state) => state.addFollowUpTask);
+  const completeFollowUpTask = useStore((state) => state.completeFollowUpTask);
+  const saveSettings = useStore((state) => state.saveSettings);
+  const importCustomScenario = useStore((state) => state.importCustomScenario);
+  const deleteCustomScenario = useStore((state) => state.deleteCustomScenario);
+  const saveFloorLeaderShift = useStore((state) => state.saveFloorLeaderShift);
+  const deleteFloorLeaderShift = useStore((state) => state.deleteFloorLeaderShift);
+  const logCoachingSession = useStore((state) => state.logCoachingSession);
+  const deleteCoachingSession = useStore((state) => state.deleteCoachingSession);
+  const completeRoleplay = useStore((state) => state.completeRoleplay);
+  const saveDeptGoals = useStore((state) => state.saveDeptGoals);
+  const changePeriod = useStore((state) => state.changePeriod);
 
-  const [metrics, setMetrics] = useState({
-    memberships: 52,
-    creditCards: 4,
-    warranty: 12,
-    surveys: 4.7,
-    rph: 1050
-  });
+  const addEmployee = useStore((state) => state.addEmployee);
+  const editEmployee = useStore((state) => state.editEmployee);
+  const updateEmployeeDept = useStore((state) => state.updateEmployeeDept);
+  const bulkImportEmployees = useStore((state) => state.bulkImportEmployees);
+  const createPeriodArchive = useStore((state) => state.createPeriodArchive);
 
-  const [certifications, setCertifications] = useState([
-    {
-      id: 'computing',
-      title: 'Computing Certified Advisor',
-      category: 'Computing',
-      description: 'Mastery in computer specs, college discovery, Total memberships, and GSP attach.',
-      requirement: 'Score 80%+ on Sarah Miller College Prep Roleplay',
-      scenarioId: 'computing-college',
-      earned: false
-    },
-    {
-      id: 'home-theater',
-      title: 'Home Theater Specialist',
-      category: 'Home Theater',
-      description: 'Mastery in high-end OLED panels, custom wall mountings, audio packages, and premium protection.',
-      requirement: 'Score 80%+ on David Chen OLED Gaming Roleplay',
-      scenarioId: 'ht-gaming',
-      earned: false
-    },
-    {
-      id: 'geek-squad',
-      title: 'Geek Squad Services Liaison',
-      category: 'Geek Squad Services',
-      description: 'Mastery in empathetic service intake, secure virus cleanup recommendations, and 24/7 tech support memberships.',
-      requirement: 'Score 80%+ on Elena Rostova Virus Recovery Roleplay',
-      scenarioId: 'geek-repair',
-      earned: false
-    }
-  ]);
-
-  const [recentSessions, setRecentSessions] = useState([]);
-  const [customScenarios, setCustomScenarios] = useState([]);
-  
-  // Store Roster Performance State
-  const [rosterHistory, setRosterHistory] = useState({ 'May 2026': INITIAL_ROSTER });
-  const [activePeriod, setActivePeriod] = useState('May 2026');
+  // Local UI-only state
   const [selectedCoachingRosterEmployee, setSelectedCoachingRosterEmployee] = useState(null);
   const [prefillBuilderData, setPrefillBuilderData] = useState(null);
-
-  // Follow-up Commitments / Tasks State
-  const [followUpTasks, setFollowUpTasks] = useState([]);
-
-  // Cloud Synchronization state
-  const [dbConnected, setDbConnected] = useState(isFirebaseConnected());
-
-  const handleSaveFirebaseConfig = (config) => {
-    if (config) {
-      localStorage.setItem('bby_firebase_config', JSON.stringify(config));
-      const database = initFirebase(config);
-      setDbConnected(!!database);
-      if (database) {
-        alert("Connected to Firebase Cloud Database! Roster data, department targets, and exemplar templates are now synchronized in real-time.");
-      }
-    } else {
-      localStorage.removeItem('bby_firebase_config');
-      initFirebase(null);
-      setDbConnected(false);
-      alert("Switched back to Local Offline Sandbox Mode successfully.");
-    }
-  };
-  
-  // Department-specific Goals Matrix (dynamic store benchmarks)
-  const [deptGoals, setDeptGoals] = useState({
-    'Front End': { 
-      memberships: 8.0, membershipsType: 'Hours', 
-      creditCards: 12.5, creditCardsType: 'Hours', 
-      warranty: 11.0, surveys: 1.0, rph: 640 
-    },
-    'General Sales': { 
-      memberships: 5000, membershipsType: 'Dollars', 
-      creditCards: 8000, creditCardsType: 'Dollars', 
-      warranty: 11.0, surveys: 1.0, rph: 640 
-    },
-    'Appliances': { 
-      memberships: 15000, membershipsType: 'Dollars', 
-      creditCards: 10000, creditCardsType: 'Dollars', 
-      warranty: 12.0, surveys: 1.0, rph: 1200 
-    },
-    'Computing': { 
-      memberships: 8000, membershipsType: 'Dollars', 
-      creditCards: 10000, creditCardsType: 'Dollars', 
-      warranty: 11.0, surveys: 1.0, rph: 900 
-    },
-    'Mobile': { 
-      memberships: 6000, membershipsType: 'Dollars', 
-      creditCards: 8000, creditCardsType: 'Dollars', 
-      warranty: 8.0, surveys: 1.0, rph: 700 
-    },
-    'Home Theatre': { 
-      memberships: 10000, membershipsType: 'Dollars', 
-      creditCards: 12000, creditCardsType: 'Dollars', 
-      warranty: 11.0, surveys: 1.0, rph: 800 
-    },
-    'Geek Squad': { 
-      memberships: 5000, membershipsType: 'Dollars', 
-      creditCards: 15000, creditCardsType: 'Dollars', 
-      warranty: 12.0, surveys: 1.0, rph: 500 
-    }
+  const [prefillShadowEmployee, setPrefillShadowEmployee] = useState(null);
+  const [collapsedCategories, setCollapsedCategories] = useState({
+    overview: false,
+    floorOps: false,
+    trainingCerts: false,
+    recordsSetup: false
   });
-  
-  const [showCertModal, setShowCertModal] = useState(null);
 
-  // Initialize and load state from localStorage on startup
+  const toggleCategory = (cat) => {
+    setCollapsedCategories(prev => ({
+      ...prev,
+      [cat]: !prev[cat]
+    }));
+  };
+
+  const [swUpdateAvailable, setSwUpdateAvailable] = useState(false);
+
   useEffect(() => {
-    const savedKey = localStorage.getItem('bby_api_key');
-    const hasEnvKey = !!(import.meta.env.VITE_GEMINI_API_KEY && import.meta.env.VITE_GEMINI_API_KEY.trim().length > 10);
-
-    if (savedKey && savedKey.trim().length > 10) {
-      setApiKey(savedKey);
-    } else if (hasEnvKey) {
-      setApiKey(import.meta.env.VITE_GEMINI_API_KEY);
-    }
-
-    const savedSettings = localStorage.getItem('bby_playbook_settings');
-    let parsedSettings = safeJsonParse(savedSettings, null);
-    if (parsedSettings) {
-      // Force useGemini to true if an environment key is loaded and no custom override is in localStorage
-      if (hasEnvKey && (!savedKey || savedKey.trim().length < 10)) {
-        parsedSettings.useGemini = true;
-      }
-      
-      // Safeguard trainingLogs: if they upgraded from an older version of saved settings that didn't have trainingLogs, populate it!
-      if (!parsedSettings.trainingLogs || !Array.isArray(parsedSettings.trainingLogs)) {
-        parsedSettings.trainingLogs = [
-          `## 📋 Coaching Plan: Ricky / 5-Star Surveys
-
-* **What**: Deliver a warmer checkout experience and explicitly ask for 5-star survey feedback at checkout.
-* **How**: Slow down, write your name on the receipt sleeve, make direct eye contact, and say: "I hope I made your shopping easy today. My name is Ricky; please take 30 seconds to let me know how I did on the 5-star survey!"
-* **Why**: Ensures customer loyalty, measures our store service indices, and highlights excellent human work on the checkout floor.
-* **Behavior**: Secure at least 2 five-star survey mentions this week and maintain a 4.8+ survey average.
-* **Validation**: Leader will perform 3 checkout observations this week and review the Sunday 5 Star survey comment log.
-
----
-### 🔍 Background & Performance Context
-* **Observed Strengths**: Excellent transactional speeds, zero cashier queue backlog, and highly professional checkout processing.
-* **Performance Gap / Metric Focus**: Ricky has 0 5 Star surveys this month (store standard is maintaining 2+ five-star survey mentions per week).
-* **Coaching Date**: 6/6/2026`
-        ];
-        localStorage.setItem('bby_playbook_settings', JSON.stringify(parsedSettings));
-      }
-      setPlaybookSettings(parsedSettings);
-    } else if (hasEnvKey) {
-      setPlaybookSettings(prev => ({ ...prev, useGemini: true }));
-    }
-
-    const savedMetrics = localStorage.getItem('bby_metrics');
-    if (savedMetrics) {
-      const metricsData = safeJsonParse(savedMetrics, null);
-      if (metricsData) setMetrics(metricsData);
-    }
-
-    const savedCerts = localStorage.getItem('bby_certifications');
-    if (savedCerts) {
-      const certsData = safeJsonParse(savedCerts, null);
-      if (certsData) setCertifications(certsData);
-    }
-
-    const savedSessions = localStorage.getItem('bby_recent_sessions');
-    if (savedSessions) {
-      const sessionsData = safeJsonParse(savedSessions, null);
-      if (sessionsData) setRecentSessions(sessionsData);
-    }
-
-    const savedCustomScenarios = localStorage.getItem('bby_custom_scenarios');
-    if (savedCustomScenarios) {
-      const customData = safeJsonParse(savedCustomScenarios, null);
-      if (customData) setCustomScenarios(customData);
-    }
-
-    const savedGoals = localStorage.getItem('bby_dept_goals');
-    if (savedGoals) {
-      const parsedGoals = safeJsonParse(savedGoals, null);
-      if (parsedGoals) {
-        // Safely introduce Front End goals without wiping out General Sales!
-        let changed = false;
-        if (!parsedGoals['Front End']) {
-          parsedGoals['Front End'] = { 
-            memberships: 8.0, membershipsType: 'Hours', 
-            creditCards: 12.5, creditCardsType: 'Hours', 
-            warranty: 11.0, surveys: 1.0, rph: 640 
-          };
-          changed = true;
-        }
-        if (!parsedGoals['General Sales']) {
-          parsedGoals['General Sales'] = { 
-            memberships: 5000, membershipsType: 'Dollars', 
-            creditCards: 8000, creditCardsType: 'Dollars', 
-            warranty: 11.0, surveys: 1.0, rph: 640 
-          };
-          changed = true;
-        }
-        setDeptGoals(parsedGoals);
-        if (changed) {
-          localStorage.setItem('bby_dept_goals', JSON.stringify(parsedGoals));
-        }
-      }
-    }
-
-    const savedHistory = localStorage.getItem('bby_roster_history');
-    if (savedHistory) {
-      const historyData = safeJsonParse(savedHistory, null);
-      if (historyData) setRosterHistory(historyData);
-    } else {
-      const savedRoster = localStorage.getItem('bby_roster');
-      if (savedRoster) {
-        const parsedRoster = safeJsonParse(savedRoster, null);
-        if (parsedRoster && Array.isArray(parsedRoster)) {
-          let rosterToMigrate = parsedRoster;
-          if (parsedRoster.some(e => e.id === 'jordan') || parsedRoster.some(e => e.id === 'yinel' && e.dept === 'General Sales') || !parsedRoster.some(e => e.id === 'yinel') || !parsedRoster.some(e => e.id === 'yinel' && 'hours' in e)) {
-            rosterToMigrate = INITIAL_ROSTER;
-          }
-          const migrated = { 'May 2026': rosterToMigrate };
-          setRosterHistory(migrated);
-          localStorage.setItem('bby_roster_history', JSON.stringify(migrated));
-        } else {
-          setRosterHistory({ 'May 2026': INITIAL_ROSTER });
-        }
-      } else {
-        setRosterHistory({ 'May 2026': INITIAL_ROSTER });
-      }
-    }
-
-    const savedPeriod = localStorage.getItem('bby_active_period');
-    if (savedPeriod) {
-      setActivePeriod(savedPeriod);
-    }
-
-    const savedFollowUp = localStorage.getItem('bby_follow_up_tasks');
-    if (savedFollowUp) {
-      const parsedFollowUp = safeJsonParse(savedFollowUp, null);
-      if (parsedFollowUp) setFollowUpTasks(parsedFollowUp);
-    }
+    const handleUpdate = () => setSwUpdateAvailable(true);
+    window.addEventListener('sw-update-available', handleUpdate);
+    return () => window.removeEventListener('sw-update-available', handleUpdate);
   }, []);
+
+  // Auto-expand category of active view
+  useEffect(() => {
+    if (activeView === 'dashboard' || activeView === 'tv') {
+      setCollapsedCategories(prev => ({ ...prev, overview: false }));
+    } else if (activeView === 'roster' || activeView === 'shadow' || activeView === 'floorLeader') {
+      setCollapsedCategories(prev => ({ ...prev, floorOps: false }));
+    } else if (activeView === 'roleplay' || activeView === 'certification' || activeView === 'coach') {
+      setCollapsedCategories(prev => ({ ...prev, trainingCerts: false }));
+    } else if (activeView === 'builder' || activeView === 'history' || activeView === 'playbook') {
+      setCollapsedCategories(prev => ({ ...prev, recordsSetup: false }));
+    }
+  }, [activeView]);
 
   // Subscribe to real-time Cloud Sync
   useEffect(() => {
@@ -333,6 +162,8 @@ export default function App() {
       const savedSessions = localStorage.getItem('bby_recent_sessions');
       const savedMetrics = localStorage.getItem('bby_metrics');
       const savedFollowUp = localStorage.getItem('bby_follow_up_tasks');
+      const savedFloorLeaderShifts = localStorage.getItem('bby_floor_leader_shifts');
+      const savedCoachingLogs = localStorage.getItem('bby_coaching_logs');
 
       await seedOfflineDataToCloud({
         activePeriod: savedPeriod || 'May 2026',
@@ -341,7 +172,9 @@ export default function App() {
         deptGoals: safeJsonParse(savedGoals, null),
         recentSessions: safeJsonParse(savedSessions, null),
         metrics: safeJsonParse(savedMetrics, null),
-        followUpTasks: safeJsonParse(savedFollowUp, null)
+        followUpTasks: safeJsonParse(savedFollowUp, null),
+        floorLeaderShifts: safeJsonParse(savedFloorLeaderShifts, null),
+        coachingLogs: safeJsonParse(savedCoachingLogs, null)
       });
     };
     seedCloud();
@@ -364,6 +197,9 @@ export default function App() {
         const savedKey = localStorage.getItem('bby_api_key');
         if (hasEnvKey && (!savedKey || savedKey.trim().length < 10)) {
           s.useGemini = true;
+        }
+        if (!s.storePin) {
+          s.storePin = '1234';
         }
         setPlaybookSettings(s);
       }
@@ -389,6 +225,19 @@ export default function App() {
       if (tasks) setFollowUpTasks(tasks);
     });
 
+    // Subscribe to Floor Leader shifts
+    const unsubFloorLeader = subscribeToFloorLeaderShifts((shifts) => {
+      if (shifts) setFloorLeaderShifts(shifts);
+    });
+
+    // Subscribe to coaching logs sub-collection
+    const unsubCoachingLogs = subscribeToCoachingLogs((logs) => {
+      if (logs) {
+        setCoachingLogs(logs);
+        localStorage.setItem('bby_coaching_logs', JSON.stringify(logs));
+      }
+    });
+
     return () => {
       if (unsubPeriod) unsubPeriod();
       if (unsubRoster) unsubRoster();
@@ -397,130 +246,10 @@ export default function App() {
       if (unsubSessions) unsubSessions();
       if (unsubMetrics) unsubMetrics();
       if (unsubFollowUp) unsubFollowUp();
+      if (unsubFloorLeader) unsubFloorLeader();
+      if (unsubCoachingLogs) unsubCoachingLogs();
     };
   }, [dbConnected]);
-
-  // Add Follow-Up Task
-  const handleAddFollowUpTask = (task) => {
-    const newTask = {
-      ...task,
-      id: 'task_' + Date.now()
-    };
-    const updated = [...followUpTasks, newTask];
-    setFollowUpTasks(updated);
-    localStorage.setItem('bby_follow_up_tasks', JSON.stringify(updated));
-    if (dbConnected) {
-      saveFollowUpTasksToCloud(updated);
-    }
-  };
-
-  // Complete Follow-Up Task
-  const handleCompleteFollowUpTask = (taskId) => {
-    const updated = followUpTasks.map(t => t.id === taskId ? { ...t, completed: true } : t);
-    setFollowUpTasks(updated);
-    localStorage.setItem('bby_follow_up_tasks', JSON.stringify(updated));
-    if (dbConnected) {
-      saveFollowUpTasksToCloud(updated);
-    }
-  };
-
-  // Save Settings
-  const handleSaveSettings = ({ apiKey: newKey, playbookSettings: newSettings }) => {
-    setApiKey(newKey);
-    setPlaybookSettings(newSettings);
-    localStorage.setItem('bby_api_key', newKey);
-    localStorage.setItem('bby_playbook_settings', JSON.stringify(newSettings));
-    if (dbConnected) {
-      savePlaybookSettingsToCloud(newSettings);
-    }
-  };
-
-  // Import custom scenario generated from past coachings
-  const handleImportScenario = (newScenario) => {
-    const updated = [...customScenarios, newScenario];
-    setCustomScenarios(updated);
-    localStorage.setItem('bby_custom_scenarios', JSON.stringify(updated));
-  };
-
-  // Log Coaching Session (Optimistic Update)
-  const handleLogCoachingSession = (session) => {
-    const newSession = {
-      customerName: session.customerName,
-      category: session.category || 'Coaching',
-      avatar: session.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-      score: session.score || 100,
-      date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      notes: session.notes || ''
-    };
-    const updatedSessions = [newSession, ...recentSessions].slice(0, 15);
-    setRecentSessions(updatedSessions);
-    localStorage.setItem('bby_recent_sessions', JSON.stringify(updatedSessions));
-    if (dbConnected) {
-      saveRecentSessionsToCloud(updatedSessions);
-    }
-  };
-
-  const handleDeleteCoachingSession = (index) => {
-    const updatedSessions = recentSessions.filter((_, idx) => idx !== index);
-    setRecentSessions(updatedSessions);
-    localStorage.setItem('bby_recent_sessions', JSON.stringify(updatedSessions));
-    if (dbConnected) {
-      saveRecentSessionsToCloud(updatedSessions);
-    }
-  };
-
-  // Complete Roleplay
-  const handleCompleteRoleplay = ({ scenarioId, category, customerName, avatar, score, passed, growReport, metrics: newMetrics }) => {
-    // 1. Add session log
-    const newSession = {
-      customerName,
-      category,
-      avatar,
-      score,
-      date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      notes: growReport.reality
-    };
-    const updatedSessions = [newSession, ...recentSessions].slice(0, 15);
-    setRecentSessions(updatedSessions);
-    localStorage.setItem('bby_recent_sessions', JSON.stringify(updatedSessions));
-    if (dbConnected) {
-      saveRecentSessionsToCloud(updatedSessions);
-    }
-
-    // 2. Average in metrics if passed
-    if (passed && newMetrics) {
-      const averagedMetrics = {
-        memberships: Math.round((metrics.memberships * 2 + newMetrics.memberships) / 3),
-        creditCards: metrics.creditCards + newMetrics.creditCards,
-        warranty: Math.round((metrics.warranty * 2 + newMetrics.warranty) / 3),
-        surveys: Math.round(((metrics.surveys * 2 + newMetrics.surveys) / 3) * 10) / 10,
-        rph: Math.round((metrics.rph * 2 + newMetrics.rph) / 3)
-      };
-      setMetrics(averagedMetrics);
-      localStorage.setItem('bby_metrics', JSON.stringify(averagedMetrics));
-      if (dbConnected) {
-        saveMetricsToCloud(averagedMetrics);
-      }
-    }
-
-    // 3. Award certification if requirement is met
-    if (score >= 80) {
-      const updatedCerts = certifications.map(cert => {
-        if (cert.scenarioId === scenarioId && !cert.earned) {
-          cert.earned = true;
-          setShowCertModal(cert); 
-          return cert;
-        }
-        return cert;
-      });
-      setCertifications(updatedCerts);
-      localStorage.setItem('bby_certifications', JSON.stringify(updatedCerts));
-    }
-  };
-
-  const handleStartRoleplayFromCert = (scenarioId) => {
-    setActiveView('roleplay');
-  };
 
   // Roster Interactions
   const handleCoachEmployeeFromRoster = (emp) => {
@@ -533,69 +262,35 @@ export default function App() {
     setActiveView('builder');
   };
 
-  const handleUpdateRosterHistory = (updatedRoster) => {
-    const newHistory = { ...rosterHistory, [activePeriod]: updatedRoster };
-    setRosterHistory(newHistory);
-    localStorage.setItem('bby_roster_history', JSON.stringify(newHistory));
-    if (dbConnected) {
-      saveRosterHistoryToCloud(newHistory);
-    }
+  const handleShadowEmployeeFromRoster = (emp) => {
+    setPrefillShadowEmployee(emp);
+    setActiveView('shadow');
   };
 
-  const handleUpdateEmployeeDept = (empId, newDept) => {
-    const updated = (rosterHistory[activePeriod] || []).map(emp => {
-      if (emp.id === empId) {
-        return { ...emp, dept: newDept };
-      }
-      return emp;
-    });
-    handleUpdateRosterHistory(updated);
+  const handleStartRoleplayFromCert = (scenarioId) => {
+    setActiveView('roleplay');
   };
 
-  const handleAddEmployee = (newEmp) => {
-    const updated = [...(rosterHistory[activePeriod] || []), newEmp];
-    handleUpdateRosterHistory(updated);
-  };
+  if (activeView === 'tv') {
+    return (
+      <BreakroomTV 
+        roster={rosterHistory[activePeriod] || []}
+        certifications={certifications}
+        recentSessions={recentSessions}
+        activePeriod={activePeriod}
+      />
+    );
+  }
 
-  const handleEditEmployee = (empId, updatedFields) => {
-    const updated = (rosterHistory[activePeriod] || []).map(emp => {
-      if (emp.id === empId) {
-        return { ...emp, ...updatedFields };
-      }
-      return emp;
-    });
-    handleUpdateRosterHistory(updated);
-  };
-
-  const handleCreatePeriodArchive = (newPeriodName, copyOption) => {
-    const currentRoster = rosterHistory[activePeriod] || [];
-    let newRoster = [];
-    if (copyOption === 'roster-only') {
-      newRoster = currentRoster.map(emp => ({
-        ...emp,
-        hours: 0,
-        memberships: 0,
-        creditCards: 0,
-        warranty: 0,
-        surveys: 5.0,
-        rph: 0,
-        gap: 'None'
-      }));
-    } else if (copyOption === 'roster-and-metrics') {
-      newRoster = currentRoster.map(emp => ({ ...emp }));
-    } else {
-      newRoster = [];
-    }
-    const newHistory = { ...rosterHistory, [newPeriodName]: newRoster };
-    setRosterHistory(newHistory);
-    setActivePeriod(newPeriodName);
-    localStorage.setItem('bby_roster_history', JSON.stringify(newHistory));
-    localStorage.setItem('bby_active_period', newPeriodName);
-    if (dbConnected) {
-      saveRosterHistoryToCloud(newHistory);
-      saveActivePeriodToCloud(newPeriodName);
-    }
-  };
+  if (!isAuthenticated) {
+    return (
+      <Login 
+        correctPin={storePin}
+        onLoginSuccess={() => login(storePin)}
+        dbConnected={dbConnected}
+      />
+    );
+  }
 
   return (
     <div className="app-container">
@@ -607,60 +302,107 @@ export default function App() {
         </div>
 
         <ul className="sidebar-menu">
-          <li 
-            className={`menu-item ${activeView === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setActiveView('dashboard')}
-          >
-            <LayoutDashboard className="menu-item-icon" /> Dashboard
+          <li className="menu-group-header" onClick={() => toggleCategory('overview')}>
+            <span>Overview</span>
+            {collapsedCategories.overview ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
           </li>
-          <li 
-            className={`menu-item ${activeView === 'roster' ? 'active' : ''}`}
-            onClick={() => setActiveView('roster')}
-          >
-            <ClipboardList className="menu-item-icon" /> Store Roster
+          {!collapsedCategories.overview && (
+            <>
+              <li 
+                className={`menu-item ${activeView === 'dashboard' ? 'active' : ''}`}
+                onClick={() => setActiveView('dashboard')}
+              >
+                <LayoutDashboard className="menu-item-icon" /> Dashboard
+              </li>
+              <li 
+                className={`menu-item ${activeView === 'tv' ? 'active' : ''}`}
+                onClick={() => setActiveView('tv')}
+              >
+                <Tv className="menu-item-icon" /> TV Standings Board
+              </li>
+            </>
+          )}
+
+          <li className="menu-group-header" onClick={() => toggleCategory('floorOps')}>
+            <span>Floor Operations</span>
+            {collapsedCategories.floorOps ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
           </li>
-          <li 
-            className={`menu-item ${activeView === 'shadow' ? 'active' : ''}`}
-            onClick={() => setActiveView('shadow')}
-          >
-            <ShieldCheck className="menu-item-icon" /> Floor Shadowing
+          {!collapsedCategories.floorOps && (
+            <>
+              <li 
+                className={`menu-item ${activeView === 'roster' ? 'active' : ''}`}
+                onClick={() => setActiveView('roster')}
+              >
+                <ClipboardList className="menu-item-icon" /> Store Roster
+              </li>
+              <li 
+                className={`menu-item ${activeView === 'shadow' ? 'active' : ''}`}
+                onClick={() => setActiveView('shadow')}
+              >
+                <ShieldCheck className="menu-item-icon" /> Floor Shadowing
+              </li>
+              <li 
+                className={`menu-item ${activeView === 'floorLeader' ? 'active' : ''}`}
+                onClick={() => setActiveView('floorLeader')}
+              >
+                <Clock className="menu-item-icon" /> Floor Leader
+              </li>
+            </>
+          )}
+
+          <li className="menu-group-header" onClick={() => toggleCategory('trainingCerts')}>
+            <span>Training & Certs</span>
+            {collapsedCategories.trainingCerts ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
           </li>
-          <li 
-            className={`menu-item ${activeView === 'roleplay' ? 'active' : ''}`}
-            onClick={() => setActiveView('roleplay')}
-          >
-            <Compass className="menu-item-icon" /> Consult Arena
+          {!collapsedCategories.trainingCerts && (
+            <>
+              <li 
+                className={`menu-item ${activeView === 'roleplay' ? 'active' : ''}`}
+                onClick={() => setActiveView('roleplay')}
+              >
+                <Compass className="menu-item-icon" /> Consult Arena
+              </li>
+              <li 
+                className={`menu-item ${activeView === 'certification' ? 'active' : ''}`}
+                onClick={() => setActiveView('certification')}
+              >
+                <Award className="menu-item-icon" /> Certifications
+              </li>
+              <li 
+                className={`menu-item ${activeView === 'coach' ? 'active' : ''}`}
+                onClick={() => setActiveView('coach')}
+              >
+                <Users className="menu-item-icon" /> Coach Simulator
+              </li>
+            </>
+          )}
+
+          <li className="menu-group-header" onClick={() => toggleCategory('recordsSetup')}>
+            <span>Records & Setup</span>
+            {collapsedCategories.recordsSetup ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
           </li>
-          <li 
-            className={`menu-item ${activeView === 'certification' ? 'active' : ''}`}
-            onClick={() => setActiveView('certification')}
-          >
-            <Award className="menu-item-icon" /> Certifications
-          </li>
-          <li 
-            className={`menu-item ${activeView === 'coach' ? 'active' : ''}`}
-            onClick={() => setActiveView('coach')}
-          >
-            <Users className="menu-item-icon" /> Coach Simulator
-          </li>
-          <li 
-            className={`menu-item ${activeView === 'builder' ? 'active' : ''}`}
-            onClick={() => setActiveView('builder')}
-          >
-            <Sparkles className="menu-item-icon" /> Coaching Generator
-          </li>
-          <li 
-            className={`menu-item ${activeView === 'history' ? 'active' : ''}`}
-            onClick={() => setActiveView('history')}
-          >
-            <Archive className="menu-item-icon" /> History Hub
-          </li>
-          <li 
-            className={`menu-item ${activeView === 'playbook' ? 'active' : ''}`}
-            onClick={() => setActiveView('playbook')}
-          >
-            <BookOpen className="menu-item-icon" /> Playbook Studio
-          </li>
+          {!collapsedCategories.recordsSetup && (
+            <>
+              <li 
+                className={`menu-item ${activeView === 'builder' ? 'active' : ''}`}
+                onClick={() => setActiveView('builder')}
+              >
+                <Sparkles className="menu-item-icon" /> Coaching Generator
+              </li>
+              <li 
+                className={`menu-item ${activeView === 'history' ? 'active' : ''}`}
+                onClick={() => setActiveView('history')}
+              >
+                <Archive className="menu-item-icon" /> History Hub
+              </li>
+              <li 
+                className={`menu-item ${activeView === 'playbook' ? 'active' : ''}`}
+                onClick={() => setActiveView('playbook')}
+              >
+                <BookOpen className="menu-item-icon" /> Playbook Studio
+              </li>
+            </>
+          )}
         </ul>
 
         {/* Sidebar Footer Status Indicator */}
@@ -696,16 +438,22 @@ export default function App() {
             onNavigate={setActiveView}
             roster={rosterHistory[activePeriod] || []}
             followUpTasks={followUpTasks}
-            onCompleteFollowUpTask={handleCompleteFollowUpTask}
+            onCompleteFollowUpTask={completeFollowUpTask}
+            deptGoals={deptGoals}
+            onCoachEmployee={handleCoachEmployeeFromRoster}
+            onCreateLog={handleCreateLogFromRoster}
+            onShadowEmployee={handleShadowEmployeeFromRoster}
           />
         )}
 
         {activeView === 'shadow' && (
           <LiveFloorShadow 
             roster={rosterHistory[activePeriod] || []}
-            onLogCoachingSession={handleLogCoachingSession}
-            onAddFollowUpTask={handleAddFollowUpTask}
+            onLogCoachingSession={logCoachingSession}
+            onAddFollowUpTask={addFollowUpTask}
             onNavigate={setActiveView}
+            preselectedEmployee={prefillShadowEmployee}
+            clearPreselectedEmployee={() => setPrefillShadowEmployee(null)}
           />
         )}
 
@@ -714,27 +462,24 @@ export default function App() {
             roster={rosterHistory[activePeriod] || []}
             activePeriod={activePeriod}
             rosterHistory={rosterHistory}
-            onChangePeriod={(p) => { 
-              setActivePeriod(p); 
-              localStorage.setItem('bby_active_period', p); 
-              if (dbConnected) saveActivePeriodToCloud(p);
-            }}
+            onChangePeriod={changePeriod}
             onCoachEmployee={handleCoachEmployeeFromRoster}
             onCreateLog={handleCreateLogFromRoster}
             deptGoals={deptGoals}
-            onUpdateEmployeeDept={handleUpdateEmployeeDept}
-            onAddEmployee={handleAddEmployee}
-            onEditEmployee={handleEditEmployee}
-            onCreatePeriod={handleCreatePeriodArchive}
+            onUpdateEmployeeDept={updateEmployeeDept}
+            onAddEmployee={addEmployee}
+            onEditEmployee={editEmployee}
+            onBulkImportEmployees={bulkImportEmployees}
+            onCreatePeriod={createPeriodArchive}
+            coachingLogs={coachingLogs}
+            followUpTasks={followUpTasks}
           />
         )}
         
         {activeView === 'roleplay' && (
           <RoleplayCenter 
-            apiKey={apiKey}
             playbookSettings={playbookSettings}
-            onCompleteRoleplay={handleCompleteRoleplay}
-            onNavigate={setActiveView}
+            onCompleteRoleplay={completeRoleplay}
           />
         )}
 
@@ -748,56 +493,57 @@ export default function App() {
 
         {activeView === 'coach' && (
           <CoachSimulator 
-            apiKey={apiKey}
             playbookSettings={playbookSettings}
             customScenarios={customScenarios}
             preselectedEmployee={selectedCoachingRosterEmployee}
             clearPreselectedEmployee={() => setSelectedCoachingRosterEmployee(null)}
             prefillBuilderData={prefillBuilderData}
             clearPrefillBuilderData={() => setPrefillBuilderData(null)}
-            onImportScenario={handleImportScenario}
-            onLogCoachingSession={handleLogCoachingSession}
+            onImportScenario={importCustomScenario}
+            onLogCoachingSession={logCoachingSession}
             initialTab="sim"
-            onNavigate={setActiveView}
           />
         )}
 
         {activeView === 'builder' && (
           <CoachSimulator 
-            apiKey={apiKey}
             playbookSettings={playbookSettings}
             customScenarios={customScenarios}
             preselectedEmployee={selectedCoachingRosterEmployee}
             clearPreselectedEmployee={() => setSelectedCoachingRosterEmployee(null)}
             prefillBuilderData={prefillBuilderData}
             clearPrefillBuilderData={() => setPrefillBuilderData(null)}
-            onImportScenario={handleImportScenario}
-            onLogCoachingSession={handleLogCoachingSession}
+            onImportScenario={importCustomScenario}
+            onLogCoachingSession={logCoachingSession}
             initialTab="builder"
-            onNavigate={setActiveView}
           />
         )}
 
         {activeView === 'playbook' && (
           <PlaybookStudio 
-            apiKey={apiKey}
             playbookSettings={playbookSettings}
-            onSaveSettings={handleSaveSettings}
+            onSaveSettings={saveSettings}
             deptGoals={deptGoals}
-            onSaveDeptGoals={(newGoals) => {
-              setDeptGoals(newGoals);
-              localStorage.setItem('bby_dept_goals', JSON.stringify(newGoals));
-              if (dbConnected) saveDeptGoalsToCloud(newGoals);
-            }}
-            dbConnected={dbConnected}
-            onSaveFirebaseConfig={handleSaveFirebaseConfig}
+            onSaveDeptGoals={saveDeptGoals}
+            customScenarios={customScenarios}
+            onAddCustomScenario={importCustomScenario}
+            onDeleteCustomScenario={deleteCustomScenario}
+          />
+        )}
+
+        {activeView === 'floorLeader' && (
+          <FloorLeaderTracker 
+            shifts={floorLeaderShifts}
+            onSaveShift={saveFloorLeaderShift}
+            onDeleteShift={deleteFloorLeaderShift}
+            roster={rosterHistory[activePeriod] || []}
           />
         )}
 
         {activeView === 'history' && (
           <CoachingHistory 
             recentSessions={recentSessions}
-            onDeleteSession={handleDeleteCoachingSession}
+            onDeleteSession={deleteCoachingSession}
           />
         )}
       </main>
@@ -824,6 +570,13 @@ export default function App() {
         >
           <ShieldCheck size={20} />
           <span>Shadow</span>
+        </button>
+        <button 
+          className={`bottom-nav-item ${activeView === 'floorLeader' ? 'active' : ''}`}
+          onClick={() => setActiveView('floorLeader')}
+        >
+          <Clock size={20} />
+          <span>Floor Lead</span>
         </button>
         <button 
           className={`bottom-nav-item ${activeView === 'roleplay' ? 'active' : ''}`}
@@ -896,6 +649,50 @@ export default function App() {
         </div>
       )}
 
+      {/* Service Worker Update Toast Banner */}
+      {swUpdateAvailable && (
+        <div style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          background: '#111625',
+          border: '1.5px solid var(--bby-blue)',
+          borderRadius: '16px',
+          padding: '1.25rem',
+          boxShadow: '0 8px 32px rgba(0, 70, 190, 0.25)',
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem',
+          maxWidth: '320px',
+          animation: 'fadeInUp 0.3s ease'
+        }}>
+          <div>
+            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#fff' }}>App Update Available</h4>
+            <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              A new version of BlueCoach AI is available. Refresh to load new sales tools and metrics.
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button 
+              className="btn btn-primary" 
+              style={{ flex: 1, padding: '0.45rem', fontSize: '0.75rem' }}
+              onClick={() => window.location.reload()}
+            >
+              Reload Page
+            </button>
+            <button 
+              className="btn btn-secondary" 
+              style={{ padding: '0.45rem 0.75rem', fontSize: '0.75rem' }}
+              onClick={() => setSwUpdateAvailable(false)}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
+

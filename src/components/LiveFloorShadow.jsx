@@ -1,10 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShieldCheck, ChevronLeft, ChevronRight, Check, Clipboard, Calendar, Users, AlertCircle } from 'lucide-react';
 
-export default function LiveFloorShadow({ roster = [], onLogCoachingSession, onAddFollowUpTask, onNavigate }) {
+export default function LiveFloorShadow({ roster = [], onLogCoachingSession, onAddFollowUpTask, onNavigate, preselectedEmployee, clearPreselectedEmployee }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedEmpId, setSelectedEmpId] = useState('');
   const [department, setDepartment] = useState('General Sales');
+
+  useEffect(() => {
+    if (preselectedEmployee) {
+      setSelectedEmpId(preselectedEmployee.id || '');
+      if (clearPreselectedEmployee) {
+        clearPreselectedEmployee();
+      }
+    }
+  }, [preselectedEmployee]);
   
   // DISC Checklist States
   const [checklist, setChecklist] = useState({
@@ -143,6 +152,7 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
     // 2. Add coaching log to history
     if (onLogCoachingSession) {
       onLogCoachingSession({
+        employeeId: selectedEmployee.id,
         customerName: selectedEmployee.name,
         category: 'Live Shadowing',
         avatar: selectedEmployee.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
@@ -280,7 +290,7 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
                       value={selectedEmpId} 
                       onChange={(e) => handleSelectEmployee(e.target.value)}
                       className="form-control"
-                      style={{ background: 'rgba(11, 15, 25, 0.8)', borderColor: 'var(--border-glass)', color: '#fff', width: '100%', height: '44px' }}
+                      style={{ background: 'rgba(11, 15, 25, 0.8)', borderColor: 'var(--border-glass)', color: '#fff', width: '100%', height: '44px', padding: '0.55rem 1.25rem' }}
                     >
                       <option value="">-- Choose Associate --</option>
                       {roster.map(emp => (
@@ -299,7 +309,7 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
                       value={department} 
                       onChange={(e) => setDepartment(e.target.value)}
                       className="form-control"
-                      style={{ background: 'rgba(11, 15, 25, 0.8)', borderColor: 'var(--border-glass)', color: '#fff', width: '100%', height: '44px' }}
+                      style={{ background: 'rgba(11, 15, 25, 0.8)', borderColor: 'var(--border-glass)', color: '#fff', width: '100%', height: '44px', padding: '0.55rem 1.25rem' }}
                     >
                       <option value="Front End">Front End</option>
                       <option value="General Sales">General Sales</option>

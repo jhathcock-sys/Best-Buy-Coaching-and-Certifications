@@ -162,6 +162,12 @@ export default function CertificationCenter({ certifications, onNavigate, onStar
                   </div>
                 </div>
 
+                {selectedCert.signature && (
+                  <div style={{ marginTop: '1.5rem', fontSize: '0.62rem', color: 'var(--text-muted)', fontFamily: 'monospace', opacity: 0.7, wordBreak: 'break-all', padding: '0 2rem' }}>
+                    Google Cloud Secure Key: {selectedCert.signature} • Verified: {selectedCert.verifiedAt}
+                  </div>
+                )}
+
                 <div className="cert-seal">
                   BEST BUY<br />CERTIFIED
                 </div>

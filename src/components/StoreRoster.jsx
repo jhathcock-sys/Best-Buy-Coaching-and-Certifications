@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Users, Search, AlertTriangle, CheckCircle, TrendingUp, Sparkles, Clock, HelpCircle } from 'lucide-react';
+import AddEmployeeModal from './AddEmployeeModal';
+import PerformanceWizardModal from './PerformanceWizardModal';
+import RosterImporterModal from './RosterImporterModal';
+import AssociateProfileModal from './AssociateProfileModal';
+
 
 export default function StoreRoster({ 
   roster, 
@@ -12,16 +17,20 @@ export default function StoreRoster({
   onChangePeriod, 
   onEditEmployee, 
   onCreatePeriod, 
+  onBulkImportEmployees, 
+  coachingLogs = [],
+  followUpTasks = [],
   deptGoals = {
     'Front End': { memberships: 8.0, membershipsType: 'Hours', creditCards: 12.5, creditCardsType: 'Hours', warranty: 11.0, surveys: 1.0, rph: 640 },
     'General Sales': { memberships: 5000, membershipsType: 'Dollars', creditCards: 8000, creditCardsType: 'Dollars', warranty: 11.0, surveys: 1.0, rph: 640 },
     'Appliances': { memberships: 15000, membershipsType: 'Dollars', creditCards: 10000, creditCardsType: 'Dollars', warranty: 12.0, surveys: 1.0, rph: 1200 },
-    'Computing': { memberships: 8000, membershipsType: 'Dollars', creditCards: 10000, creditCardsType: 'Dollars', warranty: 11.0, surveys: 1.0, rph: 900 },
+    'Computing': { memberships: 8000, membershipsType: 'Dollars', creditCards: 10000, creditCardsType: 'Dollars', warranty: 11.0, surveys: 1.0, rph: 900, basket: 150, m365: 60.0 },
     'Mobile': { memberships: 6000, membershipsType: 'Dollars', creditCards: 8000, creditCardsType: 'Dollars', warranty: 8.0, surveys: 1.0, rph: 700 },
-    'Home Theatre': { memberships: 10000, membershipsType: 'Dollars', creditCards: 12000, creditCardsType: 'Dollars', warranty: 11.0, surveys: 1.0, rph: 800 },
+    'Home Theatre': { memberships: 10000, membershipsType: 'Dollars', creditCards: 12000, creditCardsType: 'Dollars', warranty: 11.0, surveys: 1.0, rph: 800, basket: 250, audio: 35.0 },
     'Geek Squad': { memberships: 5000, membershipsType: 'Dollars', creditCards: 15000, creditCardsType: 'Dollars', warranty: 12.0, surveys: 1.0, rph: 500 }
   } 
 }) {
+  const [selectedProfileEmployee, setSelectedProfileEmployee] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [tempSearch, setTempSearch] = useState('');
   const [activeDept, setActiveDept] = useState('All');
@@ -34,17 +43,6 @@ export default function StoreRoster({
   }, [tempSearch]);
   
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newEmpForm, setNewEmpForm] = useState({
-    name: '',
-    dept: 'Front End',
-    hours: '',
-    memberships: '',
-    creditCards: '',
-    warranty: '',
-    surveys: '',
-    rph: '',
-    gap: 'None'
-  });
 
   // Roster History and Performance Editor states
   const [showNewPeriodForm, setShowNewPeriodForm] = useState(false);
@@ -52,89 +50,17 @@ export default function StoreRoster({
   const [copyOption, setCopyOption] = useState('roster-only');
   
   const [editingEmployee, setEditingEmployee] = useState(null);
-  const [currentEditStep, setCurrentEditStep] = useState(1);
-  const [editForm, setEditForm] = useState({
-    name: '',
-    dept: 'Front End',
-    hours: 0,
-    memberships: 0,
-    creditCards: 0,
-    warranty: 0,
-    surveys: 5.0,
-    rph: 0,
-    gap: 'None'
-  });
+  const [showImporter, setShowImporter] = useState(false);
 
   const handleStartEdit = (emp) => {
     setEditingEmployee(emp);
-    setCurrentEditStep(1);
-    setEditForm({
-      name: emp.name,
-      dept: emp.dept,
-      hours: emp.hours,
-      memberships: emp.memberships,
-      creditCards: emp.creditCards,
-      warranty: emp.warranty,
-      surveys: emp.surveys === 0.2 ? 'Failing' : emp.surveys.toString(),
-      rph: emp.rph,
-      gap: emp.gap || 'None'
-    });
   };
 
-  const handleSaveEdit = () => {
-    if (!editForm.name.trim()) {
-      alert("Name is required!");
-      return;
-    }
-    const updated = {
-      name: editForm.name.trim(),
-      dept: editForm.dept,
-      hours: parseFloat(editForm.hours) || 0,
-      memberships: parseInt(editForm.memberships) || 0,
-      creditCards: parseInt(editForm.creditCards) || 0,
-      warranty: parseFloat(editForm.warranty) || 0,
-      surveys: editForm.surveys === 'Failing' || editForm.surveys === 'failing' ? 0.2 : parseFloat(editForm.surveys) || 0,
-      rph: parseInt(editForm.rph) || 0,
-      gap: editForm.gap || 'None'
-    };
-    if (onEditEmployee) {
-      onEditEmployee(editingEmployee.id, updated);
+  const handleSaveEdit = (updatedMetrics) => {
+    if (onEditEmployee && editingEmployee) {
+      onEditEmployee(editingEmployee.id, updatedMetrics);
     }
     setEditingEmployee(null);
-  };
-
-  const handleSubmitAddEmployee = () => {
-    if (!newEmpForm.name.trim()) {
-      alert("Please enter the associate's name!");
-      return;
-    }
-    const newEmp = {
-      id: `emp-${Date.now()}`,
-      name: newEmpForm.name.trim(),
-      dept: newEmpForm.dept,
-      hours: parseFloat(newEmpForm.hours) || 0,
-      memberships: parseInt(newEmpForm.memberships) || 0,
-      creditCards: parseInt(newEmpForm.creditCards) || 0,
-      warranty: parseFloat(newEmpForm.warranty) || 0.0,
-      surveys: newEmpForm.surveys === 'Failing' || newEmpForm.surveys === 'failing' ? 0.2 : parseFloat(newEmpForm.surveys) || 0.0,
-      rph: parseInt(newEmpForm.rph) || 0,
-      gap: newEmpForm.gap || 'None'
-    };
-    if (onAddEmployee) {
-      onAddEmployee(newEmp);
-    }
-    setNewEmpForm({
-      name: '',
-      dept: 'Front End',
-      hours: '',
-      memberships: '',
-      creditCards: '',
-      warranty: '',
-      surveys: '',
-      rph: '',
-      gap: 'None'
-    });
-    setShowAddForm(false);
   };
 
   const DEPARTMENTS = ['All', 'Front End', 'General Sales', 'Appliances', 'Computing', 'Mobile', 'Home Theatre', 'Geek Squad'];
@@ -142,7 +68,8 @@ export default function StoreRoster({
   const DEFAULT_GOALS = {
     memberships: 8.0, membershipsType: 'Hours', 
     creditCards: 12.5, creditCardsType: 'Hours', 
-    warranty: 11.0, surveys: 1.0, rph: 640 
+    warranty: 11.0, surveys: 1.0, rph: 640,
+    basket: 150, m365: 60.0, audio: 35.0
   };
 
   // Audits employee metrics dynamically based on their department goals!
@@ -191,6 +118,15 @@ export default function StoreRoster({
     }
     if (type === 'rph') {
       return val >= target ? 'text-success' : val >= target - 150 ? 'text-warning' : 'text-danger';
+    }
+    if (type === 'basket') {
+      return val >= target ? 'text-success' : val >= target - 30 ? 'text-warning' : 'text-danger';
+    }
+    if (type === 'm365') {
+      return val >= target ? 'text-success' : val >= target - 10 ? 'text-warning' : 'text-danger';
+    }
+    if (type === 'audio') {
+      return val >= target ? 'text-success' : val >= target - 10 ? 'text-warning' : 'text-danger';
     }
     return '';
   };
@@ -253,6 +189,18 @@ export default function StoreRoster({
     // rph
     if (getMetricClass(emp.rph, 'rph', emp.dept, emp) === 'text-danger') {
       gaps.push('RPH');
+    }
+    // basket
+    if ((emp.dept === 'Computing' || emp.dept === 'Home Theatre') && getMetricClass(emp.basket, 'basket', emp.dept, emp) === 'text-danger') {
+      gaps.push('Basket');
+    }
+    // m365
+    if (emp.dept === 'Computing' && getMetricClass(emp.m365, 'm365', emp.dept, emp) === 'text-danger') {
+      gaps.push('M365 Attach');
+    }
+    // audio
+    if (emp.dept === 'Home Theatre' && getMetricClass(emp.audio, 'audio', emp.dept, emp) === 'text-danger') {
+      gaps.push('Audio Attach');
     }
     
     if (gaps.length === 0) return 'None';
@@ -369,6 +317,19 @@ export default function StoreRoster({
             {showAddForm ? 'Close Associate Form' : '+ Add Associate'}
           </button>
 
+          <button 
+            className="btn btn-secondary" 
+            style={{ padding: '0.55rem 1rem', fontSize: '0.8rem', height: '38px', borderColor: 'var(--text-muted)' }} 
+            onClick={() => {
+              setShowImporter(true);
+              setShowAddForm(false);
+              setShowNewPeriodForm(false);
+            }}
+          >
+            Import CSV
+          </button>
+
+
           <div style={{ position: 'relative', width: '200px' }}>
             <input 
               type="text" 
@@ -449,127 +410,12 @@ export default function StoreRoster({
         </div>
       )}
 
-      {/* Collapsible Add Associate Card */}
-      {showAddForm && (
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', border: '1.5px solid var(--bby-blue)', padding: '1.5rem 2rem', animation: 'fadeIn 0.3s ease' }}>
-          <h3 style={{ fontSize: '1.2rem', color: '#fff', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', fontFamily: 'var(--font-heading)', letterSpacing: '-0.01em' }}>
-            Add New Associate to Roster
-          </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-            <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>Associate Name:</label>
-              <input 
-                type="text" 
-                className="form-control" 
-                placeholder="e.g. Sarah Jennings"
-                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                value={newEmpForm.name}
-                onChange={(e) => setNewEmpForm({ ...newEmpForm, name: e.target.value })}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>Department:</label>
-              <select 
-                className="form-control"
-                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                value={newEmpForm.dept}
-                onChange={(e) => setNewEmpForm({ ...newEmpForm, dept: e.target.value })}
-              >
-                {DEPARTMENTS.filter(d => d !== 'All').map(d => (
-                  <option key={d} value={d}>{d}</option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>Monthly Hours Worked:</label>
-              <input 
-                type="number" 
-                className="form-control" 
-                placeholder="e.g. 45.5"
-                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                value={newEmpForm.hours}
-                onChange={(e) => setNewEmpForm({ ...newEmpForm, hours: e.target.value })}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>Memberships Attach:</label>
-              <input 
-                type="number" 
-                className="form-control" 
-                placeholder="e.g. 6"
-                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                value={newEmpForm.memberships}
-                onChange={(e) => setNewEmpForm({ ...newEmpForm, memberships: e.target.value })}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>Credit Card Apps:</label>
-              <input 
-                type="number" 
-                className="form-control" 
-                placeholder="e.g. 3"
-                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                value={newEmpForm.creditCards}
-                onChange={(e) => setNewEmpForm({ ...newEmpForm, creditCards: e.target.value })}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>GSP/Warranty Attach %:</label>
-              <input 
-                type="number" 
-                className="form-control" 
-                placeholder="e.g. 10.5"
-                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                value={newEmpForm.warranty}
-                onChange={(e) => setNewEmpForm({ ...newEmpForm, warranty: e.target.value })}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>5 Star Surveys (Count or Failing):</label>
-              <input 
-                type="text" 
-                className="form-control" 
-                placeholder="e.g. 4 or Failing"
-                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                value={newEmpForm.surveys}
-                onChange={(e) => setNewEmpForm({ ...newEmpForm, surveys: e.target.value })}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>RPH ($ index):</label>
-              <input 
-                type="number" 
-                className="form-control" 
-                placeholder="e.g. 950"
-                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                value={newEmpForm.rph}
-                onChange={(e) => setNewEmpForm({ ...newEmpForm, rph: e.target.value })}
-              />
-            </div>
-          </div>
-          
-          <div className="form-group">
-            <label className="form-label" style={{ fontSize: '0.8rem' }}>Opportunity Gap Description (or None):</label>
-            <input 
-              type="text" 
-              className="form-control" 
-              placeholder="e.g. GSP Attach (4.0% vs 12.0%) or None"
-              style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-              value={newEmpForm.gap}
-              onChange={(e) => setNewEmpForm({ ...newEmpForm, gap: e.target.value })}
-            />
-          </div>
-
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
-            <button className="btn btn-secondary" style={{ padding: '0.55rem 1.25rem' }} onClick={() => setShowAddForm(false)}>
-              Cancel
-            </button>
-            <button className="btn btn-primary" style={{ padding: '0.55rem 1.25rem' }} onClick={handleSubmitAddEmployee}>
-              Add Associate to Roster
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Add Associate Modal */}
+      <AddEmployeeModal
+        isOpen={showAddForm}
+        onClose={() => setShowAddForm(false)}
+        onAddEmployee={onAddEmployee}
+      />
 
       {/* Roster Table Card */}
       <div className="glass-card" style={{ padding: '0', overflow: 'hidden' }}>
@@ -586,6 +432,8 @@ export default function StoreRoster({
                 <th style={{ padding: '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>Warranty/GSP</th>
                 <th style={{ padding: '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>5 Star</th>
                 <th style={{ padding: '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>RPH</th>
+                <th style={{ padding: '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>Basket ($)</th>
+                <th style={{ padding: '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>Dept Attach</th>
                 <th style={{ padding: '1.25rem 1.5rem', fontWeight: 600 }}>Status</th>
                 <th style={{ padding: '1.25rem 1.5rem', fontWeight: 600, textAlign: 'right' }}>Actions</th>
               </tr>
@@ -593,7 +441,7 @@ export default function StoreRoster({
             <tbody>
               {filteredRoster.length === 0 ? (
                 <tr>
-                  <td colSpan="10" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                  <td colSpan="12" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
                     <Users size={32} color="var(--text-muted)" style={{ marginBottom: '0.75rem', opacity: 0.5 }} />
                     <p>No associates match your active filters.</p>
                   </td>
@@ -611,7 +459,21 @@ export default function StoreRoster({
                     onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.01)'}
                   >
                     <td style={{ padding: '1rem 1.5rem', fontWeight: 600, color: '#fff' }}>
-                      {emp.name}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <span 
+                          style={{ cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'rgba(255,255,255,0.3)' }}
+                          onClick={() => setSelectedProfileEmployee(emp)}
+                          onMouseEnter={(e) => e.currentTarget.style.color = 'var(--bby-blue)'}
+                          onMouseLeave={(e) => e.currentTarget.style.color = '#fff'}
+                        >
+                          {emp.name}
+                        </span>
+                        {emp.focus5 && (
+                          <span style={{ fontSize: '0.65rem', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid var(--error)', color: 'var(--error)', padding: '0.15rem 0.35rem', borderRadius: '6px', fontWeight: 700, letterSpacing: '0.02em' }}>
+                            🔥 FOCUS 5
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td style={{ padding: '1rem 1rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
                       {emp.hours} hrs
@@ -658,6 +520,12 @@ export default function StoreRoster({
                     </td>
                     <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={getMetricClass(emp.rph, 'rph', emp.dept, emp)}>
                       ${emp.rph}
+                    </td>
+                    <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={(emp.dept === 'Computing' || emp.dept === 'Home Theatre') ? getMetricClass(emp.basket, 'basket', emp.dept, emp) : ''}>
+                      {(emp.dept === 'Computing' || emp.dept === 'Home Theatre') ? `$${parseFloat(emp.basket || 0).toFixed(2)}` : '—'}
+                    </td>
+                    <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={emp.dept === 'Computing' ? getMetricClass(emp.m365, 'm365', emp.dept, emp) : emp.dept === 'Home Theatre' ? getMetricClass(emp.audio, 'audio', emp.dept, emp) : ''}>
+                      {emp.dept === 'Computing' ? `${(emp.m365 || 0)}% M365` : emp.dept === 'Home Theatre' ? `${(emp.audio || 0)}% Audio` : '—'}
                     </td>
                     <td style={{ padding: '1rem 1.5rem' }}>
                       {getStatusBadge(getEmployeeGap(emp))}
@@ -720,7 +588,19 @@ export default function StoreRoster({
                   {/* Header: Name, Hours, and Status */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
                     <div>
-                      <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#fff', fontWeight: 600 }}>{emp.name}</h4>
+                      <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#fff', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                        <span 
+                          style={{ cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'rgba(255,255,255,0.3)' }}
+                          onClick={() => setSelectedProfileEmployee(emp)}
+                        >
+                          {emp.name}
+                        </span>
+                        {emp.focus5 && (
+                          <span style={{ fontSize: '0.6rem', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid var(--error)', color: 'var(--error)', padding: '0.1rem 0.3rem', borderRadius: '4px', fontWeight: 700 }}>
+                            🔥 FOCUS 5
+                          </span>
+                        )}
+                      </h4>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
                         {emp.hours} hrs worked
                       </div>
@@ -809,6 +689,34 @@ export default function StoreRoster({
                         {emp.dept === 'Computing' ? 'Comp' : emp.dept === 'Home Theatre' ? 'HT' : emp.dept.substring(0, 4)}
                       </span>
                     </div>
+
+                    {/* Additional Department specific mobile metrics */}
+                    {(emp.dept === 'Computing' || emp.dept === 'Home Theatre') && (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Basket</span>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: '0.15rem' }} className={getMetricClass(emp.basket, 'basket', emp.dept, emp)}>
+                          ${parseFloat(emp.basket || 0).toFixed(0)}
+                        </span>
+                      </div>
+                    )}
+
+                    {emp.dept === 'Computing' && (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>M365%</span>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: '0.15rem' }} className={getMetricClass(emp.m365, 'm365', emp.dept, emp)}>
+                          {emp.m365 || 0}%
+                        </span>
+                      </div>
+                    )}
+
+                    {emp.dept === 'Home Theatre' && (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Audio%</span>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: '0.15rem' }} className={getMetricClass(emp.audio, 'audio', emp.dept, emp)}>
+                          {emp.audio || 0}%
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Actions Buttons */}
@@ -876,302 +784,47 @@ export default function StoreRoster({
                 <div><strong>GSP Attach:</strong> {targets.warranty}% attach</div>
                 <div><strong>5 Star Surveys:</strong> {targets.surveys} mentions</div>
                 <div><strong>RPH index:</strong> ${targets.rph}/hr target</div>
+                {targets.basket !== undefined && <div><strong>Basket target:</strong> ${targets.basket}</div>}
+                {targets.m365 !== undefined && <div><strong>M365 Attach:</strong> {targets.m365}%</div>}
+                {targets.audio !== undefined && <div><strong>Audio Attach:</strong> {targets.audio}%</div>}
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Edit Performance Metrics Modal */}
-      {editingEmployee && (
-        <div className="modal-overlay" onClick={() => setEditingEmployee(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ border: '2.5px solid var(--bby-blue)', maxWidth: '650px' }}>
-            <div className="modal-header">
-              <h3 style={{ fontSize: '1.25rem', color: '#fff', fontFamily: 'var(--font-heading)', margin: 0 }}>
-                Update Weekly Performance: {editingEmployee.name}
-              </h3>
-              <button 
-                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.25rem' }} 
-                onClick={() => setEditingEmployee(null)}
-              >
-                &times;
-              </button>
-            </div>
-            
-            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxHeight: '80vh', overflowY: 'auto' }}>
-              
-              {/* Wizard Step Progress Indicator */}
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center', 
-                background: 'rgba(0, 70, 190, 0.1)', 
-                border: '1px solid var(--border-glass)', 
-                borderRadius: '12px',
-                padding: '0.65rem 1rem',
-                marginBottom: '0.5rem'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', opacity: currentEditStep === 1 ? 1 : 0.5 }}>
-                  <span style={{ 
-                    background: currentEditStep === 1 ? 'var(--bby-blue)' : 'rgba(255,255,255,0.1)', 
-                    color: '#fff', 
-                    width: '20px', 
-                    height: '20px', 
-                    borderRadius: '50%', 
-                    display: 'inline-flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    fontSize: '0.75rem',
-                    fontWeight: 700
-                  }}>1</span>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Profile</span>
-                </div>
-                <div style={{ width: '20px', height: '1px', background: 'rgba(255,255,255,0.1)' }} />
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', opacity: currentEditStep === 2 ? 1 : 0.5 }}>
-                  <span style={{ 
-                    background: currentEditStep === 2 ? 'var(--bby-blue)' : 'rgba(255,255,255,0.1)', 
-                    color: '#fff', 
-                    width: '20px', 
-                    height: '20px', 
-                    borderRadius: '50%', 
-                    display: 'inline-flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    fontSize: '0.75rem',
-                    fontWeight: 700
-                  }}>2</span>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Targets</span>
-                </div>
-                <div style={{ width: '20px', height: '1px', background: 'rgba(255,255,255,0.1)' }} />
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', opacity: currentEditStep === 3 ? 1 : 0.5 }}>
-                  <span style={{ 
-                    background: currentEditStep === 3 ? 'var(--bby-blue)' : 'rgba(255,255,255,0.1)', 
-                    color: '#fff', 
-                    width: '20px', 
-                    height: '20px', 
-                    borderRadius: '50%', 
-                    display: 'inline-flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    fontSize: '0.75rem',
-                    fontWeight: 700
-                  }}>3</span>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Ratings</span>
-                </div>
-              </div>
+      {/* Performance Wizard Modal */}
+      <PerformanceWizardModal
+        isOpen={!!editingEmployee}
+        onClose={() => setEditingEmployee(null)}
+        employee={editingEmployee}
+        onSave={handleSaveEdit}
+        activePeriod={activePeriod}
+        deptGoals={deptGoals}
+      />
 
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '-0.25rem' }}>
-                Period: <strong>{activePeriod}</strong> | Audited against <strong>{editForm.dept}</strong> goals.
-              </p>
-              
-              {/* STEP 1: General Info */}
-              {currentEditStep === 1 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.25s ease' }}>
-                  <div className="form-group">
-                    <label className="form-label" style={{ fontSize: '0.8rem' }}>Associate Name:</label>
-                    <input 
-                      type="text" 
-                      className="form-control" 
-                      style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                      value={editForm.name}
-                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                    />
-                  </div>
-                  
-                  <div className="form-group">
-                    <label className="form-label" style={{ fontSize: '0.8rem' }}>Department:</label>
-                    <select 
-                      className="form-control"
-                      style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                      value={editForm.dept}
-                      onChange={(e) => setEditForm({ ...editForm, dept: e.target.value })}
-                    >
-                      {DEPARTMENTS.filter(d => d !== 'All').map(d => (
-                        <option key={d} value={d}>{d}</option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div className="form-group">
-                    <label className="form-label" style={{ fontSize: '0.8rem' }}>Hours Worked:</label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, hours: Math.max(0, parseFloat((parseFloat(prev.hours) - 1).toFixed(1))) }))}>-</button>
-                      <input 
-                        type="number" 
-                        className="form-control" 
-                        style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
-                        value={editForm.hours}
-                        onChange={(e) => setEditForm({ ...editForm, hours: e.target.value })}
-                      />
-                      <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, hours: parseFloat((parseFloat(prev.hours) + 1).toFixed(1)) }))}>+</button>
-                    </div>
-                  </div>
-                </div>
-              )}
+      {/* Roster CSV Importer Modal */}
+      <RosterImporterModal
+        isOpen={showImporter}
+        onClose={() => setShowImporter(false)}
+        onImport={(importedList) => {
+          if (onBulkImportEmployees) {
+            onBulkImportEmployees(importedList);
+          }
+          setShowImporter(false);
+        }}
+      />
 
-              {/* STEP 2: Attach Targets */}
-              {currentEditStep === 2 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.25s ease' }}>
-                  <div className="form-group">
-                    <label className="form-label" style={{ fontSize: '0.8rem' }}>Memberships Attach:</label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, memberships: Math.max(0, parseInt(prev.memberships) - 1) }))}>-</button>
-                      <input 
-                        type="number" 
-                        className="form-control" 
-                        style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
-                        value={editForm.memberships}
-                        onChange={(e) => setEditForm({ ...editForm, memberships: e.target.value })}
-                      />
-                      <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, memberships: parseInt(prev.memberships) + 1 }))}>+</button>
-                    </div>
-                  </div>
-                  
-                  <div className="form-group">
-                    <label className="form-label" style={{ fontSize: '0.8rem' }}>BBY Credit Card Apps:</label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, creditCards: Math.max(0, parseInt(prev.creditCards) - 1) }))}>-</button>
-                      <input 
-                        type="number" 
-                        className="form-control" 
-                        style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
-                        value={editForm.creditCards}
-                        onChange={(e) => setEditForm({ ...editForm, creditCards: e.target.value })}
-                      />
-                      <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, creditCards: parseInt(prev.creditCards) + 1 }))}>+</button>
-                    </div>
-                  </div>
-                  
-                  <div className="form-group">
-                    <label className="form-label" style={{ fontSize: '0.8rem' }}>GSP/Warranty Attach %:</label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, warranty: Math.max(0, parseFloat((parseFloat(prev.warranty) - 1).toFixed(1))) }))}>-</button>
-                      <input 
-                        type="number" 
-                        className="form-control" 
-                        style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
-                        value={editForm.warranty}
-                        onChange={(e) => setEditForm({ ...editForm, warranty: e.target.value })}
-                      />
-                      <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, warranty: parseFloat((parseFloat(prev.warranty) + 1).toFixed(1)) }))}>+</button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 3: Quality & Gap */}
-              {currentEditStep === 3 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.25s ease' }}>
-                  <div className="form-group">
-                    <label className="form-label" style={{ fontSize: '0.8rem' }}>5 Star Surveys:</label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <button 
-                        type="button" 
-                        className="stepper-btn" 
-                        onClick={() => {
-                          setEditForm(prev => {
-                            if (prev.surveys === 'Failing') {
-                              return { ...prev, surveys: '0' };
-                            }
-                            const val = parseInt(prev.surveys) || 0;
-                            if (val <= 0) {
-                              return { ...prev, surveys: 'Failing' };
-                            }
-                            return { ...prev, surveys: (val - 1).toString() };
-                          });
-                        }}
-                      >-</button>
-                      <input 
-                        type="text" 
-                        className="form-control" 
-                        style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
-                        value={editForm.surveys}
-                        onChange={(e) => setEditForm({ ...editForm, surveys: e.target.value })}
-                      />
-                      <button 
-                        type="button" 
-                        className="stepper-btn" 
-                        onClick={() => {
-                          setEditForm(prev => {
-                            if (prev.surveys === 'Failing') {
-                              return { ...prev, surveys: '1' };
-                            }
-                            const val = parseInt(prev.surveys) || 0;
-                            return { ...prev, surveys: (val + 1).toString() };
-                          });
-                        }}
-                      >+</button>
-                    </div>
-                  </div>
-                  
-                  <div className="form-group">
-                    <label className="form-label" style={{ fontSize: '0.8rem' }}>RPH index ($):</label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, rph: Math.max(0, parseInt(prev.rph) - 50) }))}>-50</button>
-                      <input 
-                        type="number" 
-                        className="form-control" 
-                        style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
-                        value={editForm.rph}
-                        onChange={(e) => setEditForm({ ...editForm, rph: e.target.value })}
-                      />
-                      <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, rph: parseInt(prev.rph) + 50 }))}>+50</button>
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label" style={{ fontSize: '0.8rem' }}>Opportunity Gap Description:</label>
-                    <input 
-                      type="text" 
-                      className="form-control" 
-                      style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                      value={editForm.gap}
-                      onChange={(e) => setEditForm({ ...editForm, gap: e.target.value })}
-                    />
-                  </div>
-                </div>
-              )}
-              
-              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'space-between', marginTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
-                <button 
-                  type="button"
-                  className="btn btn-secondary" 
-                  style={{ padding: '0.55rem 1.25rem' }} 
-                  onClick={() => {
-                    if (currentEditStep > 1) {
-                      setCurrentEditStep(currentEditStep - 1);
-                    } else {
-                      setEditingEmployee(null);
-                    }
-                  }}
-                >
-                  {currentEditStep > 1 ? 'Back' : 'Discard'}
-                </button>
-                
-                {currentEditStep < 3 ? (
-                  <button 
-                    type="button"
-                    className="btn btn-primary" 
-                    style={{ padding: '0.55rem 1.25rem', background: 'var(--bby-blue)' }} 
-                    onClick={() => setCurrentEditStep(currentEditStep + 1)}
-                  >
-                    Next
-                  </button>
-                ) : (
-                  <button 
-                    type="button"
-                    className="btn btn-primary" 
-                    style={{ padding: '0.55rem 1.25rem', background: 'var(--success)' }} 
-                    onClick={handleSaveEdit}
-                  >
-                    Save Metrics
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Associate Profile Modal */}
+      <AssociateProfileModal
+        isOpen={!!selectedProfileEmployee}
+        onClose={() => setSelectedProfileEmployee(null)}
+        employee={selectedProfileEmployee}
+        rosterHistory={rosterHistory}
+        coachingLogs={coachingLogs}
+        followUpTasks={followUpTasks}
+        deptGoals={deptGoals}
+      />
 
     </div>
   );

@@ -830,56 +830,6 @@ export default function Dashboard({
             </div>
           </div>
 
-          {/* Certifications Card */}
-          <div className="glass-card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Award size={20} color="var(--bby-blue)" /> Certification Status
-              </h3>
-              <span className="tag-pill tag-pill-active">{activeCerts} of {certifications.length} Earned</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {certifications.slice(0, 3).map(cert => (
-                <div 
-                  key={cert.id} 
-                  style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center', 
-                    padding: '1rem', 
-                    background: 'rgba(255, 255, 255, 0.02)', 
-                    border: '1px solid var(--border-glass)',
-                    borderRadius: '12px' 
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{ 
-                      padding: '0.5rem', 
-                      borderRadius: '8px', 
-                      background: cert.earned ? 'rgba(255, 230, 0, 0.08)' : 'rgba(255,255,255,0.02)',
-                      border: `1px solid ${cert.earned ? 'rgba(255,230,0,0.3)' : 'var(--border-glass)'}`
-                    }}>
-                      <Award size={20} color={cert.earned ? 'var(--bby-yellow)' : 'var(--text-muted)'} />
-                    </div>
-                    <div>
-                      <h4 style={{ fontSize: '0.95rem' }}>{cert.title}</h4>
-                      <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{cert.category}</p>
-                    </div>
-                  </div>
-                  <span style={{ 
-                    fontSize: '0.75rem', 
-                    fontWeight: 700, 
-                    color: cert.earned ? 'var(--bby-yellow)' : 'var(--text-muted)' 
-                  }}>
-                    {cert.earned ? 'EARNED' : 'LOCKED'}
-                  </span>
-                </div>
-              ))}
-              <button className="btn btn-secondary" style={{ width: '100%', padding: '0.65rem' }} onClick={() => onNavigate('certification')}>
-                View Certification Center
-              </button>
-            </div>
-          </div>
 
           {/* Store Performance Leaderboard */}
           <div className="glass-card">
@@ -1051,6 +1001,57 @@ export default function Dashboard({
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Certifications Card */}
+          <div className="glass-card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Award size={20} color="var(--bby-blue)" /> Certification Status
+              </h3>
+              <span className="tag-pill tag-pill-active">{activeCerts} of {certifications.length} Earned</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {certifications.slice(0, 3).map(cert => (
+                <div 
+                  key={cert.id} 
+                  style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    padding: '1rem', 
+                    background: 'rgba(255, 255, 255, 0.02)', 
+                    border: '1px solid var(--border-glass)',
+                    borderRadius: '12px' 
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ 
+                      padding: '0.5rem', 
+                      borderRadius: '8px', 
+                      background: cert.earned ? 'rgba(255, 230, 0, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                      border: `1px solid ${cert.earned ? 'rgba(255, 230, 0, 0.3)' : 'var(--border-glass)'}`
+                    }}>
+                      <Award size={20} color={cert.earned ? 'var(--bby-yellow)' : 'var(--text-muted)'} />
+                    </div>
+                    <div>
+                      <h4 style={{ fontSize: '0.95rem' }}>{cert.title}</h4>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{cert.category}</p>
+                    </div>
+                  </div>
+                  <span style={{ 
+                    fontSize: '0.75rem', 
+                    fontWeight: 700, 
+                    color: cert.earned ? 'var(--bby-yellow)' : 'var(--text-muted)' 
+                  }}>
+                    {cert.earned ? 'EARNED' : 'LOCKED'}
+                  </span>
+                </div>
+              ))}
+              <button className="btn btn-secondary" style={{ width: '100%', padding: '0.65rem' }} onClick={() => onNavigate('certification')}>
+                View Certification Center
+              </button>
+            </div>
           </div>
 
           {/* Recent Sessions Log */}

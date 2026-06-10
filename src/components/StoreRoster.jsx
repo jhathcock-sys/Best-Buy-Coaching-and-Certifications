@@ -4,6 +4,7 @@ import AddEmployeeModal from './AddEmployeeModal';
 import PerformanceWizardModal from './PerformanceWizardModal';
 import RosterImporterModal from './RosterImporterModal';
 import AssociateProfileModal from './AssociateProfileModal';
+import { calculateCVI } from '../store/cviHelper';
 
 
 export default function StoreRoster({ 
@@ -459,7 +460,7 @@ export default function StoreRoster({
                     onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.01)'}
                   >
                     <td style={{ padding: '1rem 1.5rem', fontWeight: 600, color: '#fff' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                         <span 
                           style={{ cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'rgba(255,255,255,0.3)' }}
                           onClick={() => setSelectedProfileEmployee(emp)}
@@ -468,6 +469,44 @@ export default function StoreRoster({
                         >
                           {emp.name}
                         </span>
+                        {(() => {
+                          const cvi = calculateCVI(emp, rosterHistory, activePeriod);
+                          let badgeBg = 'rgba(255, 255, 255, 0.05)';
+                          let badgeColor = 'var(--text-secondary)';
+                          let badgeBorder = 'rgba(255, 255, 255, 0.1)';
+                          if (cvi.includes('Accelerating')) {
+                            badgeBg = 'rgba(16, 185, 129, 0.15)';
+                            badgeColor = 'var(--success)';
+                            badgeBorder = 'rgba(16, 185, 129, 0.3)';
+                          } else if (cvi.includes('Needs Review')) {
+                            badgeBg = 'rgba(239, 68, 68, 0.15)';
+                            badgeColor = 'var(--error)';
+                            badgeBorder = 'rgba(239, 68, 68, 0.3)';
+                          } else if (cvi.includes('Neutral')) {
+                            badgeBg = 'rgba(245, 158, 11, 0.15)';
+                            badgeColor = 'var(--warning)';
+                            badgeBorder = 'rgba(245, 158, 11, 0.3)';
+                          }
+                          return (
+                            <span 
+                              title="Coaching Velocity Index (Month over Month growth velocity)"
+                              style={{ 
+                                fontSize: '0.65rem', 
+                                background: badgeBg, 
+                                border: `1px solid ${badgeBorder}`, 
+                                color: badgeColor, 
+                                padding: '0.15rem 0.35rem', 
+                                borderRadius: '6px', 
+                                fontWeight: 700,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.15rem'
+                              }}
+                            >
+                              📈 CVI: {cvi.split(' ')[0]}
+                            </span>
+                          );
+                        })()}
                         {emp.focus5 && (
                           <span style={{ fontSize: '0.65rem', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid var(--error)', color: 'var(--error)', padding: '0.15rem 0.35rem', borderRadius: '6px', fontWeight: 700, letterSpacing: '0.02em' }}>
                             🔥 FOCUS 5
@@ -595,6 +634,44 @@ export default function StoreRoster({
                         >
                           {emp.name}
                         </span>
+                        {(() => {
+                          const cvi = calculateCVI(emp, rosterHistory, activePeriod);
+                          let badgeBg = 'rgba(255, 255, 255, 0.05)';
+                          let badgeColor = 'var(--text-secondary)';
+                          let badgeBorder = 'rgba(255, 255, 255, 0.1)';
+                          if (cvi.includes('Accelerating')) {
+                            badgeBg = 'rgba(16, 185, 129, 0.15)';
+                            badgeColor = 'var(--success)';
+                            badgeBorder = 'rgba(16, 185, 129, 0.3)';
+                          } else if (cvi.includes('Needs Review')) {
+                            badgeBg = 'rgba(239, 68, 68, 0.15)';
+                            badgeColor = 'var(--error)';
+                            badgeBorder = 'rgba(239, 68, 68, 0.3)';
+                          } else if (cvi.includes('Neutral')) {
+                            badgeBg = 'rgba(245, 158, 11, 0.15)';
+                            badgeColor = 'var(--warning)';
+                            badgeBorder = 'rgba(245, 158, 11, 0.3)';
+                          }
+                          return (
+                            <span 
+                              title="Coaching Velocity Index (Month over Month growth velocity)"
+                              style={{ 
+                                fontSize: '0.6rem', 
+                                background: badgeBg, 
+                                border: `1px solid ${badgeBorder}`, 
+                                color: badgeColor, 
+                                padding: '0.15rem 0.3rem', 
+                                borderRadius: '4px', 
+                                fontWeight: 700,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.15rem'
+                              }}
+                            >
+                              📈 CVI: {cvi.split(' ')[0]}
+                            </span>
+                          );
+                        })()}
                         {emp.focus5 && (
                           <span style={{ fontSize: '0.6rem', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid var(--error)', color: 'var(--error)', padding: '0.1rem 0.3rem', borderRadius: '4px', fontWeight: 700 }}>
                             🔥 FOCUS 5
@@ -824,6 +901,7 @@ export default function StoreRoster({
         coachingLogs={coachingLogs}
         followUpTasks={followUpTasks}
         deptGoals={deptGoals}
+        activePeriod={activePeriod}
       />
 
     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { X, TrendingUp, ClipboardList, Calendar, Volume2, Square, Clock, AlertCircle, CheckCircle } from 'lucide-react';
 import MetricSparkline from './MetricSparkline';
+import { calculateCVI } from '../store/cviHelper';
 
 export default function AssociateProfileModal({
   isOpen,
@@ -9,7 +10,8 @@ export default function AssociateProfileModal({
   rosterHistory = {},
   coachingLogs = [],
   followUpTasks = [],
-  deptGoals = {}
+  deptGoals = {},
+  activePeriod
 }) {
   const [activeTab, setActiveTab] = useState('trends');
   const [playingLogId, setPlayingLogId] = useState(null);
@@ -171,9 +173,50 @@ export default function AssociateProfileModal({
                 </span>
               )}
             </div>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '0.15rem 0 0 0' }}>
-              Associate Profile & Coaching Dashboard
-            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.35rem', flexWrap: 'wrap' }}>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0 }}>
+                Associate Profile & Coaching Dashboard
+              </p>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>•</span>
+              {(() => {
+                const cvi = calculateCVI(employee, rosterHistory, activePeriod);
+                let badgeBg = 'rgba(255, 255, 255, 0.05)';
+                let badgeColor = 'var(--text-secondary)';
+                let badgeBorder = 'rgba(255, 255, 255, 0.1)';
+                if (cvi.includes('Accelerating')) {
+                  badgeBg = 'rgba(16, 185, 129, 0.15)';
+                  badgeColor = 'var(--success)';
+                  badgeBorder = 'rgba(16, 185, 129, 0.3)';
+                } else if (cvi.includes('Needs Review')) {
+                  badgeBg = 'rgba(239, 68, 68, 0.15)';
+                  badgeColor = 'var(--error)';
+                  badgeBorder = 'rgba(239, 68, 68, 0.3)';
+                } else if (cvi.includes('Neutral')) {
+                  badgeBg = 'rgba(245, 158, 11, 0.15)';
+                  badgeColor = 'var(--warning)';
+                  badgeBorder = 'rgba(245, 158, 11, 0.3)';
+                }
+                return (
+                  <span 
+                    title="Coaching Velocity Index (Month over Month growth velocity)"
+                    style={{ 
+                      fontSize: '0.7rem', 
+                      background: badgeBg, 
+                      border: `1px solid ${badgeBorder}`, 
+                      color: badgeColor, 
+                      padding: '0.15rem 0.45rem', 
+                      borderRadius: '6px', 
+                      fontWeight: 700,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.2rem'
+                    }}
+                  >
+                    📈 CVI: {cvi}
+                  </span>
+                );
+              })()}
+            </div>
           </div>
           <button 
             type="button"

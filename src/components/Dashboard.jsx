@@ -1,8 +1,110 @@
 import React, { useMemo, useState } from 'react';
-import { Award, TrendingUp, Compass, ShieldCheck, CreditCard, Star, DollarSign, ArrowUpRight, MessageSquare, Play, ClipboardList, Check } from 'lucide-react';
-export default function Dashboard({ metrics, certifications, recentSessions, onNavigate, roster = [], followUpTasks = [], onCompleteFollowUpTask, deptGoals = {}, onCoachEmployee, onCreateLog, onShadowEmployee }) {
+import { Award, TrendingUp, Compass, ShieldCheck, CreditCard, Star, DollarSign, ArrowUpRight, MessageSquare, Play, ClipboardList, Check, AlertCircle } from 'lucide-react';
+export default function Dashboard({ 
+  metrics, 
+  certifications, 
+  recentSessions, 
+  onNavigate, 
+  roster = [], 
+  followUpTasks = [], 
+  onCompleteFollowUpTask, 
+  deptGoals = {}, 
+  onCoachEmployee, 
+  onCreateLog, 
+  onShadowEmployee,
+  floorLeaderShifts = [],
+  coachingLogs = [],
+  activePeriod,
+  rosterHistory = {}
+}) {
   const [rankMetric, setRankMetric] = useState('memberships');
   const [chartMetric, setChartMetric] = useState('memberships');
+
+  // 1. Focus 5 Shift Alerts calculation
+  const activeFocus5Alerts = useMemo(() => {
+    if (!floorLeaderShifts || floorLeaderShifts.length === 0) return [];
+    
+    const sortedShifts = [...floorLeaderShifts].sort((a, b) => b.timestamp - a.timestamp);
+    const mostRecentShift = sortedShifts[0];
+    
+    const todayStr = new Date().toLocaleDateString();
+    if (mostRecentShift.date !== todayStr) return [];
+    
+    const zoneAssignments = mostRecentShift.zoneAssignments || {};
+    const alerts = [];
+    
+    const todayStart = new Date().setHours(0,0,0,0);
+    const todayLogs = (coachingLogs || []).filter(log => {
+      const logTime = log.timestamp || 0;
+      return logTime >= todayStart;
+    });
+
+    Object.keys(zoneAssignments).forEach(zone => {
+      const empIds = zoneAssignments[zone] || [];
+      empIds.forEach(empId => {
+        const emp = roster.find(e => e.id === empId);
+        if (emp && emp.focus5) {
+          const hasLogToday = todayLogs.some(log => log.employeeId === empId || log.employeeName === emp.name);
+          if (!hasLogToday) {
+            alerts.push({
+              employee: emp,
+              zone: zone
+            });
+          }
+        }
+      });
+    });
+    
+    return alerts;
+  }, [floorLeaderShifts, coachingLogs, roster]);
+
+  // 2. Heatmap logs calculation
+  const activePeriodLogs = useMemo(() => {
+    if (!activePeriod) return coachingLogs || [];
+    const [activeMonthStr, activeYearStr] = activePeriod.split(' ');
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const activeMonthIdx = months.findIndex(m => activeMonthStr.startsWith(m));
+    
+    return (coachingLogs || []).filter(log => {
+      const logDate = log.timestamp ? new Date(log.timestamp) : new Date(log.date);
+      if (isNaN(logDate.getTime())) return true;
+      
+      const logMonth = logDate.getMonth();
+      const logYear = logDate.getFullYear();
+      
+      return logMonth === activeMonthIdx && logYear === parseInt(activeYearStr);
+    });
+  }, [coachingLogs, activePeriod]);
+
+  // 3. Heatmap counts grouping
+  const shadowingHeatmapData = useMemo(() => {
+    const counts = {
+      'Front End': 0,
+      'Computing': 0,
+      'Mobile': 0,
+      'Home Theatre': 0,
+      'Geek Squad': 0,
+      'Appliances': 0
+    };
+    
+    activePeriodLogs.forEach(log => {
+      const emp = roster.find(e => e.id === log.employeeId || e.name === log.employeeName);
+      const dept = emp ? emp.dept : null;
+      if (dept && dept in counts) {
+        counts[dept]++;
+      } else {
+        for (const period of Object.keys(rosterHistory)) {
+          const histEmp = rosterHistory[period]?.find(e => e.id === log.employeeId || e.name === log.employeeName);
+          if (histEmp && histEmp.dept in counts) {
+            counts[histEmp.dept]++;
+            break;
+          }
+        }
+      }
+    });
+    
+    return counts;
+  }, [activePeriodLogs, roster, rosterHistory]);
 
   const chartData = useMemo(() => {
     const isMemb = chartMetric === 'memberships';
@@ -256,6 +358,49 @@ export default function Dashboard({ metrics, certifications, recentSessions, onN
         </div>
       </div>
 
+      {/* Focus 5 Alerts Console */}
+      {activeFocus5Alerts.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', animation: 'fadeIn 0.4s ease' }}>
+          {activeFocus5Alerts.map(({ employee, zone }) => (
+            <div 
+              key={employee.id}
+              className="glass-card" 
+              style={{ 
+                borderLeft: '4px solid var(--error)', 
+                background: 'rgba(239, 68, 68, 0.08)',
+                padding: '1.25rem 1.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '1rem'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ background: 'rgba(239, 68, 68, 0.15)', padding: '0.75rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <AlertCircle color="var(--error)" size={24} />
+                </div>
+                <div>
+                  <h4 style={{ margin: 0, color: '#fff', fontSize: '1.05rem', fontWeight: 600 }}>
+                    Focus 5 Validation Warning
+                  </h4>
+                  <p style={{ margin: '0.25rem 0 0 0', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+                    <strong>{employee.name}</strong> (Zoned in <strong>{zone}</strong>) has no observations logged today. Shadow them on the floor to validate behavior.
+                  </p>
+                </div>
+              </div>
+              <button 
+                className="btn btn-accent" 
+                style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', background: 'var(--error)', borderColor: 'var(--error)' }}
+                onClick={() => onShadowEmployee && onShadowEmployee(employee)}
+              >
+                Shadow Now
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Core Metrics Grid */}
       <div className="metrics-grid">
         <CircularGauge 
@@ -402,6 +547,65 @@ export default function Dashboard({ metrics, certifications, recentSessions, onN
               </g>
             ))}
           </svg>
+        </div>
+      </div>
+
+      {/* Shadowing Coverage Heatmap */}
+      <div className="glass-card" style={{ padding: '1.75rem' }}>
+        <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 0.25rem 0' }}>
+          <ShieldCheck size={20} color="var(--bby-blue)" /> Shadowing Coverage Heatmap
+        </h3>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', margin: '0 0 1.5rem 0' }}>
+          Real-time shadowing observations logged by department for active period (<strong>{activePeriod}</strong>). Deep red highlights departments requiring focus.
+        </p>
+        
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
+          gap: '1.25rem' 
+        }}>
+          {Object.entries(shadowingHeatmapData).map(([dept, count]) => {
+            const hue = Math.min(count * 45, 180);
+            const cellColor = `hsl(${hue}, 70%, 20%)`;
+            const borderColor = `hsl(${hue}, 70%, 35%)`;
+            return (
+              <div 
+                key={dept} 
+                style={{ 
+                  background: `linear-gradient(135deg, ${cellColor}, rgba(255,255,255,0.02))`, 
+                  border: `1px solid ${borderColor}`,
+                  borderRadius: '12px',
+                  padding: '1.25rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.25rem',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                  cursor: 'pointer',
+                  minHeight: '100px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = `0 8px 24px rgba(${hue === 0 ? '239, 68, 68' : '16, 185, 129'}, 0.2)`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                <span style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.7)', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                  {dept}
+                </span>
+                <span style={{ fontSize: '2rem', fontWeight: 800, color: '#fff', fontFamily: 'var(--font-heading)', margin: '0.25rem 0' }}>
+                  {count}
+                </span>
+                <span style={{ fontSize: '0.7rem', color: 'rgba(255, 255, 255, 0.5)' }}>
+                  {count === 1 ? 'Observation' : 'Observations'}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
 

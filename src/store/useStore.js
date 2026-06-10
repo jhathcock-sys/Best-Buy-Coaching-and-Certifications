@@ -287,7 +287,7 @@ export const useStore = create((set, get) => {
       set({ rosterHistory: newHistory });
       localStorage.setItem('bby_roster_history', JSON.stringify(newHistory));
       if (dbConnected) {
-        saveRosterHistoryToCloud(newHistory);
+        saveRosterHistoryToCloud(updated, activePeriod);
       }
     },
 
@@ -305,7 +305,7 @@ export const useStore = create((set, get) => {
       set({ rosterHistory: newHistory });
       localStorage.setItem('bby_roster_history', JSON.stringify(newHistory));
       if (dbConnected) {
-        saveRosterHistoryToCloud(newHistory);
+        saveRosterHistoryToCloud(updated, activePeriod);
       }
     },
 
@@ -341,7 +341,7 @@ export const useStore = create((set, get) => {
       set({ rosterHistory: newHistory });
       localStorage.setItem('bby_roster_history', JSON.stringify(newHistory));
       if (dbConnected) {
-        saveRosterHistoryToCloud(newHistory);
+        saveRosterHistoryToCloud(updated, activePeriod);
       }
     },
 
@@ -383,7 +383,7 @@ export const useStore = create((set, get) => {
       localStorage.setItem('bby_roster_history', JSON.stringify(newHistory));
       localStorage.setItem('bby_active_period', newPeriodName);
       if (dbConnected) {
-        saveRosterHistoryToCloud(newHistory);
+        saveRosterHistoryToCloud(newRoster, newPeriodName);
         saveActivePeriodToCloud(newPeriodName);
       }
     },

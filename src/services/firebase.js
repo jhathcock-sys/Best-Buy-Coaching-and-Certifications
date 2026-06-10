@@ -88,15 +88,22 @@ export const subscribeToActivePeriod = (onUpdate) => {
   });
 };
 
-// Subscribe to Roster History
+// Subscribe to Roster History (Periods Collection Split)
 export const subscribeToRosterHistory = (onUpdate) => {
-  const ref = getStoreDocRef('rosterHistory');
-  if (!ref) return null;
-  return onSnapshot(ref, (snap) => {
-    if (snap.exists()) {
-      onUpdate(snap.data().history || {});
-    }
-  });
+  if (!db) return null;
+  try {
+    const colRef = collection(db, 'stores', 'store-1', 'periods');
+    return onSnapshot(colRef, (snap) => {
+      const periods = {};
+      snap.forEach((doc) => {
+        periods[doc.id] = doc.data().roster || [];
+      });
+      onUpdate(periods);
+    });
+  } catch (e) {
+    console.error('Failed to subscribe to periods collection:', e);
+    return null;
+  }
 };
 
 // Subscribe to Playbook Settings
@@ -134,15 +141,15 @@ export const saveActivePeriodToCloud = async (activePeriod) => {
   }
 };
 
-// Write Roster History
-export const saveRosterHistoryToCloud = async (history) => {
-  const ref = getStoreDocRef('rosterHistory');
-  if (!ref) return false;
+// Write Roster History (Period Document Split)
+export const saveRosterHistoryToCloud = async (roster, periodId) => {
+  if (!db || !periodId) return false;
   try {
-    await setDoc(ref, { history }, { merge: true });
+    const ref = doc(db, 'stores', 'store-1', 'periods', periodId);
+    await setDoc(ref, { roster }, { merge: true });
     return true;
   } catch (e) {
-    console.error('Failed to save rosterHistory to cloud:', e);
+    console.error('Failed to save period roster to cloud:', e);
     return false;
   }
 };
@@ -329,9 +336,13 @@ export const seedOfflineDataToCloud = async (offlineData) => {
       await saveActivePeriodToCloud(activePeriod);
     }
     
-    const rosterSnap = await getDoc(getStoreDocRef('rosterHistory'));
-    if (!rosterSnap.exists() && rosterHistory) {
-      await saveRosterHistoryToCloud(rosterHistory);
+    // Seed periods collection if empty
+    const periodsColRef = collection(db, 'stores', 'store-1', 'periods');
+    const periodsQuerySnap = await getDocs(query(periodsColRef, limit(1)));
+    if (periodsQuerySnap.empty && rosterHistory) {
+      for (const periodId of Object.keys(rosterHistory)) {
+        await saveRosterHistoryToCloud(rosterHistory[periodId], periodId);
+      }
     }
 
     const playbookSnap = await getDoc(getStoreDocRef('playbookSettings'));

@@ -7,10 +7,9 @@ import CoachSimulator from './components/CoachSimulator';
 import PlaybookStudio from './components/PlaybookStudio';
 import CoachingHistory from './components/CoachingHistory';
 import LiveFloorShadow from './components/LiveFloorShadow';
-import BreakroomTV from './components/BreakroomTV';
 import Login from './components/Login';
 import FloorLeaderTracker from './components/FloorLeaderTracker';
-import { Compass, Award, Users, BookOpen, LayoutDashboard, Key, Sparkles, ShieldCheck, ClipboardList, Archive, Tv, Clock, ChevronDown, ChevronRight } from 'lucide-react';
+import { Compass, Award, Users, BookOpen, LayoutDashboard, Key, Sparkles, ShieldCheck, ClipboardList, Archive, Clock, ChevronDown, ChevronRight } from 'lucide-react';
 import { 
   subscribeToActivePeriod, 
   subscribeToRosterHistory, 
@@ -138,7 +137,7 @@ function AppContent() {
 
   // Auto-expand category of active view
   useEffect(() => {
-    if (activeView === 'dashboard' || activeView === 'tv') {
+    if (activeView === 'dashboard') {
       setCollapsedCategories(prev => ({ ...prev, overview: false }));
     } else if (activeView === 'roster' || activeView === 'shadow' || activeView === 'floorLeader') {
       setCollapsedCategories(prev => ({ ...prev, floorOps: false }));
@@ -271,16 +270,7 @@ function AppContent() {
     setActiveView('roleplay');
   };
 
-  if (activeView === 'tv') {
-    return (
-      <BreakroomTV 
-        roster={rosterHistory[activePeriod] || []}
-        certifications={certifications}
-        recentSessions={recentSessions}
-        activePeriod={activePeriod}
-      />
-    );
-  }
+
 
   if (!isAuthenticated) {
     return (
@@ -313,12 +303,6 @@ function AppContent() {
                 onClick={() => setActiveView('dashboard')}
               >
                 <LayoutDashboard className="menu-item-icon" /> Dashboard
-              </li>
-              <li 
-                className={`menu-item ${activeView === 'tv' ? 'active' : ''}`}
-                onClick={() => setActiveView('tv')}
-              >
-                <Tv className="menu-item-icon" /> TV Standings Board
               </li>
             </>
           )}
@@ -443,6 +427,10 @@ function AppContent() {
             onCoachEmployee={handleCoachEmployeeFromRoster}
             onCreateLog={handleCreateLogFromRoster}
             onShadowEmployee={handleShadowEmployeeFromRoster}
+            floorLeaderShifts={floorLeaderShifts}
+            coachingLogs={coachingLogs}
+            activePeriod={activePeriod}
+            rosterHistory={rosterHistory}
           />
         )}
 
@@ -528,6 +516,10 @@ function AppContent() {
             customScenarios={customScenarios}
             onAddCustomScenario={importCustomScenario}
             onDeleteCustomScenario={deleteCustomScenario}
+            rosterHistory={rosterHistory}
+            coachingLogs={coachingLogs}
+            followUpTasks={followUpTasks}
+            floorLeaderShifts={floorLeaderShifts}
           />
         )}
 

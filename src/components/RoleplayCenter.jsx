@@ -3,7 +3,7 @@ import { STANDARD_SCENARIOS, runOfflineSimulationStep, runGeminiSimulationStep, 
 import { MessageSquare, ArrowLeft, RefreshCw, Send, Award, CheckCircle, Sparkles, BookOpen } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
-export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay }) {
+export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, customScenarios = [] }) {
   const { apiKey, setActiveView } = useApp();
   const [selectedScenario, setSelectedScenario] = useState(null);
   const [sessionActive, setSessionActive] = useState(false);
@@ -21,21 +21,8 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay })
   const [isLoading, setIsLoading] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [evaluation, setEvaluation] = useState(null);
-  const [customScenarios, setCustomScenarios] = useState([]);
   
   const chatBottomRef = useRef(null);
-
-  // Load custom scenarios from local storage
-  useEffect(() => {
-    const saved = localStorage.getItem('bby_custom_scenarios');
-    if (saved) {
-      try {
-        setCustomScenarios(JSON.parse(saved));
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  }, []);
 
   const allScenarios = useMemo(() => [...STANDARD_SCENARIOS, ...customScenarios], [customScenarios]);
 

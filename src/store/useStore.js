@@ -12,7 +12,8 @@ import {
   deleteFollowUpTaskFromCloud,
   saveFloorLeaderShiftToCloud,
   deleteFloorLeaderShiftFromCloud,
-  saveCoachingLogToCloud
+  saveCoachingLogToCloud,
+  deleteCoachingLogFromCloud
 } from '../services/firebase';
 
 const INITIAL_ROSTER = [
@@ -419,6 +420,7 @@ export const useStore = create((set, get) => {
         employeeId: empId,
         employeeName: session.customerName,
         category: session.category || 'Coaching',
+        avatar: session.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
         score: session.score || 100,
         date: newSession.date,
         notes: session.notes || '',
@@ -439,6 +441,34 @@ export const useStore = create((set, get) => {
       set({ recentSessions: updatedSessions });
       localStorage.setItem('bby_recent_sessions', JSON.stringify(updatedSessions));
       if (dbConnected) {
+        saveRecentSessionsToCloud(updatedSessions);
+      }
+    },
+
+    deleteCoachingLog: async (logId) => {
+      const coachingLogs = get().coachingLogs;
+      const recentSessions = get().recentSessions;
+      const dbConnected = get().dbConnected;
+      
+      const logToDelete = coachingLogs.find(l => l.id === logId || (logId && l.timestamp === logId));
+      if (!logToDelete) return;
+      
+      // Update coachingLogs state
+      const updatedLogs = coachingLogs.filter(l => l.id !== logId && l.timestamp !== logId);
+      set({ coachingLogs: updatedLogs });
+      localStorage.setItem('bby_coaching_logs', JSON.stringify(updatedLogs));
+      
+      // Synchronize with recentSessions (Dashboard)
+      const updatedSessions = recentSessions.filter(s => 
+        !(s.customerName === logToDelete.employeeName && s.date === logToDelete.date && s.notes === logToDelete.notes)
+      );
+      set({ recentSessions: updatedSessions });
+      localStorage.setItem('bby_recent_sessions', JSON.stringify(updatedSessions));
+      
+      if (dbConnected) {
+        if (logToDelete.id) {
+          await deleteCoachingLogFromCloud(logToDelete.id);
+        }
         saveRecentSessionsToCloud(updatedSessions);
       }
     },

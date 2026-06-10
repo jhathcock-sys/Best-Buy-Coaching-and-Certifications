@@ -99,6 +99,7 @@ function AppContent() {
   const deleteFloorLeaderShift = useStore((state) => state.deleteFloorLeaderShift);
   const logCoachingSession = useStore((state) => state.logCoachingSession);
   const deleteCoachingSession = useStore((state) => state.deleteCoachingSession);
+  const deleteCoachingLog = useStore((state) => state.deleteCoachingLog);
   const completeRoleplay = useStore((state) => state.completeRoleplay);
   const saveDeptGoals = useStore((state) => state.saveDeptGoals);
   const changePeriod = useStore((state) => state.changePeriod);
@@ -468,6 +469,7 @@ function AppContent() {
           <RoleplayCenter 
             playbookSettings={playbookSettings}
             onCompleteRoleplay={completeRoleplay}
+            customScenarios={customScenarios}
           />
         )}
 
@@ -534,8 +536,8 @@ function AppContent() {
 
         {activeView === 'history' && (
           <CoachingHistory 
-            recentSessions={recentSessions}
-            onDeleteSession={deleteCoachingSession}
+            coachingLogs={coachingLogs}
+            onDeleteLog={deleteCoachingLog}
           />
         )}
       </main>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Trash2, Volume2, BookOpen, Clock, ArrowLeft, Check } from 'lucide-react';
 
-export default function CoachingHistory({ recentSessions = [], onDeleteSession }) {
+export default function CoachingHistory({ coachingLogs = [], onDeleteLog }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [selectedSession, setSelectedSession] = useState(null);
@@ -66,8 +66,8 @@ export default function CoachingHistory({ recentSessions = [], onDeleteSession }
     setIsPausedSpeech(false);
   };
 
-  const filteredSessions = recentSessions.filter(session => {
-    const name = (session.customerName || '').toLowerCase();
+  const filteredSessions = coachingLogs.filter(session => {
+    const name = (session.employeeName || session.customerName || '').toLowerCase();
     const notes = (session.notes || '').toLowerCase();
     const matchesSearch = name.includes(searchTerm.toLowerCase()) || notes.includes(searchTerm.toLowerCase());
     
@@ -85,14 +85,13 @@ export default function CoachingHistory({ recentSessions = [], onDeleteSession }
     return matchesSearch && matchesCategory;
   });
 
-  const handleDelete = (sessionToDelete, e) => {
+  const handleDelete = (logToDelete, e) => {
     e.stopPropagation();
-    if (confirm(`Are you sure you want to delete this coaching log for ${sessionToDelete.customerName}?`)) {
-      // Find index in the original list
-      const idx = recentSessions.findIndex(s => s === sessionToDelete);
-      if (idx !== -1 && onDeleteSession) {
-        onDeleteSession(idx);
-        if (selectedSession === sessionToDelete) {
+    if (confirm(`Are you sure you want to delete this coaching log for ${logToDelete.employeeName || logToDelete.customerName}?`)) {
+      const logId = logToDelete.id || logToDelete.timestamp;
+      if (logId && onDeleteLog) {
+        onDeleteLog(logId);
+        if (selectedSession === logToDelete) {
           setSelectedSession(null);
           handleStopSpeech();
         }
@@ -177,9 +176,9 @@ export default function CoachingHistory({ recentSessions = [], onDeleteSession }
                 {/* Header: Avatar, Name, Score, Trash */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <img src={session.avatar} alt="" style={{ width: 36, height: 36, borderRadius: '50%', border: '1.5px solid var(--border-glass)' }} />
+                    <img src={session.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'} alt="" style={{ width: 36, height: 36, borderRadius: '50%', border: '1.5px solid var(--border-glass)' }} />
                     <div>
-                      <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff', margin: 0 }}>{session.customerName}</h4>
+                      <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff', margin: 0 }}>{session.employeeName || session.customerName}</h4>
                       <span className="tag-pill" style={{ 
                         fontSize: '0.65rem', 
                         padding: '0.15rem 0.45rem', 
@@ -236,10 +235,10 @@ export default function CoachingHistory({ recentSessions = [], onDeleteSession }
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ border: '2.5px solid var(--bby-blue)', maxWidth: '650px' }}>
             <div className="modal-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <img src={selectedSession.avatar} alt="" style={{ width: 36, height: 36, borderRadius: '50%' }} />
+                <img src={selectedSession.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'} alt="" style={{ width: 36, height: 36, borderRadius: '50%' }} />
                 <div>
                   <h3 style={{ fontSize: '1.15rem', color: '#fff', fontFamily: 'var(--font-heading)', margin: 0 }}>
-                    Coaching Review: {selectedSession.customerName}
+                    Coaching Review: {selectedSession.employeeName || selectedSession.customerName}
                   </h3>
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{selectedSession.category} | {selectedSession.date}</span>
                 </div>

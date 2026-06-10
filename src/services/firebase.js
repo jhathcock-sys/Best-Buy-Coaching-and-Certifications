@@ -448,3 +448,19 @@ export const deleteCoachingLogFromCloud = async (logId) => {
   }
 };
 
+// Test real Firebase connection latency
+export const testLatency = async () => {
+  if (!db) return -1;
+  const startTime = Date.now();
+  try {
+    const ref = getStoreDocRef('activePeriod');
+    if (ref) {
+      await getDoc(ref);
+      return Date.now() - startTime;
+    }
+  } catch (e) {
+    console.error('Latency test failed:', e);
+  }
+  return -1;
+};
+

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShieldAlert, Sparkles, Key, Check, Plus, Trash2, BookOpen, Compass } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { testLatency } from '../services/firebase';
 
 export default function PlaybookStudio({ 
   playbookSettings, 
@@ -43,8 +44,13 @@ export default function PlaybookStudio({
       await addLog(`📡 Testing Firebase connection latency...`, 300);
       
       if (dbConnected) {
-        const latency = Math.round(15 + Math.random() * 25);
-        await addLog(`✅ Firebase Connection: Connected. Latency: ${latency}ms (Excellent).`, 200);
+        const latency = await testLatency();
+        if (latency !== -1) {
+          const rating = latency < 50 ? 'Excellent' : latency < 150 ? 'Good' : 'Fair';
+          await addLog(`✅ Firebase Connection: Connected. Latency: ${latency}ms (${rating}).`, 200);
+        } else {
+          await addLog(`⚠️ Firebase Connection: Connected but latency test failed.`, 200);
+        }
         await addLog(`💾 Offline Persistence: Active (IndexedDB storage verified).`, 100);
         await addLog(`🔄 Sync Status: Clean (0 pending local writes queued).`, 100);
       } else {

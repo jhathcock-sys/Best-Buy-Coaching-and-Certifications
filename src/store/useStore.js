@@ -63,6 +63,16 @@ const DEFAULT_PLAYBOOK_SETTINGS = {
   ]
 };
 
+export const MANAGERS = [
+  { name: 'Corey T.', role: 'Experience Manager Sales Focused', pin: '2001' },
+  { name: 'Joey Z', role: 'Experience Manager Ops Focused', pin: '2002' },
+  { name: 'Sam E', role: 'Experience Manager Sales Focus', pin: '2003' },
+  { name: 'Lee R', role: 'Experience Supervisor Sales', pin: '2004' },
+  { name: 'James H', role: 'Experience Supervisor Sales and Front End', pin: '2005' },
+  { name: 'Sackett', role: 'GM', pin: '2006' },
+  { name: 'Will C.', role: 'GM', pin: '2007' }
+];
+
 const safeJsonParse = (str, fallback) => {
   if (!str) return fallback;
   try {
@@ -157,6 +167,16 @@ export const useStore = create((set, get) => {
 
   // Load remaining operational states from localStorage
   const initialMetrics = safeJsonParse(localStorage.getItem('bby_metrics'), { memberships: 52, creditCards: 4, warranty: 12, surveys: 4.7, rph: 1050 });
+  
+  let initialActiveManager = null;
+  try {
+    const savedManager = sessionStorage.getItem('bby_active_manager');
+    if (savedManager) {
+      initialActiveManager = JSON.parse(savedManager);
+    }
+  } catch (e) {
+    console.error('Failed to parse active manager from sessionStorage', e);
+  }
 
   const initialRecentSessions = safeJsonParse(localStorage.getItem('bby_recent_sessions'), []);
   const initialCustomScenarios = safeJsonParse(localStorage.getItem('bby_custom_scenarios'), []);
@@ -171,6 +191,7 @@ export const useStore = create((set, get) => {
     dbConnected: isFirebaseConnected(),
     isAuthenticated: sessionStorage.getItem('bby_authenticated') === 'true',
     storePin: initialStorePin,
+    activeManager: initialActiveManager,
 
 
     // Operational Data State
@@ -202,9 +223,18 @@ export const useStore = create((set, get) => {
     setStorePin: (pin) => set({ storePin: pin }),
 
     login: (pin) => {
-      if (pin === get().storePin) {
+      const manager = MANAGERS.find(m => m.pin === pin);
+      if (manager) {
         sessionStorage.setItem('bby_authenticated', 'true');
-        set({ isAuthenticated: true });
+        sessionStorage.setItem('bby_active_manager', JSON.stringify(manager));
+        set({ isAuthenticated: true, activeManager: manager });
+        return true;
+      }
+      if (pin === get().storePin) {
+        const guestManager = { name: 'Default Supervisor', role: 'Store Leader' };
+        sessionStorage.setItem('bby_authenticated', 'true');
+        sessionStorage.setItem('bby_active_manager', JSON.stringify(guestManager));
+        set({ isAuthenticated: true, activeManager: guestManager });
         return true;
       }
       return false;
@@ -212,7 +242,8 @@ export const useStore = create((set, get) => {
 
     logout: () => {
       sessionStorage.removeItem('bby_authenticated');
-      set({ isAuthenticated: false });
+      sessionStorage.removeItem('bby_active_manager');
+      set({ isAuthenticated: false, activeManager: null });
     },
 
     handleSaveFirebaseConfig: (config) => {
@@ -395,7 +426,8 @@ export const useStore = create((set, get) => {
         score: session.score || 100,
         date: newSession.date,
         notes: session.notes || '',
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        coachName: get().activeManager?.name || 'Supervisor'
       };
       const updatedLogs = [newLog, ...coachingLogs];
       set({ coachingLogs: updatedLogs });

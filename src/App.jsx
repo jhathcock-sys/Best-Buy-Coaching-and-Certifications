@@ -73,6 +73,7 @@ function AppContent() {
   const floorLeaderShifts = useStore((state) => state.floorLeaderShifts);
   const coachingLogs = useStore((state) => state.coachingLogs);
   const deptGoals = useStore((state) => state.deptGoals);
+  const activeManager = useStore((state) => state.activeManager);
 
   // Zustand Store Actions
   const setRosterHistory = useStore((state) => state.setRosterHistory);
@@ -84,6 +85,7 @@ function AppContent() {
   const setFloorLeaderShifts = useStore((state) => state.setFloorLeaderShifts);
   const setCoachingLogs = useStore((state) => state.setCoachingLogs);
   const setDeptGoals = useStore((state) => state.setDeptGoals);
+  const logout = useStore((state) => state.logout);
 
   const addFollowUpTask = useStore((state) => state.addFollowUpTask);
   const completeFollowUpTask = useStore((state) => state.completeFollowUpTask);
@@ -284,6 +286,40 @@ function AppContent() {
           <div className="logo-badge">BBY</div>
           <div className="logo-text">BlueCoach<span>AI</span></div>
         </div>
+
+        {activeManager && (
+          <div style={{ 
+            background: 'rgba(255, 255, 255, 0.02)', 
+            border: '1px solid var(--border-glass)', 
+            borderRadius: '16px', 
+            padding: '0.85rem 1rem', 
+            marginBottom: '1.5rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.15rem'
+          }}>
+            <span style={{ fontSize: '0.65rem', color: 'var(--bby-yellow)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Logged in as</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff' }}>{activeManager.name}</span>
+              <button 
+                onClick={logout} 
+                style={{ 
+                  background: 'transparent', 
+                  border: 'none', 
+                  color: 'var(--error)', 
+                  fontSize: '0.65rem', 
+                  cursor: 'pointer', 
+                  padding: 0,
+                  fontWeight: 600,
+                  textTransform: 'uppercase'
+                }}
+              >
+                Log Out
+              </button>
+            </div>
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', lineHeight: 1.2 }}>{activeManager.role}</span>
+          </div>
+        )}
 
         <ul className="sidebar-menu">
           <li className="menu-group-header" onClick={() => toggleCategory('overview')}>
@@ -511,6 +547,7 @@ function AppContent() {
             onSaveShift={saveFloorLeaderShift}
             onDeleteShift={deleteFloorLeaderShift}
             roster={rosterHistory[activePeriod] || []}
+            activeManager={activeManager}
           />
         )}
 

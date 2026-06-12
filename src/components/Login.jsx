@@ -98,7 +98,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
             {isSuccess ? 'Access Granted' : 'BlueCoach AI Login'}
           </h2>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
-            {isSuccess ? 'Initializing leadership hub...' : 'Enter your 4-digit store passcode PIN'}
+            {isSuccess ? 'Initializing leadership hub...' : 'Enter your store or manager 4-digit passcode PIN'}
           </p>
         </div>
 

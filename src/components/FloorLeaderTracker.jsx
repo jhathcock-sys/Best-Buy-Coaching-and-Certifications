@@ -4,7 +4,7 @@ import { useApp } from '../context/AppContext';
 import ZoneScheduler from './ZoneScheduler';
 import BreakRunSheet from './BreakRunSheet';
 
-export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteShift, roster = [] }) {
+export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteShift, roster = [], activeManager }) {
   const { dbConnected } = useApp();
   
   // Auto-detect if today is weekend (0=Sun, 6=Sat)
@@ -26,12 +26,19 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
     return null;
   });
 
-  const [leaderName, setLeaderName] = useState('');
+  const [leaderName, setLeaderName] = useState(activeManager?.name || '');
   const [dailyRevenueGoal, setDailyRevenueGoal] = useState('10000');
   const [dailyAppsGoal, setDailyAppsGoal] = useState('10');
   const [dailyPmsGoal, setDailyPmsGoal] = useState('15');
   const [isWeekend, setIsWeekend] = useState(isTodayWeekend());
   const [leaderTab, setLeaderTab] = useState('tracker');
+
+  // Set leader name from logged in manager
+  useEffect(() => {
+    if (activeManager) {
+      setLeaderName(activeManager.name);
+    }
+  }, [activeManager]);
   const [breakForm, setBreakForm] = useState({
     empId: '',
     time: '12:00 PM',

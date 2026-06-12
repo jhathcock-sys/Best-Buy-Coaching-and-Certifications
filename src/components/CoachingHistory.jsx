@@ -189,6 +189,11 @@ export default function CoachingHistory({ coachingLogs = [], onDeleteLog }) {
                       }}>
                         {session.category}
                       </span>
+                      {session.coachName && (
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '0.2rem', fontWeight: 500 }}>
+                          Coach: {session.coachName}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <button 
@@ -240,7 +245,9 @@ export default function CoachingHistory({ coachingLogs = [], onDeleteLog }) {
                   <h3 style={{ fontSize: '1.15rem', color: '#fff', fontFamily: 'var(--font-heading)', margin: 0 }}>
                     Coaching Review: {selectedSession.employeeName || selectedSession.customerName}
                   </h3>
-                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{selectedSession.category} | {selectedSession.date}</span>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                    {selectedSession.category} | {selectedSession.date} {selectedSession.coachName ? `| Coach: ${selectedSession.coachName}` : ''}
+                  </span>
                 </div>
               </div>
               <button 

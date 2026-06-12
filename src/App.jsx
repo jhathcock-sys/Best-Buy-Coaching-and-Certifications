@@ -67,12 +67,23 @@ function AppContent() {
   const activePeriod = useStore((state) => state.activePeriod);
   const playbookSettings = useStore((state) => state.playbookSettings);
   const recentSessions = useStore((state) => state.recentSessions);
+  const metrics = useStore((state) => state.metrics);
+  const customScenarios = useStore((state) => state.customScenarios);
+  const followUpTasks = useStore((state) => state.followUpTasks);
+  const floorLeaderShifts = useStore((state) => state.floorLeaderShifts);
+  const coachingLogs = useStore((state) => state.coachingLogs);
+  const deptGoals = useStore((state) => state.deptGoals);
 
   // Zustand Store Actions
   const setRosterHistory = useStore((state) => state.setRosterHistory);
   const setActivePeriod = useStore((state) => state.setActivePeriod);
   const setPlaybookSettings = useStore((state) => state.setPlaybookSettings);
   const setRecentSessions = useStore((state) => state.setRecentSessions);
+  const setMetrics = useStore((state) => state.setMetrics);
+  const setFollowUpTasks = useStore((state) => state.setFollowUpTasks);
+  const setFloorLeaderShifts = useStore((state) => state.setFloorLeaderShifts);
+  const setCoachingLogs = useStore((state) => state.setCoachingLogs);
+  const setDeptGoals = useStore((state) => state.setDeptGoals);
 
   const addFollowUpTask = useStore((state) => state.addFollowUpTask);
   const completeFollowUpTask = useStore((state) => state.completeFollowUpTask);

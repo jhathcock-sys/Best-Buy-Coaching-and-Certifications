@@ -272,7 +272,7 @@ function AppContent() {
     return (
       <Login 
         correctPin={storePin}
-        onLoginSuccess={() => login(storePin)}
+        onLoginSuccess={(enteredPin) => login(enteredPin)}
         dbConnected={dbConnected}
       />
     );

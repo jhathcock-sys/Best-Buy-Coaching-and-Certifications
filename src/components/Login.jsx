@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Key, ChevronRight, AlertCircle, RefreshCw, X, Delete } from 'lucide-react';
-import { MANAGERS } from '../store/useStore';
-
-export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected }) {
+export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected, managers = [] }) {
   const [pin, setPin] = useState('');
   const [isShaking, setIsShaking] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -10,7 +8,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
   // Validate the PIN code when it reaches 4 digits
   useEffect(() => {
     if (pin.length === 4) {
-      const isManagerPin = MANAGERS.some(m => m.pin === pin);
+      const isManagerPin = managers.some(m => m.pin === pin);
       const isStorePin = pin === correctPin;
       
       if (isManagerPin || isStorePin) {
@@ -27,7 +25,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
         }, 600);
       }
     }
-  }, [pin, correctPin, onLoginSuccess]);
+  }, [pin, correctPin, onLoginSuccess, managers]);
 
   const handleKeyPress = (num) => {
     if (pin.length < 4 && !isSuccess) {

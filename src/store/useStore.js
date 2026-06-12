@@ -13,7 +13,8 @@ import {
   saveFloorLeaderShiftToCloud,
   deleteFloorLeaderShiftFromCloud,
   saveCoachingLogToCloud,
-  deleteCoachingLogFromCloud
+  deleteCoachingLogFromCloud,
+  saveManagersToCloud
 } from '../services/firebase';
 
 const INITIAL_ROSTER = [
@@ -184,6 +185,16 @@ export const useStore = create((set, get) => {
   const initialFloorLeaderShifts = safeJsonParse(localStorage.getItem('bby_floor_leader_shifts'), []);
   const initialCoachingLogs = safeJsonParse(localStorage.getItem('bby_coaching_logs'), []);
 
+  // Load initial managers from localStorage or defaults
+  let initialManagers = MANAGERS;
+  const savedManagers = localStorage.getItem('bby_managers');
+  if (savedManagers) {
+    const parsed = safeJsonParse(savedManagers, null);
+    if (parsed && Array.isArray(parsed)) {
+      initialManagers = parsed;
+    }
+  }
+
   return {
     // UI Routing & Authentication
     activeView: 'dashboard',
@@ -206,6 +217,7 @@ export const useStore = create((set, get) => {
     recentSessions: initialRecentSessions,
     customScenarios: initialCustomScenarios,
     playbookSettings: initialPlaybookSettings,
+    managers: initialManagers,
 
     // UI & Auth Actions
     setActiveView: (view) => set({ activeView: view }),
@@ -223,7 +235,7 @@ export const useStore = create((set, get) => {
     setStorePin: (pin) => set({ storePin: pin }),
 
     login: (pin) => {
-      const manager = MANAGERS.find(m => m.pin === pin);
+      const manager = get().managers.find(m => m.pin === pin);
       if (manager) {
         sessionStorage.setItem('bby_authenticated', 'true');
         sessionStorage.setItem('bby_active_manager', JSON.stringify(manager));
@@ -277,6 +289,14 @@ export const useStore = create((set, get) => {
       set({ playbookSettings });
       if (playbookSettings?.storePin) {
         set({ storePin: playbookSettings.storePin });
+      }
+    },
+    setManagers: (managers) => set({ managers }),
+    saveManagers: (newManagers) => {
+      set({ managers: newManagers });
+      localStorage.setItem('bby_managers', JSON.stringify(newManagers));
+      if (get().dbConnected) {
+        saveManagersToCloud(newManagers);
       }
     },
 

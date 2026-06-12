@@ -1,36 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, ChevronLeft, ChevronRight, Check, Clipboard, Calendar, Users, AlertCircle } from 'lucide-react';
+import { generateCoachingLogGemini } from '../services/ai';
 
-export default function LiveFloorShadow({ roster = [], onLogCoachingSession, onAddFollowUpTask, onNavigate, preselectedEmployee, clearPreselectedEmployee }) {
+export default function LiveFloorShadow({ 
+  roster = [], 
+  onLogCoachingSession, 
+  onAddFollowUpTask, 
+  onNavigate, 
+  preselectedEmployee, 
+  clearPreselectedEmployee,
+  playbookSettings,
+  apiKey
+}) {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedEmpId, setSelectedEmpId] = useState('');
   const [department, setDepartment] = useState('General Sales');
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     if (preselectedEmployee) {
       setSelectedEmpId(preselectedEmployee.id || '');
-      if (clearPreselectedEmployee) {
-        clearPreselectedEmployee();
-      }
+      const timer = setTimeout(() => {
+        if (clearPreselectedEmployee) clearPreselectedEmployee();
+      }, 50);
+      return () => clearTimeout(timer);
     }
   }, [preselectedEmployee]);
   
   // DISC Checklist States
   const [checklist, setChecklist] = useState({
     // Discover
+    greeting: false,
+    nameExchange: false,
     setupProbe: false,
     specQuestions: false,
     avoidedForbidden: false,
     // Inspire
-    warmWelcome: false,
-    membershipBenefits: false,
     builtRapport: false,
+    emotionalDriver: false,
+    demoProduct: false,
+    membershipBenefits: false,
     // Solve
     membershipPitched: false,
     warrantyAttached: false,
     solutionMatched: false,
     // Close
     creditCardPitched: false,
+    handledObjections: false,
     surveyRequested: false,
     sleeveReceipt: false
   });
@@ -77,27 +93,31 @@ export default function LiveFloorShadow({ roster = [], onLogCoachingSession, onA
     // Group checklist items for strengths/gaps output
     const discoverStrengths = [];
     const discoverGaps = [];
-    if (checklist.setupProbe) discoverStrengths.push("Probed customer environment setup"); else discoverGaps.push("Probe environment setup");
-    if (checklist.specQuestions) discoverStrengths.push("Asked spec questions"); else discoverGaps.push("Ask open-ended spec questions");
-    if (checklist.avoidedForbidden) discoverStrengths.push("Avoided forbidden vocabulary"); else discoverGaps.push("Avoid forbidden words (e.g. warranty, contract)");
+    if (checklist.greeting) discoverStrengths.push("Initiated a friendly, welcoming greeting within 10 seconds/10 feet"); else discoverGaps.push("Initiate friendly, welcoming greeting within 10 seconds/10 feet");
+    if (checklist.nameExchange) discoverStrengths.push("Exchanged names and introduced self"); else discoverGaps.push("Exchange names and introduce self");
+    if (checklist.setupProbe) discoverStrengths.push("Probed customer's setup/environment"); else discoverGaps.push("Probe environment setup/use case");
+    if (checklist.specQuestions) discoverStrengths.push("Asked open-ended lifestyle/spec questions"); else discoverGaps.push("Ask open-ended spec/lifestyle questions");
+    if (checklist.avoidedForbidden) discoverStrengths.push("Avoided forbidden retail words"); else discoverGaps.push("Avoid forbidden vocabulary (e.g., 'warranty', 'deal')");
 
     const inspireStrengths = [];
     const inspireGaps = [];
-    if (checklist.warmWelcome) inspireStrengths.push("Warm, immediate greeting"); else inspireGaps.push("Offer warm welcome");
-    if (checklist.membershipBenefits) inspireStrengths.push("Shared membership benefits (Plus/Total)"); else inspireGaps.push("Share membership benefits");
-    if (checklist.builtRapport) inspireStrengths.push("Connected personally / built rapport"); else inspireGaps.push("Build customer rapport");
+    if (checklist.builtRapport) inspireStrengths.push("Connected personally / built human rapport"); else inspireGaps.push("Connect personally / build human rapport (Family, Occupation, Recreation)");
+    if (checklist.emotionalDriver) inspireStrengths.push("Uncovered customer emotional driver"); else inspireGaps.push("Uncover the emotional driver/purpose behind the purchase");
+    if (checklist.demoProduct) inspireStrengths.push("Demonstrated product/service features"); else inspireGaps.push("Demonstrate product/service features physically or digitally");
+    if (checklist.membershipBenefits) inspireStrengths.push("Shared membership benefits (Plus/Total) during demo"); else inspireGaps.push("Share membership benefits during the product demo");
 
     const solveStrengths = [];
     const solveGaps = [];
-    if (checklist.membershipPitched) solveStrengths.push("Pitched My Best Buy Plus/Total"); else solveGaps.push("Pitch My Best Buy Plus/Total");
-    if (checklist.warrantyAttached) solveStrengths.push("Attached Protection (GSP/AppleCare)"); else solveGaps.push("Attach Protection (GSP)");
-    if (checklist.solutionMatched) solveStrengths.push("Accurate solution matching"); else solveGaps.push("Match solution to user needs");
+    if (checklist.membershipPitched) solveStrengths.push("Pitched My Best Buy Plus/Total to support solution"); else solveGaps.push("Pitch My Best Buy Plus/Total to support the complete solution");
+    if (checklist.warrantyAttached) solveStrengths.push("Attached GSP protection / AppleCare+"); else solveGaps.push("Attach GSP protection or AppleCare+");
+    if (checklist.solutionMatched) solveStrengths.push("Matched the complete solution"); else solveGaps.push("Match the complete solution (hardware + services + accessories)");
 
     const closeStrengths = [];
     const closeGaps = [];
-    if (checklist.creditCardPitched) closeStrengths.push("Pitched BBY Credit Card rewards"); else closeGaps.push("Pitch BBY Credit Card rewards");
-    if (checklist.surveyRequested) closeStrengths.push("Requested 5-star survey feedback"); else closeGaps.push("Explicitly ask for 5-star survey");
-    if (checklist.sleeveReceipt) closeStrengths.push("Placed receipt in sleeve with name written"); else closeGaps.push("Place receipt in sleeve with written name");
+    if (checklist.creditCardPitched) closeStrengths.push("Pitched Best Buy Credit Card financing/rewards"); else closeGaps.push("Pitch Best Buy Credit Card financing/rewards early");
+    if (checklist.handledObjections) closeStrengths.push("Handled customer objections professionally"); else closeGaps.push("Acknowledge and handle customer objections professionally");
+    if (checklist.surveyRequested) closeStrengths.push("Requested customer feedback via 5-Star Survey"); else closeGaps.push("Request customer feedback via 5-Star Survey");
+    if (checklist.sleeveReceipt) closeStrengths.push("Receipt in sleeve with written advisor name"); else closeGaps.push("Place receipt in sleeve with written advisor name and thank customer");
 
     const allStrengths = [...discoverStrengths, ...inspireStrengths, ...solveStrengths, ...closeStrengths];
     const allGaps = [...discoverGaps, ...inspireGaps, ...solveGaps, ...closeGaps];
@@ -131,7 +151,7 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
 * **Coaching Date**: ${todayDate}`;
   };
 
-  const handleCompileAndLog = () => {
+  const handleCompileAndLog = async () => {
     if (!selectedEmpId) {
       alert("Please select an associate first.");
       return;
@@ -141,8 +161,92 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
       return;
     }
 
-    const logText = generateGrowLog();
+    setIsGenerating(true);
+    let logText = '';
+
+    try {
+      if (playbookSettings?.useGemini && apiKey?.trim().length > 10) {
+        // Assemble checklist details for prompt context
+        const discoverStrengths = [];
+        const discoverGaps = [];
+        if (checklist.greeting) discoverStrengths.push("Initiated a friendly, welcoming greeting within 10 seconds/10 feet"); else discoverGaps.push("Initiate friendly, welcoming greeting within 10 seconds/10 feet");
+        if (checklist.nameExchange) discoverStrengths.push("Exchanged names and introduced self"); else discoverGaps.push("Exchange names and introduce self");
+        if (checklist.setupProbe) discoverStrengths.push("Probed customer's setup/environment"); else discoverGaps.push("Probe environment setup/use case");
+        if (checklist.specQuestions) discoverStrengths.push("Asked open-ended lifestyle/spec questions"); else discoverGaps.push("Ask open-ended spec/lifestyle questions");
+        if (checklist.avoidedForbidden) discoverStrengths.push("Avoided forbidden retail words"); else discoverGaps.push("Avoid forbidden vocabulary (e.g., 'warranty', 'deal')");
+
+        const inspireStrengths = [];
+        const inspireGaps = [];
+        if (checklist.builtRapport) inspireStrengths.push("Connected personally / built human rapport"); else inspireGaps.push("Connect personally / build human rapport (Family, Occupation, Recreation)");
+        if (checklist.emotionalDriver) inspireStrengths.push("Uncovered customer emotional driver"); else inspireGaps.push("Uncover the emotional driver/purpose behind the purchase");
+        if (checklist.demoProduct) inspireStrengths.push("Demonstrated product/service features"); else inspireGaps.push("Demonstrate product/service features physically or digitally");
+        if (checklist.membershipBenefits) inspireStrengths.push("Shared membership benefits (Plus/Total) during demo"); else inspireGaps.push("Share membership benefits during the product demo");
+
+        const solveStrengths = [];
+        const solveGaps = [];
+        if (checklist.membershipPitched) solveStrengths.push("Pitched My Best Buy Plus/Total to support solution"); else solveGaps.push("Pitch My Best Buy Plus/Total to support the complete solution");
+        if (checklist.warrantyAttached) solveStrengths.push("Attached GSP protection / AppleCare+"); else solveGaps.push("Attach GSP protection or AppleCare+");
+        if (checklist.solutionMatched) solveStrengths.push("Matched the complete solution"); else solveGaps.push("Match the complete solution (hardware + services + accessories)");
+
+        const closeStrengths = [];
+        const closeGaps = [];
+        if (checklist.creditCardPitched) closeStrengths.push("Pitched Best Buy Credit Card financing/rewards"); else closeGaps.push("Pitch Best Buy Credit Card financing/rewards early");
+        if (checklist.handledObjections) closeStrengths.push("Handled customer objections professionally"); else closeGaps.push("Acknowledge and handle customer objections professionally");
+        if (checklist.surveyRequested) closeStrengths.push("Requested customer feedback via 5-Star Survey"); else closeGaps.push("Request customer feedback via 5-Star Survey");
+        if (checklist.sleeveReceipt) closeStrengths.push("Receipt in sleeve with written advisor name"); else closeGaps.push("Place receipt in sleeve with written advisor name and thank customer");
+
+        const allGaps = [...discoverGaps, ...inspireGaps, ...solveGaps, ...closeGaps];
+
+        let discFocus = 'Solve';
+        if (discoverGaps.length > inspireGaps.length && discoverGaps.length > solveGaps.length && discoverGaps.length > closeGaps.length) {
+          discFocus = 'Discover';
+        } else if (inspireGaps.length > discoverGaps.length && inspireGaps.length > solveGaps.length && inspireGaps.length > closeGaps.length) {
+          discFocus = 'Inspire';
+        } else if (closeGaps.length > discoverGaps.length && closeGaps.length > inspireGaps.length && closeGaps.length > solveGaps.length) {
+          discFocus = 'Close';
+        }
+
+        const rawObservation = `DISC Behavior Checklist Summary:\n- Checked (Strengths): ${[...discoverStrengths, ...inspireStrengths, ...solveStrengths, ...closeStrengths].join(', ') || 'None'}\n- Unchecked (Gaps): ${allGaps.join(', ') || 'None'}`;
+
+        const aiResponse = await generateCoachingLogGemini(
+          apiKey,
+          selectedEmployee.name,
+          `Floor Shadowing: ${discFocus} Focus`,
+          gapDetails || `Needs reinforcement in: ${allGaps.slice(0, 2).join(', ')}`,
+          strengths || [...discoverStrengths, ...inspireStrengths, ...solveStrengths, ...closeStrengths].slice(0, 3).join(', '),
+          rawObservation,
+          playbookSettings,
+          discFocus
+        );
+
+        if (aiResponse) {
+          logText = `## 📋 Coaching Plan: ${selectedEmployee.name} (Live Floor Shadowing) — DISC Focus: ${aiResponse.discStep || discFocus}
+          
+* **What**: ${aiResponse.what}
+* **How**: ${aiResponse.how}
+* **Why**: ${aiResponse.why}
+* **Behavior**: ${aiResponse.expectation}
+* **Validation**: Leader observation will check on ${followUpDate}.
+
+---
+### 🔍 Background & Performance Context
+* **Observed Strengths**: ${aiResponse.strengths || strengths || [...discoverStrengths, ...inspireStrengths, ...solveStrengths, ...closeStrengths].slice(0, 3).join(', ')}
+* **Performance Gap / Metric Focus**: ${aiResponse.gapDetails || gapDetails || aiResponse.metricGap}
+* **Follow-up Action**: ${followUpAction || 'Verify behaviors on the sales floor.'}
+* **Coaching Date**: ${new Date().toLocaleDateString()}`;
+        } else {
+          logText = generateGrowLog();
+        }
+      } else {
+        logText = generateGrowLog();
+      }
+    } catch (e) {
+      console.error("AI coaching log generation failed, falling back to local template", e);
+      logText = generateGrowLog();
+    }
+
     setCompiledLog(logText);
+    setIsGenerating(false);
 
     // 1. Copy to clipboard
     navigator.clipboard.writeText(logText).catch(err => {
@@ -184,16 +288,20 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
     setSelectedEmpId('');
     setDepartment('General Sales');
     setChecklist({
+      greeting: false,
+      nameExchange: false,
       setupProbe: false,
       specQuestions: false,
       avoidedForbidden: false,
-      warmWelcome: false,
-      membershipBenefits: false,
       builtRapport: false,
+      emotionalDriver: false,
+      demoProduct: false,
+      membershipBenefits: false,
       membershipPitched: false,
       warrantyAttached: false,
       solutionMatched: false,
       creditCardPitched: false,
+      handledObjections: false,
       surveyRequested: false,
       sleeveReceipt: false
     });
@@ -360,16 +468,24 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
                     </h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                        <input type="checkbox" checked={checklist.greeting} onChange={() => toggleChecklistItem('greeting')} />
+                        Friendly welcome within 10s / 10ft
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                        <input type="checkbox" checked={checklist.nameExchange} onChange={() => toggleChecklistItem('nameExchange')} />
+                        Exchanged names / introduced self
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
                         <input type="checkbox" checked={checklist.setupProbe} onChange={() => toggleChecklistItem('setupProbe')} />
-                        Probed environment setup
+                        Probed customer environment setup
                       </label>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
                         <input type="checkbox" checked={checklist.specQuestions} onChange={() => toggleChecklistItem('specQuestions')} />
-                        Asked spec/usage questions
+                        Asked open-ended spec/usage questions
                       </label>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
                         <input type="checkbox" checked={checklist.avoidedForbidden} onChange={() => toggleChecklistItem('avoidedForbidden')} />
-                        Avoided forbidden words
+                        Avoided forbidden retail vocabulary
                       </label>
                     </div>
                   </div>
@@ -381,16 +497,20 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
                     </h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                        <input type="checkbox" checked={checklist.warmWelcome} onChange={() => toggleChecklistItem('warmWelcome')} />
-                        Warm checkout greeting
+                        <input type="checkbox" checked={checklist.builtRapport} onChange={() => toggleChecklistItem('builtRapport')} />
+                        Connected personally / built human rapport
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                        <input type="checkbox" checked={checklist.emotionalDriver} onChange={() => toggleChecklistItem('emotionalDriver')} />
+                        Uncovered customer emotional driver
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                        <input type="checkbox" checked={checklist.demoProduct} onChange={() => toggleChecklistItem('demoProduct')} />
+                        Demonstrated product/service features
                       </label>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
                         <input type="checkbox" checked={checklist.membershipBenefits} onChange={() => toggleChecklistItem('membershipBenefits')} />
-                        Shared membership benefits
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                        <input type="checkbox" checked={checklist.builtRapport} onChange={() => toggleChecklistItem('builtRapport')} />
-                        Connected personally / built rapport
+                        Shared membership benefits during demo
                       </label>
                     </div>
                   </div>
@@ -403,15 +523,15 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
                         <input type="checkbox" checked={checklist.membershipPitched} onChange={() => toggleChecklistItem('membershipPitched')} />
-                        Pitched Plus/Total support
+                        Pitched Plus/Total support solution
                       </label>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
                         <input type="checkbox" checked={checklist.warrantyAttached} onChange={() => toggleChecklistItem('warrantyAttached')} />
-                        Attached GSP protection
+                        Attached protection (GSP/AppleCare+)
                       </label>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
                         <input type="checkbox" checked={checklist.solutionMatched} onChange={() => toggleChecklistItem('solutionMatched')} />
-                        Accurate solution matching
+                        Matched the complete solution
                       </label>
                     </div>
                   </div>
@@ -424,15 +544,19 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
                         <input type="checkbox" checked={checklist.creditCardPitched} onChange={() => toggleChecklistItem('creditCardPitched')} />
-                        Pitched credit card rewards
+                        Pitched Credit Card rewards/financing
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                        <input type="checkbox" checked={checklist.handledObjections} onChange={() => toggleChecklistItem('handledObjections')} />
+                        Acknowledged and handled objections
                       </label>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
                         <input type="checkbox" checked={checklist.surveyRequested} onChange={() => toggleChecklistItem('surveyRequested')} />
-                        Explicitly requested 5-star survey
+                        Requested feedback via 5-Star Survey
                       </label>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
                         <input type="checkbox" checked={checklist.sleeveReceipt} onChange={() => toggleChecklistItem('sleeveReceipt')} />
-                        Receipt in sleeve with written name
+                        Receipt in sleeve with written advisor name
                       </label>
                     </div>
                   </div>
@@ -538,9 +662,19 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
               <button 
                 className="btn btn-primary" 
                 onClick={handleCompileAndLog}
+                disabled={isGenerating}
                 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--success)', borderColor: 'var(--success)' }}
               >
-                <Clipboard size={16} /> Compile & Log
+                {isGenerating ? (
+                  <>
+                    <span className="pulse-dot" style={{ display: 'inline-block', width: '8px', height: '8px', background: '#fff', borderRadius: '50%' }} />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Clipboard size={16} /> Compile & Log
+                  </>
+                )}
               </button>
             )}
           </div>

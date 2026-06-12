@@ -1,6 +1,15 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { EMPLOYEE_SCENARIOS, runOfflineEmployeeCoachingStep, evaluateCoachingSession, generateCoachingLogGemini, generateCoachingLogLocal } from '../services/ai';
-import { Users, Sparkles, MessageSquare, ArrowLeft, RefreshCw, Send, HelpCircle, FileText, Check, Copy, AlertCircle, Volume2 } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { 
+  EMPLOYEE_SCENARIOS, 
+  runOfflineEmployeeCoachingStep, 
+  evaluateCoachingSession, 
+  generateCoachingLogGemini, 
+  generateCoachingLogLocal,
+  isGeminiAvailable,
+  runGeminiEmployeeCoachingStep,
+  evaluateCoachingSessionGemini
+} from '../services/ai';
+import { Users, Sparkles, MessageSquare, ArrowLeft, RefreshCw, Send, HelpCircle, FileText, Check, Copy, AlertCircle, Volume2, Mic, MicOff } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function CoachSimulator({ 
@@ -12,6 +21,7 @@ export default function CoachSimulator({
   clearPrefillBuilderData, 
   onImportScenario, 
   onLogCoachingSession,
+  coachingLogs = [],
   initialTab = 'sim'
 }) {
   const { apiKey, setActiveView } = useApp();
@@ -42,6 +52,11 @@ export default function CoachSimulator({
     will: false
   });
   const [evaluation, setEvaluation] = useState(null);
+  const [isThinking, setIsThinking] = useState(false);
+  const [isEvaluating, setIsEvaluating] = useState(false);
+  const [isVoiceMode, setIsVoiceMode] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef(null);
   
   // NLP Scenario Importer States
   const [importText, setImportText] = useState('');
@@ -71,6 +86,9 @@ export default function CoachSimulator({
 
   useEffect(() => {
     return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
       if (window.speechSynthesis) {
         window.speechSynthesis.cancel();
       }
@@ -125,6 +143,91 @@ export default function CoachSimulator({
     }
     setIsPlayingSpeech(false);
     setIsPausedSpeech(false);
+  };
+
+  const speakText = (text) => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    
+    // Clean up markdown formatting for better reading
+    const cleanText = text
+      .replace(/## 📋 /g, '')
+      .replace(/## 💬 /g, '')
+      .replace(/\* \*\*(.*?)\*\*/g, '$1')
+      .replace(/\-\-\-/g, '')
+      .replace(/### 🔍 /g, '')
+      .replace(/\*/g, '');
+      
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const toggleVoiceMode = () => {
+    const nextMode = !isVoiceMode;
+    setIsVoiceMode(nextMode);
+    if (nextMode) {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg && lastMsg.sender !== 'coach') {
+        speakText(lastMsg.text);
+      }
+    } else {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    }
+  };
+
+  const handleMicClick = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Speech recognition is not supported in this browser. Please use a modern browser like Google Chrome or Microsoft Edge.");
+      return;
+    }
+
+    if (isListening) {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      setIsListening(false);
+      return;
+    }
+
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        if (transcript) {
+          setInputVal(prev => prev ? prev + ' ' + transcript : transcript);
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Speech recognition error:", event.error);
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch (err) {
+      console.error("Failed to start speech recognition:", err);
+      setIsListening(false);
+    }
   };
 
   // Pre-configured Best Buy Templates
@@ -205,7 +308,11 @@ export default function CoachSimulator({
       
       setActiveTab('sim');
       startCoaching(dynamicScen);
-      clearPreselectedEmployee();
+      
+      const timer = setTimeout(() => {
+        if (clearPreselectedEmployee) clearPreselectedEmployee();
+      }, 50);
+      return () => clearTimeout(timer);
     }
   }, [preselectedEmployee]);
 
@@ -228,7 +335,7 @@ export default function CoachSimulator({
         why: '',
         strengths: (prefillBuilderData.memberships || 0) >= 5.0 ? 'Incredible membership attach rate and strong floor presence!' : 'Friendly greetings, proactive attitude on the floor.',
         metricGap: getPrefillGapType(),
-        gapDetails: `${prefillBuilderData.gap || ''} (RPH: $${prefillBuilderData.rph || 0}, surveys: ${prefillBuilderData.surveys || 0})`,
+        gapDetails: `Active Gap Focus: ${prefillBuilderData.gap || 'None'} | Advisor Metrics Profile: RPH: $${prefillBuilderData.rph || 0}/hr, Memberships: ${prefillBuilderData.memberships || 0} Attach, BBY Cards: ${prefillBuilderData.creditCards || 0} Submissions, GSP Attach: ${prefillBuilderData.warranty || 0}%, CSAT Survey Score: ${prefillBuilderData.surveys || 0}★`,
         expectation: `Raise metrics to meet store benchmarks over the next 14 days.`,
         validation: `Store leader will perform counter observations and check weekly reporting.`,
         discFocus: ['Solve'],
@@ -236,7 +343,11 @@ export default function CoachSimulator({
       });
       
       setActiveTab('builder');
-      clearPrefillBuilderData();
+      
+      const timer = setTimeout(() => {
+        if (clearPrefillBuilderData) clearPrefillBuilderData();
+      }, 50);
+      return () => clearTimeout(timer);
     }
   }, [prefillBuilderData]);
 
@@ -439,29 +550,48 @@ Let's crush it! Let me know if you have any questions or need me to jump in and 
     });
     setCurrentCoachStep('goal');
     setEvaluation(null);
+    if (isVoiceMode) {
+      speakText(employee.initialGreeting);
+    }
   };
 
-  const finishCoaching = () => {
-    const history = {
+  const finishCoaching = async () => {
+    setIsEvaluating(true);
+    const historyObj = {
       messages: messages,
       completedCoachSteps: completedCoachSteps,
       currentCoachStep: currentCoachStep
     };
-    const evalResult = evaluateCoachingSession(history);
-    setEvaluation(evalResult);
     
-    if (onLogCoachingSession) {
-      const isRoster = selectedEmployee.id && String(selectedEmployee.id).startsWith('roster-');
-      const rosterEmpId = isRoster ? String(selectedEmployee.id).substring(7) : null;
-      const cleanName = isRoster ? selectedEmployee.name.split(' (')[0] : selectedEmployee.name;
-      onLogCoachingSession({
-        employeeId: rosterEmpId,
-        customerName: cleanName || 'Advisor',
-        category: 'Coaching Practice',
-        avatar: selectedEmployee.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-        score: evalResult.score,
-        notes: evalResult.feedback || 'Completed GROW Coaching practice session.'
-      });
+    try {
+      let evalResult;
+      if (isGeminiAvailable(apiKey) && playbookSettings?.useGemini) {
+        evalResult = await evaluateCoachingSessionGemini(apiKey, historyObj, selectedEmployee, playbookSettings);
+      } else {
+        evalResult = evaluateCoachingSession(historyObj);
+      }
+      
+      setEvaluation(evalResult);
+      
+      if (onLogCoachingSession) {
+        const isRoster = selectedEmployee.id && String(selectedEmployee.id).startsWith('roster-');
+        const rosterEmpId = isRoster ? String(selectedEmployee.id).substring(7) : null;
+        const cleanName = isRoster ? selectedEmployee.name.split(' (')[0] : selectedEmployee.name;
+        onLogCoachingSession({
+          employeeId: rosterEmpId,
+          customerName: cleanName || 'Advisor',
+          category: 'Coaching Practice',
+          avatar: selectedEmployee.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+          score: evalResult.score,
+          notes: evalResult.feedback || 'Completed GROW Coaching practice session.'
+        });
+      }
+    } catch (err) {
+      console.error("Evaluation error:", err);
+      const evalResult = evaluateCoachingSession(historyObj);
+      setEvaluation(evalResult);
+    } finally {
+      setIsEvaluating(false);
     }
   };
 
@@ -528,27 +658,63 @@ Let's crush it! Let me know if you have any questions or need me to jump in and 
     }, 5000);
   };
 
-  const handleSend = () => {
-    if (!inputVal.trim()) return;
+  const handleSend = async () => {
+    if (!inputVal.trim() || isThinking) return;
     const currentMsg = inputVal;
     setInputVal('');
     
+    // Add coach message immediately to UI
     setMessages(prev => [...prev, { sender: 'coach', text: currentMsg }]);
+    setIsThinking(true);
     
-    setTimeout(() => {
-      const history = {
+    let nextState = null;
+    try {
+      const historyObj = {
         messages: messages,
         completedCoachSteps: completedCoachSteps,
         currentCoachStep: currentCoachStep
       };
       
-      const nextState = runOfflineEmployeeCoachingStep(currentMsg, history, selectedEmployee);
-      
-      setMessages(nextState.messages);
-      setCompletedCoachSteps(nextState.completedCoachSteps);
-      setCurrentCoachStep(nextState.currentCoachStep);
-    }, 600);
+      if (isGeminiAvailable(apiKey) && playbookSettings?.useGemini) {
+        const cleanEmpName = selectedEmployee.name.split(' (')[0].trim();
+        const pastLogs = (coachingLogs || [])
+          .filter(log => log.employeeName && log.employeeName.split(' (')[0].trim() === cleanEmpName)
+          .slice(0, 3)
+          .map(log => `- Date: ${log.date}, Score: ${log.score}%, Notes: ${log.notes}`)
+          .join('\n');
+        
+        nextState = await runGeminiEmployeeCoachingStep(apiKey, currentMsg, historyObj, selectedEmployee, playbookSettings, pastLogs);
+      } else {
+        // Fallback offline simulator with delay
+        await new Promise(resolve => setTimeout(resolve, 800));
+        nextState = runOfflineEmployeeCoachingStep(currentMsg, historyObj, selectedEmployee);
+      }
+    } catch (err) {
+      console.error("Coaching step generation error:", err);
+      // Fallback in case of error
+      const historyObj = {
+        messages: messages,
+        completedCoachSteps: completedCoachSteps,
+        currentCoachStep: currentCoachStep
+      };
+      nextState = runOfflineEmployeeCoachingStep(currentMsg, historyObj, selectedEmployee);
+    } finally {
+      setIsThinking(false);
+      if (nextState) {
+        setMessages(nextState.messages);
+        setCompletedCoachSteps(nextState.completedCoachSteps);
+        setCurrentCoachStep(nextState.currentCoachStep);
+        
+        if (isVoiceMode) {
+          const lastMsg = nextState.messages[nextState.messages.length - 1];
+          if (lastMsg && lastMsg.sender !== 'coach') {
+            speakText(lastMsg.text);
+          }
+        }
+      }
+    }
   };
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -1116,12 +1282,28 @@ Let's crush it! Let me know if you have any questions or need me to jump in and 
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <button className="btn btn-secondary" onClick={() => startCoaching(selectedEmployee)}>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <button 
+                className={`btn ${isVoiceMode ? 'btn-accent' : 'btn-secondary'}`}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: isVoiceMode ? '#000' : undefined }}
+                onClick={toggleVoiceMode}
+                disabled={isEvaluating || isThinking}
+                title="Toggle Speech-to-Text / Text-to-Speech Voice Mode"
+              >
+                {isVoiceMode ? <Mic size={14} /> : <MicOff size={14} />}
+                {isVoiceMode ? 'Voice Mode: Active' : 'Voice Mode: Disabled'}
+              </button>
+              <button className="btn btn-secondary" onClick={() => startCoaching(selectedEmployee)} disabled={isEvaluating || isThinking}>
                 <RefreshCw size={14} /> Restart
               </button>
-              <button className="btn btn-accent" onClick={finishCoaching}>
-                Complete Coaching Session
+              <button className="btn btn-accent" onClick={finishCoaching} disabled={isEvaluating || isThinking}>
+                {isEvaluating ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <RefreshCw size={14} className="typing-dots" style={{ animation: 'spin 2s linear infinite' }} /> Evaluating...
+                  </div>
+                ) : (
+                  'Complete Coaching Session'
+                )}
               </button>
             </div>
           </div>
@@ -1169,18 +1351,39 @@ Let's crush it! Let me know if you have any questions or need me to jump in and 
                     {m.text}
                   </div>
                 ))}
+                {isThinking && (
+                  <div className="chat-bubble bubble-employee-active typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                )}
               </div>
 
               <div className="chat-input-bar">
                 <input 
                   type="text" 
                   className="chat-input" 
-                  placeholder="Ask a coaching question, show empathy, or discuss action steps..."
+                  placeholder={isListening ? "Listening... Speak clearly..." : isThinking ? "Advisor is thinking..." : "Ask a coaching question, show empathy, or discuss action steps..."}
                   value={inputVal}
                   onChange={(e) => setInputVal(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                  disabled={isThinking || isEvaluating}
+                  style={{
+                    borderColor: isListening ? 'var(--bby-yellow)' : undefined,
+                    boxShadow: isListening ? '0 0 10px rgba(242, 169, 0, 0.25)' : undefined
+                  }}
                 />
-                <button className="btn btn-primary btn-icon" onClick={handleSend}>
+                <button 
+                  className={`btn btn-icon ${isListening ? 'mic-listening' : 'btn-secondary'}`}
+                  style={{ width: '42px', height: '42px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  onClick={handleMicClick}
+                  disabled={isThinking || isEvaluating}
+                  title={isListening ? "Stop Recording (Speech-to-Text)" : "Start Recording (Speech-to-Text)"}
+                >
+                  {isListening ? <Mic size={16} /> : <MicOff size={16} />}
+                </button>
+                <button className="btn btn-primary btn-icon" onClick={handleSend} disabled={isThinking || isEvaluating}>
                   <Send size={16} />
                 </button>
               </div>

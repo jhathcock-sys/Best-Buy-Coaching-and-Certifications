@@ -1,11 +1,33 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Users, Search, AlertTriangle, CheckCircle, TrendingUp, Sparkles, Clock, HelpCircle, Sliders } from 'lucide-react';
+import { Users, Search, AlertTriangle, CheckCircle, TrendingUp, Sparkles, Clock, HelpCircle, Sliders, BarChart3 } from 'lucide-react';
 import AddEmployeeModal from './AddEmployeeModal';
 import PerformanceWizardModal from './PerformanceWizardModal';
 import RosterImporterModal from './RosterImporterModal';
 import AssociateProfileModal from './AssociateProfileModal';
 import { calculateCVI } from '../store/cviHelper';
+import RosterAuditor from './RosterAuditor';
 
+
+const getDeptStyle = (dept) => {
+  switch (dept) {
+    case 'Computing':
+      return { bg: 'rgba(59, 130, 246, 0.12)', color: '#60a5fa', border: 'rgba(59, 130, 246, 0.25)' };
+    case 'Mobile':
+      return { bg: 'rgba(249, 115, 22, 0.12)', color: '#fb923c', border: 'rgba(249, 115, 22, 0.25)' };
+    case 'Home Theatre':
+      return { bg: 'rgba(139, 92, 246, 0.12)', color: '#a78bfa', border: 'rgba(139, 92, 246, 0.25)' };
+    case 'Front End':
+      return { bg: 'rgba(6, 182, 212, 0.12)', color: '#22d3ee', border: 'rgba(6, 182, 212, 0.25)' };
+    case 'Geek Squad':
+      return { bg: 'rgba(239, 68, 68, 0.12)', color: '#f87171', border: 'rgba(239, 68, 68, 0.25)' };
+    case 'Appliances':
+      return { bg: 'rgba(16, 185, 129, 0.12)', color: '#34d399', border: 'rgba(16, 185, 129, 0.25)' };
+    case 'General Sales':
+      return { bg: 'rgba(236, 72, 153, 0.12)', color: '#f472b6', border: 'rgba(236, 72, 153, 0.25)' };
+    default:
+      return { bg: 'rgba(156, 163, 175, 0.12)', color: '#9ca3af', border: 'rgba(156, 163, 175, 0.25)' };
+  }
+};
 
 export default function StoreRoster({ 
   roster, 
@@ -54,6 +76,7 @@ export default function StoreRoster({
   const [showImporter, setShowImporter] = useState(false);
 
   // View options & layout configuration settings
+  const [activeSubView, setActiveSubView] = useState('list');
   const [showViewSettings, setShowViewSettings] = useState(false);
   const [isDense, setIsDense] = useState(false);
   const [visibleCols, setVisibleCols] = useState({
@@ -189,56 +212,58 @@ export default function StoreRoster({
     }
     
     const metricClass = getMetricClass(val, type, dept, emp);
-    let pillBg = 'rgba(255, 255, 255, 0.02)';
+    let pillBg = 'transparent';
     let pillColor = 'var(--text-secondary)';
-    let pillBorder = 'rgba(255, 255, 255, 0.05)';
+    let pillBorder = 'transparent';
+    let hasPill = false;
     
     if (metricClass === 'text-success') {
       pillBg = 'rgba(16, 185, 129, 0.08)';
       pillColor = 'var(--success)';
       pillBorder = 'rgba(16, 185, 129, 0.2)';
+      hasPill = true;
     } else if (metricClass === 'text-warning') {
       pillBg = 'rgba(245, 158, 11, 0.08)';
       pillColor = 'var(--warning)';
       pillBorder = 'rgba(245, 158, 11, 0.2)';
+      hasPill = true;
     } else if (metricClass === 'text-danger') {
       pillBg = 'rgba(239, 68, 68, 0.08)';
       pillColor = 'var(--error)';
       pillBorder = 'rgba(239, 68, 68, 0.2)';
+      hasPill = true;
     }
     
-    const pace = (type === 'memberships' || type === 'creditCards') ? getPaceText(val, type, dept, emp) : '';
-    
+    const paceText = (type === 'memberships' || type === 'creditCards') ? getPaceText(val, type, dept, emp) : '';
+    const showPace = val > 0 && paceText && paceText !== 'No pace';
+
     return (
       <td style={{ padding: isDense ? '0.45rem 0.5rem' : '0.85rem 1rem', textAlign: 'center' }}>
         <div style={{ 
           display: 'inline-flex', 
           flexDirection: 'column', 
           alignItems: 'center', 
-          justifyContent: 'center',
-          background: pillBg, 
-          color: pillColor, 
-          border: `1px solid ${pillBorder}`, 
-          borderRadius: '12px', 
-          padding: isDense ? '0.2rem 0.55rem' : '0.4rem 0.85rem',
-          minWidth: isDense ? '80px' : '100px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
-          transition: 'all 0.2s ease',
-          cursor: 'default'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'scale(1.06)';
-          if (metricClass === 'text-success') e.currentTarget.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.18)';
-          else if (metricClass === 'text-warning') e.currentTarget.style.boxShadow = '0 6px 16px rgba(245, 158, 11, 0.18)';
-          else if (metricClass === 'text-danger') e.currentTarget.style.boxShadow = '0 6px 16px rgba(239, 68, 68, 0.18)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.12)';
-        }}
-        >
-          <span style={{ fontWeight: 700, fontSize: isDense ? '0.775rem' : '0.85rem' }}>{displayValue}</span>
-          {pace && <span style={{ fontSize: isDense ? '0.6rem' : '0.65rem', opacity: 0.8, marginTop: '0.125rem', fontWeight: 500 }}>{pace}</span>}
+          justifyContent: 'center'
+        }}>
+          <span style={{ 
+            fontSize: '0.85rem', 
+            fontWeight: 700, 
+            background: pillBg, 
+            border: `1px solid ${pillBorder}`, 
+            color: pillColor, 
+            padding: hasPill ? '0.25rem 0.65rem' : '0rem', 
+            borderRadius: '8px',
+            minWidth: hasPill ? '64px' : 'auto',
+            textAlign: 'center',
+            display: 'inline-block'
+          }}>
+            {displayValue}
+          </span>
+          {showPace && (
+            <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '0.15rem', fontWeight: 500 }}>
+              {paceText}
+            </span>
+          )}
         </div>
       </td>
     );
@@ -423,8 +448,48 @@ export default function StoreRoster({
         )}
       </div>
 
-      {/* Roster Controls */}
-      <div className="glass-card" style={{ padding: '1.25rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
+      {/* Subview Tabs bar */}
+      <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--border-glass)', paddingBottom: '0.25rem' }}>
+        <button
+          className="btn"
+          style={{
+            background: 'transparent',
+            border: 'none',
+            borderBottom: activeSubView === 'list' ? '2.5px solid var(--bby-blue)' : 'none',
+            color: activeSubView === 'list' ? '#fff' : 'var(--text-muted)',
+            borderRadius: 0,
+            padding: '0.75rem 1.25rem',
+            fontWeight: 700,
+            fontSize: '0.85rem',
+            cursor: 'pointer'
+          }}
+          onClick={() => setActiveSubView('list')}
+        >
+          Performance Ledger
+        </button>
+        <button
+          className="btn"
+          style={{
+            background: 'transparent',
+            border: 'none',
+            borderBottom: activeSubView === 'audit' ? '2.5px solid var(--bby-blue)' : 'none',
+            color: activeSubView === 'audit' ? '#fff' : 'var(--text-muted)',
+            borderRadius: 0,
+            padding: '0.75rem 1.25rem',
+            fontWeight: 700,
+            fontSize: '0.85rem',
+            cursor: 'pointer'
+          }}
+          onClick={() => setActiveSubView('audit')}
+        >
+          AI Metrics Auditor
+        </button>
+      </div>
+
+      {activeSubView === 'list' && (
+        <>
+          {/* Roster Controls */}
+          <div className="glass-card" style={{ padding: '1.25rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
         {/* Department Filters */}
         <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
           {DEPARTMENTS.map(dept => (
@@ -670,8 +735,8 @@ export default function StoreRoster({
                 </tr>
               ) : (
                 filteredRoster.map(emp => {
-                  const gaps = getEmployeeGap(emp);
-                  const isExceeding = gaps === 'None' || gaps === '';
+                  const gap = getEmployeeGap(emp);
+                  const isExceeding = gap === 'None' || gap === '';
                   const rowBg = isExceeding ? 'rgba(16, 185, 129, 0.018)' : emp.focus5 ? 'rgba(239, 68, 68, 0.018)' : 'rgba(255,255,255,0.005)';
                   const rowBorderLeft = isExceeding ? '4px solid var(--success)' : emp.focus5 ? '4px solid var(--error)' : '4px solid transparent';
                   const hoverBg = isExceeding ? 'rgba(16, 185, 129, 0.035)' : emp.focus5 ? 'rgba(239, 68, 68, 0.035)' : 'rgba(255,255,255,0.025)';
@@ -689,62 +754,65 @@ export default function StoreRoster({
                       onMouseLeave={(e) => e.currentTarget.style.background = rowBg}
                     >
                       <td style={{ padding: isDense ? '0.45rem 1.5rem' : '1rem 1.5rem', fontWeight: 600, color: '#fff' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', alignItems: 'flex-start' }}>
                           <span 
-                            style={{ cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'rgba(255,255,255,0.3)' }}
+                            style={{ cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'rgba(255,255,255,0.3)', fontSize: '0.925rem', fontWeight: 700 }}
                             onClick={() => setSelectedProfileEmployee(emp)}
                             onMouseEnter={(e) => e.currentTarget.style.color = 'var(--bby-blue)'}
                             onMouseLeave={(e) => e.currentTarget.style.color = '#fff'}
                           >
                             {emp.name}
                           </span>
-                          {(() => {
-                            const cvi = calculateCVI(emp, rosterHistory, activePeriod);
-                            let badgeBg = 'rgba(255, 255, 255, 0.05)';
-                            let badgeColor = 'var(--text-secondary)';
-                            let badgeBorder = 'rgba(255, 255, 255, 0.1)';
-                            let cviIcon = '▶';
-                            if (cvi.includes('Accelerating')) {
-                              badgeBg = 'rgba(16, 185, 129, 0.15)';
-                              badgeColor = 'var(--success)';
-                              badgeBorder = 'rgba(16, 185, 129, 0.3)';
-                              cviIcon = '▲';
-                            } else if (cvi.includes('Needs Review')) {
-                              badgeBg = 'rgba(239, 68, 68, 0.15)';
-                              badgeColor = 'var(--error)';
-                              badgeBorder = 'rgba(239, 68, 68, 0.3)';
-                              cviIcon = '▼';
-                            } else if (cvi.includes('Neutral')) {
-                              badgeBg = 'rgba(245, 158, 11, 0.15)';
-                              badgeColor = 'var(--warning)';
-                              badgeBorder = 'rgba(245, 158, 11, 0.3)';
-                              cviIcon = '▶';
-                            }
-                            return (
-                              <span 
-                                title="Coaching Velocity Index (Month over Month growth velocity)"
-                                style={{ 
-                                  fontSize: '0.65rem', 
-                                  background: badgeBg, 
-                                  border: `1px solid ${badgeBorder}`, 
-                                  color: badgeColor, 
-                                  padding: '0.15rem 0.35rem', 
-                                  borderRadius: '6px', 
-                                  fontWeight: 700,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.15rem'
-                                }}
-                              >
-                                {cviIcon} CVI: {cvi.split(' ')[0]}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                            {(() => {
+                              const cvi = calculateCVI(emp, rosterHistory, activePeriod);
+                              let badgeBg = 'rgba(255, 255, 255, 0.04)';
+                              let badgeColor = 'var(--text-secondary)';
+                              let badgeBorder = 'rgba(255, 255, 255, 0.08)';
+                              let cviIcon = '▶';
+                              if (cvi.includes('Accelerating')) {
+                                badgeBg = 'rgba(16, 185, 129, 0.1)';
+                                badgeColor = 'var(--success)';
+                                badgeBorder = 'rgba(16, 185, 129, 0.2)';
+                                cviIcon = '▲';
+                              } else if (cvi.includes('Needs Review')) {
+                                badgeBg = 'rgba(239, 68, 68, 0.15)';
+                                badgeColor = 'var(--error)';
+                                badgeBorder = 'rgba(239, 68, 68, 0.3)';
+                                cviIcon = '▼';
+                              } else if (cvi.includes('Neutral')) {
+                                badgeBg = 'rgba(245, 158, 11, 0.1)';
+                                badgeColor = 'var(--warning)';
+                                badgeBorder = 'rgba(245, 158, 11, 0.2)';
+                                cviIcon = '▶';
+                              }
+                              return (
+                                <span 
+                                  title="Coaching Velocity Index (Month over Month growth velocity)"
+                                  style={{ 
+                                    fontSize: '0.625rem', 
+                                    background: badgeBg, 
+                                    border: `1px solid ${badgeBorder}`, 
+                                    color: badgeColor, 
+                                    padding: '0.1rem 0.3rem', 
+                                    borderRadius: '4px', 
+                                    fontWeight: 700,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.15rem',
+                                    whiteSpace: 'nowrap'
+                                  }}
+                                >
+                                  {cviIcon} CVI: {cvi.split(' ')[0]}
+                                </span>
+                              );
+                            })()}
+                            {emp.focus5 && (
+                              <span style={{ fontSize: '0.625rem', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: 'var(--error)', padding: '0.1rem 0.3rem', borderRadius: '4px', fontWeight: 700, letterSpacing: '0.02em', whiteSpace: 'nowrap' }}>
+                                🔥 FOCUS 5
                               </span>
-                            );
-                          })()}
-                          {emp.focus5 && (
-                            <span style={{ fontSize: '0.65rem', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid var(--error)', color: 'var(--error)', padding: '0.15rem 0.35rem', borderRadius: '6px', fontWeight: 700, letterSpacing: '0.02em' }}>
-                              🔥 FOCUS 5
-                            </span>
-                          )}
+                            )}
+                          </div>
                         </div>
                       </td>
                       {visibleCols.hours && (
@@ -754,26 +822,37 @@ export default function StoreRoster({
                       )}
                       {visibleCols.dept && (
                         <td style={{ padding: isDense ? '0.25rem 1.5rem' : '0.5rem 1.5rem' }}>
-                          <select 
-                            className="form-control"
-                            style={{ 
-                              padding: isDense ? '0.25rem 0.5rem' : '0.4rem 0.8rem', 
-                              fontSize: '0.8rem', 
-                              background: 'rgba(11,15,25,0.6)', 
-                              border: '1px solid var(--border-glass)',
-                              borderRadius: '8px',
-                              color: 'var(--text-secondary)',
-                              cursor: 'pointer',
-                              width: 'auto',
-                              minWidth: isDense ? '110px' : '130px'
-                            }}
-                            value={emp.dept}
-                            onChange={(e) => onUpdateEmployeeDept && onUpdateEmployeeDept(emp.id, e.target.value)}
-                          >
-                            {DEPARTMENTS.filter(d => d !== 'All').map(d => (
-                              <option key={d} value={d}>{d}</option>
-                            ))}
-                          </select>
+                          {(() => {
+                            const deptStyle = getDeptStyle(emp.dept);
+                            return (
+                              <select 
+                                className="form-control"
+                                style={{ 
+                                  padding: '0.25rem 0.6rem', 
+                                  fontSize: '0.75rem', 
+                                  fontWeight: 700,
+                                  background: deptStyle.bg, 
+                                  border: `1px solid ${deptStyle.border}`,
+                                  borderRadius: '20px',
+                                  color: deptStyle.color,
+                                  cursor: 'pointer',
+                                  width: 'auto',
+                                  minWidth: isDense ? '110px' : '130px',
+                                  textAlign: 'center',
+                                  appearance: 'none',
+                                  WebkitAppearance: 'none',
+                                  outline: 'none',
+                                  textAlignLast: 'center'
+                                }}
+                                value={emp.dept}
+                                onChange={(e) => onUpdateEmployeeDept && onUpdateEmployeeDept(emp.id, e.target.value)}
+                              >
+                                {DEPARTMENTS.filter(d => d !== 'All').map(d => (
+                                  <option key={d} value={d} style={{ background: '#0e1220', color: '#fff' }}>{d}</option>
+                                ))}
+                              </select>
+                            );
+                          })()}
                         </td>
                       )}
                       {visibleCols.memberships && renderMetricCell(emp.memberships, 'memberships', emp.dept, emp, `${emp.memberships} Membs`)}
@@ -791,7 +870,7 @@ export default function StoreRoster({
                       )}
                       {visibleCols.status && (
                         <td style={{ padding: isDense ? '0.45rem 1.5rem' : '1rem 1.5rem' }}>
-                          {getStatusBadge(gaps)}
+                          {getStatusBadge(gap)}
                         </td>
                       )}
                       <td style={{ padding: isDense ? '0.45rem 1.5rem' : '1rem 1.5rem', textAlign: 'right' }}>
@@ -806,14 +885,14 @@ export default function StoreRoster({
                           <button 
                             className="btn btn-secondary" 
                             style={{ padding: isDense ? '0.25rem 0.45rem' : '0.35rem 0.6rem', fontSize: '0.75rem' }}
-                            onClick={() => onCoachEmployee({ ...emp, gap })}
+                            onClick={() => onCoachEmployee && onCoachEmployee({ ...emp, gap })}
                           >
                             Coach
                           </button>
                           <button 
                             className="btn btn-accent" 
                             style={{ padding: isDense ? '0.25rem 0.45rem' : '0.35rem 0.6rem', fontSize: '0.75rem', color: '#000' }}
-                            onClick={() => onCreateLog({ ...emp, gap })}
+                            onClick={() => onCreateLog && onCreateLog({ ...emp, gap })}
                           >
                             Log Builder
                           </button>
@@ -932,25 +1011,36 @@ export default function StoreRoster({
                   {/* Department Selector */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Dept:</span>
-                    <select 
-                      className="form-control"
-                      style={{ 
-                        padding: '0.3rem 0.6rem', 
-                        fontSize: '0.8rem', 
-                        background: 'rgba(11,15,25,0.6)', 
-                        border: '1px solid var(--border-glass)',
-                        borderRadius: '8px',
-                        color: 'var(--text-secondary)',
-                        cursor: 'pointer',
-                        width: 'auto',
-                      }}
-                      value={emp.dept}
-                      onChange={(e) => onUpdateEmployeeDept && onUpdateEmployeeDept(emp.id, e.target.value)}
-                    >
-                      {DEPARTMENTS.filter(d => d !== 'All').map(d => (
-                        <option key={d} value={d}>{d}</option>
-                      ))}
-                    </select>
+                    {(() => {
+                      const deptStyle = getDeptStyle(emp.dept);
+                      return (
+                        <select 
+                          className="form-control"
+                          style={{ 
+                            padding: '0.25rem 0.6rem', 
+                            fontSize: '0.75rem', 
+                            fontWeight: 700,
+                            background: deptStyle.bg, 
+                            border: `1px solid ${deptStyle.border}`,
+                            borderRadius: '20px',
+                            color: deptStyle.color,
+                            cursor: 'pointer',
+                            width: 'auto',
+                            textAlign: 'center',
+                            appearance: 'none',
+                            WebkitAppearance: 'none',
+                            outline: 'none',
+                            textAlignLast: 'center'
+                          }}
+                          value={emp.dept}
+                          onChange={(e) => onUpdateEmployeeDept && onUpdateEmployeeDept(emp.id, e.target.value)}
+                        >
+                          {DEPARTMENTS.filter(d => d !== 'All').map(d => (
+                            <option key={d} value={d} style={{ background: '#0e1220', color: '#fff' }}>{d}</option>
+                          ))}
+                        </select>
+                      );
+                    })()}
                   </div>
 
                   {/* Metrics Grid */}
@@ -996,14 +1086,14 @@ export default function StoreRoster({
                     <button 
                       className="btn btn-secondary" 
                       style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', textAlign: 'center' }}
-                      onClick={() => onCoachEmployee({ ...emp, gap })}
+                      onClick={() => onCoachEmployee && onCoachEmployee({ ...emp, gap })}
                     >
                       Coach
                     </button>
                     <button 
                       className="btn btn-accent" 
                       style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', color: '#000', textAlign: 'center' }}
-                      onClick={() => onCreateLog({ ...emp, gap })}
+                      onClick={() => onCreateLog && onCreateLog({ ...emp, gap })}
                     >
                       Log Builder
                     </button>
@@ -1057,6 +1147,12 @@ export default function StoreRoster({
           ))}
         </div>
       </div>
+      </>
+      )}
+
+      {activeSubView === 'audit' && (
+        <RosterAuditor roster={roster} />
+      )}
 
       {/* Performance Wizard Modal */}
       <PerformanceWizardModal

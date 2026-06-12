@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Check, AlertCircle, Plus, Minus, Power, Trash2, Calendar, User, CheckCircle2, XCircle } from 'lucide-react';
+import { Clock, Check, AlertCircle, Plus, Minus, Power, Trash2, Calendar, User, CheckCircle2, XCircle, Upload, Camera, Play, Flame, Trophy, Undo } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useStore } from '../store/useStore';
 import ZoneScheduler from './ZoneScheduler';
 import BreakRunSheet from './BreakRunSheet';
+import ImportScheduleModal from './ImportScheduleModal';
+import FloorAudit from './FloorAudit';
+import ShiftSimulator from './ShiftSimulator';
 
-export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteShift, roster = [], activeManager }) {
-  const { dbConnected } = useApp();
+export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteShift, roster = [], activeManager, onAddEmployee }) {
+  const { dbConnected, apiKey } = useApp();
   
   // Auto-detect if today is weekend (0=Sun, 6=Sat)
   const isTodayWeekend = () => {
@@ -32,6 +36,7 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
   const [dailyPmsGoal, setDailyPmsGoal] = useState('15');
   const [isWeekend, setIsWeekend] = useState(isTodayWeekend());
   const [leaderTab, setLeaderTab] = useState('tracker');
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   // Set leader name from logged in manager
   useEffect(() => {
@@ -44,6 +49,143 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
     time: '12:00 PM',
     type: '15 min Break'
   });
+
+  // Zustand store actions
+  const editEmployee = useStore((state) => state.editEmployee);
+
+  // States for logging floor wins (credit cards and memberships)
+  const [selectedEmpId, setSelectedEmpId] = useState('');
+  const [winType, setWinType] = useState('pm'); // 'pm' or 'app'
+
+  const getEmployeesOnShift = () => {
+    if (!activeShift || !activeShift.zoneAssignments) return [];
+    const activeEmpIds = new Set();
+    Object.values(activeShift.zoneAssignments).forEach(ids => {
+      if (Array.isArray(ids)) {
+        ids.forEach(id => activeEmpIds.add(id));
+      }
+    });
+    return roster.filter(emp => activeEmpIds.has(emp.id));
+  };
+
+  const handleLogFloorWin = () => {
+    if (!activeShift) return;
+    if (!selectedEmpId) {
+      alert("Please select an associate first!");
+      return;
+    }
+    const emp = roster.find(e => e.id === selectedEmpId);
+    if (!emp) return;
+
+    let empZone = 'Floor';
+    if (activeShift.zoneAssignments) {
+      Object.entries(activeShift.zoneAssignments).forEach(([zoneName, ids]) => {
+        if (ids.includes(emp.id)) {
+          empZone = zoneName;
+        }
+      });
+    }
+
+    const latestIdx = activeShift.hours && activeShift.hours.length > 0 ? activeShift.hours.length - 1 : 0;
+    const newWin = {
+      id: `win-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      empId: emp.id,
+      empName: emp.name,
+      zone: empZone,
+      type: winType,
+      timestamp: Date.now(),
+      hourIndex: latestIdx
+    };
+
+    // Update hourly count of the current hour interval
+    const updatedHours = [...(activeShift.hours || [])];
+    if (updatedHours[latestIdx]) {
+      const targetHour = { ...updatedHours[latestIdx] };
+      if (winType === 'pm') {
+        targetHour.pms = (targetHour.pms || 0) + 1;
+      } else {
+        targetHour.apps = (targetHour.apps || 0) + 1;
+      }
+      updatedHours[latestIdx] = targetHour;
+    }
+
+    // Append win history
+    const updatedWins = [...(activeShift.wins || []), newWin];
+
+    setActiveShift({
+      ...activeShift,
+      hours: updatedHours,
+      wins: updatedWins
+    });
+
+    // Update roster employee metrics
+    editEmployee(emp.id, {
+      memberships: (emp.memberships || 0) + (winType === 'pm' ? 1 : 0),
+      creditCards: (emp.creditCards || 0) + (winType === 'app' ? 1 : 0)
+    });
+
+    // Clear dropdown selection
+    setSelectedEmpId('');
+  };
+
+  const handleUndoWin = (winId) => {
+    if (!activeShift) return;
+    const win = (activeShift.wins || []).find(w => w.id === winId);
+    if (!win) return;
+
+    const emp = roster.find(e => e.id === win.empId);
+
+    const updatedHours = [...(activeShift.hours || [])];
+    const hourIdx = win.hourIndex;
+    if (updatedHours[hourIdx]) {
+      const targetHour = { ...updatedHours[hourIdx] };
+      if (win.type === 'pm') {
+        targetHour.pms = Math.max(0, (targetHour.pms || 0) - 1);
+      } else {
+        targetHour.apps = Math.max(0, (targetHour.apps || 0) - 1);
+      }
+      updatedHours[hourIdx] = targetHour;
+    }
+
+    const updatedWins = (activeShift.wins || []).filter(w => w.id !== winId);
+
+    setActiveShift({
+      ...activeShift,
+      hours: updatedHours,
+      wins: updatedWins
+    });
+
+    if (emp) {
+      editEmployee(emp.id, {
+        memberships: Math.max(0, (emp.memberships || 0) - (win.type === 'pm' ? 1 : 0)),
+        creditCards: Math.max(0, (emp.creditCards || 0) - (win.type === 'app' ? 1 : 0))
+      });
+    }
+  };
+
+  const getShiftLeaderboard = () => {
+    const onShift = getEmployeesOnShift();
+    const targetList = onShift.length > 0 ? onShift : roster;
+    
+    const leaderboard = targetList.map(emp => {
+      const empWins = (activeShift?.wins || []).filter(w => w.empId === emp.id);
+      const pms = empWins.filter(w => w.type === 'pm').length;
+      const apps = empWins.filter(w => w.type === 'app').length;
+      return {
+        ...emp,
+        shiftPms: pms,
+        shiftApps: apps,
+        shiftTotal: pms + apps
+      };
+    });
+
+    return leaderboard.sort((a, b) => {
+      if (b.shiftTotal !== a.shiftTotal) {
+        return b.shiftTotal - a.shiftTotal;
+      }
+      return a.name.localeCompare(b.name);
+    });
+  };
   
   // Save active shift to localStorage so it survives page reloads
   useEffect(() => {
@@ -80,7 +222,9 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
         'Geek Squad': [],
         'Appliances': []
       },
-      breakSchedule: []
+      breakSchedule: [],
+      activeBreaks: {},
+      wins: []
     };
     setActiveShift(newShift);
   };
@@ -259,6 +403,70 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
     setActiveShift({
       ...activeShift,
       breakSchedule: updated
+    });
+  };
+
+  const handleToggleBreakState = (empId, breakType) => {
+    if (!activeShift) return;
+    const currentActiveBreaks = activeShift.activeBreaks || {};
+    const updatedActiveBreaks = { ...currentActiveBreaks };
+
+    if (breakType) {
+      // Start a break
+      updatedActiveBreaks[empId] = breakType;
+      
+      // Auto-log break as completed in the Run Sheet
+      const emp = roster.find(e => e.id === empId);
+      const empName = emp ? emp.name : 'Associate';
+      const nowTimeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      const newBreak = {
+        id: `manual_break_${empId}_${Date.now()}`,
+        empId,
+        name: empName,
+        time: nowTimeStr,
+        type: breakType === '15m' ? '15 min Break' : '30 min Lunch',
+        completed: true
+      };
+
+      setActiveShift({
+        ...activeShift,
+        activeBreaks: updatedActiveBreaks,
+        breakSchedule: [...(activeShift.breakSchedule || []), newBreak]
+      });
+    } else {
+      // End break
+      delete updatedActiveBreaks[empId];
+      setActiveShift({
+        ...activeShift,
+        activeBreaks: updatedActiveBreaks
+      });
+    }
+  };
+
+  const handleImportSchedule = ({ zoneAssignments, breakSchedule }) => {
+    if (!activeShift) return;
+    
+    // Merge zones: for each zone, merge new assignments with existing ones, avoiding duplicates
+    const currentZones = activeShift.zoneAssignments || {
+      'Computing': [], 'Mobile': [], 'Home Theatre': [], 'Front End': [], 'Geek Squad': [], 'Appliances': []
+    };
+    
+    const mergedZones = {};
+    Object.keys(currentZones).forEach(z => {
+      const existingIds = currentZones[z] || [];
+      const newIds = zoneAssignments[z] || [];
+      mergedZones[z] = Array.from(new Set([...existingIds, ...newIds]));
+    });
+
+    // Append breaks
+    const currentBreaks = activeShift.breakSchedule || [];
+    const mergedBreaks = [...currentBreaks, ...breakSchedule];
+
+    setActiveShift({
+      ...activeShift,
+      zoneAssignments: mergedZones,
+      breakSchedule: mergedBreaks
     });
   };
 
@@ -467,7 +675,7 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
 
           {/* Tab Selection Header bar with End Shift */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-glass)', flexWrap: 'wrap', gap: '1rem', paddingBottom: '0.25rem' }}>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               <button
                 className="btn"
                 style={{
@@ -502,6 +710,40 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
               >
                 Zones & Breaks Run Sheet
               </button>
+              <button
+                className="btn"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  borderBottom: leaderTab === 'audit' ? '2.5px solid var(--bby-blue)' : 'none',
+                  color: leaderTab === 'audit' ? '#fff' : 'var(--text-muted)',
+                  borderRadius: 0,
+                  padding: '0.75rem 1.25rem',
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer'
+                }}
+                onClick={() => setLeaderTab('audit')}
+              >
+                Floor Audit (Vision)
+              </button>
+              <button
+                className="btn"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  borderBottom: leaderTab === 'sim' ? '2.5px solid var(--bby-blue)' : 'none',
+                  color: leaderTab === 'sim' ? '#fff' : 'var(--text-muted)',
+                  borderRadius: 0,
+                  padding: '0.75rem 1.25rem',
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer'
+                }}
+                onClick={() => setLeaderTab('sim')}
+              >
+                Shift Simulator
+              </button>
             </div>
             
             <button className="btn btn-accent" onClick={handleEndShift} style={{ padding: '0.5rem 1.25rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', color: 'var(--error)', height: '36px', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
@@ -509,7 +751,7 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
             </button>
           </div>
 
-          {leaderTab === 'tracker' ? (
+          {leaderTab === 'tracker' && (
             /* Hourly Tracker Log Form */
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               
@@ -611,245 +853,467 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
                   </div>
                 </div>
               </div>
-
-              {/* Hourly Table Log Card */}
-              <div className="glass-card" style={{ padding: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                  <div>
-                    <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Hourly Floor Performance Log</h3>
-                    <p style={{ fontSize: '0.775rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>Increment Apps, PMs, and Revenue at the end of each hourly check.</p>
+            <div className="floor-tracker-grid">
+              {/* Main Column: Hourly Log Table */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                {/* Hourly Table Log Card */}
+                <div className="glass-card" style={{ padding: '2rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                    <div>
+                      <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Hourly Floor Performance Log</h3>
+                      <p style={{ fontSize: '0.775rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>Increment Apps, PMs, and Revenue at the end of each hourly check.</p>
+                    </div>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                      <button className="btn btn-secondary" onClick={handleAddHour} style={{ padding: '0.55rem 1rem', fontSize: '0.8rem' }}>
+                        + Add Next Hour
+                      </button>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button className="btn btn-secondary" onClick={handleAddHour} style={{ padding: '0.55rem 1rem', fontSize: '0.8rem' }}>
-                      + Add Next Hour
+
+                  {/* Desktop Table View */}
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid var(--border-glass)', color: 'var(--text-secondary)', fontSize: '0.775rem' }}>
+                          <th style={{ padding: '1rem' }}>TIME INTERVAL</th>
+                          <th style={{ padding: '1rem', textAlign: 'center' }}>PMs (MEMBERSHIPS)</th>
+                          <th style={{ padding: '1rem', textAlign: 'center' }}>APPs (CREDIT CARDS)</th>
+                          <th style={{ padding: '1rem', textAlign: 'center' }}>REVENUE GENERATED</th>
+                          <th style={{ padding: '1rem', textAlign: 'center' }}>STATUS</th>
+                          <th style={{ padding: '1rem', textAlign: 'right' }}>ACTIONS</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {activeShift.hours.map((hour, idx) => {
+                          const onTrack = checkHourStatus(hour.pms, hour.apps, activeShift.isWeekend);
+                          const pmGoal = activeShift.isWeekend ? 3 : 2;
+                          const appGoal = activeShift.isWeekend ? 3 : 2;
+
+                          return (
+                            <tr 
+                              key={idx} 
+                              style={{ 
+                                borderBottom: '1px solid var(--border-glass)',
+                                background: onTrack ? 'rgba(16, 185, 129, 0.01)' : 'rgba(239, 68, 68, 0.005)'
+                              }}
+                            >
+                              <td style={{ padding: '1.2rem 1rem', fontWeight: 600 }}>
+                                Hour {hour.hourNumber} <span style={{ fontSize: '0.725rem', color: 'var(--text-muted)', fontWeight: 400 }}>(Interval #{idx + 1})</span>
+                              </td>
+                              
+                              {/* PMs Stepper */}
+                              <td style={{ padding: '1rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+                                  <button 
+                                    type="button"
+                                    className="btn btn-secondary" 
+                                    style={{ width: '28px', height: '28px', borderRadius: '50%', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                    onClick={() => handleUpdateMetric(idx, 'pms', -1)}
+                                  >
+                                    <Minus size={14} />
+                                  </button>
+                                  <span style={{ fontSize: '1.1rem', fontWeight: 700, width: '24px', textAlign: 'center', color: hour.pms >= pmGoal ? 'var(--success)' : '#fff' }}>
+                                    {hour.pms}
+                                  </span>
+                                  <button 
+                                    type="button"
+                                    className="btn btn-secondary" 
+                                    style={{ width: '28px', height: '28px', borderRadius: '50%', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                    onClick={() => handleUpdateMetric(idx, 'pms', 1)}
+                                  >
+                                    <Plus size={14} />
+                                  </button>
+                                </div>
+                              </td>
+
+                              {/* Apps Stepper */}
+                              <td style={{ padding: '1rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+                                  <button 
+                                    type="button"
+                                    className="btn btn-secondary" 
+                                    style={{ width: '28px', height: '28px', borderRadius: '50%', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                    onClick={() => handleUpdateMetric(idx, 'apps', -1)}
+                                  >
+                                    <Minus size={14} />
+                                  </button>
+                                  <span style={{ fontSize: '1.1rem', fontWeight: 700, width: '24px', textAlign: 'center', color: hour.apps >= appGoal ? 'var(--success)' : '#fff' }}>
+                                    {hour.apps}
+                                  </span>
+                                  <button 
+                                    type="button"
+                                    className="btn btn-secondary" 
+                                    style={{ width: '28px', height: '28px', borderRadius: '50%', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                    onClick={() => handleUpdateMetric(idx, 'apps', 1)}
+                                  >
+                                    <Plus size={14} />
+                                  </button>
+                                </div>
+                              </td>
+
+                              {/* Hourly Revenue Input */}
+                              <td style={{ padding: '1rem' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
+                                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>$</span>
+                                    <input 
+                                      type="number"
+                                      className="form-control"
+                                      style={{ 
+                                        width: '90px', 
+                                        textAlign: 'center', 
+                                        padding: '0.35rem 0.5rem', 
+                                        fontSize: '0.9rem', 
+                                        background: 'rgba(11, 15, 25, 0.6)', 
+                                        border: '1px solid var(--border-glass)',
+                                        borderRadius: '6px',
+                                        color: '#fff',
+                                        margin: 0
+                                      }}
+                                      value={hour.revenue || ''}
+                                      onChange={(e) => handleUpdateRevenue(idx, e.target.value)}
+                                      placeholder="0"
+                                    />
+                                  </div>
+                                  <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.15rem' }}>
+                                    {['+500', '+1k', '+2k'].map(preset => {
+                                      const val = preset === '+500' ? 500 : preset === '+1k' ? 1000 : 2000;
+                                      return (
+                                        <button
+                                          key={preset}
+                                          type="button"
+                                          style={{
+                                            padding: '0.15rem 0.35rem',
+                                            fontSize: '0.65rem',
+                                            background: 'rgba(255,255,255,0.03)',
+                                            border: '1px solid rgba(255,255,255,0.08)',
+                                            borderRadius: '4px',
+                                            color: 'var(--text-secondary)',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.15s ease'
+                                          }}
+                                          onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                                            e.currentTarget.style.color = '#fff';
+                                          }}
+                                          onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                                            e.currentTarget.style.color = 'var(--text-secondary)';
+                                          }}
+                                          onClick={() => {
+                                            const currentRev = parseFloat(hour.revenue) || 0;
+                                            handleUpdateRevenue(idx, currentRev + val);
+                                          }}
+                                        >
+                                          {preset}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              </td>
+
+                              {/* Status Check Badge */}
+                              <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                                  {onTrack ? (
+                                    <span style={{ 
+                                      padding: '0.35rem 0.75rem', 
+                                      background: 'rgba(16, 185, 129, 0.1)', 
+                                      border: '1px solid rgba(16, 185, 129, 0.25)', 
+                                      color: 'var(--success)', 
+                                      borderRadius: '20px', 
+                                      fontSize: '0.725rem',
+                                      fontWeight: 700,
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '0.25rem',
+                                      boxShadow: '0 0 10px rgba(16,185,129,0.05)'
+                                    }}>
+                                      <CheckCircle2 size={12} /> ON TRACK
+                                    </span>
+                                  ) : (
+                                    <span style={{ 
+                                      padding: '0.35rem 0.75rem', 
+                                      background: 'rgba(239, 68, 68, 0.08)', 
+                                      border: '1px solid rgba(239, 68, 68, 0.2)', 
+                                      color: 'var(--error)', 
+                                      borderRadius: '20px', 
+                                      fontSize: '0.725rem',
+                                      fontWeight: 700,
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '0.25rem'
+                                    }}>
+                                      <XCircle size={12} /> OFF TRACK
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+
+                              <td style={{ padding: '1rem', textAlign: 'right' }}>
+                                <button 
+                                  type="button"
+                                  className="btn-trash"
+                                  style={{ 
+                                    background: 'transparent', 
+                                    border: 'none', 
+                                    color: 'var(--text-muted)', 
+                                    cursor: activeShift.hours.length > 1 ? 'pointer' : 'not-allowed',
+                                    opacity: activeShift.hours.length > 1 ? 1 : 0.3,
+                                    transition: 'color 0.2s'
+                                  }}
+                                  onClick={() => handleRemoveHour(idx)}
+                                  disabled={activeShift.hours.length <= 1}
+                                  title="Delete Hour Record"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Bottom Add button */}
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
+                  <button className="btn btn-secondary" onClick={handleAddHour} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.825rem', borderStyle: 'dashed' }}>
+                    <Plus size={16} /> Add Hour {activeShift.hours.length + 1}
+                  </button>
+                </div>
+              </div>
+
+              {/* Sidebar Column: Logger, Leaderboard, Win feed */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                
+                {/* Quick Log Floor Win */}
+                <div className="glass-card" style={{ padding: '1.5rem' }}>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#fff' }}>
+                    <Trophy size={18} color="var(--bby-yellow)" /> Quick Log Floor Win
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Select Associate:</label>
+                      <select 
+                        className="form-control"
+                        style={{ background: '#0e1220', fontSize: '0.85rem', height: '38px' }}
+                        value={selectedEmpId}
+                        onChange={(e) => setSelectedEmpId(e.target.value)}
+                      >
+                        <option value="">-- Select Associate --</option>
+                        {(() => {
+                          const onShift = getEmployeesOnShift();
+                          const offShift = roster.filter(emp => !onShift.some(os => os.id === emp.id));
+                          return (
+                            <>
+                              {onShift.length > 0 && (
+                                <optgroup label="Associates On Shift">
+                                  {onShift.map(emp => (
+                                    <option key={emp.id} value={emp.id}>{emp.name} ({emp.dept || 'Floor'})</option>
+                                  ))}
+                                </optgroup>
+                              )}
+                              <optgroup label="Other Roster Associates">
+                                {offShift.map(emp => (
+                                  <option key={emp.id} value={emp.id}>{emp.name} ({emp.dept || 'Floor'})</option>
+                                ))}
+                              </optgroup>
+                            </>
+                          );
+                        })()}
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Win Type:</label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.25rem' }}>
+                        <button
+                          type="button"
+                          className="btn"
+                          style={{
+                            padding: '0.55rem',
+                            fontSize: '0.8rem',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border-glass)',
+                            background: winType === 'pm' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255,255,255,0.01)',
+                            borderColor: winType === 'pm' ? 'var(--success)' : 'var(--border-glass)',
+                            color: winType === 'pm' ? '#fff' : 'var(--text-secondary)',
+                            fontWeight: 600,
+                            cursor: 'pointer'
+                          }}
+                          onClick={() => setWinType('pm')}
+                        >
+                          Membership (PM) 🚀
+                        </button>
+                        <button
+                          type="button"
+                          className="btn"
+                          style={{
+                            padding: '0.55rem',
+                            fontSize: '0.8rem',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border-glass)',
+                            background: winType === 'app' ? 'rgba(242, 169, 0, 0.15)' : 'rgba(255,255,255,0.01)',
+                            borderColor: winType === 'app' ? 'var(--bby-yellow)' : 'var(--border-glass)',
+                            color: winType === 'app' ? '#fff' : 'var(--text-secondary)',
+                            fontWeight: 600,
+                            cursor: 'pointer'
+                          }}
+                          onClick={() => setWinType('app')}
+                        >
+                          Best Buy Card 💳
+                        </button>
+                      </div>
+                    </div>
+
+                    <button 
+                      className="btn btn-primary"
+                      style={{ padding: '0.65rem', fontSize: '0.85rem', fontWeight: 700, width: '100%', marginTop: '0.25rem' }}
+                      onClick={handleLogFloorWin}
+                      disabled={!selectedEmpId}
+                    >
+                      Log Floor Win! 🚀
                     </button>
                   </div>
                 </div>
 
-                {/* Desktop Table View */}
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                    <thead>
-                      <tr style={{ borderBottom: '1px solid var(--border-glass)', color: 'var(--text-secondary)', fontSize: '0.775rem' }}>
-                        <th style={{ padding: '1rem' }}>TIME INTERVAL</th>
-                        <th style={{ padding: '1rem', textAlign: 'center' }}>PMs (MEMBERSHIPS)</th>
-                        <th style={{ padding: '1rem', textAlign: 'center' }}>APPs (CREDIT CARDS)</th>
-                        <th style={{ padding: '1rem', textAlign: 'center' }}>REVENUE GENERATED</th>
-                        <th style={{ padding: '1rem', textAlign: 'center' }}>STATUS</th>
-                        <th style={{ padding: '1rem', textAlign: 'right' }}>ACTIONS</th>
-                      </tr>
-                    </thead>
-                  <tbody>
-                    {activeShift.hours.map((hour, idx) => {
-                      const onTrack = checkHourStatus(hour.pms, hour.apps, activeShift.isWeekend);
-                      const pmGoal = activeShift.isWeekend ? 3 : 2;
-                      const appGoal = activeShift.isWeekend ? 3 : 2;
-
+                {/* Leaderboard: Hot on the Floor */}
+                <div className="glass-card" style={{ padding: '1.5rem' }}>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#fff' }}>
+                    <Flame size={18} color="var(--error)" /> Hot on the Floor
+                  </h3>
+                  <p style={{ fontSize: '0.725rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Shift leaderboard ranked by PMs + Apps secured today.</p>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '250px', overflowY: 'auto', paddingRight: '0.25rem' }}>
+                    {getShiftLeaderboard().map((emp, idx) => {
+                      const totalWins = emp.shiftTotal || 0;
                       return (
-                        <tr 
-                          key={idx} 
+                        <div 
+                          key={emp.id} 
                           style={{ 
-                            borderBottom: '1px solid var(--border-glass)',
-                            background: onTrack ? 'rgba(16, 185, 129, 0.01)' : 'rgba(239, 68, 68, 0.005)'
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center', 
+                            background: totalWins > 0 ? 'rgba(253, 216, 53, 0.03)' : 'rgba(255,255,255,0.01)', 
+                            border: totalWins > 0 ? '1px solid rgba(253,216,53,0.15)' : '1px solid var(--border-glass)',
+                            borderRadius: '10px', 
+                            padding: '0.6rem 0.85rem' 
                           }}
                         >
-                          <td style={{ padding: '1.2rem 1rem', fontWeight: 600 }}>
-                            Hour {hour.hourNumber} <span style={{ fontSize: '0.725rem', color: 'var(--text-muted)', fontWeight: 400 }}>(Interval #{idx + 1})</span>
-                          </td>
-                          
-                          {/* PMs Stepper */}
-                          <td style={{ padding: '1rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
-                              <button 
-                                type="button"
-                                className="btn btn-secondary" 
-                                style={{ width: '28px', height: '28px', borderRadius: '50%', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                onClick={() => handleUpdateMetric(idx, 'pms', -1)}
-                              >
-                                <Minus size={14} />
-                              </button>
-                              <span style={{ fontSize: '1.1rem', fontWeight: 700, width: '24px', textAlign: 'center', color: hour.pms >= pmGoal ? 'var(--success)' : '#fff' }}>
-                                {hour.pms}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: totalWins > 0 ? 'var(--bby-yellow)' : 'var(--text-muted)', width: '16px' }}>
+                              #{idx + 1}
+                            </span>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: totalWins > 0 ? '#fff' : 'var(--text-secondary)' }}>
+                                {emp.name}
                               </span>
-                              <button 
-                                type="button"
-                                className="btn btn-secondary" 
-                                style={{ width: '28px', height: '28px', borderRadius: '50%', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                onClick={() => handleUpdateMetric(idx, 'pms', 1)}
-                              >
-                                <Plus size={14} />
-                              </button>
-                            </div>
-                          </td>
-
-                          {/* Apps Stepper */}
-                          <td style={{ padding: '1rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
-                              <button 
-                                type="button"
-                                className="btn btn-secondary" 
-                                style={{ width: '28px', height: '28px', borderRadius: '50%', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                onClick={() => handleUpdateMetric(idx, 'apps', -1)}
-                              >
-                                <Minus size={14} />
-                              </button>
-                              <span style={{ fontSize: '1.1rem', fontWeight: 700, width: '24px', textAlign: 'center', color: hour.apps >= appGoal ? 'var(--success)' : '#fff' }}>
-                                {hour.apps}
+                              <span style={{ fontSize: '0.675rem', color: 'var(--text-muted)' }}>
+                                {emp.dept || 'Floor'}
                               </span>
-                              <button 
-                                type="button"
-                                className="btn btn-secondary" 
-                                style={{ width: '28px', height: '28px', borderRadius: '50%', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                onClick={() => handleUpdateMetric(idx, 'apps', 1)}
-                              >
-                                <Plus size={14} />
-                              </button>
                             </div>
-                          </td>
+                          </div>
 
-                          {/* Hourly Revenue Input */}
-                          <td style={{ padding: '1rem' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
-                                <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>$</span>
-                                <input 
-                                  type="number"
-                                  className="form-control"
-                                  style={{ 
-                                    width: '90px', 
-                                    textAlign: 'center', 
-                                    padding: '0.35rem 0.5rem', 
-                                    fontSize: '0.9rem', 
-                                    background: 'rgba(11, 15, 25, 0.6)', 
-                                    border: '1px solid var(--border-glass)',
-                                    borderRadius: '6px',
-                                    color: '#fff',
-                                    margin: 0
-                                  }}
-                                  value={hour.revenue || ''}
-                                  onChange={(e) => handleUpdateRevenue(idx, e.target.value)}
-                                  placeholder="0"
-                                />
-                              </div>
-                              <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.15rem' }}>
-                                {['+500', '+1k', '+2k'].map(preset => {
-                                  const val = preset === '+500' ? 500 : preset === '+1k' ? 1000 : 2000;
-                                  return (
-                                    <button
-                                      key={preset}
-                                      type="button"
-                                      style={{
-                                        padding: '0.15rem 0.35rem',
-                                        fontSize: '0.65rem',
-                                        background: 'rgba(255,255,255,0.03)',
-                                        border: '1px solid rgba(255,255,255,0.08)',
-                                        borderRadius: '4px',
-                                        color: 'var(--text-secondary)',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.15s ease'
-                                      }}
-                                      onMouseEnter={(e) => {
-                                        e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
-                                        e.currentTarget.style.color = '#fff';
-                                      }}
-                                      onMouseLeave={(e) => {
-                                        e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-                                        e.currentTarget.style.color = 'var(--text-secondary)';
-                                      }}
-                                      onClick={() => {
-                                        const currentRev = parseFloat(hour.revenue) || 0;
-                                        handleUpdateRevenue(idx, currentRev + val);
-                                      }}
-                                    >
-                                      {preset}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          </td>
-
-                          {/* Status Check Badge */}
-                          <td style={{ padding: '1rem', textAlign: 'center' }}>
-                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                              {onTrack ? (
-                                <span style={{ 
-                                  padding: '0.35rem 0.75rem', 
-                                  background: 'rgba(16, 185, 129, 0.1)', 
-                                  border: '1px solid rgba(16, 185, 129, 0.25)', 
-                                  color: 'var(--success)', 
-                                  borderRadius: '20px', 
-                                  fontSize: '0.725rem',
-                                  fontWeight: 700,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.25rem',
-                                  boxShadow: '0 0 10px rgba(16,185,129,0.05)'
-                                }}>
-                                  <CheckCircle2 size={12} /> ON TRACK
-                                </span>
-                              ) : (
-                                <span style={{ 
-                                  padding: '0.35rem 0.75rem', 
-                                  background: 'rgba(239, 68, 68, 0.08)', 
-                                  border: '1px solid rgba(239, 68, 68, 0.2)', 
-                                  color: 'var(--error)', 
-                                  borderRadius: '20px', 
-                                  fontSize: '0.725rem',
-                                  fontWeight: 700,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.25rem'
-                                }}>
-                                  <XCircle size={12} /> OFF TRACK
-                                </span>
-                              )}
-                            </div>
-                          </td>
-
-                          <td style={{ padding: '1rem', textAlign: 'right' }}>
-                            <button 
-                              type="button"
-                              className="btn-trash"
-                              style={{ 
-                                background: 'transparent', 
-                                border: 'none', 
-                                color: 'var(--text-muted)', 
-                                cursor: activeShift.hours.length > 1 ? 'pointer' : 'not-allowed',
-                                opacity: activeShift.hours.length > 1 ? 1 : 0.3,
-                                transition: 'color 0.2s'
-                              }}
-                              onClick={() => handleRemoveHour(idx)}
-                              disabled={activeShift.hours.length <= 1}
-                              title="Delete Hour Record"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </td>
-                        </tr>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            {totalWins > 0 && (
+                              <span style={{ display: 'flex', alignItems: 'center', color: 'var(--error)', marginRight: '0.25rem', animation: 'skeletonPulse 1.2s infinite ease-in-out' }}>
+                                <Flame size={14} fill="var(--error)" />
+                              </span>
+                            )}
+                            <span style={{ padding: '0.15rem 0.4rem', borderRadius: '4px', fontSize: '0.7rem', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', fontWeight: 600 }}>
+                              {emp.shiftPms || 0} PM
+                            </span>
+                            <span style={{ padding: '0.15rem 0.4rem', borderRadius: '4px', fontSize: '0.7rem', background: 'rgba(242, 169, 0, 0.1)', color: 'var(--bby-yellow)', fontWeight: 600 }}>
+                              {emp.shiftApps || 0} Card
+                            </span>
+                          </div>
+                        </div>
                       );
                     })}
-                  </tbody>
-                </table>
-              </div>
+                  </div>
+                </div>
 
-              {/* Bottom Add button */}
-              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.5rem' }}>
-                <button className="btn btn-secondary" onClick={handleAddHour} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.825rem', borderStyle: 'dashed' }}>
-                  <Plus size={16} /> Add Hour {activeShift.hours.length + 1}
-                </button>
-              </div>
+                {/* Recent Floor Activity Win Feed */}
+                <div className="glass-card" style={{ padding: '1.5rem' }}>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.25rem', color: '#fff' }}>
+                    📢 Recent Floor Activity
+                  </h3>
+                  <p style={{ fontSize: '0.725rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Real-time win notifications logged during this shift.</p>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '200px', overflowY: 'auto', paddingRight: '0.25rem' }}>
+                    {(!activeShift.wins || activeShift.wins.length === 0) ? (
+                      <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.75rem', padding: '1.5rem 0' }}>
+                        No floor wins logged yet for this shift. Keep pushing cards & memberships!
+                      </div>
+                    ) : (
+                      [...activeShift.wins].reverse().map(win => (
+                        <div 
+                          key={win.id} 
+                          style={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center', 
+                            background: 'rgba(0,0,0,0.15)', 
+                            border: '1px solid var(--border-glass)',
+                            borderRadius: '8px', 
+                            padding: '0.5rem 0.75rem', 
+                            fontSize: '0.75rem' 
+                          }}
+                        >
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', flex: 1, paddingRight: '0.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                              <strong style={{ color: '#fff' }}>{win.empName}</strong>
+                              <span style={{ color: 'var(--text-muted)', fontSize: '0.675rem' }}>({win.zone})</span>
+                            </div>
+                            <span style={{ color: win.type === 'pm' ? 'var(--success)' : 'var(--bby-yellow)', fontWeight: 600 }}>
+                              {win.type === 'pm' ? 'My Best Buy Plus/Total Membership' : 'Best Buy Credit Card Application'}
+                            </span>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.65rem' }}>
+                              Logged at {new Date(win.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
 
+                          <button 
+                            className="btn-trash"
+                            style={{ padding: '0.3rem', background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                            onClick={() => handleUndoWin(win.id)}
+                            title="Undo/Remove Win Entry"
+                          >
+                            <Undo size={13} />
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+              </div>
             </div>
           </div>
-          ) : (
+          )}
+
+          {leaderTab === 'scheduler' && (
             /* Interactive Floor Zone & Break Scheduler Tab content */
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-1rem' }}>
+                <button 
+                  className="btn btn-primary"
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1.2rem', fontSize: '0.825rem' }}
+                  onClick={() => setIsImportModalOpen(true)}
+                >
+                  <Upload size={15} /> Import Floor Schedule
+                </button>
+              </div>
               <ZoneScheduler 
                 zoneAssignments={activeShift.zoneAssignments || {}}
                 roster={roster}
                 onAssignZone={handleAssignZone}
                 onUnassignZone={handleUnassignZone}
+                activeBreaks={activeShift.activeBreaks || {}}
+                onToggleBreakState={handleToggleBreakState}
               />
               <BreakRunSheet 
                 breakSchedule={activeShift.breakSchedule || []}
@@ -859,6 +1323,14 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
                 onDeleteBreak={handleDeleteBreak}
               />
             </div>
+          )}
+
+          {leaderTab === 'audit' && (
+            <FloorAudit />
+          )}
+
+          {leaderTab === 'sim' && (
+            <ShiftSimulator roster={roster} />
           )}
 
         </div>
@@ -937,6 +1409,16 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
           </div>
         )}
       </div>
+
+      {/* Import Schedule Modal */}
+      <ImportScheduleModal 
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        roster={roster}
+        onImportConfirm={handleImportSchedule}
+        apiKey={apiKey}
+        onAddEmployee={onAddEmployee}
+      />
 
     </div>
   );

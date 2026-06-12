@@ -117,6 +117,17 @@ export const subscribeToPlaybookSettings = (onUpdate) => {
   });
 };
 
+// Subscribe to Managers Settings
+export const subscribeToManagers = (onUpdate) => {
+  const ref = getStoreDocRef('managersSettings');
+  if (!ref) return null;
+  return onSnapshot(ref, (snap) => {
+    if (snap.exists()) {
+      onUpdate(snap.data().managers || []);
+    }
+  });
+};
+
 // Subscribe to Department Goals
 export const subscribeToDeptGoals = (onUpdate) => {
   const ref = getStoreDocRef('deptGoals');
@@ -163,6 +174,19 @@ export const savePlaybookSettingsToCloud = async (settings) => {
     return true;
   } catch (e) {
     console.error('Failed to save playbookSettings to cloud:', e);
+    return false;
+  }
+};
+
+// Write Managers Settings
+export const saveManagersToCloud = async (managers) => {
+  const ref = getStoreDocRef('managersSettings');
+  if (!ref) return false;
+  try {
+    await setDoc(ref, { managers }, { merge: true });
+    return true;
+  } catch (e) {
+    console.error('Failed to save managers to cloud:', e);
     return false;
   }
 };
@@ -328,7 +352,7 @@ export const deleteFloorLeaderShiftFromCloud = async (shiftId) => {
 export const seedOfflineDataToCloud = async (offlineData) => {
   if (!db) return false;
   try {
-    const { activePeriod, rosterHistory, playbookSettings, deptGoals, recentSessions, metrics, followUpTasks, floorLeaderShifts } = offlineData;
+    const { activePeriod, rosterHistory, playbookSettings, deptGoals, recentSessions, metrics, followUpTasks, floorLeaderShifts, managers } = offlineData;
     
     // Check if cloud data exists first to avoid blindly overwriting existing cloud data!
     const activePeriodSnap = await getDoc(getStoreDocRef('activePeriod'));
@@ -348,6 +372,11 @@ export const seedOfflineDataToCloud = async (offlineData) => {
     const playbookSnap = await getDoc(getStoreDocRef('playbookSettings'));
     if (!playbookSnap.exists() && playbookSettings) {
       await savePlaybookSettingsToCloud(playbookSettings);
+    }
+
+    const managersSnap = await getDoc(getStoreDocRef('managersSettings'));
+    if (!managersSnap.exists() && managers) {
+      await saveManagersToCloud(managers);
     }
 
     const goalsSnap = await getDoc(getStoreDocRef('deptGoals'));

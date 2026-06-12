@@ -19,7 +19,8 @@ import {
   subscribeToFollowUpTasks,
   subscribeToFloorLeaderShifts,
   seedOfflineDataToCloud,
-  subscribeToCoachingLogs
+  subscribeToCoachingLogs,
+  subscribeToManagers
 } from './services/firebase';
 import { AppProvider, useApp } from './context/AppContext';
 import { useStore } from './store/useStore';
@@ -74,6 +75,7 @@ function AppContent() {
   const coachingLogs = useStore((state) => state.coachingLogs);
   const deptGoals = useStore((state) => state.deptGoals);
   const activeManager = useStore((state) => state.activeManager);
+  const managers = useStore((state) => state.managers);
 
   // Zustand Store Actions
   const setRosterHistory = useStore((state) => state.setRosterHistory);
@@ -86,6 +88,8 @@ function AppContent() {
   const setCoachingLogs = useStore((state) => state.setCoachingLogs);
   const setDeptGoals = useStore((state) => state.setDeptGoals);
   const logout = useStore((state) => state.logout);
+  const setManagers = useStore((state) => state.setManagers);
+  const saveManagers = useStore((state) => state.saveManagers);
 
   const addFollowUpTask = useStore((state) => state.addFollowUpTask);
   const completeFollowUpTask = useStore((state) => state.completeFollowUpTask);
@@ -161,7 +165,8 @@ function AppContent() {
       const savedFollowUp = localStorage.getItem('bby_follow_up_tasks');
       const savedFloorLeaderShifts = localStorage.getItem('bby_floor_leader_shifts');
       const savedCoachingLogs = localStorage.getItem('bby_coaching_logs');
-
+      const savedManagers = localStorage.getItem('bby_managers');
+ 
       await seedOfflineDataToCloud({
         activePeriod: savedPeriod || 'May 2026',
         rosterHistory: safeJsonParse(savedHistory, null),
@@ -171,7 +176,8 @@ function AppContent() {
         metrics: safeJsonParse(savedMetrics, null),
         followUpTasks: safeJsonParse(savedFollowUp, null),
         floorLeaderShifts: safeJsonParse(savedFloorLeaderShifts, null),
-        coachingLogs: safeJsonParse(savedCoachingLogs, null)
+        coachingLogs: safeJsonParse(savedCoachingLogs, null),
+        managers: safeJsonParse(savedManagers, null)
       });
     };
     seedCloud();
@@ -234,6 +240,11 @@ function AppContent() {
         localStorage.setItem('bby_coaching_logs', JSON.stringify(logs));
       }
     });
+ 
+    // Subscribe to managers list
+    const unsubManagers = subscribeToManagers((m) => {
+      if (m) setManagers(m);
+    });
 
     return () => {
       if (unsubPeriod) unsubPeriod();
@@ -245,6 +256,7 @@ function AppContent() {
       if (unsubFollowUp) unsubFollowUp();
       if (unsubFloorLeader) unsubFloorLeader();
       if (unsubCoachingLogs) unsubCoachingLogs();
+      if (unsubManagers) unsubManagers();
     };
   }, [dbConnected]);
 
@@ -274,6 +286,7 @@ function AppContent() {
         correctPin={storePin}
         onLoginSuccess={(enteredPin) => login(enteredPin)}
         dbConnected={dbConnected}
+        managers={managers}
       />
     );
   }
@@ -466,6 +479,8 @@ function AppContent() {
             onNavigate={setActiveView}
             preselectedEmployee={prefillShadowEmployee}
             clearPreselectedEmployee={() => setPrefillShadowEmployee(null)}
+            playbookSettings={playbookSettings}
+            apiKey={apiKey}
           />
         )}
 
@@ -508,6 +523,7 @@ function AppContent() {
             clearPrefillBuilderData={() => setPrefillBuilderData(null)}
             onImportScenario={importCustomScenario}
             onLogCoachingSession={logCoachingSession}
+            coachingLogs={coachingLogs}
             initialTab="sim"
           />
         )}
@@ -522,6 +538,7 @@ function AppContent() {
             clearPrefillBuilderData={() => setPrefillBuilderData(null)}
             onImportScenario={importCustomScenario}
             onLogCoachingSession={logCoachingSession}
+            coachingLogs={coachingLogs}
             initialTab="builder"
           />
         )}
@@ -539,6 +556,8 @@ function AppContent() {
             coachingLogs={coachingLogs}
             followUpTasks={followUpTasks}
             floorLeaderShifts={floorLeaderShifts}
+            managers={managers}
+            onSaveManagers={saveManagers}
           />
         )}
 
@@ -549,6 +568,7 @@ function AppContent() {
             onDeleteShift={deleteFloorLeaderShift}
             roster={rosterHistory[activePeriod] || []}
             activeManager={activeManager}
+            onAddEmployee={addEmployee}
           />
         )}
 

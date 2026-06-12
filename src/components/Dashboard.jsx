@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { Award, TrendingUp, Compass, ShieldCheck, CreditCard, Star, DollarSign, ArrowUpRight, MessageSquare, Play, ClipboardList, Check, AlertCircle, Sparkles } from 'lucide-react';
+import { calculateCVI } from '../store/cviHelper';
+
 export default function Dashboard({ 
   metrics, 
-  certifications, 
   recentSessions, 
   onNavigate, 
   roster = [], 
@@ -234,8 +235,8 @@ export default function Dashboard({
         id: 0,
         type: 'success',
         text: 'All core sales metrics are currently meeting or exceeding store goals. Excellent job maintaining Best Buy standards!',
-        actionLabel: 'Take HT Exam',
-        navTarget: 'certification'
+        actionLabel: 'Start Practice',
+        navTarget: 'roleplay'
       });
     }
     return list;
@@ -354,9 +355,110 @@ export default function Dashboard({
     return scored.sort((a, b) => b.score - a.score).slice(0, 3);
   }, [roster, recentSessions, deptGoals]);
 
-  const activeCerts = useMemo(() => {
-    return certifications.filter(c => c.earned).length;
-  }, [certifications]);
+  const cviStats = useMemo(() => {
+    let accelerating = 0;
+    let neutral = 0;
+    let review = 0;
+    
+    if (Array.isArray(roster)) {
+      roster.forEach(emp => {
+        const c = calculateCVI(emp, rosterHistory, activePeriod);
+        if (c.includes('Accelerating')) accelerating++;
+        else if (c.includes('Needs Review')) review++;
+        else neutral++;
+      });
+    }
+    
+    const total = roster.length || 1;
+    return {
+      accelerating,
+      acceleratingPct: Math.round((accelerating / total) * 100),
+      neutral,
+      neutralPct: Math.round((neutral / total) * 100),
+      review,
+      reviewPct: Math.round((review / total) * 100)
+    };
+  }, [roster, rosterHistory, activePeriod]);
+
+  const leaderCounts = useMemo(() => {
+    const counts = {};
+    if (Array.isArray(floorLeaderShifts)) {
+      floorLeaderShifts.forEach(shift => {
+        const leader = shift.leaderName || 'Unknown Leader';
+        if (!counts[leader]) {
+          counts[leader] = { shiftsCount: 0, totalHours: 0, totalPms: 0, totalApps: 0, totalRevenue: 0 };
+        }
+        counts[leader].shiftsCount += 1;
+        counts[leader].totalHours += shift.hours ? shift.hours.length : 0;
+        counts[leader].totalPms += shift.totalPms || 0;
+        counts[leader].totalApps += shift.totalApps || 0;
+        counts[leader].totalRevenue += shift.totalRevenue || 0;
+      });
+    }
+    return counts;
+  }, [floorLeaderShifts]);
+
+  const handleExportDistrictReport = () => {
+    let accelerating = 0;
+    let neutral = 0;
+    let review = 0;
+    
+    if (Array.isArray(roster)) {
+      roster.forEach(emp => {
+        const c = calculateCVI(emp, rosterHistory, activePeriod);
+        if (c.includes('Accelerating')) accelerating++;
+        else if (c.includes('Needs Review')) review++;
+        else neutral++;
+      });
+    }
+
+    const leaderCountsMap = {};
+    if (Array.isArray(floorLeaderShifts)) {
+      floorLeaderShifts.forEach(shift => {
+        const leader = shift.leaderName || 'Unknown Leader';
+        if (!leaderCountsMap[leader]) {
+          leaderCountsMap[leader] = { shifts: 0, pms: 0, apps: 0, revenue: 0 };
+        }
+        leaderCountsMap[leader].shifts += 1;
+        leaderCountsMap[leader].pms += shift.totalPms || 0;
+        leaderCountsMap[leader].apps += shift.totalApps || 0;
+        leaderCountsMap[leader].revenue += shift.totalRevenue || 0;
+      });
+    }
+
+    let csvContent = "";
+    csvContent += "=== RETAIL STORE EXECUTIVE DISTRICT REPORT ===\r\n";
+    csvContent += `Active Period,${activePeriod}\r\n`;
+    csvContent += `Store Health,${accelerating} Accelerating | ${neutral} Neutral | ${review} Needs Review\r\n\r\n`;
+
+    csvContent += "--- SUPERVISOR SHIFT ACCOUNTABILITY ---\r\n";
+    csvContent += "Leader/Supervisor,Shifts Logged,PMs Led,Apps Led,Revenue Led ($)\r\n";
+    Object.entries(leaderCountsMap).forEach(([leader, data]) => {
+      csvContent += `"${leader}",${data.shifts},${data.pms},${data.apps},${data.revenue.toFixed(2)}\r\n`;
+    });
+    if (Object.keys(leaderCountsMap).length === 0) {
+      csvContent += "No active floor leader shifts logged,0,0,0,0.00\r\n";
+    }
+    csvContent += "\r\n";
+
+    csvContent += "--- STORE PERFORMANCE ROSTER ---\r\n";
+    csvContent += "Name,Department,Hours,Memberships,BBY Cards,GSP Attach %,Surveys (CSAT),RPH ($),CVI Status,Focus 5\r\n";
+    if (Array.isArray(roster)) {
+      roster.forEach(emp => {
+        const cviVal = calculateCVI(emp, rosterHistory, activePeriod).split(' ')[0];
+        csvContent += `"${emp.name}","${emp.dept}",${emp.hours},${emp.memberships},${emp.creditCards},${emp.warranty}%,${emp.surveys === 0.2 ? 'Fail' : emp.surveys},${emp.rph},"${cviVal}",${emp.focus5 ? 'Yes' : 'No'}\r\n`;
+      });
+    }
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `District_Coaching_Report_${activePeriod.replace(/\s+/g, '_')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
@@ -366,7 +468,14 @@ export default function Dashboard({
           <h1 style={{ fontSize: '2.25rem', marginBottom: '0.5rem' }}>Advisor Dashboard</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Welcome back, Advisor. Here is your current sales performance and coaching checklist.</p>
         </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <button 
+            className="btn btn-secondary" 
+            style={{ borderColor: 'var(--info)', color: 'var(--info)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+            onClick={handleExportDistrictReport}
+          >
+            📥 Export District Report
+          </button>
           <button className="btn btn-secondary" onClick={() => onNavigate('playbook')}>
             <TrendingUp size={16} /> Playbook Studio
           </button>
@@ -681,7 +790,7 @@ export default function Dashboard({
       {/* Main Sections Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
         
-        {/* Left Column: Certifications & Suggestions */}
+        {/* Left Column: Recommendations & Suggestions */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           {/* Automated Coaching Recommendations Engine */}
           <div className="glass-card">
@@ -1019,54 +1128,92 @@ export default function Dashboard({
             )}
           </div>
 
-          {/* Certifications Card */}
+          {/* GM Executive Summary: CVI Health */}
           <div className="glass-card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Award size={20} color="var(--bby-blue)" /> Certification Status
-              </h3>
-              <span className="tag-pill tag-pill-active">{activeCerts} of {certifications.length} Earned</span>
-            </div>
+            <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <TrendingUp size={20} color="var(--success)" /> GM Executive Summary: CVI Health
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '1.25rem', marginTop: '-0.5rem' }}>
+              Store-wide growth velocity distribution for the current active period.
+            </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {certifications.slice(0, 3).map(cert => (
-                <div 
-                  key={cert.id} 
-                  style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center', 
-                    padding: '1rem', 
-                    background: 'rgba(255, 255, 255, 0.02)', 
-                    border: '1px solid var(--border-glass)',
-                    borderRadius: '12px' 
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{ 
-                      padding: '0.5rem', 
-                      borderRadius: '8px', 
-                      background: cert.earned ? 'rgba(255, 230, 0, 0.08)' : 'rgba(255, 255, 255, 0.02)',
-                      border: `1px solid ${cert.earned ? 'rgba(255, 230, 0, 0.3)' : 'var(--border-glass)'}`
-                    }}>
-                      <Award size={20} color={cert.earned ? 'var(--bby-yellow)' : 'var(--text-muted)'} />
-                    </div>
-                    <div>
-                      <h4 style={{ fontSize: '0.95rem' }}>{cert.title}</h4>
-                      <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{cert.category}</p>
-                    </div>
-                  </div>
-                  <span style={{ 
-                    fontSize: '0.75rem', 
-                    fontWeight: 700, 
-                    color: cert.earned ? 'var(--bby-yellow)' : 'var(--text-muted)' 
-                  }}>
-                    {cert.earned ? 'EARNED' : 'LOCKED'}
-                  </span>
+              {/* Accelerating */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.25rem', fontWeight: 600 }}>
+                  <span style={{ color: 'var(--success)' }}>▲ Accelerating Performance</span>
+                  <span style={{ color: '#fff' }}>{cviStats.accelerating} ({cviStats.acceleratingPct}%)</span>
                 </div>
-              ))}
-              <button className="btn btn-secondary" style={{ width: '100%', padding: '0.65rem' }} onClick={() => onNavigate('certification')}>
-                View Certification Center
-              </button>
+                <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.03)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ width: `${cviStats.acceleratingPct}%`, height: '100%', background: 'var(--success)' }}></div>
+                </div>
+              </div>
+
+              {/* Neutral */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.25rem', fontWeight: 600 }}>
+                  <span style={{ color: 'var(--warning)' }}>▶ Steady & Neutral</span>
+                  <span style={{ color: '#fff' }}>{cviStats.neutral} ({cviStats.neutralPct}%)</span>
+                </div>
+                <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.03)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ width: `${cviStats.neutralPct}%`, height: '100%', background: 'var(--warning)' }}></div>
+                </div>
+              </div>
+
+              {/* Needs Review */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.25rem', fontWeight: 600 }}>
+                  <span style={{ color: 'var(--error)' }}>▼ Performance Review Gap</span>
+                  <span style={{ color: '#fff' }}>{cviStats.review} ({cviStats.reviewPct}%)</span>
+                </div>
+                <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.03)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ width: `${cviStats.reviewPct}%`, height: '100%', background: 'var(--error)' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Leader Accountability Standings Card */}
+          <div className="glass-card">
+            <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <ShieldCheck size={20} color="var(--bby-blue)" /> Leader Accountability Standings
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '1.25rem', marginTop: '-0.5rem' }}>
+              Total floor observations, GROW plans, and practice sessions conducted by each supervisor.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {Object.keys(leaderCounts).length === 0 ? (
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', padding: '1rem' }}>
+                  No supervisor activity logged yet.
+                </p>
+              ) : (
+                Object.entries(leaderCounts).map(([leader, countData]) => (
+                  <div 
+                    key={leader} 
+                    style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center', 
+                      padding: '0.75rem 1rem', 
+                      background: 'rgba(255, 255, 255, 0.01)', 
+                      border: '1px solid var(--border-glass)',
+                      borderRadius: '12px' 
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--bby-blue)' }}></div>
+                      <div>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff' }}>{leader}</span>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                          {countData.totalHours} hrs floor lead | ${Math.round(countData.totalRevenue).toLocaleString()} rev
+                        </div>
+                      </div>
+                    </div>
+                    <span className="tag-pill tag-pill-active" style={{ fontSize: '0.75rem', background: 'rgba(0, 70, 190, 0.12)', color: 'var(--bby-blue)', borderColor: 'rgba(0,70,190,0.2)' }}>
+                      {countData.shiftsCount} Shifts
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 

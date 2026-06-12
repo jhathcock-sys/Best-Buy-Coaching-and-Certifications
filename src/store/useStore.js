@@ -39,35 +39,6 @@ const DEFAULT_DEPT_GOALS = {
   'Geek Squad': { memberships: 5000, membershipsType: 'Dollars', creditCards: 15000, creditCardsType: 'Dollars', warranty: 12.0, surveys: 1.0, rph: 500 }
 };
 
-const DEFAULT_CERTIFICATIONS = [
-  {
-    id: 'computing',
-    title: 'Computing Certified Advisor',
-    category: 'Computing',
-    description: 'Mastery in computer specs, college discovery, Total memberships, and GSP attach.',
-    requirement: 'Score 80%+ on Sarah Miller College Prep Roleplay',
-    scenarioId: 'computing-college',
-    earned: false
-  },
-  {
-    id: 'home-theater',
-    title: 'Home Theater Specialist',
-    category: 'Home Theater',
-    description: 'Mastery in high-end OLED panels, custom wall mountings, audio packages, and premium protection.',
-    requirement: 'Score 80%+ on David Chen OLED Gaming Roleplay',
-    scenarioId: 'ht-gaming',
-    earned: false
-  },
-  {
-    id: 'geek-squad',
-    title: 'Geek Squad Services Liaison',
-    category: 'Geek Squad Services',
-    description: 'Mastery in repair services, diagnostics consults, Home Membership attach, and visual ob checklist validations.',
-    requirement: 'Score 80%+ on Elena Rostova Virus Recovery Roleplay',
-    scenarioId: 'geek-repair',
-    earned: false
-  }
-];
 
 const DEFAULT_PLAYBOOK_SETTINGS = {
   useGemini: false,
@@ -186,7 +157,7 @@ export const useStore = create((set, get) => {
 
   // Load remaining operational states from localStorage
   const initialMetrics = safeJsonParse(localStorage.getItem('bby_metrics'), { memberships: 52, creditCards: 4, warranty: 12, surveys: 4.7, rph: 1050 });
-  const initialCertifications = safeJsonParse(localStorage.getItem('bby_certifications'), DEFAULT_CERTIFICATIONS);
+
   const initialRecentSessions = safeJsonParse(localStorage.getItem('bby_recent_sessions'), []);
   const initialCustomScenarios = safeJsonParse(localStorage.getItem('bby_custom_scenarios'), []);
   const initialFollowUpTasks = safeJsonParse(localStorage.getItem('bby_follow_up_tasks'), []);
@@ -200,7 +171,7 @@ export const useStore = create((set, get) => {
     dbConnected: isFirebaseConnected(),
     isAuthenticated: sessionStorage.getItem('bby_authenticated') === 'true',
     storePin: initialStorePin,
-    showCertModal: null,
+
 
     // Operational Data State
     rosterHistory: initialRosterHistory,
@@ -210,14 +181,14 @@ export const useStore = create((set, get) => {
     coachingLogs: initialCoachingLogs,
     deptGoals: initialDeptGoals,
     metrics: initialMetrics,
-    certifications: initialCertifications,
+
     recentSessions: initialRecentSessions,
     customScenarios: initialCustomScenarios,
     playbookSettings: initialPlaybookSettings,
 
     // UI & Auth Actions
     setActiveView: (view) => set({ activeView: view }),
-    setShowCertModal: (cert) => set({ showCertModal: cert }),
+
     setApiKey: (key) => {
       set({ apiKey: key });
       if (key) {
@@ -268,7 +239,7 @@ export const useStore = create((set, get) => {
     setCoachingLogs: (coachingLogs) => set({ coachingLogs }),
     setDeptGoals: (deptGoals) => set({ deptGoals }),
     setMetrics: (metrics) => set({ metrics }),
-    setCertifications: (certifications) => set({ certifications }),
+
     setRecentSessions: (recentSessions) => set({ recentSessions }),
     setCustomScenarios: (customScenarios) => set({ customScenarios }),
     setPlaybookSettings: (playbookSettings) => {
@@ -531,11 +502,10 @@ export const useStore = create((set, get) => {
       }
     },
 
-    // Certifications & Roleplay Actions
+    // Roleplay Actions
     completeRoleplay: async ({ scenarioId, category, customerName, avatar, score, passed, growReport, metrics: newMetrics }) => {
       const recentSessions = get().recentSessions;
       const metrics = get().metrics;
-      const certifications = get().certifications;
       const dbConnected = get().dbConnected;
 
       // 1. Add session log
@@ -568,50 +538,6 @@ export const useStore = create((set, get) => {
         if (dbConnected) {
           saveMetricsToCloud(averagedMetrics);
         }
-      }
-
-      // 3. Award certification if requirement is met
-      if (score >= 80) {
-        let isVerified = false;
-        let signature = null;
-
-        if (dbConnected) {
-          try {
-            const response = await fetch('/api/verify-certification', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                score,
-                scenarioId,
-                employeeName: 'Sales Advisor'
-              })
-            });
-            if (response.ok) {
-              const data = await response.json();
-              isVerified = data.verified;
-              signature = data.signature;
-            }
-          } catch (e) {
-            console.error("Backend certification verification failed, falling back to local verification:", e);
-          }
-        }
-
-        const updatedCerts = certifications.map(cert => {
-          if (cert.scenarioId === scenarioId && !cert.earned) {
-            const earnedCert = {
-              ...cert,
-              earned: true,
-              signature: signature || 'local-sandbox-verification-hash',
-              verifiedAt: new Date().toLocaleDateString()
-            };
-            set({ showCertModal: earnedCert });
-            return earnedCert;
-          }
-          return cert;
-        });
-
-        set({ certifications: updatedCerts });
-        localStorage.setItem('bby_certifications', JSON.stringify(updatedCerts));
       }
     },
 

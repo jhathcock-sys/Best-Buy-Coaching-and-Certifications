@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Dashboard from './components/Dashboard';
 import StoreRoster from './components/StoreRoster';
 import RoleplayCenter from './components/RoleplayCenter';
-import CertificationCenter from './components/CertificationCenter';
 import CoachSimulator from './components/CoachSimulator';
 import PlaybookStudio from './components/PlaybookStudio';
 import CoachingHistory from './components/CoachingHistory';
@@ -67,28 +66,13 @@ function AppContent() {
   const rosterHistory = useStore((state) => state.rosterHistory);
   const activePeriod = useStore((state) => state.activePeriod);
   const playbookSettings = useStore((state) => state.playbookSettings);
-  const metrics = useStore((state) => state.metrics);
-  const certifications = useStore((state) => state.certifications);
   const recentSessions = useStore((state) => state.recentSessions);
-  const customScenarios = useStore((state) => state.customScenarios);
-  const followUpTasks = useStore((state) => state.followUpTasks);
-  const floorLeaderShifts = useStore((state) => state.floorLeaderShifts);
-  const coachingLogs = useStore((state) => state.coachingLogs);
-  const deptGoals = useStore((state) => state.deptGoals);
-  const showCertModal = useStore((state) => state.showCertModal);
 
   // Zustand Store Actions
   const setRosterHistory = useStore((state) => state.setRosterHistory);
   const setActivePeriod = useStore((state) => state.setActivePeriod);
   const setPlaybookSettings = useStore((state) => state.setPlaybookSettings);
-  const setMetrics = useStore((state) => state.setMetrics);
-  const setCertifications = useStore((state) => state.setCertifications);
   const setRecentSessions = useStore((state) => state.setRecentSessions);
-  const setFollowUpTasks = useStore((state) => state.setFollowUpTasks);
-  const setFloorLeaderShifts = useStore((state) => state.setFloorLeaderShifts);
-  const setCoachingLogs = useStore((state) => state.setCoachingLogs);
-  const setDeptGoals = useStore((state) => state.setDeptGoals);
-  const setShowCertModal = useStore((state) => state.setShowCertModal);
 
   const addFollowUpTask = useStore((state) => state.addFollowUpTask);
   const completeFollowUpTask = useStore((state) => state.completeFollowUpTask);
@@ -117,7 +101,7 @@ function AppContent() {
   const [collapsedCategories, setCollapsedCategories] = useState({
     overview: false,
     floorOps: false,
-    trainingCerts: false,
+    coachingPractice: false,
     recordsSetup: false
   });
 
@@ -142,8 +126,8 @@ function AppContent() {
       setCollapsedCategories(prev => ({ ...prev, overview: false }));
     } else if (activeView === 'roster' || activeView === 'shadow' || activeView === 'floorLeader') {
       setCollapsedCategories(prev => ({ ...prev, floorOps: false }));
-    } else if (activeView === 'roleplay' || activeView === 'certification' || activeView === 'coach') {
-      setCollapsedCategories(prev => ({ ...prev, trainingCerts: false }));
+    } else if (activeView === 'roleplay' || activeView === 'coach') {
+      setCollapsedCategories(prev => ({ ...prev, coachingPractice: false }));
     } else if (activeView === 'builder' || activeView === 'history' || activeView === 'playbook') {
       setCollapsedCategories(prev => ({ ...prev, recordsSetup: false }));
     }
@@ -267,9 +251,7 @@ function AppContent() {
     setActiveView('shadow');
   };
 
-  const handleStartRoleplayFromCert = (scenarioId) => {
-    setActiveView('roleplay');
-  };
+
 
 
 
@@ -335,23 +317,17 @@ function AppContent() {
             </>
           )}
 
-          <li className="menu-group-header" onClick={() => toggleCategory('trainingCerts')}>
-            <span>Training & Certs</span>
-            {collapsedCategories.trainingCerts ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+          <li className="menu-group-header" onClick={() => toggleCategory('coachingPractice')}>
+            <span>Coaching & Practice</span>
+            {collapsedCategories.coachingPractice ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
           </li>
-          {!collapsedCategories.trainingCerts && (
+          {!collapsedCategories.coachingPractice && (
             <>
               <li 
                 className={`menu-item ${activeView === 'roleplay' ? 'active' : ''}`}
                 onClick={() => setActiveView('roleplay')}
               >
                 <Compass className="menu-item-icon" /> Consult Arena
-              </li>
-              <li 
-                className={`menu-item ${activeView === 'certification' ? 'active' : ''}`}
-                onClick={() => setActiveView('certification')}
-              >
-                <Award className="menu-item-icon" /> Certifications
               </li>
               <li 
                 className={`menu-item ${activeView === 'coach' ? 'active' : ''}`}
@@ -418,7 +394,6 @@ function AppContent() {
         {activeView === 'dashboard' && (
           <Dashboard 
             metrics={metrics}
-            certifications={certifications}
             recentSessions={recentSessions}
             onNavigate={setActiveView}
             roster={rosterHistory[activePeriod] || []}
@@ -473,13 +448,7 @@ function AppContent() {
           />
         )}
 
-        {activeView === 'certification' && (
-          <CertificationCenter 
-            certifications={certifications}
-            onNavigate={setActiveView}
-            onStartRoleplay={handleStartRoleplayFromCert}
-          />
-        )}
+
 
         {activeView === 'coach' && (
           <CoachSimulator 
@@ -595,53 +564,7 @@ function AppContent() {
         </button>
       </div>
 
-      {/* DYNAMIC CONGRATULATORY AWARD CERTIFICATE MODAL */}
-      {showCertModal && (
-        <div className="modal-overlay" onClick={() => setShowCertModal(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ border: '2.5px solid var(--bby-yellow)' }}>
-            <div className="modal-body" style={{ textAlign: 'center', padding: '3rem 2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
-              <div style={{ padding: '1rem', background: 'rgba(255, 230, 0, 0.08)', borderRadius: '50%', border: '2px solid rgba(255,230,0,0.3)', animation: 'fadeIn 0.6s ease' }}>
-                <Award size={48} color="var(--bby-yellow)" fill="var(--bby-yellow)" />
-              </div>
-              
-              <h2 style={{ fontSize: '2rem', fontFamily: 'var(--font-heading)', color: '#fff', letterSpacing: '-0.02em' }}>
-                CONGRATULATIONS!
-              </h2>
-              
-              <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', lineHeight: 1.5, maxWidth: '400px' }}>
-                You have passed the consultative sales validation exam and earned the official **{showCertModal.title}**!
-              </p>
 
-              <div style={{ background: 'rgba(0, 70, 190, 0.15)', border: '1px solid rgba(0, 70, 190, 0.25)', padding: '1.25rem 2rem', borderRadius: '16px', width: '100%' }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em' }}>Unlocked Badge</span>
-                <span style={{ fontSize: '1.15rem', color: '#fff', fontWeight: 700, fontFamily: 'var(--font-heading)', marginTop: '0.25rem', display: 'block' }}>
-                  {showCertModal.category} Expert
-                </span>
-              </div>
-
-              <div style={{ display: 'flex', gap: '1rem', width: '100%', marginTop: '1rem' }}>
-                <button 
-                  className="btn btn-secondary" 
-                  style={{ flex: 1 }} 
-                  onClick={() => {
-                    setShowCertModal(null);
-                    setActiveView('certification');
-                  }}
-                >
-                  View in Hub
-                </button>
-                <button 
-                  className="btn btn-accent" 
-                  style={{ flex: 1 }}
-                  onClick={() => setShowCertModal(null)}
-                >
-                  Keep Practicing
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Service Worker Update Toast Banner */}
       {swUpdateAvailable && (

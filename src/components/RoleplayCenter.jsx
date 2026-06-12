@@ -120,7 +120,7 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
       
       setEvaluation(result);
       
-      // Notify parent system to update employee dashboard metrics and award certifications
+      // Notify parent system to update employee dashboard metrics
       onCompleteRoleplay({
         scenarioId: selectedScenario.id,
         category: selectedScenario.category,
@@ -190,7 +190,7 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           <div>
             <h1 style={{ fontSize: '2.25rem', marginBottom: '0.5rem' }}>Consultative Practice Arena</h1>
-            <p style={{ color: 'var(--text-secondary)' }}>Select a customer profile to practice the Best Buy sales process. Earn certifications by passing with an 80%+ rating.</p>
+            <p style={{ color: 'var(--text-secondary)' }}>Select a customer profile to practice the Best Buy sales process and test your consultative skills.</p>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
@@ -451,10 +451,10 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
               {evaluation.passed ? (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--bby-yellow)', fontWeight: 700, fontSize: '1.25rem', fontFamily: 'var(--font-heading)' }}>
-                    <Award size={24} fill="var(--bby-yellow)" /> CERTIFICATION VALIDATED!
+                    <Sparkles size={24} fill="var(--bby-yellow)" /> PRACTICE TARGET MET!
                   </div>
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: '280px' }}>
-                    Congratulations! You scored 80% or higher and unlocked the official **{selectedScenario.category}** badge.
+                    Congratulations! You scored 80% or higher and demonstrated full competency in consultative selling.
                   </p>
                 </div>
               ) : (
@@ -463,7 +463,7 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
                     <CheckCircle size={24} /> PRACTICE APPROVED
                   </div>
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: '280px' }}>
-                    Solid effort! Review the GROW options below and retry to achieve certification. Goal is 80%+.
+                    Solid effort! Review the GROW options below and retry to improve your score. Goal is 80%+.
                   </p>
                 </div>
               )}

@@ -151,7 +151,7 @@ export default function Dashboard({
   // Circular Gauge Helper
   const CircularGauge = ({ value, max = 100, label, prefix = "", suffix = "%", color, icon: Icon, description }) => {
     const percentage = Math.min((value / max) * 100, 100);
-    const radius = 40;
+    const radius = 46;
     const circumference = 2 * Math.PI * radius;
     const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
@@ -172,24 +172,24 @@ export default function Dashboard({
         }}
       >
         <div className="metric-circle-container">
-          <svg className="metric-svg">
-            <circle className="metric-circle-bg" cx="55" cy="55" r={radius} />
+          <svg className="metric-svg" viewBox="0 0 120 120" width="120" height="120">
+            <circle className="metric-circle-bg" cx="60" cy="60" r={radius} />
             <circle 
               className="metric-circle-fill" 
-              cx="55" 
-              cy="55" 
+              cx="60" 
+              cy="60" 
               r={radius} 
               stroke={color}
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
               strokeLinecap="round"
-              style={{ filter: `drop-shadow(0 0 4px ${color}80)` }}
+              style={{ filter: `drop-shadow(0 0 5px ${color}a0)` }}
             />
           </svg>
-          <div className="metric-val" style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center' }}>
-            {prefix && <span style={{ fontSize: '0.85rem', opacity: 0.8, marginRight: '1px' }}>{prefix}</span>}
-            <span style={{ fontSize: value >= 1000 ? '1.15rem' : '1.35rem' }}>{value}</span>
-            {suffix && <span style={{ fontSize: '0.8rem', opacity: 0.8, marginLeft: '1px' }}>{suffix}</span>}
+          <div className="metric-val" style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', textShadow: `0 0 10px ${color}50` }}>
+            {prefix && <span style={{ fontSize: '0.95rem', opacity: 0.8, marginRight: '1px' }}>{prefix}</span>}
+            <span style={{ fontSize: value >= 1000 ? '1.25rem' : '1.55rem' }}>{value}</span>
+            {suffix && <span style={{ fontSize: '0.85rem', opacity: 0.8, marginLeft: '1px' }}>{suffix}</span>}
           </div>
         </div>
         <div className="metric-label" style={{ fontWeight: 700, color: '#fff', fontSize: '0.9rem' }}>{label}</div>
@@ -567,7 +567,23 @@ export default function Dashboard({
 
             {/* Points and Hover Labels */}
             {points.map((p, idx) => (
-              <g key={idx}>
+              <g key={idx} style={{ cursor: 'pointer' }}>
+                <circle 
+                  cx={p.x} 
+                  cy={p.y} 
+                  r="9" 
+                  fill={chartMetric === 'memberships' ? 'var(--bby-blue)' : 'var(--bby-yellow)'} 
+                  opacity="0.15" 
+                  style={{ transition: 'transform 0.2s ease, opacity 0.2s', transformOrigin: `${p.x}px ${p.y}px` }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scale(1.4)';
+                    e.currentTarget.style.opacity = '0.35';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.opacity = '0.15';
+                  }}
+                />
                 <circle cx={p.x} cy={p.y} r="5" fill={chartMetric === 'memberships' ? 'var(--bby-blue)' : 'var(--bby-yellow)'} stroke="#0b0f19" strokeWidth="1.5" />
                 <text x={p.x} y={p.y - 12} fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
                   {p.value}{chartMetric === 'memberships' ? '%' : ''}

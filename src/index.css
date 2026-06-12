@@ -64,9 +64,10 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   background-image: 
-    radial-gradient(at 0% 0%, rgba(0, 70, 190, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(255, 230, 0, 0.05) 0px, transparent 50%),
-    radial-gradient(at 50% 50%, rgba(6, 182, 212, 0.05) 0px, transparent 50%);
+    radial-gradient(at 10% 10%, rgba(0, 70, 190, 0.18) 0px, transparent 45%),
+    radial-gradient(at 90% 90%, rgba(255, 230, 0, 0.06) 0px, transparent 40%),
+    radial-gradient(at 50% 10%, rgba(6, 182, 212, 0.07) 0px, transparent 45%),
+    radial-gradient(at 80% 20%, rgba(16, 185, 129, 0.04) 0px, transparent 35%);
   background-attachment: fixed;
 }
 
@@ -361,8 +362,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .metric-circle-container {
   position: relative;
-  width: 110px;
-  height: 110px;
+  width: 120px;
+  height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -382,13 +383,13 @@ h1, h2, h3, h4, h5, h6 {
 
 .metric-circle-bg {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.04);
-  stroke-width: 8px;
+  stroke: rgba(255, 255, 255, 0.03);
+  stroke-width: 10px;
 }
 
 .metric-circle-fill {
   fill: none;
-  stroke-width: 8px;
+  stroke-width: 10px;
   stroke-linecap: round;
   transition: stroke-dashoffset 0.8s ease-in-out;
 }
@@ -396,9 +397,10 @@ h1, h2, h3, h4, h5, h6 {
 .metric-val {
   position: absolute;
   font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 1.35rem;
+  font-weight: 800;
+  font-size: 1.55rem;
   color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
 .metric-label {

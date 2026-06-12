@@ -153,6 +153,142 @@ export default function StoreRoster({
     return '';
   };
 
+  const renderMetricCell = (val, type, dept, emp, displayValue) => {
+    const goals = (deptGoals && (deptGoals[dept] || deptGoals['Front End'])) || DEFAULT_GOALS;
+    
+    const isDeptMetric = (
+      type !== 'basket' && type !== 'm365' && type !== 'audio'
+    ) || (
+      (type === 'basket' && (dept === 'Computing' || dept === 'Home Theatre')) ||
+      (type === 'm365' && dept === 'Computing') ||
+      (type === 'audio' && dept === 'Home Theatre')
+    );
+    
+    if (!isDeptMetric) {
+      return (
+        <td style={{ padding: '0.85rem 1rem', textAlign: 'center' }}>
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', opacity: 0.35 }}>—</span>
+        </td>
+      );
+    }
+    
+    const metricClass = getMetricClass(val, type, dept, emp);
+    let pillBg = 'rgba(255, 255, 255, 0.02)';
+    let pillColor = 'var(--text-secondary)';
+    let pillBorder = 'rgba(255, 255, 255, 0.05)';
+    
+    if (metricClass === 'text-success') {
+      pillBg = 'rgba(16, 185, 129, 0.08)';
+      pillColor = 'var(--success)';
+      pillBorder = 'rgba(16, 185, 129, 0.2)';
+    } else if (metricClass === 'text-warning') {
+      pillBg = 'rgba(245, 158, 11, 0.08)';
+      pillColor = 'var(--warning)';
+      pillBorder = 'rgba(245, 158, 11, 0.2)';
+    } else if (metricClass === 'text-danger') {
+      pillBg = 'rgba(239, 68, 68, 0.08)';
+      pillColor = 'var(--error)';
+      pillBorder = 'rgba(239, 68, 68, 0.2)';
+    }
+    
+    const pace = (type === 'memberships' || type === 'creditCards') ? getPaceText(val, type, dept, emp) : '';
+    
+    return (
+      <td style={{ padding: '0.85rem 1rem', textAlign: 'center' }}>
+        <div style={{ 
+          display: 'inline-flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          background: pillBg, 
+          color: pillColor, 
+          border: `1px solid ${pillBorder}`, 
+          borderRadius: '12px', 
+          padding: '0.4rem 0.85rem',
+          minWidth: '100px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+          transition: 'all 0.2s ease',
+          cursor: 'default'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'scale(1.06)';
+          if (metricClass === 'text-success') e.currentTarget.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.18)';
+          else if (metricClass === 'text-warning') e.currentTarget.style.boxShadow = '0 6px 16px rgba(245, 158, 11, 0.18)';
+          else if (metricClass === 'text-danger') e.currentTarget.style.boxShadow = '0 6px 16px rgba(239, 68, 68, 0.18)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.12)';
+        }}
+        >
+          <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>{displayValue}</span>
+          {pace && <span style={{ fontSize: '0.65rem', opacity: 0.8, marginTop: '0.15rem', fontWeight: 500 }}>{pace}</span>}
+        </div>
+      </td>
+    );
+  };
+
+  const renderMobileMetricBadge = (val, type, dept, emp, label, displayValue) => {
+    const goals = (deptGoals && (deptGoals[dept] || deptGoals['Front End'])) || DEFAULT_GOALS;
+    
+    const isDeptMetric = (
+      type !== 'basket' && type !== 'm365' && type !== 'audio'
+    ) || (
+      (type === 'basket' && (dept === 'Computing' || dept === 'Home Theatre')) ||
+      (type === 'm365' && dept === 'Computing') ||
+      (type === 'audio' && dept === 'Home Theatre')
+    );
+    
+    if (!isDeptMetric) return null;
+    
+    const metricClass = getMetricClass(val, type, dept, emp);
+    let pillBg = 'rgba(255, 255, 255, 0.015)';
+    let pillColor = 'var(--text-secondary)';
+    let pillBorder = 'rgba(255, 255, 255, 0.05)';
+    
+    if (metricClass === 'text-success') {
+      pillBg = 'rgba(16, 185, 129, 0.08)';
+      pillColor = 'var(--success)';
+      pillBorder = 'rgba(16, 185, 129, 0.2)';
+    } else if (metricClass === 'text-warning') {
+      pillBg = 'rgba(245, 158, 11, 0.08)';
+      pillColor = 'var(--warning)';
+      pillBorder = 'rgba(245, 158, 11, 0.2)';
+    } else if (metricClass === 'text-danger') {
+      pillBg = 'rgba(239, 68, 68, 0.08)';
+      pillColor = 'var(--error)';
+      pillBorder = 'rgba(239, 68, 68, 0.2)';
+    }
+    
+    const pace = (type === 'memberships' || type === 'creditCards') ? getPaceText(val, type, dept, emp) : '';
+    
+    return (
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        textAlign: 'center',
+        background: pillBg, 
+        color: pillColor, 
+        border: `1px solid ${pillBorder}`, 
+        borderRadius: '10px', 
+        padding: '0.45rem 0.25rem',
+        minHeight: '62px',
+        justifyContent: 'center'
+      }}>
+        <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>{label}</span>
+        <span style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: '0.15rem' }}>
+          {displayValue}
+        </span>
+        {pace && (
+          <span style={{ fontSize: '0.55rem', opacity: 0.8, marginTop: '0.05rem', fontWeight: 500 }}>
+            {pace}
+          </span>
+        )}
+      </div>
+    );
+  };
+
   const getStatusBadge = (gap) => {
     if (gap === 'None' || !gap || gap.startsWith('None')) {
       return (
@@ -448,24 +584,198 @@ export default function StoreRoster({
                   </td>
                 </tr>
               ) : (
-                filteredRoster.map(emp => (
-                  <tr 
-                    key={emp.id} 
-                    style={{ 
-                      borderBottom: '1px solid var(--border-glass)',
-                      background: 'rgba(255,255,255,0.01)',
-                      transition: 'background 0.25s ease'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.01)'}
-                  >
-                    <td style={{ padding: '1rem 1.5rem', fontWeight: 600, color: '#fff' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                filteredRoster.map(emp => {
+                  const gaps = getEmployeeGap(emp);
+                  const isExceeding = gaps === 'None' || gaps === '';
+                  const rowBg = isExceeding ? 'rgba(16, 185, 129, 0.018)' : emp.focus5 ? 'rgba(239, 68, 68, 0.018)' : 'rgba(255,255,255,0.005)';
+                  const rowBorderLeft = isExceeding ? '4px solid var(--success)' : emp.focus5 ? '4px solid var(--error)' : '4px solid transparent';
+                  const hoverBg = isExceeding ? 'rgba(16, 185, 129, 0.035)' : emp.focus5 ? 'rgba(239, 68, 68, 0.035)' : 'rgba(255,255,255,0.025)';
+                  
+                  return (
+                    <tr 
+                      key={emp.id} 
+                      style={{ 
+                        borderBottom: '1px solid var(--border-glass)',
+                        borderLeft: rowBorderLeft,
+                        background: rowBg,
+                        transition: 'background 0.25s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = hoverBg}
+                      onMouseLeave={(e) => e.currentTarget.style.background = rowBg}
+                    >
+                      <td style={{ padding: '1rem 1.5rem', fontWeight: 600, color: '#fff' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                          <span 
+                            style={{ cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'rgba(255,255,255,0.3)' }}
+                            onClick={() => setSelectedProfileEmployee(emp)}
+                            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--bby-blue)'}
+                            onMouseLeave={(e) => e.currentTarget.style.color = '#fff'}
+                          >
+                            {emp.name}
+                          </span>
+                          {(() => {
+                            const cvi = calculateCVI(emp, rosterHistory, activePeriod);
+                            let badgeBg = 'rgba(255, 255, 255, 0.05)';
+                            let badgeColor = 'var(--text-secondary)';
+                            let badgeBorder = 'rgba(255, 255, 255, 0.1)';
+                            if (cvi.includes('Accelerating')) {
+                              badgeBg = 'rgba(16, 185, 129, 0.15)';
+                              badgeColor = 'var(--success)';
+                              badgeBorder = 'rgba(16, 185, 129, 0.3)';
+                            } else if (cvi.includes('Needs Review')) {
+                              badgeBg = 'rgba(239, 68, 68, 0.15)';
+                              badgeColor = 'var(--error)';
+                              badgeBorder = 'rgba(239, 68, 68, 0.3)';
+                            } else if (cvi.includes('Neutral')) {
+                              badgeBg = 'rgba(245, 158, 11, 0.15)';
+                              badgeColor = 'var(--warning)';
+                              badgeBorder = 'rgba(245, 158, 11, 0.3)';
+                            }
+                            return (
+                              <span 
+                                title="Coaching Velocity Index (Month over Month growth velocity)"
+                                style={{ 
+                                  fontSize: '0.65rem', 
+                                  background: badgeBg, 
+                                  border: `1px solid ${badgeBorder}`, 
+                                  color: badgeColor, 
+                                  padding: '0.15rem 0.35rem', 
+                                  borderRadius: '6px', 
+                                  fontWeight: 700,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.15rem'
+                                }}
+                              >
+                                📈 CVI: {cvi.split(' ')[0]}
+                              </span>
+                            );
+                          })()}
+                          {emp.focus5 && (
+                            <span style={{ fontSize: '0.65rem', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid var(--error)', color: 'var(--error)', padding: '0.15rem 0.35rem', borderRadius: '6px', fontWeight: 700, letterSpacing: '0.02em' }}>
+                              🔥 FOCUS 5
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td style={{ padding: '1rem 1rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                        {emp.hours} hrs
+                      </td>
+                      <td style={{ padding: '0.5rem 1.5rem' }}>
+                        <select 
+                          className="form-control"
+                          style={{ 
+                            padding: '0.4rem 0.8rem', 
+                            fontSize: '0.8rem', 
+                            background: 'rgba(11,15,25,0.6)', 
+                            border: '1px solid var(--border-glass)',
+                            borderRadius: '8px',
+                            color: 'var(--text-secondary)',
+                            cursor: 'pointer',
+                            width: 'auto',
+                            minWidth: '130px'
+                          }}
+                          value={emp.dept}
+                          onChange={(e) => onUpdateEmployeeDept && onUpdateEmployeeDept(emp.id, e.target.value)}
+                        >
+                          {DEPARTMENTS.filter(d => d !== 'All').map(d => (
+                            <option key={d} value={d}>{d}</option>
+                          ))}
+                        </select>
+                      </td>
+                      {renderMetricCell(emp.memberships, 'memberships', emp.dept, emp, `${emp.memberships} Membs`)}
+                      {renderMetricCell(emp.creditCards, 'creditCards', emp.dept, emp, `${emp.creditCards} Apps`)}
+                      {renderMetricCell(emp.warranty, 'warranty', emp.dept, emp, `${emp.warranty}%`)}
+                      {renderMetricCell(emp.surveys, 'surveys', emp.dept, emp, emp.surveys === 0.2 ? 'Fail' : `${emp.surveys} ★`)}
+                      {renderMetricCell(emp.rph, 'rph', emp.dept, emp, `$${emp.rph}`)}
+                      {renderMetricCell(emp.basket, 'basket', emp.dept, emp, `$${parseFloat(emp.basket || 0).toFixed(0)}`)}
+                      {renderMetricCell(
+                        emp.dept === 'Computing' ? emp.m365 : emp.dept === 'Home Theatre' ? emp.audio : 0, 
+                        emp.dept === 'Computing' ? 'm365' : 'audio', 
+                        emp.dept, 
+                        emp, 
+                        emp.dept === 'Computing' ? `${emp.m365 || 0}% M365` : `${emp.audio || 0}% Audio`
+                      )}
+                      <td style={{ padding: '1rem 1.5rem' }}>
+                        {getStatusBadge(gaps)}
+                      </td>
+                      <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
+                        <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
+                          <button 
+                            className="btn btn-secondary" 
+                            style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.02)' }}
+                            onClick={() => handleStartEdit(emp)}
+                          >
+                            Edit
+                          </button>
+                          <button 
+                            className="btn btn-secondary" 
+                            style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem' }}
+                            onClick={() => onCoachEmployee({ ...emp, gap })}
+                          >
+                            Coach
+                          </button>
+                          <button 
+                            className="btn btn-accent" 
+                            style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', color: '#000' }}
+                            onClick={() => onCreateLog({ ...emp, gap })}
+                          >
+                            Log Builder
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile Stacked Card View */}
+        <div className="mobile-only" style={{ padding: '1rem', gap: '1rem' }}>
+          {filteredRoster.length === 0 ? (
+            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+              <Users size={32} color="var(--text-muted)" style={{ marginBottom: '0.75rem', opacity: 0.5 }} />
+              <p>No associates match your active filters.</p>
+            </div>
+          ) : (
+            filteredRoster.map(emp => {
+              const gap = getEmployeeGap(emp);
+              const isExceeding = gap === 'None' || gap === '';
+              const cardBg = isExceeding ? 'rgba(16, 185, 129, 0.018)' : emp.focus5 ? 'rgba(239, 68, 68, 0.018)' : 'rgba(255,255,255,0.005)';
+              const cardBorderLeft = isExceeding ? '4px solid var(--success)' : emp.focus5 ? '4px solid var(--error)' : '1px solid var(--border-glass)';
+
+              return (
+                <div 
+                  key={emp.id} 
+                  style={{ 
+                    background: cardBg, 
+                    border: '1px solid var(--border-glass)', 
+                    borderLeft: cardBorderLeft,
+                    borderRadius: '16px', 
+                    padding: '1.25rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1rem',
+                    transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.18)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                >
+                  {/* Header: Name, Hours, and Status */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#fff', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                         <span 
                           style={{ cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'rgba(255,255,255,0.3)' }}
                           onClick={() => setSelectedProfileEmployee(emp)}
-                          onMouseEnter={(e) => e.currentTarget.style.color = 'var(--bby-blue)'}
-                          onMouseLeave={(e) => e.currentTarget.style.color = '#fff'}
                         >
                           {emp.name}
                         </span>
@@ -508,172 +818,7 @@ export default function StoreRoster({
                           );
                         })()}
                         {emp.focus5 && (
-                          <span style={{ fontSize: '0.65rem', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid var(--error)', color: 'var(--error)', padding: '0.15rem 0.35rem', borderRadius: '6px', fontWeight: 700, letterSpacing: '0.02em' }}>
-                            🔥 FOCUS 5
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td style={{ padding: '1rem 1rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                      {emp.hours} hrs
-                    </td>
-                    <td style={{ padding: '0.5rem 1.5rem' }}>
-                      <select 
-                        className="form-control"
-                        style={{ 
-                          padding: '0.4rem 0.8rem', 
-                          fontSize: '0.8rem', 
-                          background: 'rgba(11,15,25,0.6)', 
-                          border: '1px solid var(--border-glass)',
-                          borderRadius: '8px',
-                          color: 'var(--text-secondary)',
-                          cursor: 'pointer',
-                          width: 'auto',
-                          minWidth: '130px'
-                        }}
-                        value={emp.dept}
-                        onChange={(e) => onUpdateEmployeeDept && onUpdateEmployeeDept(emp.id, e.target.value)}
-                      >
-                        {DEPARTMENTS.filter(d => d !== 'All').map(d => (
-                          <option key={d} value={d}>{d}</option>
-                        ))}
-                      </select>
-                    </td>
-                    <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={getMetricClass(emp.memberships, 'memberships', emp.dept, emp)}>
-                      <div>{emp.memberships} Membs</div>
-                      <div style={{ fontSize: '0.7rem', fontWeight: 500, color: 'var(--text-secondary)', marginTop: '0.15rem' }}>
-                        ({getPaceText(emp.memberships, 'memberships', emp.dept, emp)})
-                      </div>
-                    </td>
-                    <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={getMetricClass(emp.creditCards, 'creditCards', emp.dept, emp)}>
-                      <div>{emp.creditCards} Apps</div>
-                      <div style={{ fontSize: '0.7rem', fontWeight: 500, color: 'var(--text-secondary)', marginTop: '0.15rem' }}>
-                        ({getPaceText(emp.creditCards, 'creditCards', emp.dept, emp)})
-                      </div>
-                    </td>
-                    <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={getMetricClass(emp.warranty, 'warranty', emp.dept, emp)}>
-                      {emp.warranty}%
-                    </td>
-                    <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={getMetricClass(emp.surveys, 'surveys', emp.dept, emp)}>
-                      {emp.surveys === 0.2 ? 'Failing' : `${emp.surveys} 5 Star`}
-                    </td>
-                    <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={getMetricClass(emp.rph, 'rph', emp.dept, emp)}>
-                      ${emp.rph}
-                    </td>
-                    <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={(emp.dept === 'Computing' || emp.dept === 'Home Theatre') ? getMetricClass(emp.basket, 'basket', emp.dept, emp) : ''}>
-                      {(emp.dept === 'Computing' || emp.dept === 'Home Theatre') ? `$${parseFloat(emp.basket || 0).toFixed(2)}` : '—'}
-                    </td>
-                    <td style={{ padding: '1rem 1rem', textAlign: 'center', fontWeight: 700 }} className={emp.dept === 'Computing' ? getMetricClass(emp.m365, 'm365', emp.dept, emp) : emp.dept === 'Home Theatre' ? getMetricClass(emp.audio, 'audio', emp.dept, emp) : ''}>
-                      {emp.dept === 'Computing' ? `${(emp.m365 || 0)}% M365` : emp.dept === 'Home Theatre' ? `${(emp.audio || 0)}% Audio` : '—'}
-                    </td>
-                    <td style={{ padding: '1rem 1.5rem' }}>
-                      {getStatusBadge(getEmployeeGap(emp))}
-                    </td>
-                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                      <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
-                        <button 
-                          className="btn btn-secondary" 
-                          style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.02)' }}
-                          onClick={() => handleStartEdit(emp)}
-                        >
-                          Edit
-                        </button>
-                        <button 
-                          className="btn btn-secondary" 
-                          style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem' }}
-                          onClick={() => onCoachEmployee({ ...emp, gap: getEmployeeGap(emp) })}
-                        >
-                          Coach
-                        </button>
-                        <button 
-                          className="btn btn-accent" 
-                          style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', color: '#000' }}
-                          onClick={() => onCreateLog({ ...emp, gap: getEmployeeGap(emp) })}
-                        >
-                          Log Builder
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Mobile Stacked Card View */}
-        <div className="mobile-only" style={{ padding: '1rem', gap: '1rem' }}>
-          {filteredRoster.length === 0 ? (
-            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-              <Users size={32} color="var(--text-muted)" style={{ marginBottom: '0.75rem', opacity: 0.5 }} />
-              <p>No associates match your active filters.</p>
-            </div>
-          ) : (
-            filteredRoster.map(emp => {
-              const gap = getEmployeeGap(emp);
-              return (
-                <div 
-                  key={emp.id} 
-                  style={{ 
-                    background: 'rgba(255, 255, 255, 0.02)', 
-                    border: '1px solid var(--border-glass)', 
-                    borderRadius: '16px', 
-                    padding: '1.25rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '1rem'
-                  }}
-                >
-                  {/* Header: Name, Hours, and Status */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    <div>
-                      <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#fff', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-                        <span 
-                          style={{ cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'rgba(255,255,255,0.3)' }}
-                          onClick={() => setSelectedProfileEmployee(emp)}
-                        >
-                          {emp.name}
-                        </span>
-                        {(() => {
-                          const cvi = calculateCVI(emp, rosterHistory, activePeriod);
-                          let badgeBg = 'rgba(255, 255, 255, 0.05)';
-                          let badgeColor = 'var(--text-secondary)';
-                          let badgeBorder = 'rgba(255, 255, 255, 0.1)';
-                          if (cvi.includes('Accelerating')) {
-                            badgeBg = 'rgba(16, 185, 129, 0.15)';
-                            badgeColor = 'var(--success)';
-                            badgeBorder = 'rgba(16, 185, 129, 0.3)';
-                          } else if (cvi.includes('Needs Review')) {
-                            badgeBg = 'rgba(239, 68, 68, 0.15)';
-                            badgeColor = 'var(--error)';
-                            badgeBorder = 'rgba(239, 68, 68, 0.3)';
-                          } else if (cvi.includes('Neutral')) {
-                            badgeBg = 'rgba(245, 158, 11, 0.15)';
-                            badgeColor = 'var(--warning)';
-                            badgeBorder = 'rgba(245, 158, 11, 0.3)';
-                          }
-                          return (
-                            <span 
-                              title="Coaching Velocity Index (Month over Month growth velocity)"
-                              style={{ 
-                                fontSize: '0.6rem', 
-                                background: badgeBg, 
-                                border: `1px solid ${badgeBorder}`, 
-                                color: badgeColor, 
-                                padding: '0.15rem 0.3rem', 
-                                borderRadius: '4px', 
-                                fontWeight: 700,
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '0.15rem'
-                              }}
-                            >
-                              📈 CVI: {cvi.split(' ')[0]}
-                            </span>
-                          );
-                        })()}
-                        {emp.focus5 && (
-                          <span style={{ fontSize: '0.6rem', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid var(--error)', color: 'var(--error)', padding: '0.1rem 0.3rem', borderRadius: '4px', fontWeight: 700 }}>
+                          <span style={{ fontSize: '0.65rem', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid var(--error)', color: 'var(--error)', padding: '0.15rem 0.35rem', borderRadius: '6px', fontWeight: 700 }}>
                             🔥 FOCUS 5
                           </span>
                         )}
@@ -709,91 +854,35 @@ export default function StoreRoster({
                     </select>
                   </div>
 
-                  {/* Metrics 3x2 Grid */}
+                  {/* Metrics Grid */}
                   <div style={{ 
                     display: 'grid', 
-                    gridTemplateColumns: 'repeat(3, 1fr)', 
-                    gap: '0.75rem', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', 
+                    gap: '0.65rem', 
                     background: 'rgba(0,0,0,0.15)', 
-                    padding: '0.75rem', 
+                    padding: '0.65rem', 
                     borderRadius: '12px',
                     border: '1px solid rgba(255,255,255,0.02)'
                   }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Membs</span>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: '0.15rem' }} className={getMetricClass(emp.memberships, 'memberships', emp.dept, emp)}>
-                        {emp.memberships}
-                      </span>
-                      <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', marginTop: '0.05rem' }}>
-                        ({getPaceText(emp.memberships, 'memberships', emp.dept, emp)})
-                      </span>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Cards</span>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: '0.15rem' }} className={getMetricClass(emp.creditCards, 'creditCards', emp.dept, emp)}>
-                        {emp.creditCards}
-                      </span>
-                      <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', marginTop: '0.05rem' }}>
-                        ({getPaceText(emp.creditCards, 'creditCards', emp.dept, emp)})
-                      </span>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>GSP%</span>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: '0.15rem' }} className={getMetricClass(emp.warranty, 'warranty', emp.dept, emp)}>
-                        {emp.warranty}%
-                      </span>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Surveys</span>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: '0.15rem' }} className={getMetricClass(emp.surveys, 'surveys', emp.dept, emp)}>
-                        {emp.surveys === 0.2 ? 'Fail' : emp.surveys}
-                      </span>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>RPH</span>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: '0.15rem' }} className={getMetricClass(emp.rph, 'rph', emp.dept, emp)}>
-                        ${emp.rph}
-                      </span>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Pace</span>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: '0.15rem', color: '#fff' }}>
-                        {emp.dept === 'Computing' ? 'Comp' : emp.dept === 'Home Theatre' ? 'HT' : emp.dept.substring(0, 4)}
-                      </span>
-                    </div>
-
-                    {/* Additional Department specific mobile metrics */}
-                    {(emp.dept === 'Computing' || emp.dept === 'Home Theatre') && (
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Basket</span>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: '0.15rem' }} className={getMetricClass(emp.basket, 'basket', emp.dept, emp)}>
-                          ${parseFloat(emp.basket || 0).toFixed(0)}
+                    {renderMobileMetricBadge(emp.memberships, 'memberships', emp.dept, emp, 'Membs', emp.memberships)}
+                    {renderMobileMetricBadge(emp.creditCards, 'creditCards', emp.dept, emp, 'Cards', emp.creditCards)}
+                    {renderMobileMetricBadge(emp.warranty, 'warranty', emp.dept, emp, 'GSP', `${emp.warranty}%`)}
+                    {renderMobileMetricBadge(emp.surveys, 'surveys', emp.dept, emp, 'Surveys', emp.surveys === 0.2 ? 'Fail' : emp.surveys)}
+                    {renderMobileMetricBadge(emp.rph, 'rph', emp.dept, emp, 'RPH', `$${emp.rph}`)}
+                    {emp.dept === 'Computing' ? (
+                      renderMobileMetricBadge(emp.m365, 'm365', emp.dept, emp, 'M365', `${emp.m365 || 0}%`)
+                    ) : emp.dept === 'Home Theatre' ? (
+                      renderMobileMetricBadge(emp.audio, 'audio', emp.dept, emp, 'Audio', `${emp.audio || 0}%`)
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '10px', padding: '0.45rem 0.25rem' }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Pace</span>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: '0.15rem', color: '#fff' }}>
+                          {emp.dept.substring(0, 4)}
                         </span>
                       </div>
                     )}
-
-                    {emp.dept === 'Computing' && (
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>M365%</span>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: '0.15rem' }} className={getMetricClass(emp.m365, 'm365', emp.dept, emp)}>
-                          {emp.m365 || 0}%
-                        </span>
-                      </div>
-                    )}
-
-                    {emp.dept === 'Home Theatre' && (
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Audio%</span>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, marginTop: '0.15rem' }} className={getMetricClass(emp.audio, 'audio', emp.dept, emp)}>
-                          {emp.audio || 0}%
-                        </span>
-                      </div>
-                    )}
+                    {(emp.dept === 'Computing' || emp.dept === 'Home Theatre') && 
+                      renderMobileMetricBadge(emp.basket, 'basket', emp.dept, emp, 'Basket', `$${parseFloat(emp.basket || 0).toFixed(0)}`)}
                   </div>
 
                   {/* Actions Buttons */}
@@ -814,7 +903,7 @@ export default function StoreRoster({
                     </button>
                     <button 
                       className="btn btn-accent" 
-                      style={{ flex: 1.2, padding: '0.5rem', fontSize: '0.75rem', color: '#000', textAlign: 'center' }}
+                      style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', color: '#000', textAlign: 'center' }}
                       onClick={() => onCreateLog({ ...emp, gap })}
                     >
                       Log Builder

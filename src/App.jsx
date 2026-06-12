@@ -454,6 +454,7 @@ function AppContent() {
             coachingLogs={coachingLogs}
             activePeriod={activePeriod}
             rosterHistory={rosterHistory}
+            activeManager={activeManager}
           />
         )}
 

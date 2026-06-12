@@ -16,7 +16,8 @@ export default function Dashboard({
   floorLeaderShifts = [],
   coachingLogs = [],
   activePeriod,
-  rosterHistory = {}
+  rosterHistory = {},
+  activeManager
 }) {
   const [rankMetric, setRankMetric] = useState('memberships');
   const [chartMetric, setChartMetric] = useState('memberships');
@@ -460,13 +461,17 @@ export default function Dashboard({
     document.body.removeChild(link);
   };
 
+  const headerTitle = activeManager ? `${activeManager.name}'s Dashboard` : "Advisor Dashboard";
+  const managerFirstName = activeManager ? activeManager.name.split(' ')[0] : "Advisor";
+  const subText = `Welcome back, ${managerFirstName}. Here is your current sales performance and coaching checklist.`;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
       {/* Header Panel */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '2.25rem', marginBottom: '0.5rem' }}>Advisor Dashboard</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>Welcome back, Advisor. Here is your current sales performance and coaching checklist.</p>
+          <h1 style={{ fontSize: '2.25rem', marginBottom: '0.5rem' }}>{headerTitle}</h1>
+          <p style={{ color: 'var(--text-secondary)' }}>{subText}</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <button 

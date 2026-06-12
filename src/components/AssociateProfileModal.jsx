@@ -183,18 +183,22 @@ export default function AssociateProfileModal({
                 let badgeBg = 'rgba(255, 255, 255, 0.05)';
                 let badgeColor = 'var(--text-secondary)';
                 let badgeBorder = 'rgba(255, 255, 255, 0.1)';
+                let cviIcon = '▶';
                 if (cvi.includes('Accelerating')) {
                   badgeBg = 'rgba(16, 185, 129, 0.15)';
                   badgeColor = 'var(--success)';
                   badgeBorder = 'rgba(16, 185, 129, 0.3)';
+                  cviIcon = '▲';
                 } else if (cvi.includes('Needs Review')) {
                   badgeBg = 'rgba(239, 68, 68, 0.15)';
                   badgeColor = 'var(--error)';
                   badgeBorder = 'rgba(239, 68, 68, 0.3)';
+                  cviIcon = '▼';
                 } else if (cvi.includes('Neutral')) {
                   badgeBg = 'rgba(245, 158, 11, 0.15)';
                   badgeColor = 'var(--warning)';
                   badgeBorder = 'rgba(245, 158, 11, 0.3)';
+                  cviIcon = '▶';
                 }
                 return (
                   <span 
@@ -212,7 +216,7 @@ export default function AssociateProfileModal({
                       gap: '0.2rem'
                     }}
                   >
-                    📈 CVI: {cvi}
+                    {cviIcon} CVI: {cvi}
                   </span>
                 );
               })()}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Users, Search, AlertTriangle, CheckCircle, TrendingUp, Sparkles, Clock, HelpCircle } from 'lucide-react';
+import { Users, Search, AlertTriangle, CheckCircle, TrendingUp, Sparkles, Clock, HelpCircle, Sliders } from 'lucide-react';
 import AddEmployeeModal from './AddEmployeeModal';
 import PerformanceWizardModal from './PerformanceWizardModal';
 import RosterImporterModal from './RosterImporterModal';
@@ -52,6 +52,22 @@ export default function StoreRoster({
   
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [showImporter, setShowImporter] = useState(false);
+
+  // View options & layout configuration settings
+  const [showViewSettings, setShowViewSettings] = useState(false);
+  const [isDense, setIsDense] = useState(false);
+  const [visibleCols, setVisibleCols] = useState({
+    hours: true,
+    dept: true,
+    memberships: true,
+    creditCards: true,
+    warranty: true,
+    surveys: true,
+    rph: true,
+    basket: true,
+    attach: true,
+    status: true
+  });
 
   const handleStartEdit = (emp) => {
     setEditingEmployee(emp);
@@ -166,8 +182,8 @@ export default function StoreRoster({
     
     if (!isDeptMetric) {
       return (
-        <td style={{ padding: '0.85rem 1rem', textAlign: 'center' }}>
-          <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', opacity: 0.35 }}>—</span>
+        <td style={{ padding: isDense ? '0.45rem 0.5rem' : '0.85rem 1rem', textAlign: 'center', opacity: 0.15 }}>
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>—</span>
         </td>
       );
     }
@@ -194,7 +210,7 @@ export default function StoreRoster({
     const pace = (type === 'memberships' || type === 'creditCards') ? getPaceText(val, type, dept, emp) : '';
     
     return (
-      <td style={{ padding: '0.85rem 1rem', textAlign: 'center' }}>
+      <td style={{ padding: isDense ? '0.45rem 0.5rem' : '0.85rem 1rem', textAlign: 'center' }}>
         <div style={{ 
           display: 'inline-flex', 
           flexDirection: 'column', 
@@ -204,8 +220,8 @@ export default function StoreRoster({
           color: pillColor, 
           border: `1px solid ${pillBorder}`, 
           borderRadius: '12px', 
-          padding: '0.4rem 0.85rem',
-          minWidth: '100px',
+          padding: isDense ? '0.2rem 0.55rem' : '0.4rem 0.85rem',
+          minWidth: isDense ? '80px' : '100px',
           boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
           transition: 'all 0.2s ease',
           cursor: 'default'
@@ -221,8 +237,8 @@ export default function StoreRoster({
           e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.12)';
         }}
         >
-          <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>{displayValue}</span>
-          {pace && <span style={{ fontSize: '0.65rem', opacity: 0.8, marginTop: '0.15rem', fontWeight: 500 }}>{pace}</span>}
+          <span style={{ fontWeight: 700, fontSize: isDense ? '0.775rem' : '0.85rem' }}>{displayValue}</span>
+          {pace && <span style={{ fontSize: isDense ? '0.6rem' : '0.65rem', opacity: 0.8, marginTop: '0.125rem', fontWeight: 500 }}>{pace}</span>}
         </div>
       </td>
     );
@@ -461,11 +477,32 @@ export default function StoreRoster({
               setShowImporter(true);
               setShowAddForm(false);
               setShowNewPeriodForm(false);
+              setShowViewSettings(false);
             }}
           >
             Import CSV
           </button>
 
+          <button 
+            className="btn btn-secondary" 
+            style={{ 
+              padding: '0.55rem 1rem', 
+              fontSize: '0.8rem', 
+              height: '38px', 
+              borderColor: 'var(--text-muted)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              background: showViewSettings ? 'rgba(255, 255, 255, 0.05)' : 'transparent'
+            }} 
+            onClick={() => {
+              setShowViewSettings(!showViewSettings);
+              setShowAddForm(false);
+              setShowNewPeriodForm(false);
+            }}
+          >
+            <Sliders size={14} /> View Options
+          </button>
 
           <div style={{ position: 'relative', width: '200px' }}>
             <input 
@@ -480,6 +517,54 @@ export default function StoreRoster({
           </div>
         </div>
       </div>
+
+      {/* View Settings Drawer */}
+      {showViewSettings && (
+        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.25rem 2rem', border: '1px solid rgba(255, 255, 255, 0.08)', animation: 'fadeIn 0.25s ease' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+            <h4 style={{ margin: 0, fontSize: '0.95rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}>
+              <Sliders size={16} color="var(--bby-blue)" /> Roster Display Settings
+            </h4>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              <input 
+                type="checkbox" 
+                checked={isDense} 
+                onChange={(e) => setIsDense(e.target.checked)} 
+                style={{ cursor: 'pointer' }}
+              />
+              <span>Enable Dense Grid Layout</span>
+            </label>
+          </div>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem 1.25rem', padding: '0.75rem', background: 'rgba(0,0,0,0.15)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.02)' }}>
+            {Object.keys(visibleCols).map(col => {
+              const label = 
+                col === 'hours' ? 'Hours' :
+                col === 'dept' ? 'Department' :
+                col === 'memberships' ? 'Memberships' :
+                col === 'creditCards' ? 'BBY Cards' :
+                col === 'warranty' ? 'GSP/Warranty' :
+                col === 'surveys' ? '5 Star Surveys' :
+                col === 'rph' ? 'RPH Index' :
+                col === 'basket' ? 'Basket' :
+                col === 'attach' ? 'Dept Attach' :
+                col === 'status' ? 'Status' : col;
+
+              return (
+                <label key={col} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.8rem', color: '#fff' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={visibleCols[col]} 
+                    onChange={(e) => setVisibleCols({ ...visibleCols, [col]: e.target.checked })} 
+                    style={{ cursor: 'pointer' }}
+                  />
+                  <span>{label}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Collapsible Start New Period Card */}
       {showNewPeriodForm && (
@@ -561,24 +646,24 @@ export default function StoreRoster({
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
             <thead>
               <tr style={{ background: 'rgba(16, 24, 48, 0.7)', borderBottom: '1px solid var(--border-glass)', color: 'var(--text-secondary)' }}>
-                <th style={{ padding: '1.25rem 1.5rem', fontWeight: 600 }}>Associate</th>
-                <th style={{ padding: '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}><Clock size={14} style={{ display: 'inline', marginRight: '0.25rem', verticalAlign: 'text-bottom' }} />Hours</th>
-                <th style={{ padding: '1.25rem 1.5rem', fontWeight: 600 }}>Department</th>
-                <th style={{ padding: '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>Memberships</th>
-                <th style={{ padding: '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>BBY Cards</th>
-                <th style={{ padding: '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>Warranty/GSP</th>
-                <th style={{ padding: '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>5 Star</th>
-                <th style={{ padding: '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>RPH</th>
-                <th style={{ padding: '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>Basket ($)</th>
-                <th style={{ padding: '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>Dept Attach</th>
-                <th style={{ padding: '1.25rem 1.5rem', fontWeight: 600 }}>Status</th>
-                <th style={{ padding: '1.25rem 1.5rem', fontWeight: 600, textAlign: 'right' }}>Actions</th>
+                <th style={{ padding: isDense ? '0.75rem 1.5rem' : '1.25rem 1.5rem', fontWeight: 600 }}>Associate</th>
+                {visibleCols.hours && <th style={{ padding: isDense ? '0.75rem 1rem' : '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}><Clock size={14} style={{ display: 'inline', marginRight: '0.25rem', verticalAlign: 'text-bottom' }} />Hours</th>}
+                {visibleCols.dept && <th style={{ padding: isDense ? '0.75rem 1.5rem' : '1.25rem 1.5rem', fontWeight: 600 }}>Department</th>}
+                {visibleCols.memberships && <th style={{ padding: isDense ? '0.75rem 1rem' : '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>Memberships</th>}
+                {visibleCols.creditCards && <th style={{ padding: isDense ? '0.75rem 1rem' : '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>BBY Cards</th>}
+                {visibleCols.warranty && <th style={{ padding: isDense ? '0.75rem 1rem' : '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>Warranty/GSP</th>}
+                {visibleCols.surveys && <th style={{ padding: isDense ? '0.75rem 1rem' : '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>5 Star</th>}
+                {visibleCols.rph && <th style={{ padding: isDense ? '0.75rem 1rem' : '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>RPH</th>}
+                {visibleCols.basket && <th style={{ padding: isDense ? '0.75rem 1rem' : '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>Basket ($)</th>}
+                {visibleCols.attach && <th style={{ padding: isDense ? '0.75rem 1rem' : '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>Dept Attach</th>}
+                {visibleCols.status && <th style={{ padding: isDense ? '0.75rem 1.5rem' : '1.25rem 1.5rem', fontWeight: 600 }}>Status</th>}
+                <th style={{ padding: isDense ? '0.75rem 1.5rem' : '1.25rem 1.5rem', fontWeight: 600, textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredRoster.length === 0 ? (
                 <tr>
-                  <td colSpan="12" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                  <td colSpan={2 + Object.values(visibleCols).filter(Boolean).length} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
                     <Users size={32} color="var(--text-muted)" style={{ marginBottom: '0.75rem', opacity: 0.5 }} />
                     <p>No associates match your active filters.</p>
                   </td>
@@ -603,7 +688,7 @@ export default function StoreRoster({
                       onMouseEnter={(e) => e.currentTarget.style.background = hoverBg}
                       onMouseLeave={(e) => e.currentTarget.style.background = rowBg}
                     >
-                      <td style={{ padding: '1rem 1.5rem', fontWeight: 600, color: '#fff' }}>
+                      <td style={{ padding: isDense ? '0.45rem 1.5rem' : '1rem 1.5rem', fontWeight: 600, color: '#fff' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                           <span 
                             style={{ cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'rgba(255,255,255,0.3)' }}
@@ -618,18 +703,22 @@ export default function StoreRoster({
                             let badgeBg = 'rgba(255, 255, 255, 0.05)';
                             let badgeColor = 'var(--text-secondary)';
                             let badgeBorder = 'rgba(255, 255, 255, 0.1)';
+                            let cviIcon = '▶';
                             if (cvi.includes('Accelerating')) {
                               badgeBg = 'rgba(16, 185, 129, 0.15)';
                               badgeColor = 'var(--success)';
                               badgeBorder = 'rgba(16, 185, 129, 0.3)';
+                              cviIcon = '▲';
                             } else if (cvi.includes('Needs Review')) {
                               badgeBg = 'rgba(239, 68, 68, 0.15)';
                               badgeColor = 'var(--error)';
                               badgeBorder = 'rgba(239, 68, 68, 0.3)';
+                              cviIcon = '▼';
                             } else if (cvi.includes('Neutral')) {
                               badgeBg = 'rgba(245, 158, 11, 0.15)';
                               badgeColor = 'var(--warning)';
                               badgeBorder = 'rgba(245, 158, 11, 0.3)';
+                              cviIcon = '▶';
                             }
                             return (
                               <span 
@@ -647,7 +736,7 @@ export default function StoreRoster({
                                   gap: '0.15rem'
                                 }}
                               >
-                                📈 CVI: {cvi.split(' ')[0]}
+                                {cviIcon} CVI: {cvi.split(' ')[0]}
                               </span>
                             );
                           })()}
@@ -658,66 +747,72 @@ export default function StoreRoster({
                           )}
                         </div>
                       </td>
-                      <td style={{ padding: '1rem 1rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                        {emp.hours} hrs
-                      </td>
-                      <td style={{ padding: '0.5rem 1.5rem' }}>
-                        <select 
-                          className="form-control"
-                          style={{ 
-                            padding: '0.4rem 0.8rem', 
-                            fontSize: '0.8rem', 
-                            background: 'rgba(11,15,25,0.6)', 
-                            border: '1px solid var(--border-glass)',
-                            borderRadius: '8px',
-                            color: 'var(--text-secondary)',
-                            cursor: 'pointer',
-                            width: 'auto',
-                            minWidth: '130px'
-                          }}
-                          value={emp.dept}
-                          onChange={(e) => onUpdateEmployeeDept && onUpdateEmployeeDept(emp.id, e.target.value)}
-                        >
-                          {DEPARTMENTS.filter(d => d !== 'All').map(d => (
-                            <option key={d} value={d}>{d}</option>
-                          ))}
-                        </select>
-                      </td>
-                      {renderMetricCell(emp.memberships, 'memberships', emp.dept, emp, `${emp.memberships} Membs`)}
-                      {renderMetricCell(emp.creditCards, 'creditCards', emp.dept, emp, `${emp.creditCards} Apps`)}
-                      {renderMetricCell(emp.warranty, 'warranty', emp.dept, emp, `${emp.warranty}%`)}
-                      {renderMetricCell(emp.surveys, 'surveys', emp.dept, emp, emp.surveys === 0.2 ? 'Fail' : `${emp.surveys} ★`)}
-                      {renderMetricCell(emp.rph, 'rph', emp.dept, emp, `$${emp.rph}`)}
-                      {renderMetricCell(emp.basket, 'basket', emp.dept, emp, `$${parseFloat(emp.basket || 0).toFixed(0)}`)}
-                      {renderMetricCell(
+                      {visibleCols.hours && (
+                        <td style={{ padding: isDense ? '0.45rem 1rem' : '1rem 1rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                          {emp.hours} hrs
+                        </td>
+                      )}
+                      {visibleCols.dept && (
+                        <td style={{ padding: isDense ? '0.25rem 1.5rem' : '0.5rem 1.5rem' }}>
+                          <select 
+                            className="form-control"
+                            style={{ 
+                              padding: isDense ? '0.25rem 0.5rem' : '0.4rem 0.8rem', 
+                              fontSize: '0.8rem', 
+                              background: 'rgba(11,15,25,0.6)', 
+                              border: '1px solid var(--border-glass)',
+                              borderRadius: '8px',
+                              color: 'var(--text-secondary)',
+                              cursor: 'pointer',
+                              width: 'auto',
+                              minWidth: isDense ? '110px' : '130px'
+                            }}
+                            value={emp.dept}
+                            onChange={(e) => onUpdateEmployeeDept && onUpdateEmployeeDept(emp.id, e.target.value)}
+                          >
+                            {DEPARTMENTS.filter(d => d !== 'All').map(d => (
+                              <option key={d} value={d}>{d}</option>
+                            ))}
+                          </select>
+                        </td>
+                      )}
+                      {visibleCols.memberships && renderMetricCell(emp.memberships, 'memberships', emp.dept, emp, `${emp.memberships} Membs`)}
+                      {visibleCols.creditCards && renderMetricCell(emp.creditCards, 'creditCards', emp.dept, emp, `${emp.creditCards} Apps`)}
+                      {visibleCols.warranty && renderMetricCell(emp.warranty, 'warranty', emp.dept, emp, `${emp.warranty}%`)}
+                      {visibleCols.surveys && renderMetricCell(emp.surveys, 'surveys', emp.dept, emp, emp.surveys === 0.2 ? 'Fail' : `${emp.surveys} ★`)}
+                      {visibleCols.rph && renderMetricCell(emp.rph, 'rph', emp.dept, emp, `$${emp.rph}`)}
+                      {visibleCols.basket && renderMetricCell(emp.basket, 'basket', emp.dept, emp, `$${parseFloat(emp.basket || 0).toFixed(0)}`)}
+                      {visibleCols.attach && renderMetricCell(
                         emp.dept === 'Computing' ? emp.m365 : emp.dept === 'Home Theatre' ? emp.audio : 0, 
                         emp.dept === 'Computing' ? 'm365' : 'audio', 
                         emp.dept, 
                         emp, 
-                        emp.dept === 'Computing' ? `${emp.m365 || 0}% M365` : `${emp.audio || 0}% Audio`
+                        emp.dept === 'Computing' ? `${emp.m365 || 0}% M365` : emp.dept === 'Home Theatre' ? `${emp.audio || 0}% Audio` : '—'
                       )}
-                      <td style={{ padding: '1rem 1.5rem' }}>
-                        {getStatusBadge(gaps)}
-                      </td>
-                      <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
+                      {visibleCols.status && (
+                        <td style={{ padding: isDense ? '0.45rem 1.5rem' : '1rem 1.5rem' }}>
+                          {getStatusBadge(gaps)}
+                        </td>
+                      )}
+                      <td style={{ padding: isDense ? '0.45rem 1.5rem' : '1rem 1.5rem', textAlign: 'right' }}>
                         <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
                           <button 
                             className="btn btn-secondary" 
-                            style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.02)' }}
+                            style={{ padding: isDense ? '0.25rem 0.45rem' : '0.35rem 0.6rem', fontSize: '0.75rem', borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.02)' }}
                             onClick={() => handleStartEdit(emp)}
                           >
                             Edit
                           </button>
                           <button 
                             className="btn btn-secondary" 
-                            style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem' }}
+                            style={{ padding: isDense ? '0.25rem 0.45rem' : '0.35rem 0.6rem', fontSize: '0.75rem' }}
                             onClick={() => onCoachEmployee({ ...emp, gap })}
                           >
                             Coach
                           </button>
                           <button 
                             className="btn btn-accent" 
-                            style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', color: '#000' }}
+                            style={{ padding: isDense ? '0.25rem 0.45rem' : '0.35rem 0.6rem', fontSize: '0.75rem', color: '#000' }}
                             onClick={() => onCreateLog({ ...emp, gap })}
                           >
                             Log Builder
@@ -784,18 +879,22 @@ export default function StoreRoster({
                           let badgeBg = 'rgba(255, 255, 255, 0.05)';
                           let badgeColor = 'var(--text-secondary)';
                           let badgeBorder = 'rgba(255, 255, 255, 0.1)';
+                          let cviIcon = '▶';
                           if (cvi.includes('Accelerating')) {
                             badgeBg = 'rgba(16, 185, 129, 0.15)';
                             badgeColor = 'var(--success)';
                             badgeBorder = 'rgba(16, 185, 129, 0.3)';
+                            cviIcon = '▲';
                           } else if (cvi.includes('Needs Review')) {
                             badgeBg = 'rgba(239, 68, 68, 0.15)';
                             badgeColor = 'var(--error)';
                             badgeBorder = 'rgba(239, 68, 68, 0.3)';
+                            cviIcon = '▼';
                           } else if (cvi.includes('Neutral')) {
                             badgeBg = 'rgba(245, 158, 11, 0.15)';
                             badgeColor = 'var(--warning)';
                             badgeBorder = 'rgba(245, 158, 11, 0.3)';
+                            cviIcon = '▶';
                           }
                           return (
                             <span 
@@ -813,7 +912,7 @@ export default function StoreRoster({
                                 gap: '0.15rem'
                               }}
                             >
-                              📈 CVI: {cvi.split(' ')[0]}
+                              {cviIcon} CVI: {cvi.split(' ')[0]}
                             </span>
                           );
                         })()}

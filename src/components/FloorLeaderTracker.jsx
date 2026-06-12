@@ -702,26 +702,63 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
 
                           {/* Hourly Revenue Input */}
                           <td style={{ padding: '1rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
-                              <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>$</span>
-                              <input 
-                                type="number"
-                                className="form-control"
-                                style={{ 
-                                  width: '90px', 
-                                  textAlign: 'center', 
-                                  padding: '0.35rem 0.5rem', 
-                                  fontSize: '0.9rem', 
-                                  background: 'rgba(11, 15, 25, 0.6)', 
-                                  border: '1px solid var(--border-glass)',
-                                  borderRadius: '6px',
-                                  color: '#fff',
-                                  margin: 0
-                                }}
-                                value={hour.revenue || ''}
-                                onChange={(e) => handleUpdateRevenue(idx, e.target.value)}
-                                placeholder="0"
-                              />
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
+                                <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>$</span>
+                                <input 
+                                  type="number"
+                                  className="form-control"
+                                  style={{ 
+                                    width: '90px', 
+                                    textAlign: 'center', 
+                                    padding: '0.35rem 0.5rem', 
+                                    fontSize: '0.9rem', 
+                                    background: 'rgba(11, 15, 25, 0.6)', 
+                                    border: '1px solid var(--border-glass)',
+                                    borderRadius: '6px',
+                                    color: '#fff',
+                                    margin: 0
+                                  }}
+                                  value={hour.revenue || ''}
+                                  onChange={(e) => handleUpdateRevenue(idx, e.target.value)}
+                                  placeholder="0"
+                                />
+                              </div>
+                              <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.15rem' }}>
+                                {['+500', '+1k', '+2k'].map(preset => {
+                                  const val = preset === '+500' ? 500 : preset === '+1k' ? 1000 : 2000;
+                                  return (
+                                    <button
+                                      key={preset}
+                                      type="button"
+                                      style={{
+                                        padding: '0.15rem 0.35rem',
+                                        fontSize: '0.65rem',
+                                        background: 'rgba(255,255,255,0.03)',
+                                        border: '1px solid rgba(255,255,255,0.08)',
+                                        borderRadius: '4px',
+                                        color: 'var(--text-secondary)',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.15s ease'
+                                      }}
+                                      onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                                        e.currentTarget.style.color = '#fff';
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                                        e.currentTarget.style.color = 'var(--text-secondary)';
+                                      }}
+                                      onClick={() => {
+                                        const currentRev = parseFloat(hour.revenue) || 0;
+                                        handleUpdateRevenue(idx, currentRev + val);
+                                      }}
+                                    >
+                                      {preset}
+                                    </button>
+                                  );
+                                })}
+                              </div>
                             </div>
                           </td>
 

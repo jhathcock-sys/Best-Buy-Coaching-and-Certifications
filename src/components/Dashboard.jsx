@@ -207,7 +207,7 @@ export default function Dashboard({
       list.push({
         id: 1,
         type: 'warning',
-        text: 'Membership attach rate is currently 52% (Goal: 65%). Practice pitching My Best Buy Total early in discovery.',
+        text: `Membership attach rate is currently ${metrics.memberships}% (Goal: 65%). Practice pitching My Best Buy Total early in discovery.`,
         actionLabel: 'Total Support Roleplay',
         navTarget: 'roleplay'
       });
@@ -216,7 +216,7 @@ export default function Dashboard({
       list.push({
         id: 2,
         type: 'info',
-        text: 'Geek Squad Protection attach rate is 12% (Goal: 18%). Try the OLED TV setup scenario to practice warranty attach.',
+        text: `Geek Squad Protection attach rate is ${metrics.warranty}% (Goal: 18%). Try the OLED TV setup scenario to practice warranty attach.`,
         actionLabel: 'HT OLED Roleplay',
         navTarget: 'roleplay'
       });
@@ -225,7 +225,7 @@ export default function Dashboard({
       list.push({
         id: 3,
         type: 'warning',
-        text: 'Customer 5-Star Survey Index is 4.7. Try building stronger rapport at the beginning of interactions.',
+        text: `Customer 5-Star Survey Index is ${metrics.surveys === 0.2 ? '0' : metrics.surveys}. Try building stronger rapport at the beginning of interactions.`,
         actionLabel: 'Connect Training',
         navTarget: 'roleplay'
       });

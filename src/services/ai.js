@@ -350,9 +350,9 @@ export function evaluateSessionOffline(history, scenario, guidelines) {
       makeItEasy,
       showWhatPossible
     },
-    growReport: {
-      goal: "Achieve Best Buy certification in consultative sales by demonstrating full capability in discovering needs, matching memberships/warranty, and closing with BBY Credit Card solutions.",
-      reality: reality,
+      growReport: {
+        goal: "Achieve consultative sales excellence by demonstrating full capability in discovering needs, matching memberships/warranty, and closing with BBY Credit Card solutions.",
+        reality: reality,
       options: [
         "Be Human: Next time, congratulations the parent/student early to build deeper rapport before asking technical questions.",
         "Make It Easy: Introduce My Best Buy memberships as a shield or umbrella package to save them money on support rather than a separate retail line.",

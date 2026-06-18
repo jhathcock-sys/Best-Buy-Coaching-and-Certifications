@@ -1,11 +1,16 @@
-import React, { createContext, useContext } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 
 const AppContext = createContext();
 
 export function AppProvider({ children }) {
-  const activeView = useStore((state) => state.activeView);
-  const setActiveView = useStore((state) => state.setActiveView);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const activeView = location.pathname === '/' ? 'dashboard' : location.pathname.substring(1);
+  const setActiveView = (view) => navigate(view === 'dashboard' ? '/' : `/${view}`);
+
   const apiKey = useStore((state) => state.apiKey);
   const setApiKey = useStore((state) => state.setApiKey);
   const dbConnected = useStore((state) => state.dbConnected);

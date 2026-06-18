@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Award, Trophy, Users, Star, Flame, ShieldAlert, Sparkles, TrendingUp } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Award, Trophy, Users, Star, Flame, Sparkles, TrendingUp } from 'lucide-react';
 
-export default function BreakroomTV({ roster = [], certifications = [], recentSessions = [], activePeriod = "Active Period" }) {
+export default function BreakroomTV({ roster = [], recentSessions = [], activePeriod = "Active Period" }) {
   const [activeSlide, setActiveSlide] = useState(0); // 0: Leaderboard, 1: Certifications, 2: Achievements
 
   // Auto-rotate slides every 15 seconds
@@ -111,7 +111,7 @@ export default function BreakroomTV({ roster = [], certifications = [], recentSe
             BEST BUY
           </div>
           <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0, letterSpacing: '-0.02em', background: 'linear-gradient(to right, #ffffff, #93c5fd)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            BlueCoach AI Roster Board
+            FloorVision Performance Board
           </h1>
         </div>
         

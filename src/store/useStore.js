@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { ShiftSchema, EmployeeSchema } from '../schemas';
 import { 
   isFirebaseConnected, 
   initFirebase,
@@ -9,12 +10,12 @@ import {
   saveRecentSessionsToCloud,
   saveMetricsToCloud,
   saveFollowUpTaskToCloud,
-  deleteFollowUpTaskFromCloud,
   saveFloorLeaderShiftToCloud,
   deleteFloorLeaderShiftFromCloud,
   saveCoachingLogToCloud,
   deleteCoachingLogFromCloud,
-  saveManagersToCloud
+  saveManagersToCloud,
+  saveDailySnapshotToCloud
 } from '../services/firebase';
 
 const INITIAL_ROSTER = [
@@ -184,6 +185,18 @@ export const useStore = create((set, get) => {
   const initialFollowUpTasks = safeJsonParse(localStorage.getItem('bby_follow_up_tasks'), []);
   const initialFloorLeaderShifts = safeJsonParse(localStorage.getItem('bby_floor_leader_shifts'), []);
   const initialCoachingLogs = safeJsonParse(localStorage.getItem('bby_coaching_logs'), []);
+  const initialDailySnapshots = safeJsonParse(localStorage.getItem('bby_daily_snapshots'), {});
+
+  let initialActiveShift = null;
+  const rawActiveShift = safeJsonParse(localStorage.getItem('bby_active_shift'), null);
+  if (rawActiveShift) {
+    const result = ShiftSchema.safeParse(rawActiveShift);
+    if (result.success) {
+      initialActiveShift = result.data;
+    } else {
+      console.error('Failed to validate active shift from localStorage:', result.error);
+    }
+  }
 
   // Load initial managers from localStorage or defaults
   let initialManagers = MANAGERS;
@@ -211,6 +224,8 @@ export const useStore = create((set, get) => {
     followUpTasks: initialFollowUpTasks,
     floorLeaderShifts: initialFloorLeaderShifts,
     coachingLogs: initialCoachingLogs,
+    dailySnapshots: initialDailySnapshots,
+    activeShift: initialActiveShift,
     deptGoals: initialDeptGoals,
     metrics: initialMetrics,
 
@@ -276,9 +291,29 @@ export const useStore = create((set, get) => {
 
     // Operational Data Setters (for Firestore subscribers)
     setRosterHistory: (rosterHistory) => set({ rosterHistory }),
+    setDailySnapshots: (dailySnapshots) => set({ dailySnapshots }),
+    addDailySnapshot: (dateKey, metrics) => {
+      const currentSnapshots = get().dailySnapshots || {};
+      const newSnapshots = { ...currentSnapshots, [dateKey]: metrics };
+      set({ dailySnapshots: newSnapshots });
+      if (get().dbConnected) {
+        saveDailySnapshotToCloud(dateKey, metrics);
+      } else {
+        localStorage.setItem('bby_daily_snapshots', JSON.stringify(newSnapshots));
+      }
+    },
     setActivePeriod: (activePeriod) => set({ activePeriod }),
     setFollowUpTasks: (followUpTasks) => set({ followUpTasks }),
     setFloorLeaderShifts: (floorLeaderShifts) => set({ floorLeaderShifts }),
+    setActiveShift: (activeShift) => {
+      set({ activeShift });
+      if (activeShift) {
+        localStorage.setItem('bby_active_shift', JSON.stringify(activeShift));
+        // We can sync this to the cloud as an active shift if needed
+      } else {
+        localStorage.removeItem('bby_active_shift');
+      }
+    },
     setCoachingLogs: (coachingLogs) => set({ coachingLogs }),
     setDeptGoals: (deptGoals) => set({ deptGoals }),
     setMetrics: (metrics) => set({ metrics }),
@@ -303,9 +338,25 @@ export const useStore = create((set, get) => {
     // Roster Mutator Actions
     addEmployee: (newEmp) => {
       const activePeriod = get().activePeriod;
-      const rosterHistory = get().rosterHistory;
+      const rosterHistory = get().rosterHistory || {};
       const dbConnected = get().dbConnected;
-      const updated = [...(rosterHistory[activePeriod] || []), newEmp];
+      const currentRoster = Array.isArray(rosterHistory[activePeriod]) ? rosterHistory[activePeriod] : [];
+      
+      // Clean tombstones if adding back
+      try {
+        const deletedIds = JSON.parse(localStorage.getItem('bby_deleted_employees') || '[]');
+        const deletedNames = JSON.parse(localStorage.getItem('bby_deleted_employee_names') || '[]');
+        const nameKey = newEmp.name.toLowerCase().trim();
+        
+        localStorage.setItem('bby_deleted_employees', JSON.stringify(deletedIds.filter(id => id !== newEmp.id)));
+        localStorage.setItem('bby_deleted_employee_names', JSON.stringify(deletedNames.filter(n => n !== nameKey)));
+      } catch (e) { console.error('Failed to update deleted employees storage', e); }
+
+      const empWithTimestamp = {
+        ...newEmp,
+        lastUpdated: Date.now()
+      };
+      const updated = [...currentRoster, empWithTimestamp];
       const newHistory = { ...rosterHistory, [activePeriod]: updated };
       set({ rosterHistory: newHistory });
       localStorage.setItem('bby_roster_history', JSON.stringify(newHistory));
@@ -316,11 +367,12 @@ export const useStore = create((set, get) => {
 
     editEmployee: (empId, updatedFields) => {
       const activePeriod = get().activePeriod;
-      const rosterHistory = get().rosterHistory;
+      const rosterHistory = get().rosterHistory || {};
       const dbConnected = get().dbConnected;
-      const updated = (rosterHistory[activePeriod] || []).map(emp => {
+      const currentRoster = Array.isArray(rosterHistory[activePeriod]) ? rosterHistory[activePeriod] : [];
+      const updated = currentRoster.map(emp => {
         if (emp.id === empId) {
-          return { ...emp, ...updatedFields };
+          return { ...emp, ...updatedFields, lastUpdated: Date.now() };
         }
         return emp;
       });
@@ -332,30 +384,92 @@ export const useStore = create((set, get) => {
       }
     },
 
+    deleteEmployee: (empId) => {
+      const activePeriod = get().activePeriod;
+      const rosterHistory = get().rosterHistory || {};
+      const dbConnected = get().dbConnected;
+      const currentRoster = Array.isArray(rosterHistory[activePeriod]) ? rosterHistory[activePeriod] : [];
+      const targetEmp = currentRoster.find(emp => emp.id === empId);
+      if (!targetEmp) return;
+      
+      const updated = currentRoster.filter(emp => emp.id !== empId);
+      const newHistory = { ...rosterHistory, [activePeriod]: updated };
+      
+      // Track locally deleted employee ID and name to prevent merging back
+      try {
+        const deletedIds = JSON.parse(localStorage.getItem('bby_deleted_employees') || '[]');
+        if (!deletedIds.includes(empId)) {
+          localStorage.setItem('bby_deleted_employees', JSON.stringify([...deletedIds, empId]));
+        }
+        
+        const deletedNames = JSON.parse(localStorage.getItem('bby_deleted_employee_names') || '[]');
+        const empNameKey = targetEmp.name.toLowerCase().trim();
+        if (!deletedNames.includes(empNameKey)) {
+          localStorage.setItem('bby_deleted_employee_names', JSON.stringify([...deletedNames, empNameKey]));
+        }
+      } catch (e) {
+        console.error('Failed to update deleted employees storage', e);
+      }
+
+      set({ rosterHistory: newHistory });
+      localStorage.setItem('bby_roster_history', JSON.stringify(newHistory));
+      if (dbConnected) {
+        saveRosterHistoryToCloud(updated, activePeriod);
+      }
+    },
+
     updateEmployeeDept: (empId, newDept) => {
       get().editEmployee(empId, { dept: newDept });
     },
 
-    bulkImportEmployees: (importedEmployees) => {
-      const activePeriod = get().activePeriod;
-      const rosterHistory = get().rosterHistory;
+    bulkImportEmployees: (importedEmployees, targetPeriod) => {
+      const activePeriod = targetPeriod || get().activePeriod;
+      const rosterHistory = get().rosterHistory || {};
       const dbConnected = get().dbConnected;
-      const currentRoster = rosterHistory[activePeriod] || [];
-      const rosterMap = {};
+      const currentRoster = Array.isArray(rosterHistory[activePeriod]) ? rosterHistory[activePeriod] : [];
       
+      // Clean tombstones if importing
+      try {
+        const deletedNames = JSON.parse(localStorage.getItem('bby_deleted_employee_names') || '[]');
+        
+        const importedNames = importedEmployees.map(e => e.name.toLowerCase().trim());
+        const filteredNames = deletedNames.filter(n => !importedNames.includes(n));
+        localStorage.setItem('bby_deleted_employee_names', JSON.stringify(filteredNames));
+      } catch (e) { console.error('Failed to clean tombstones', e); }
+
+      const rosterMap = {};
       currentRoster.forEach(emp => {
-        rosterMap[emp.name.toLowerCase()] = emp;
+        rosterMap[emp.name.toLowerCase().trim()] = emp;
       });
 
       importedEmployees.forEach(newEmp => {
-        const nameKey = newEmp.name.toLowerCase();
+        if (!newEmp.name || newEmp.name.trim() === 'Unknown Name' || newEmp.name.trim() === '') {
+          return; // Skip empty or invalid names
+        }
+
+        const nameKey = newEmp.name.toLowerCase().trim();
+        let candidateEmp;
+
         if (rosterMap[nameKey]) {
-          rosterMap[nameKey] = { ...rosterMap[nameKey], ...newEmp };
-        } else {
-          rosterMap[nameKey] = {
-            id: 'emp_' + Math.random().toString(36).substring(2, 11),
-            ...newEmp
+          candidateEmp = { 
+            ...rosterMap[nameKey], 
+            ...newEmp, 
+            lastUpdated: Date.now() 
           };
+        } else {
+          candidateEmp = {
+            id: 'emp_' + Math.random().toString(36).substring(2, 11),
+            ...newEmp,
+            lastUpdated: Date.now()
+          };
+        }
+
+        // Validate before persisting
+        const parsed = EmployeeSchema.safeParse(candidateEmp);
+        if (parsed.success) {
+          rosterMap[nameKey] = parsed.data;
+        } else {
+          console.error(`Validation failed for imported employee ${newEmp.name}:`, parsed.error);
         }
       });
 
@@ -377,11 +491,12 @@ export const useStore = create((set, get) => {
     },
 
     createPeriodArchive: (newPeriodName, copyOption) => {
-      const rosterHistory = get().rosterHistory;
+      const rosterHistory = get().rosterHistory || {};
       const activePeriod = get().activePeriod;
       const dbConnected = get().dbConnected;
-      const currentRoster = rosterHistory[activePeriod] || [];
-      let newRoster = [];
+      const currentRoster = Array.isArray(rosterHistory[activePeriod]) ? rosterHistory[activePeriod] : [];
+      let newRoster;
+      const now = Date.now();
       if (copyOption === 'roster-only') {
         newRoster = currentRoster.map(emp => ({
           ...emp,
@@ -394,10 +509,11 @@ export const useStore = create((set, get) => {
           basket: 0,
           m365: 0,
           audio: 0,
-          gap: 'None'
+          gap: 'None',
+          lastUpdated: now
         }));
       } else if (copyOption === 'roster-and-metrics') {
-        newRoster = currentRoster.map(emp => ({ ...emp }));
+        newRoster = currentRoster.map(emp => ({ ...emp, lastUpdated: now }));
       } else {
         newRoster = [];
       }
@@ -413,9 +529,9 @@ export const useStore = create((set, get) => {
 
     // Coaching Log Actions
     logCoachingSession: (session) => {
-      const recentSessions = get().recentSessions;
-      const coachingLogs = get().coachingLogs;
-      const rosterHistory = get().rosterHistory;
+      const recentSessions = get().recentSessions || [];
+      const coachingLogs = get().coachingLogs || [];
+      const rosterHistory = get().rosterHistory || {};
       const activePeriod = get().activePeriod;
       const dbConnected = get().dbConnected;
 
@@ -429,7 +545,7 @@ export const useStore = create((set, get) => {
       };
       
       // Update global recentSessions
-      const updatedSessions = [newSession, ...recentSessions].slice(0, 15);
+      const updatedSessions = [newSession, ...(Array.isArray(recentSessions) ? recentSessions : [])].slice(0, 15);
       set({ recentSessions: updatedSessions });
       localStorage.setItem('bby_recent_sessions', JSON.stringify(updatedSessions));
       if (dbConnected) {
@@ -449,7 +565,7 @@ export const useStore = create((set, get) => {
         timestamp: Date.now(),
         coachName: get().activeManager?.name || 'Supervisor'
       };
-      const updatedLogs = [newLog, ...coachingLogs];
+      const updatedLogs = [newLog, ...(Array.isArray(coachingLogs) ? coachingLogs : [])];
       set({ coachingLogs: updatedLogs });
       localStorage.setItem('bby_coaching_logs', JSON.stringify(updatedLogs));
       if (dbConnected) {
@@ -458,9 +574,9 @@ export const useStore = create((set, get) => {
     },
 
     deleteCoachingSession: (index) => {
-      const recentSessions = get().recentSessions;
+      const recentSessions = get().recentSessions || [];
       const dbConnected = get().dbConnected;
-      const updatedSessions = recentSessions.filter((_, idx) => idx !== index);
+      const updatedSessions = (Array.isArray(recentSessions) ? recentSessions : []).filter((_, idx) => idx !== index);
       set({ recentSessions: updatedSessions });
       localStorage.setItem('bby_recent_sessions', JSON.stringify(updatedSessions));
       if (dbConnected) {
@@ -469,20 +585,20 @@ export const useStore = create((set, get) => {
     },
 
     deleteCoachingLog: async (logId) => {
-      const coachingLogs = get().coachingLogs;
-      const recentSessions = get().recentSessions;
+      const coachingLogs = get().coachingLogs || [];
+      const recentSessions = get().recentSessions || [];
       const dbConnected = get().dbConnected;
       
-      const logToDelete = coachingLogs.find(l => l.id === logId || (logId && l.timestamp === logId));
+      const logToDelete = (Array.isArray(coachingLogs) ? coachingLogs : []).find(l => l.id === logId || (logId && l.timestamp === logId));
       if (!logToDelete) return;
       
       // Update coachingLogs state
-      const updatedLogs = coachingLogs.filter(l => l.id !== logId && l.timestamp !== logId);
+      const updatedLogs = (Array.isArray(coachingLogs) ? coachingLogs : []).filter(l => l.id !== logId && l.timestamp !== logId);
       set({ coachingLogs: updatedLogs });
       localStorage.setItem('bby_coaching_logs', JSON.stringify(updatedLogs));
       
       // Synchronize with recentSessions (Dashboard)
-      const updatedSessions = recentSessions.filter(s => 
+      const updatedSessions = (Array.isArray(recentSessions) ? recentSessions : []).filter(s => 
         !(s.customerName === logToDelete.employeeName && s.date === logToDelete.date && s.notes === logToDelete.notes)
       );
       set({ recentSessions: updatedSessions });
@@ -498,14 +614,14 @@ export const useStore = create((set, get) => {
 
     // Follow-up Task Actions
     addFollowUpTask: (task) => {
-      const followUpTasks = get().followUpTasks;
+      const followUpTasks = get().followUpTasks || [];
       const dbConnected = get().dbConnected;
       const newTask = {
         ...task,
         id: 'task_' + Date.now(),
         timestamp: Date.now()
       };
-      const updated = [...followUpTasks, newTask];
+      const updated = [...(Array.isArray(followUpTasks) ? followUpTasks : []), newTask];
       set({ followUpTasks: updated });
       localStorage.setItem('bby_follow_up_tasks', JSON.stringify(updated));
       if (dbConnected) {
@@ -514,10 +630,10 @@ export const useStore = create((set, get) => {
     },
 
     completeFollowUpTask: (taskId) => {
-      const followUpTasks = get().followUpTasks;
+      const followUpTasks = get().followUpTasks || [];
       const dbConnected = get().dbConnected;
       let targetTask = null;
-      const updated = followUpTasks.map(t => {
+      const updated = (Array.isArray(followUpTasks) ? followUpTasks : []).map(t => {
         if (t.id === taskId) {
           targetTask = { ...t, completed: true };
           return targetTask;
@@ -533,20 +649,41 @@ export const useStore = create((set, get) => {
 
     // Floor Leader Shifts Actions
     saveFloorLeaderShift: (newShift) => {
-      const floorLeaderShifts = get().floorLeaderShifts;
+      const floorLeaderShifts = get().floorLeaderShifts || [];
       const dbConnected = get().dbConnected;
-      const updated = [newShift, ...floorLeaderShifts];
+      const shiftWithTime = { ...newShift, lastUpdated: Date.now() };
+      
+      const existsIndex = floorLeaderShifts.findIndex(s => s.id === shiftWithTime.id);
+      let updated;
+      if (existsIndex >= 0) {
+        updated = [...floorLeaderShifts];
+        updated[existsIndex] = shiftWithTime;
+      } else {
+        updated = [shiftWithTime, ...floorLeaderShifts];
+      }
+      
       set({ floorLeaderShifts: updated });
       localStorage.setItem('bby_floor_leader_shifts', JSON.stringify(updated));
       if (dbConnected) {
-        saveFloorLeaderShiftToCloud(newShift);
+        saveFloorLeaderShiftToCloud(shiftWithTime);
       }
     },
 
     deleteFloorLeaderShift: (shiftId) => {
-      const floorLeaderShifts = get().floorLeaderShifts;
+      const floorLeaderShifts = get().floorLeaderShifts || [];
       const dbConnected = get().dbConnected;
-      const updated = floorLeaderShifts.filter(s => s.id !== shiftId);
+      const updated = (Array.isArray(floorLeaderShifts) ? floorLeaderShifts : []).filter(s => s.id !== shiftId);
+      
+      // Track locally deleted shift ID to prevent it from being merged back during subscription sync
+      try {
+        const deleted = JSON.parse(localStorage.getItem('bby_deleted_shifts') || '[]');
+        if (!deleted.includes(shiftId)) {
+          localStorage.setItem('bby_deleted_shifts', JSON.stringify([...deleted, shiftId]));
+        }
+      } catch (e) {
+        console.error('Failed to update bby_deleted_shifts', e);
+      }
+
       set({ floorLeaderShifts: updated });
       localStorage.setItem('bby_floor_leader_shifts', JSON.stringify(updated));
       if (dbConnected) {
@@ -555,9 +692,9 @@ export const useStore = create((set, get) => {
     },
 
     // Roleplay Actions
-    completeRoleplay: async ({ scenarioId, category, customerName, avatar, score, passed, growReport, metrics: newMetrics }) => {
-      const recentSessions = get().recentSessions;
-      const metrics = get().metrics;
+    completeRoleplay: async ({ category, customerName, avatar, score, passed, growReport, metrics: newMetrics }) => {
+      const recentSessions = get().recentSessions || [];
+      const metrics = get().metrics || { memberships: 0, creditCards: 0, warranty: 0, surveys: 5.0, rph: 0 };
       const dbConnected = get().dbConnected;
 
       // 1. Add session log
@@ -569,7 +706,7 @@ export const useStore = create((set, get) => {
         date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         notes: growReport.reality
       };
-      const updatedSessions = [newSession, ...recentSessions].slice(0, 15);
+      const updatedSessions = [newSession, ...(Array.isArray(recentSessions) ? recentSessions : [])].slice(0, 15);
       set({ recentSessions: updatedSessions });
       localStorage.setItem('bby_recent_sessions', JSON.stringify(updatedSessions));
       if (dbConnected) {
@@ -613,15 +750,15 @@ export const useStore = create((set, get) => {
 
     // Custom Scenario Actions
     importCustomScenario: (newScenario) => {
-      const customScenarios = get().customScenarios;
-      const updated = [...customScenarios, newScenario];
+      const customScenarios = get().customScenarios || [];
+      const updated = [...(Array.isArray(customScenarios) ? customScenarios : []), newScenario];
       set({ customScenarios: updated });
       localStorage.setItem('bby_custom_scenarios', JSON.stringify(updated));
     },
 
     deleteCustomScenario: (scenarioId) => {
-      const customScenarios = get().customScenarios;
-      const updated = customScenarios.filter(s => s.id !== scenarioId);
+      const customScenarios = get().customScenarios || [];
+      const updated = (Array.isArray(customScenarios) ? customScenarios : []).filter(s => s.id !== scenarioId);
       set({ customScenarios: updated });
       localStorage.setItem('bby_custom_scenarios', JSON.stringify(updated));
     }

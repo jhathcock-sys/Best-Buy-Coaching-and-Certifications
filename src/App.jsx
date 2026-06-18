@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import Dashboard from './components/Dashboard';
-import StoreRoster from './components/StoreRoster';
-import RoleplayCenter from './components/RoleplayCenter';
-import CoachSimulator from './components/CoachSimulator';
-import PlaybookStudio from './components/PlaybookStudio';
-import CoachingHistory from './components/CoachingHistory';
-import LiveFloorShadow from './components/LiveFloorShadow';
+import { useState, useEffect, lazy, Suspense } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { Toaster, toast } from 'react-hot-toast';
+const Dashboard = lazy(() => import('./components/Dashboard'));
+const StoreRoster = lazy(() => import('./components/StoreRoster'));
+const RoleplayCenter = lazy(() => import('./components/RoleplayCenter'));
+const CoachSimulator = lazy(() => import('./components/CoachSimulator'));
+const PlaybookStudio = lazy(() => import('./components/PlaybookStudio'));
+const CoachingHistory = lazy(() => import('./components/CoachingHistory'));
+const LiveFloorShadow = lazy(() => import('./components/LiveFloorShadow'));
 import Login from './components/Login';
-import FloorLeaderTracker from './components/FloorLeaderTracker';
-import { Compass, Award, Users, BookOpen, LayoutDashboard, Key, Sparkles, ShieldCheck, ClipboardList, Archive, Clock, ChevronDown, ChevronRight } from 'lucide-react';
+const FloorLeaderTracker = lazy(() => import('./components/FloorLeaderTracker'));
+const TrendReporting = lazy(() => import('./components/TrendReporting'));
+import { Compass, Users, BookOpen, LayoutDashboard, Sparkles, ShieldCheck, ClipboardList, Archive, Clock, ChevronDown, ChevronRight, TrendingUp } from 'lucide-react';
 import { 
   subscribeToActivePeriod, 
   subscribeToRosterHistory, 
@@ -20,7 +23,8 @@ import {
   subscribeToFloorLeaderShifts,
   seedOfflineDataToCloud,
   subscribeToCoachingLogs,
-  subscribeToManagers
+  subscribeToManagers,
+  subscribeToDailySnapshots
 } from './services/firebase';
 import { AppProvider, useApp } from './context/AppContext';
 import { useStore } from './store/useStore';
@@ -32,6 +36,7 @@ const safeJsonParse = (str, fallback) => {
   try {
     return JSON.parse(str);
   } catch (e) {
+    toast.error('Local data parsing failed, restoring defaults.');
     console.error('JSON parsing failed:', e);
     return fallback;
   }
@@ -41,6 +46,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <AppProvider>
+        <Toaster position="top-right" />
         <AppContent />
       </AppProvider>
     </ErrorBoundary>
@@ -53,13 +59,9 @@ function AppContent() {
     activeView, 
     setActiveView, 
     apiKey, 
-    setApiKey, 
     dbConnected, 
-    setDbConnected, 
-    handleSaveFirebaseConfig,
     isAuthenticated,
     storePin,
-    setStorePin,
     login
   } = useApp();
   
@@ -88,7 +90,6 @@ function AppContent() {
   const setCoachingLogs = useStore((state) => state.setCoachingLogs);
   const setDeptGoals = useStore((state) => state.setDeptGoals);
   const logout = useStore((state) => state.logout);
-  const setManagers = useStore((state) => state.setManagers);
   const saveManagers = useStore((state) => state.saveManagers);
 
   const addFollowUpTask = useStore((state) => state.addFollowUpTask);
@@ -99,7 +100,6 @@ function AppContent() {
   const saveFloorLeaderShift = useStore((state) => state.saveFloorLeaderShift);
   const deleteFloorLeaderShift = useStore((state) => state.deleteFloorLeaderShift);
   const logCoachingSession = useStore((state) => state.logCoachingSession);
-  const deleteCoachingSession = useStore((state) => state.deleteCoachingSession);
   const deleteCoachingLog = useStore((state) => state.deleteCoachingLog);
   const completeRoleplay = useStore((state) => state.completeRoleplay);
   const saveDeptGoals = useStore((state) => state.saveDeptGoals);
@@ -107,6 +107,7 @@ function AppContent() {
 
   const addEmployee = useStore((state) => state.addEmployee);
   const editEmployee = useStore((state) => state.editEmployee);
+  const deleteEmployee = useStore((state) => state.deleteEmployee);
   const updateEmployeeDept = useStore((state) => state.updateEmployeeDept);
   const bulkImportEmployees = useStore((state) => state.bulkImportEmployees);
   const createPeriodArchive = useStore((state) => state.createPeriodArchive);
@@ -138,8 +139,10 @@ function AppContent() {
   }, []);
 
   // Auto-expand category of active view
+   
   useEffect(() => {
     if (activeView === 'dashboard') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCollapsedCategories(prev => ({ ...prev, overview: false }));
     } else if (activeView === 'roster' || activeView === 'shadow' || activeView === 'floorLeader') {
       setCollapsedCategories(prev => ({ ...prev, floorOps: false }));
@@ -148,6 +151,7 @@ function AppContent() {
     } else if (activeView === 'builder' || activeView === 'history' || activeView === 'playbook') {
       setCollapsedCategories(prev => ({ ...prev, recordsSetup: false }));
     }
+     
   }, [activeView]);
 
   // Subscribe to real-time Cloud Sync
@@ -189,7 +193,80 @@ function AppContent() {
 
     // Subscribe to roster history
     const unsubRoster = subscribeToRosterHistory((h) => {
-      if (h) setRosterHistory(h);
+      if (h) {
+        const localHistory = useStore.getState().rosterHistory || {};
+        const mergedHistory = { ...localHistory };
+
+        let deletedEmpIds = [];
+        let deletedEmpNames = [];
+        try {
+          deletedEmpIds = JSON.parse(localStorage.getItem('bby_deleted_employees') || '[]');
+          deletedEmpNames = JSON.parse(localStorage.getItem('bby_deleted_employee_names') || '[]');
+        } catch (e) {
+          console.error(e);
+        }
+
+        // Union of all period keys from local and cloud
+        const allPeriods = new Set([
+          ...Object.keys(localHistory),
+          ...Object.keys(h)
+        ]);
+
+        allPeriods.forEach(period => {
+          const cloudList = h[period] || [];
+          const localList = localHistory[period] || [];
+
+          // If period only exists locally (not in cloud), keep it
+          if (!h[period]) {
+            return;
+          }
+
+          // Merge lists of employees for this period
+          const employeeMap = {};
+          
+          // 1. Populate with local list
+          localList.forEach(emp => {
+            if (emp && emp.name) {
+              const key = emp.name.toLowerCase().trim();
+              if (!deletedEmpIds.includes(emp.id) && !deletedEmpNames.includes(key)) {
+                employeeMap[key] = emp;
+              }
+            }
+          });
+
+          // 2. Merge with cloud list based on lastUpdated timestamp
+          cloudList.forEach(cloudEmp => {
+            if (!cloudEmp || !cloudEmp.name) return;
+            const key = cloudEmp.name.toLowerCase().trim();
+            if (deletedEmpIds.includes(cloudEmp.id) || deletedEmpNames.includes(key)) {
+              return;
+            }
+            const localEmp = employeeMap[key];
+
+            if (localEmp) {
+              const localTime = localEmp.lastUpdated || 0;
+              const cloudTime = cloudEmp.lastUpdated || 0;
+
+              if (cloudTime >= localTime) {
+                employeeMap[key] = {
+                  ...localEmp,
+                  ...cloudEmp,
+                  id: localEmp.id || cloudEmp.id
+                };
+              } else {
+                // Local is newer, keep localEmp
+              }
+            } else {
+              employeeMap[key] = cloudEmp;
+            }
+          });
+
+          mergedHistory[period] = Object.values(employeeMap);
+        });
+
+        setRosterHistory(mergedHistory);
+        localStorage.setItem('bby_roster_history', JSON.stringify(mergedHistory));
+      }
     });
 
     // Subscribe to playbook settings
@@ -230,7 +307,47 @@ function AppContent() {
 
     // Subscribe to Floor Leader shifts
     const unsubFloorLeader = subscribeToFloorLeaderShifts((shifts) => {
-      if (shifts) setFloorLeaderShifts(shifts);
+      if (shifts) {
+        const localShifts = useStore.getState().floorLeaderShifts || [];
+        let deletedIds = [];
+        try {
+          deletedIds = JSON.parse(localStorage.getItem('bby_deleted_shifts') || '[]');
+        } catch (e) {
+          console.error(e);
+        }
+
+        // Merge lists of shifts by ID and lastUpdated
+        const shiftMap = {};
+        
+        // 1. Populate with local shifts (filtering out deleted ones)
+        localShifts.forEach(s => {
+          if (s && s.id && !deletedIds.includes(s.id)) {
+            shiftMap[s.id] = s;
+          }
+        });
+
+        // 2. Merge with cloud shifts (filtering out deleted ones)
+        shifts.forEach(cloudShift => {
+          if (!cloudShift || !cloudShift.id || deletedIds.includes(cloudShift.id)) return;
+          const localShift = shiftMap[cloudShift.id];
+          if (localShift) {
+            const localTime = localShift.lastUpdated || 0;
+            const cloudTime = cloudShift.lastUpdated || 0;
+            if (cloudTime >= localTime) {
+              shiftMap[cloudShift.id] = cloudShift;
+            }
+          } else {
+            shiftMap[cloudShift.id] = cloudShift;
+          }
+        });
+
+        const mergedShifts = Object.values(shiftMap);
+        // Sort by timestamp desc to preserve newest shifts at the top
+        mergedShifts.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+        setFloorLeaderShifts(mergedShifts);
+        localStorage.setItem('bby_floor_leader_shifts', JSON.stringify(mergedShifts));
+      }
     });
 
     // Subscribe to coaching logs sub-collection
@@ -241,9 +358,14 @@ function AppContent() {
       }
     });
  
-    // Subscribe to managers list
+    // Subscribe to managers
     const unsubManagers = subscribeToManagers((m) => {
-      if (m) setManagers(m);
+      if (m) useStore.getState().setManagers(m);
+    });
+
+    // Subscribe to daily snapshots
+    const unsubDailySnapshots = subscribeToDailySnapshots((s) => {
+      if (s) useStore.getState().setDailySnapshots(s);
     });
 
     return () => {
@@ -257,7 +379,9 @@ function AppContent() {
       if (unsubFloorLeader) unsubFloorLeader();
       if (unsubCoachingLogs) unsubCoachingLogs();
       if (unsubManagers) unsubManagers();
+      if (unsubDailySnapshots) unsubDailySnapshots();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dbConnected]);
 
   // Roster Interactions
@@ -296,8 +420,15 @@ function AppContent() {
       {/* Sidebar Navigation */}
       <nav className="sidebar">
         <div className="sidebar-logo">
-          <div className="logo-badge">BBY</div>
-          <div className="logo-text">BlueCoach<span>AI</span></div>
+          <svg viewBox="0 0 100 100" width="32" height="32" style={{ marginRight: '0.2rem', flexShrink: 0 }}>
+            <g transform="rotate(-12 50 50)">
+              <path d="M 10,25 L 75,25 L 90,50 L 75,75 L 10,75 Z" fill="#FFE000" />
+              <circle cx="22" cy="50" r="5" fill="#0b0f19" />
+              <text x="52" y="46" fontFamily="'Inter', sans-serif, Arial" fontWeight="900" fontSize="16" fill="#000" textAnchor="middle" letterSpacing="-0.5">BEST</text>
+              <text x="52" y="66" fontFamily="'Inter', sans-serif, Arial" fontWeight="900" fontSize="16" fill="#000" textAnchor="middle" letterSpacing="-0.5">BUY</text>
+            </g>
+          </svg>
+          <div className="logo-text">Floor<span>Vision</span></div>
         </div>
 
         {activeManager && (
@@ -373,6 +504,12 @@ function AppContent() {
                 onClick={() => setActiveView('floorLeader')}
               >
                 <Clock className="menu-item-icon" /> Floor Leader
+              </li>
+              <li 
+                className={`menu-item ${activeView === 'trends' ? 'active' : ''}`}
+                onClick={() => setActiveView('trends')}
+              >
+                <TrendingUp className="menu-item-icon" /> Trend Reporting
               </li>
             </>
           )}
@@ -451,133 +588,137 @@ function AppContent() {
 
       {/* Main View Display Port */}
       <main className="main-content">
-        {activeView === 'dashboard' && (
-          <Dashboard 
-            metrics={metrics}
-            recentSessions={recentSessions}
-            onNavigate={setActiveView}
-            roster={rosterHistory[activePeriod] || []}
-            followUpTasks={followUpTasks}
-            onCompleteFollowUpTask={completeFollowUpTask}
-            deptGoals={deptGoals}
-            onCoachEmployee={handleCoachEmployeeFromRoster}
-            onCreateLog={handleCreateLogFromRoster}
-            onShadowEmployee={handleShadowEmployeeFromRoster}
-            floorLeaderShifts={floorLeaderShifts}
-            coachingLogs={coachingLogs}
-            activePeriod={activePeriod}
-            rosterHistory={rosterHistory}
-            activeManager={activeManager}
-          />
-        )}
-
-        {activeView === 'shadow' && (
-          <LiveFloorShadow 
-            roster={rosterHistory[activePeriod] || []}
-            onLogCoachingSession={logCoachingSession}
-            onAddFollowUpTask={addFollowUpTask}
-            onNavigate={setActiveView}
-            preselectedEmployee={prefillShadowEmployee}
-            clearPreselectedEmployee={() => setPrefillShadowEmployee(null)}
-            playbookSettings={playbookSettings}
-            apiKey={apiKey}
-          />
-        )}
-
-        {activeView === 'roster' && (
-          <StoreRoster 
-            roster={rosterHistory[activePeriod] || []}
-            activePeriod={activePeriod}
-            rosterHistory={rosterHistory}
-            onChangePeriod={changePeriod}
-            onCoachEmployee={handleCoachEmployeeFromRoster}
-            onCreateLog={handleCreateLogFromRoster}
-            deptGoals={deptGoals}
-            onUpdateEmployeeDept={updateEmployeeDept}
-            onAddEmployee={addEmployee}
-            onEditEmployee={editEmployee}
-            onBulkImportEmployees={bulkImportEmployees}
-            onCreatePeriod={createPeriodArchive}
-            coachingLogs={coachingLogs}
-            followUpTasks={followUpTasks}
-          />
-        )}
-        
-        {activeView === 'roleplay' && (
-          <RoleplayCenter 
-            playbookSettings={playbookSettings}
-            onCompleteRoleplay={completeRoleplay}
-            customScenarios={customScenarios}
-          />
-        )}
-
-
-
-        {activeView === 'coach' && (
-          <CoachSimulator 
-            playbookSettings={playbookSettings}
-            customScenarios={customScenarios}
-            preselectedEmployee={selectedCoachingRosterEmployee}
-            clearPreselectedEmployee={() => setSelectedCoachingRosterEmployee(null)}
-            prefillBuilderData={prefillBuilderData}
-            clearPrefillBuilderData={() => setPrefillBuilderData(null)}
-            onImportScenario={importCustomScenario}
-            onLogCoachingSession={logCoachingSession}
-            coachingLogs={coachingLogs}
-            initialTab="sim"
-          />
-        )}
-
-        {activeView === 'builder' && (
-          <CoachSimulator 
-            playbookSettings={playbookSettings}
-            customScenarios={customScenarios}
-            preselectedEmployee={selectedCoachingRosterEmployee}
-            clearPreselectedEmployee={() => setSelectedCoachingRosterEmployee(null)}
-            prefillBuilderData={prefillBuilderData}
-            clearPrefillBuilderData={() => setPrefillBuilderData(null)}
-            onImportScenario={importCustomScenario}
-            onLogCoachingSession={logCoachingSession}
-            coachingLogs={coachingLogs}
-            initialTab="builder"
-          />
-        )}
-
-        {activeView === 'playbook' && (
-          <PlaybookStudio 
-            playbookSettings={playbookSettings}
-            onSaveSettings={saveSettings}
-            deptGoals={deptGoals}
-            onSaveDeptGoals={saveDeptGoals}
-            customScenarios={customScenarios}
-            onAddCustomScenario={importCustomScenario}
-            onDeleteCustomScenario={deleteCustomScenario}
-            rosterHistory={rosterHistory}
-            coachingLogs={coachingLogs}
-            followUpTasks={followUpTasks}
-            floorLeaderShifts={floorLeaderShifts}
-            managers={managers}
-            onSaveManagers={saveManagers}
-          />
-        )}
-
-        {activeView === 'floorLeader' && (
-          <FloorLeaderTracker 
-            shifts={floorLeaderShifts}
-            onSaveShift={saveFloorLeaderShift}
-            onDeleteShift={deleteFloorLeaderShift}
-            roster={rosterHistory[activePeriod] || []}
-            activeManager={activeManager}
-            onAddEmployee={addEmployee}
-          />
-        )}
-
-        {activeView === 'history' && (
-          <CoachingHistory 
-            coachingLogs={coachingLogs}
-            onDeleteLog={deleteCoachingLog}
-          />
-        )}
+        <Suspense fallback={
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ width: '50px', height: '50px', border: '4px solid rgba(255,255,255,0.1)', borderTopColor: 'var(--bby-yellow)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Loading Module...</span>
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          </div>
+        }>
+          <Routes>
+            <Route path="/" element={
+              <Dashboard 
+                metrics={metrics}
+                recentSessions={recentSessions}
+                onNavigate={setActiveView}
+                roster={rosterHistory[activePeriod] || []}
+                followUpTasks={followUpTasks}
+                onCompleteFollowUpTask={completeFollowUpTask}
+                deptGoals={deptGoals}
+                onCoachEmployee={handleCoachEmployeeFromRoster}
+                onCreateLog={handleCreateLogFromRoster}
+                onShadowEmployee={handleShadowEmployeeFromRoster}
+                floorLeaderShifts={floorLeaderShifts}
+                coachingLogs={coachingLogs}
+                activePeriod={activePeriod}
+                rosterHistory={rosterHistory}
+                activeManager={activeManager}
+              />
+            } />
+            <Route path="/shadow" element={
+              <LiveFloorShadow 
+                roster={rosterHistory[activePeriod] || []}
+                onLogCoachingSession={logCoachingSession}
+                onAddFollowUpTask={addFollowUpTask}
+                onNavigate={setActiveView}
+                preselectedEmployee={prefillShadowEmployee}
+                clearPreselectedEmployee={() => setPrefillShadowEmployee(null)}
+                playbookSettings={playbookSettings}
+                apiKey={apiKey}
+              />
+            } />
+            <Route path="/roster" element={
+              <StoreRoster 
+                roster={rosterHistory[activePeriod] || []}
+                activePeriod={activePeriod}
+                rosterHistory={rosterHistory}
+                onChangePeriod={changePeriod}
+                onCoachEmployee={handleCoachEmployeeFromRoster}
+                onCreateLog={handleCreateLogFromRoster}
+                deptGoals={deptGoals}
+                onUpdateEmployeeDept={updateEmployeeDept}
+                onAddEmployee={addEmployee}
+                onEditEmployee={editEmployee}
+                onDeleteEmployee={deleteEmployee}
+                onBulkImportEmployees={bulkImportEmployees}
+                onCreatePeriod={createPeriodArchive}
+                coachingLogs={coachingLogs}
+                followUpTasks={followUpTasks}
+                apiKey={apiKey}
+              />
+            } />
+            <Route path="/trends" element={<TrendReporting />} />
+            <Route path="/roleplay" element={
+              <RoleplayCenter 
+                playbookSettings={playbookSettings}
+                onCompleteRoleplay={completeRoleplay}
+                customScenarios={customScenarios}
+              />
+            } />
+            <Route path="/coach" element={
+              <CoachSimulator 
+                playbookSettings={playbookSettings}
+                customScenarios={customScenarios}
+                preselectedEmployee={selectedCoachingRosterEmployee}
+                clearPreselectedEmployee={() => setSelectedCoachingRosterEmployee(null)}
+                prefillBuilderData={prefillBuilderData}
+                clearPrefillBuilderData={() => setPrefillBuilderData(null)}
+                onImportScenario={importCustomScenario}
+                onLogCoachingSession={logCoachingSession}
+                coachingLogs={coachingLogs}
+                initialTab="sim"
+              />
+            } />
+            <Route path="/builder" element={
+              <CoachSimulator 
+                playbookSettings={playbookSettings}
+                customScenarios={customScenarios}
+                preselectedEmployee={selectedCoachingRosterEmployee}
+                clearPreselectedEmployee={() => setSelectedCoachingRosterEmployee(null)}
+                prefillBuilderData={prefillBuilderData}
+                clearPrefillBuilderData={() => setPrefillBuilderData(null)}
+                onImportScenario={importCustomScenario}
+                onLogCoachingSession={logCoachingSession}
+                coachingLogs={coachingLogs}
+                initialTab="builder"
+              />
+            } />
+            <Route path="/playbook" element={
+              <PlaybookStudio 
+                playbookSettings={playbookSettings}
+                onSaveSettings={saveSettings}
+                deptGoals={deptGoals}
+                onSaveDeptGoals={saveDeptGoals}
+                customScenarios={customScenarios}
+                onAddCustomScenario={importCustomScenario}
+                onDeleteCustomScenario={deleteCustomScenario}
+                rosterHistory={rosterHistory}
+                coachingLogs={coachingLogs}
+                followUpTasks={followUpTasks}
+                floorLeaderShifts={floorLeaderShifts}
+                managers={managers}
+                onSaveManagers={saveManagers}
+              />
+            } />
+            <Route path="/floorLeader" element={
+              <FloorLeaderTracker 
+                shifts={floorLeaderShifts}
+                onSaveShift={saveFloorLeaderShift}
+                onDeleteShift={deleteFloorLeaderShift}
+                roster={rosterHistory[activePeriod] || []}
+                activeManager={activeManager}
+                onAddEmployee={addEmployee}
+              />
+            } />
+            <Route path="/history" element={
+              <CoachingHistory 
+                coachingLogs={coachingLogs}
+                onDeleteLog={deleteCoachingLog}
+              />
+            } />
+            <Route path="*" element={<Dashboard metrics={metrics} recentSessions={recentSessions} onNavigate={setActiveView} roster={rosterHistory[activePeriod] || []} followUpTasks={followUpTasks} onCompleteFollowUpTask={completeFollowUpTask} deptGoals={deptGoals} onCoachEmployee={handleCoachEmployeeFromRoster} onCreateLog={handleCreateLogFromRoster} onShadowEmployee={handleShadowEmployeeFromRoster} floorLeaderShifts={floorLeaderShifts} coachingLogs={coachingLogs} activePeriod={activePeriod} rosterHistory={rosterHistory} activeManager={activeManager} />} />
+          </Routes>
+        </Suspense>
       </main>
 
       {/* Mobile-Only Bottom Navigation Bar */}
@@ -656,7 +797,7 @@ function AppContent() {
           <div>
             <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#fff' }}>App Update Available</h4>
             <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              A new version of BlueCoach AI is available. Refresh to load new sales tools and metrics.
+              A new version of FloorVision is available. Refresh to load new sales tools and metrics.
             </p>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>

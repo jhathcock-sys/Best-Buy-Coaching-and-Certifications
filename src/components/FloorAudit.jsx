@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Camera, CheckCircle, AlertCircle, RefreshCw, Sparkles, MessageSquare, AlertTriangle, FileText, Clipboard } from 'lucide-react';
+import { useState } from 'react';
+import { Camera, CheckCircle, AlertCircle, RefreshCw, Sparkles, FileText } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { auditStoreFloorGemini } from '../services/ai';
 
@@ -59,8 +59,6 @@ export default function FloorAudit() {
     // Simulate generation of a specific leader huddle script based on visual observations
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    const obsStr = auditResult.observations.join('; ');
-    const planStr = auditResult.actionPlan.join('; ');
     
     const script = `## 💬 Live Leadership Huddle Script: Visual Floor Actions
 

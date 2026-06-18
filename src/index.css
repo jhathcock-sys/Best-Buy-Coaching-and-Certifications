@@ -105,6 +105,7 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 1600px;
   margin: 0 auto;
   width: 100%;
+  min-width: 0;
 }
 
 /* Navigation Drawer */
@@ -1194,6 +1195,63 @@ input[type="checkbox"]:hover {
 @media (min-width: 1024px) {
   .floor-tracker-grid {
     grid-template-columns: 2fr 1fr;
+  }
+}
+
+/* Print Media Styles for clean paper huddle sheets and records */
+@media print {
+  body, .app-container {
+    background: #ffffff !important;
+    color: #111111 !important;
+    font-size: 11pt !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .sidebar,
+  .bottom-nav,
+  .bottom-nav-item,
+  .btn,
+  button,
+  .btn-accent,
+  .btn-secondary,
+  .btn-primary,
+  .actions,
+  .no-print,
+  nav {
+    display: none !important;
+  }
+  
+  .main-content, main {
+    margin-left: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+  
+  .glass-card, .card {
+    background: #ffffff !important;
+    border: 1px solid #cccccc !important;
+    box-shadow: none !important;
+    color: #111111 !important;
+    page-break-inside: avoid;
+    margin-bottom: 1.5rem !important;
+  }
+  
+  table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+    color: #111111 !important;
+  }
+  
+  th, td {
+    border: 1px solid #cccccc !important;
+    color: #111111 !important;
+    background: #ffffff !important;
+    padding: 6px 8px !important;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    color: #111111 !important;
   }
 }
 

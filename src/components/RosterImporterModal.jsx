@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react';
-import { Upload, X, Check, AlertCircle, FileText, ChevronRight, HelpCircle } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Upload, X, Check, AlertCircle, FileText, ChevronRight } from 'lucide-react';
 
 const FUZZY_MAP = {
   name: ['name', 'associate', 'employee', 'staff', 'member', 'associate name'],
+  employeeNumber: ['employee number', 'emp #', 'id', 'employee id', 'associate number', 'associate id', 'badge', 'a id'],
   department: ['dept', 'department', 'area', 'role', 'business group'],
   hours: ['hours', 'hrs', 'scheduled hours', 'hours worked', 'hours count', 'scheduled'],
   memberships: ['memberships', 'pm', 'plus/total', 'total', 'plus', 'pm attach', 'membership%', 'membership attach'],
@@ -125,6 +126,7 @@ export default function RosterImporterModal({ isOpen, onClose, onImport }) {
       const parsedDept = currentMappings.department !== -1 && row[currentMappings.department] ? normalizeDept(row[currentMappings.department]) : 'General Sales';
       const emp = {
         name: currentMappings.name !== -1 && row[currentMappings.name] ? row[currentMappings.name] : 'Unknown Name',
+        employeeNumber: currentMappings.employeeNumber !== -1 && row[currentMappings.employeeNumber] ? row[currentMappings.employeeNumber] : '',
         dept: parsedDept,
         hours: currentMappings.hours !== -1 && row[currentMappings.hours] ? Math.max(0, parseFloat(row[currentMappings.hours])) || 0 : 0,
         memberships: currentMappings.memberships !== -1 && row[currentMappings.memberships] ? Math.max(0, parseFloat(row[currentMappings.memberships].replace(/[^0-9.]/g, ''))) || 0 : 0,

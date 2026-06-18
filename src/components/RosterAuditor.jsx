@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Sparkles, Check, FileText, BarChart3, AlertCircle, RefreshCw, Clipboard, ArrowRight, Group, Target } from 'lucide-react';
+import { useState } from 'react';
+import { Sparkles, FileText, BarChart3, AlertCircle, RefreshCw } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { auditPerformanceWorkbookGemini } from '../services/ai';
 

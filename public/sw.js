@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bluecoach-assets-v2';
+const CACHE_NAME = 'floorvision-assets-v3';
 
 // We pre-cache the root documents so they load immediately offline
 const PRECACHE_URLS = [
@@ -47,6 +47,31 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Network-First strategy for index.html / root / navigation requests
+  const isNavigation = event.request.mode === 'navigate' || 
+                       url.pathname === '/' || 
+                       url.pathname === '/index.html';
+
+  if (isNavigation) {
+    event.respondWith(
+      fetch(event.request).then((networkResponse) => {
+        // Cache the latest index.html on success
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+        }
+        return networkResponse;
+      }).catch(() => {
+        // Offline: serve from cache
+        return caches.match(event.request);
+      })
+    );
+    return;
+  }
+
+  // Stale-While-Revalidate for other static assets
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       // Fetch latest copy from the network in background

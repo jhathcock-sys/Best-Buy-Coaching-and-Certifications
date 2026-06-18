@@ -1,35 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { Shield, Key, ChevronRight, AlertCircle, RefreshCw, X, Delete } from 'lucide-react';
+import { useState } from 'react';
+import { Shield, Delete } from 'lucide-react';
 export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected, managers = [] }) {
   const [pin, setPin] = useState('');
   const [isShaking, setIsShaking] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // Validate the PIN code when it reaches 4 digits
-  useEffect(() => {
-    if (pin.length === 4) {
-      const isManagerPin = managers.some(m => m.pin === pin);
-      const isStorePin = pin === correctPin;
-      
-      if (isManagerPin || isStorePin) {
-        setIsSuccess(true);
-        setTimeout(() => {
-          onLoginSuccess(pin);
-        }, 800);
-      } else {
-        // Shake and reset on failure
-        setIsShaking(true);
-        setTimeout(() => {
-          setIsShaking(false);
-          setPin('');
-        }, 600);
-      }
-    }
-  }, [pin, correctPin, onLoginSuccess, managers]);
-
   const handleKeyPress = (num) => {
     if (pin.length < 4 && !isSuccess) {
-      setPin(prev => prev + num);
+      const newPin = pin + num;
+      setPin(newPin);
+      
+      if (newPin.length === 4) {
+        const isManagerPin = managers.some(m => m.pin === newPin);
+        const isStorePin = newPin === correctPin;
+        
+        if (isManagerPin || isStorePin) {
+          setIsSuccess(true);
+          setTimeout(() => {
+            onLoginSuccess(newPin);
+          }, 800);
+        } else {
+          setIsShaking(true);
+          setTimeout(() => {
+            setIsShaking(false);
+            setPin('');
+          }, 600);
+        }
+      }
     }
   };
 
@@ -97,7 +94,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
             <Shield size={32} color={isSuccess ? 'var(--success)' : 'var(--bby-yellow)'} />
           </div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.35rem 0', letterSpacing: '-0.02em' }}>
-            {isSuccess ? 'Access Granted' : 'BlueCoach AI Login'}
+            {isSuccess ? 'Access Granted' : 'FloorVision Login'}
           </h2>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
             {isSuccess ? 'Initializing leadership hub...' : 'Enter your store or manager 4-digit passcode PIN'}

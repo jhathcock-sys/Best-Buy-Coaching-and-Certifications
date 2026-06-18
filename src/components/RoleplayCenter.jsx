@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { STANDARD_SCENARIOS, runOfflineSimulationStep, runGeminiSimulationStep, evaluateSessionOffline, evaluateSessionGemini } from '../services/ai';
-import { MessageSquare, ArrowLeft, RefreshCw, Send, Award, CheckCircle, Sparkles, BookOpen } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Send, CheckCircle, Sparkles, BookOpen } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, customScenarios = [] }) {

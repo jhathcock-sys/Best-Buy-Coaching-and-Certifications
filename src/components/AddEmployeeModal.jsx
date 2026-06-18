@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X, Users } from 'lucide-react';
 
 export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }) {
   const [form, setForm] = useState({
     name: '',
+    employeeNumber: '',
     dept: 'Front End',
     hours: '',
     memberships: '',
@@ -31,6 +32,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }) {
     const newEmp = {
       id: `emp-${Date.now()}`,
       name: form.name.trim(),
+      employeeNumber: form.employeeNumber.trim(),
       dept: form.dept,
       hours: parseFloat(form.hours) || 0,
       memberships: parseInt(form.memberships) || 0,
@@ -47,6 +49,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }) {
     onAddEmployee(newEmp);
     setForm({
       name: '',
+      employeeNumber: '',
       dept: 'Front End',
       hours: '',
       memberships: '',
@@ -90,6 +93,18 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }) {
                 style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" style={{ fontSize: '0.8rem' }}>Employee Number (Optional):</label>
+              <input 
+                type="text" 
+                className="form-control" 
+                placeholder="e.g. A1234567"
+                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+                value={form.employeeNumber}
+                onChange={(e) => setForm({ ...form, employeeNumber: e.target.value })}
               />
             </div>
             

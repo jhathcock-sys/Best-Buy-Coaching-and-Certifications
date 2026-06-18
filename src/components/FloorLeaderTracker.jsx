@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Clock, Check, AlertCircle, Plus, Minus, Power, Trash2, Calendar, User, CheckCircle2, XCircle, Upload, Camera, Play, Flame, Trophy, Undo } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { Clock, Plus, Minus, Power, Trash2, Calendar, User, CheckCircle2, XCircle, Upload, Flame, Trophy, Undo } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useStore } from '../store/useStore';
 import ZoneScheduler from './ZoneScheduler';
@@ -7,9 +8,11 @@ import BreakRunSheet from './BreakRunSheet';
 import ImportScheduleModal from './ImportScheduleModal';
 import FloorAudit from './FloorAudit';
 import ShiftSimulator from './ShiftSimulator';
+import FiveStarAuditor from './FiveStarAuditor';
+
 
 export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteShift, roster = [], activeManager, onAddEmployee }) {
-  const { dbConnected, apiKey } = useApp();
+  const { apiKey } = useApp();
   
   // Auto-detect if today is weekend (0=Sun, 6=Sat)
   const isTodayWeekend = () => {
@@ -17,45 +20,92 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
     return day === 0 || day === 6;
   };
 
-  // Active shift states
-  const [activeShift, setActiveShift] = useState(() => {
-    const saved = localStorage.getItem('bby_active_shift');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return null;
-  });
+  // Active shift states from Zustand store
+  const activeShift = useStore((state) => state.activeShift);
+  const setActiveShift = useStore((state) => state.setActiveShift);
 
   const [leaderName, setLeaderName] = useState(activeManager?.name || '');
   const [dailyRevenueGoal, setDailyRevenueGoal] = useState('10000');
   const [dailyAppsGoal, setDailyAppsGoal] = useState('10');
   const [dailyPmsGoal, setDailyPmsGoal] = useState('15');
+  const [preExistingRevenue, setPreExistingRevenue] = useState('0');
+  const [preExistingApps, setPreExistingApps] = useState('0');
+  const [preExistingPms, setPreExistingPms] = useState('0');
   const [isWeekend, setIsWeekend] = useState(isTodayWeekend());
   const [leaderTab, setLeaderTab] = useState('tracker');
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   // Set leader name from logged in manager
-  useEffect(() => {
+  const [prevActiveManager, setPrevActiveManager] = useState(activeManager);
+  
+  if (activeManager !== prevActiveManager) {
+    setPrevActiveManager(activeManager);
     if (activeManager) {
       setLeaderName(activeManager.name);
     }
-  }, [activeManager]);
-  const [breakForm, setBreakForm] = useState({
-    empId: '',
-    time: '12:00 PM',
-    type: '15 min Break'
-  });
+  }
+
 
   // Zustand store actions
   const editEmployee = useStore((state) => state.editEmployee);
+  const logCoachingSession = useStore((state) => state.logCoachingSession);
 
   // States for logging floor wins (credit cards and memberships)
   const [selectedEmpId, setSelectedEmpId] = useState('');
   const [winType, setWinType] = useState('pm'); // 'pm' or 'app'
+
+  // States for OCV Floor Observation Card
+  const [ocvEmpId, setOcvEmpId] = useState('');
+  const [ocvConnect, setOcvConnect] = useState(false);
+  const [ocvRecommend, setOcvRecommend] = useState(false);
+  const [ocvProtect, setOcvProtect] = useState(false);
+  const [ocvClose, setOcvClose] = useState(false);
+  const [ocvNotes, setOcvNotes] = useState('');
+  const [ocvSuccessMsg, setOcvSuccessMsg] = useState(false);
+
+  const handleLogOcvObservation = () => {
+    if (!ocvEmpId) {
+      alert("Please select an associate for the OCV Floor Observation!");
+      return;
+    }
+
+    const emp = roster.find(e => e.id === ocvEmpId);
+    if (!emp) return;
+
+    const checkedCount = (ocvConnect ? 1 : 0) + (ocvRecommend ? 1 : 0) + (ocvProtect ? 1 : 0) + (ocvClose ? 1 : 0);
+    const score = Math.round((checkedCount / 4) * 100);
+
+    const notesText = `### 30-Second OCV Floor Observation
+**Benchmarks Met:** ${checkedCount}/4 (${score}%)
+- **Connect:** ${ocvConnect ? '✅ Met' : '❌ Missed'} (warm greeting, intro, open discovery)
+- **Recommend:** ${ocvRecommend ? '✅ Met' : '❌ Missed'} (solution match, Good/Better/Best demo)
+- **Protect:** ${ocvProtect ? '✅ Met' : '❌ Missed'} (Plus/Total memberships & protection attach)
+- **Close:** ${ocvClose ? '✅ Met' : '❌ Missed'} (Best Buy Card financing pitch & survey ask)
+
+**Supervisor observations & feedback:**
+${ocvNotes || 'No specific observation notes logged.'}`;
+
+    logCoachingSession({
+      customerName: emp.name,
+      employeeId: emp.id,
+      category: 'OCV Observation',
+      score: score,
+      avatar: emp.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+      notes: notesText
+    });
+
+    setOcvSuccessMsg(true);
+    setTimeout(() => setOcvSuccessMsg(false), 3000);
+
+    // Reset OCV form
+    setOcvEmpId('');
+    setOcvConnect(false);
+    setOcvRecommend(false);
+    setOcvProtect(false);
+    setOcvClose(false);
+    setOcvNotes('');
+  };
+
 
   const getEmployeesOnShift = () => {
     if (!activeShift || !activeShift.zoneAssignments) return [];
@@ -187,14 +237,6 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
     });
   };
   
-  // Save active shift to localStorage so it survives page reloads
-  useEffect(() => {
-    if (activeShift) {
-      localStorage.setItem('bby_active_shift', JSON.stringify(activeShift));
-    } else {
-      localStorage.removeItem('bby_active_shift');
-    }
-  }, [activeShift]);
 
   const handleStartShift = (e) => {
     e.preventDefault();
@@ -211,8 +253,11 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
       dailyRevenueGoal: parseFloat(dailyRevenueGoal) || 10000,
       dailyAppsGoal: parseInt(dailyAppsGoal) || 10,
       dailyPmsGoal: parseInt(dailyPmsGoal) || 15,
+      preExistingRevenue: parseFloat(preExistingRevenue) || 0,
+      preExistingApps: parseInt(preExistingApps) || 0,
+      preExistingPms: parseInt(preExistingPms) || 0,
       hours: [
-        { hourNumber: 1, pms: 0, apps: 0, revenue: 0 }
+        { hourNumber: 1, pms: 0, apps: 0, revenue: 0, startRevenue: '', endRevenue: '' }
       ],
       zoneAssignments: {
         'Computing': [],
@@ -232,11 +277,13 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
   const handleAddHour = () => {
     if (!activeShift) return;
     const nextHour = activeShift.hours.length + 1;
+    const prevHour = activeShift.hours[activeShift.hours.length - 1];
+    const initialStart = prevHour && prevHour.endRevenue !== undefined && prevHour.endRevenue !== '' ? prevHour.endRevenue : '';
     const updated = {
       ...activeShift,
       hours: [
         ...activeShift.hours,
-        { hourNumber: nextHour, pms: 0, apps: 0, revenue: 0 }
+        { hourNumber: nextHour, pms: 0, apps: 0, revenue: 0, startRevenue: initialStart, endRevenue: '' }
       ]
     };
     setActiveShift(updated);
@@ -269,14 +316,50 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
     });
   };
 
-  const handleUpdateRevenue = (hourIndex, value) => {
+
+
+  const handleUpdateStartRevenue = (hourIndex, value) => {
     if (!activeShift) return;
-    const val = parseFloat(value) || 0;
     const updatedHours = activeShift.hours.map((h, idx) => {
       if (idx === hourIndex) {
+        const startVal = value === '' ? '' : (parseFloat(value) || 0);
+        const endVal = h.endRevenue !== undefined && h.endRevenue !== '' ? parseFloat(h.endRevenue) : '';
+        
+        let netRevenue = h.revenue || 0;
+        if (startVal !== '' && endVal !== '') {
+          netRevenue = Math.max(0, endVal - startVal);
+        }
+        
         return {
           ...h,
-          revenue: val
+          startRevenue: startVal,
+          revenue: netRevenue
+        };
+      }
+      return h;
+    });
+    setActiveShift({
+      ...activeShift,
+      hours: updatedHours
+    });
+  };
+
+  const handleUpdateEndRevenue = (hourIndex, value) => {
+    if (!activeShift) return;
+    const updatedHours = activeShift.hours.map((h, idx) => {
+      if (idx === hourIndex) {
+        const endVal = value === '' ? '' : (parseFloat(value) || 0);
+        const startVal = h.startRevenue !== undefined && h.startRevenue !== '' ? parseFloat(h.startRevenue) : '';
+        
+        let netRevenue = h.revenue || 0;
+        if (startVal !== '' && endVal !== '') {
+          netRevenue = Math.max(0, endVal - startVal);
+        }
+        
+        return {
+          ...h,
+          endRevenue: endVal,
+          revenue: netRevenue
         };
       }
       return h;
@@ -298,13 +381,14 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
     if (!activeShift) return;
     if (confirm('Are you sure you want to end your shift? This will archive your floor leading logs.')) {
       // Calculate overall statistics
-      const totalPms = activeShift.hours.reduce((sum, h) => sum + h.pms, 0);
-      const totalApps = activeShift.hours.reduce((sum, h) => sum + h.apps, 0);
-      const totalRevenue = activeShift.hours.reduce((sum, h) => sum + (parseFloat(h.revenue) || 0), 0);
-      const onTrackCount = activeShift.hours.filter(h => 
-        checkHourStatus(h.pms, h.apps, activeShift.isWeekend)
+      const hoursArray = Array.isArray(activeShift.hours) ? activeShift.hours : [];
+      const totalPms = hoursArray.reduce((sum, h) => sum + (h.pms || 0), 0) + (activeShift.preExistingPms || 0);
+      const totalApps = hoursArray.reduce((sum, h) => sum + (h.apps || 0), 0) + (activeShift.preExistingApps || 0);
+      const totalRevenue = hoursArray.reduce((sum, h) => sum + (parseFloat(h.revenue) || 0), 0) + (activeShift.preExistingRevenue || 0);
+      const onTrackCount = hoursArray.filter(h => 
+        checkHourStatus(h.pms || 0, h.apps || 0, activeShift.isWeekend)
       ).length;
-      const onTrackRatio = Math.round((onTrackCount / activeShift.hours.length) * 100);
+      const onTrackRatio = hoursArray.length > 0 ? Math.round((onTrackCount / hoursArray.length) * 100) : 0;
 
       const archivedShift = {
         ...activeShift,
@@ -312,28 +396,42 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
         totalPms,
         totalApps,
         totalRevenue,
-        totalHours: activeShift.hours.length,
+        totalHours: hoursArray.length,
         onTrackRatio
       };
 
-      onSaveShift(archivedShift);
-      setActiveShift(null);
-      setLeaderName('');
+      try {
+        if (onSaveShift) {
+          onSaveShift(archivedShift);
+        }
+      } catch (e) {
+        toast.error("Failed to archive floor leader shift.");
+        console.error("Failed to archive floor leader shift:", e);
+      } finally {
+        setActiveShift(null);
+        setLeaderName('');
+        setPreExistingRevenue('0');
+        setPreExistingApps('0');
+        setPreExistingPms('0');
+        setPreExistingPms('0');
+      }
     }
   };
 
   // Summary Metrics calculations for Active Shift
+  const hoursArray = activeShift && Array.isArray(activeShift.hours) ? activeShift.hours : [];
   const activeSummary = activeShift ? {
-    totalPms: activeShift.hours.reduce((sum, h) => sum + h.pms, 0),
-    totalApps: activeShift.hours.reduce((sum, h) => sum + h.apps, 0),
-    totalRevenue: activeShift.hours.reduce((sum, h) => sum + (parseFloat(h.revenue) || 0), 0),
-    onTrackHours: activeShift.hours.filter(h => 
-      checkHourStatus(h.pms, h.apps, activeShift.isWeekend)
+    totalPms: hoursArray.reduce((sum, h) => sum + (h.pms || 0), 0) + (activeShift.preExistingPms || 0),
+    totalApps: hoursArray.reduce((sum, h) => sum + (h.apps || 0), 0) + (activeShift.preExistingApps || 0),
+    totalRevenue: hoursArray.reduce((sum, h) => sum + (parseFloat(h.revenue) || 0), 0) + (activeShift.preExistingRevenue || 0),
+    onTrackHours: hoursArray.filter(h => 
+      checkHourStatus(h.pms || 0, h.apps || 0, activeShift.isWeekend)
     ).length,
-    onTrackRatio: Math.round((activeShift.hours.filter(h => 
-      checkHourStatus(h.pms, h.apps, activeShift.isWeekend)
-    ).length / activeShift.hours.length) * 100)
+    onTrackRatio: hoursArray.length > 0 ? Math.round((hoursArray.filter(h => 
+      checkHourStatus(h.pms || 0, h.apps || 0, activeShift.isWeekend)
+    ).length / hoursArray.length) * 100) : 0
   } : null;
+
 
   const handleAssignZone = (zone, empId) => {
     if (!activeShift) return;
@@ -601,6 +699,44 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
               </div>
             </div>
 
+            <div className="form-group" style={{ borderTop: '1px solid var(--border-glass)', paddingTop: '1.25rem' }}>
+              <label className="form-label" style={{ fontWeight: 700, marginBottom: '0.75rem', display: 'block' }}>
+                Carryover Metrics (Before Shift Started)
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '1rem' }}>
+                <div>
+                  <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Pre-existing Rev ($)</label>
+                  <input 
+                    type="number" 
+                    className="form-control" 
+                    placeholder="e.g. 1500"
+                    value={preExistingRevenue}
+                    onChange={(e) => setPreExistingRevenue(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Pre-existing CC Apps</label>
+                  <input 
+                    type="number" 
+                    className="form-control" 
+                    placeholder="e.g. 2"
+                    value={preExistingApps}
+                    onChange={(e) => setPreExistingApps(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Pre-existing PMs</label>
+                  <input 
+                    type="number" 
+                    className="form-control" 
+                    placeholder="e.g. 3"
+                    value={preExistingPms}
+                    onChange={(e) => setPreExistingPms(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
             <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem' }}>
               Start Shift Monitoring
             </button>
@@ -744,6 +880,24 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
               >
                 Shift Simulator
               </button>
+              <button
+                className="btn"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  borderBottom: leaderTab === 'survey' ? '2.5px solid var(--bby-blue)' : 'none',
+                  color: leaderTab === 'survey' ? '#fff' : 'var(--text-muted)',
+                  borderRadius: 0,
+                  padding: '0.75rem 1.25rem',
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer'
+                }}
+                onClick={() => setLeaderTab('survey')}
+              >
+                5-Star Detractor Coach
+              </button>
+
             </div>
             
             <button className="btn btn-accent" onClick={handleEndShift} style={{ padding: '0.5rem 1.25rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', color: 'var(--error)', height: '36px', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
@@ -953,29 +1107,60 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
 
                               {/* Hourly Revenue Input */}
                               <td style={{ padding: '1rem' }}>
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem' }}>
-                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
-                                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>$</span>
-                                    <input 
-                                      type="number"
-                                      className="form-control"
-                                      style={{ 
-                                        width: '90px', 
-                                        textAlign: 'center', 
-                                        padding: '0.35rem 0.5rem', 
-                                        fontSize: '0.9rem', 
-                                        background: 'rgba(11, 15, 25, 0.6)', 
-                                        border: '1px solid var(--border-glass)',
-                                        borderRadius: '6px',
-                                        color: '#fff',
-                                        margin: 0
-                                      }}
-                                      value={hour.revenue || ''}
-                                      onChange={(e) => handleUpdateRevenue(idx, e.target.value)}
-                                      placeholder="0"
-                                    />
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
+                                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.35rem', width: '150px' }}>
+                                    <div>
+                                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.15rem', textAlign: 'center' }}>Start ($)</span>
+                                      <input 
+                                        type="number"
+                                        className="form-control"
+                                        style={{ 
+                                          width: '100%', 
+                                          textAlign: 'center', 
+                                          padding: '0.25rem 0.35rem', 
+                                          fontSize: '0.8rem', 
+                                          background: 'rgba(11, 15, 25, 0.6)', 
+                                          border: '1px solid var(--border-glass)',
+                                          borderRadius: '4px',
+                                          color: '#fff',
+                                          margin: 0
+                                        }}
+                                        value={hour.startRevenue !== undefined ? hour.startRevenue : ''}
+                                        onChange={(e) => handleUpdateStartRevenue(idx, e.target.value)}
+                                        placeholder="Start"
+                                      />
+                                    </div>
+                                    <div>
+                                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.15rem', textAlign: 'center' }}>End ($)</span>
+                                      <input 
+                                        type="number"
+                                        className="form-control"
+                                        style={{ 
+                                          width: '100%', 
+                                          textAlign: 'center', 
+                                          padding: '0.25rem 0.35rem', 
+                                          fontSize: '0.8rem', 
+                                          background: 'rgba(11, 15, 25, 0.6)', 
+                                          border: '1px solid var(--border-glass)',
+                                          borderRadius: '4px',
+                                          color: '#fff',
+                                          margin: 0
+                                        }}
+                                        value={hour.endRevenue !== undefined ? hour.endRevenue : ''}
+                                        onChange={(e) => handleUpdateEndRevenue(idx, e.target.value)}
+                                        placeholder="End"
+                                      />
+                                    </div>
                                   </div>
-                                  <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.15rem' }}>
+                                  
+                                  <div style={{ display: 'flex', width: '150px', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem', padding: '0.15rem 0.35rem', background: 'rgba(255,255,255,0.02)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <span style={{ color: 'var(--text-secondary)' }}>Net:</span>
+                                    <span style={{ fontWeight: 800, color: 'var(--success)' }}>
+                                      ${(parseFloat(hour.revenue) || 0).toLocaleString([], { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                                    </span>
+                                  </div>
+
+                                  <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.05rem' }}>
                                     {['+500', '+1k', '+2k'].map(preset => {
                                       const val = preset === '+500' ? 500 : preset === '+1k' ? 1000 : 2000;
                                       return (
@@ -1001,8 +1186,9 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
                                             e.currentTarget.style.color = 'var(--text-secondary)';
                                           }}
                                           onClick={() => {
-                                            const currentRev = parseFloat(hour.revenue) || 0;
-                                            handleUpdateRevenue(idx, currentRev + val);
+                                            const currentStart = parseFloat(hour.startRevenue) || 0;
+                                            const currentEnd = parseFloat(hour.endRevenue) || currentStart || 0;
+                                            handleUpdateEndRevenue(idx, currentEnd + val);
                                           }}
                                         >
                                           {preset}
@@ -1180,7 +1366,119 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
                   </div>
                 </div>
 
+                {/* 30-Second OCV Floor Observation Card */}
+                <div className="glass-card" style={{ padding: '1.5rem' }}>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#fff' }}>
+                    ⏱️ 30-Second OCV Floor Observation
+                  </h3>
+                  <p style={{ fontSize: '0.725rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+                    Observe behavior on the fly. Score out of 4 benchmarks.
+                  </p>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <div className="form-group" style={{ marginBottom: '0.5rem' }}>
+                      <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Select Associate:</label>
+                      <select 
+                        className="form-control"
+                        style={{ background: '#0e1220', fontSize: '0.85rem', height: '38px', width: '100%' }}
+                        value={ocvEmpId}
+                        onChange={(e) => setOcvEmpId(e.target.value)}
+                      >
+                        <option value="">-- Select Associate --</option>
+                        {(() => {
+                          const onShift = getEmployeesOnShift();
+                          const offShift = roster.filter(emp => !onShift.some(os => os.id === emp.id));
+                          return (
+                            <>
+                              {onShift.length > 0 && (
+                                <optgroup label="Associates On Shift">
+                                  {onShift.map(emp => (
+                                    <option key={emp.id} value={emp.id}>{emp.name} ({emp.dept || 'Floor'})</option>
+                                  ))}
+                                </optgroup>
+                              )}
+                              <optgroup label="Other Roster Associates">
+                                {offShift.map(emp => (
+                                  <option key={emp.id} value={emp.id}>{emp.name} ({emp.dept || 'Floor'})</option>
+                                ))}
+                              </optgroup>
+                            </>
+                          );
+                        })()}
+                      </select>
+                    </div>
+
+                    {/* Checkbox Benchmarks */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', background: 'rgba(0,0,0,0.15)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.775rem', color: '#fff' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={ocvConnect} 
+                          onChange={(e) => setOcvConnect(e.target.checked)} 
+                          style={{ accentColor: 'var(--bby-blue)' }}
+                        />
+                        <span><strong>Connect</strong> (Greeting & discovery)</span>
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.775rem', color: '#fff' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={ocvRecommend} 
+                          onChange={(e) => setOcvRecommend(e.target.checked)} 
+                          style={{ accentColor: 'var(--bby-blue)' }}
+                        />
+                        <span><strong>Recommend</strong> (Solution matching)</span>
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.775rem', color: '#fff' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={ocvProtect} 
+                          onChange={(e) => setOcvProtect(e.target.checked)} 
+                          style={{ accentColor: 'var(--bby-blue)' }}
+                        />
+                        <span><strong>Protect</strong> (Membership & GSP attach)</span>
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.775rem', color: '#fff' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={ocvClose} 
+                          onChange={(e) => setOcvClose(e.target.checked)} 
+                          style={{ accentColor: 'var(--bby-blue)' }}
+                        />
+                        <span><strong>Close</strong> (Financing card & survey ask)</span>
+                      </label>
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: '0.25rem' }}>
+                      <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Micro Observations / Notes:</label>
+                      <textarea
+                        className="form-control"
+                        rows={2}
+                        placeholder="Quick coaching feedback note..."
+                        value={ocvNotes}
+                        onChange={(e) => setOcvNotes(e.target.value)}
+                        style={{ fontSize: '0.775rem', background: '#0e1220' }}
+                      />
+                    </div>
+
+                    <button 
+                      className="btn btn-primary"
+                      style={{ padding: '0.6rem', fontSize: '0.825rem', fontWeight: 700, width: '100%' }}
+                      onClick={handleLogOcvObservation}
+                      disabled={!ocvEmpId}
+                    >
+                      Log Floor Observation
+                    </button>
+
+                    {ocvSuccessMsg && (
+                      <div style={{ color: 'var(--success)', fontSize: '0.75rem', textAlign: 'center', marginTop: '0.25rem', fontWeight: 600 }}>
+                        ✅ OCV Observation logged successfully!
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 {/* Leaderboard: Hot on the Floor */}
+
                 <div className="glass-card" style={{ padding: '1.5rem' }}>
                   <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#fff' }}>
                     <Flame size={18} color="var(--error)" /> Hot on the Floor
@@ -1332,6 +1630,11 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
           {leaderTab === 'sim' && (
             <ShiftSimulator roster={roster} />
           )}
+
+          {leaderTab === 'survey' && (
+            <FiveStarAuditor roster={roster} />
+          )}
+
 
         </div>
       )}

@@ -27,7 +27,6 @@ export default function PlaybookStudio({
     setIsRunningDiagnostics(true);
     setDiagnosticsLogs([]);
     
-    const logs = [];
     const addLog = (msg, delay) => {
       return new Promise((resolve) => {
         setTimeout(() => {
@@ -70,11 +69,13 @@ export default function PlaybookStudio({
   const [customSystemPrompt, setCustomSystemPrompt] = useState(playbookSettings.customSystemPrompt || '');
   const [storePin, setStorePin] = useState(playbookSettings.storePin || '1234');
 
-  React.useEffect(() => {
+  const [prevStorePin, setPrevStorePin] = useState(playbookSettings.storePin);
+  if (playbookSettings.storePin !== prevStorePin) {
+    setPrevStorePin(playbookSettings.storePin);
     if (playbookSettings.storePin) {
       setStorePin(playbookSettings.storePin);
     }
-  }, [playbookSettings.storePin]);
+  }
   
   const [selectedDept, setSelectedDept] = useState('Front End');
 
@@ -251,14 +252,13 @@ export default function PlaybookStudio({
       setScenCardObj('');
     }
   };
-  const [editedGoals, setEditedGoals] = useState({ ...deptGoals });
 
   // Firebase Cloud Configuration States
   const [firebaseConfig, setFirebaseConfig] = useState(() => {
     try {
       const saved = localStorage.getItem('bby_firebase_config');
       if (saved) return JSON.parse(saved);
-    } catch(e) {}
+    } catch(e) { console.error('Failed to parse firebase config', e); }
     return {
       apiKey: '',
       authDomain: '',
@@ -268,31 +268,51 @@ export default function PlaybookStudio({
       appId: ''
     };
   });
+  const [prevDeptGoals, setPrevDeptGoals] = useState(deptGoals);
+  const [editedGoals, setEditedGoals] = useState(deptGoals);
 
-  React.useEffect(() => {
+  if (deptGoals !== prevDeptGoals) {
+    setPrevDeptGoals(deptGoals);
     setEditedGoals({ ...deptGoals });
-  }, [deptGoals]);
+  }
 
   const deptKeys = React.useMemo(() => Object.keys(deptGoals || {}), [deptGoals]);
 
   const handleGoalChange = (metric, val) => {
-    const isTypeField = metric.endsWith('Type');
-    const processedVal = isTypeField ? val : (parseFloat(val) || 0);
     setEditedGoals(prev => ({
       ...prev,
       [selectedDept]: {
-        ...prev[selectedDept],
-        [metric]: processedVal
+        ...(prev[selectedDept] || {}),
+        [metric]: val
       }
     }));
   };
 
   const handleSaveGoals = () => {
     if (onSaveDeptGoals) {
-      onSaveDeptGoals(editedGoals);
+      // Parse goals back to floats before writing to store/DB
+      const parsedGoals = {};
+      Object.keys(editedGoals || {}).forEach(dept => {
+        const deptObj = editedGoals[dept] || {};
+        parsedGoals[dept] = { ...deptObj };
+        
+        const numFields = ['memberships', 'creditCards', 'warranty', 'surveys', 'rph', 'basket', 'm365', 'audio'];
+        numFields.forEach(field => {
+          if (deptObj[field] !== undefined) {
+            if (deptObj[field] === '') {
+              parsedGoals[dept][field] = 0;
+            } else {
+              parsedGoals[dept][field] = parseFloat(deptObj[field]) || 0;
+            }
+          }
+        });
+      });
+
+      onSaveDeptGoals(parsedGoals);
       alert(`${selectedDept} performance goals updated successfully!`);
     }
   };
+
 
   const [allowedPhrases, setAllowedPhrases] = useState(playbookSettings.allowedPhrases || [
     'My Best Buy Plus', 'My Best Buy Total', 'Geek Squad Protection', 'AppleCare+'
@@ -459,7 +479,6 @@ export default function PlaybookStudio({
                 alignItems: 'center',
                 gap: '0.5rem',
                 padding: '0.6rem 1.2rem',
-                border: 'none',
                 borderRadius: '12px',
                 background: isActive ? 'rgba(0, 70, 190, 0.15)' : 'transparent',
                 border: isActive ? '1px solid rgba(0, 70, 190, 0.3)' : '1px solid transparent',
@@ -573,10 +592,10 @@ export default function PlaybookStudio({
                   />
                   <div>
                     <span style={{ fontSize: '0.95rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--bby-yellow)' }}>
-                      Premium Pro: Gemini 3.1 Pro (Secure server-side API proxy) <Key size={12} color="var(--bby-yellow)" />
+                      Premium Pro: Gemini 3.1 Pro <Key size={12} color="var(--bby-yellow)" />
                     </span>
                     <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.15rem', lineHeight: 1.4 }}>
-                      Unlocks Google's flagship reasoning model for high-fidelity Grow coaching logs and advanced dialogue auditing. Evaluates soft skills (empathy, rapport, active listening). No browser API key required.
+                      Unlocks Google's flagship reasoning model for high-fidelity Grow coaching logs and advanced dialogue auditing. Evaluates soft skills (empathy, rapport, active listening). Requires a Google AI Studio API key.
                     </p>
                   </div>
                 </label>
@@ -1026,7 +1045,7 @@ export default function PlaybookStudio({
                       <input 
                         type="number" 
                         className="form-control"
-                        value={editedGoals[selectedDept]?.memberships || 0}
+                        value={editedGoals[selectedDept]?.memberships !== undefined ? editedGoals[selectedDept].memberships : ''}
                         onChange={(e) => handleGoalChange('memberships', e.target.value)}
                         placeholder="Target value"
                         style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
@@ -1055,7 +1074,7 @@ export default function PlaybookStudio({
                       <input 
                         type="number" 
                         className="form-control"
-                        value={editedGoals[selectedDept]?.creditCards || 0}
+                        value={editedGoals[selectedDept]?.creditCards !== undefined ? editedGoals[selectedDept].creditCards : ''}
                         onChange={(e) => handleGoalChange('creditCards', e.target.value)}
                         placeholder="Target value"
                         style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
@@ -1071,7 +1090,7 @@ export default function PlaybookStudio({
                       type="number" 
                       step="0.1"
                       className="form-control"
-                      value={editedGoals[selectedDept]?.warranty || 0}
+                      value={editedGoals[selectedDept]?.warranty !== undefined ? editedGoals[selectedDept].warranty : ''}
                       onChange={(e) => handleGoalChange('warranty', e.target.value)}
                       style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
                     />
@@ -1082,7 +1101,7 @@ export default function PlaybookStudio({
                       type="number" 
                       step="0.1"
                       className="form-control"
-                      value={editedGoals[selectedDept]?.surveys || 0}
+                      value={editedGoals[selectedDept]?.surveys !== undefined ? editedGoals[selectedDept].surveys : ''}
                       onChange={(e) => handleGoalChange('surveys', e.target.value)}
                       style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
                     />
@@ -1096,7 +1115,7 @@ export default function PlaybookStudio({
                 <input 
                   type="number" 
                   className="form-control"
-                  value={editedGoals[selectedDept]?.rph || 0}
+                  value={editedGoals[selectedDept]?.rph !== undefined ? editedGoals[selectedDept].rph : ''}
                   onChange={(e) => handleGoalChange('rph', e.target.value)}
                   style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
                 />
@@ -1109,7 +1128,7 @@ export default function PlaybookStudio({
                     <input 
                       type="number" 
                       className="form-control"
-                      value={editedGoals[selectedDept]?.basket || 0}
+                      value={editedGoals[selectedDept]?.basket !== undefined ? editedGoals[selectedDept].basket : ''}
                       onChange={(e) => handleGoalChange('basket', e.target.value)}
                       style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
                     />
@@ -1121,7 +1140,7 @@ export default function PlaybookStudio({
                         type="number" 
                         step="0.1"
                         className="form-control"
-                        value={editedGoals[selectedDept]?.m365 || 0}
+                        value={editedGoals[selectedDept]?.m365 !== undefined ? editedGoals[selectedDept].m365 : ''}
                         onChange={(e) => handleGoalChange('m365', e.target.value)}
                         style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
                       />
@@ -1134,7 +1153,7 @@ export default function PlaybookStudio({
                         type="number" 
                         step="0.1"
                         className="form-control"
-                        value={editedGoals[selectedDept]?.audio || 0}
+                        value={editedGoals[selectedDept]?.audio !== undefined ? editedGoals[selectedDept].audio : ''}
                         onChange={(e) => handleGoalChange('audio', e.target.value)}
                         style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
                       />
@@ -1146,6 +1165,7 @@ export default function PlaybookStudio({
               <button className="btn btn-primary" style={{ width: '100%', padding: '0.5rem', fontSize: '0.8rem' }} onClick={handleSaveGoals}>
                 Save {selectedDept} Targets
               </button>
+
             </div>
           </div>
         </div>
@@ -1420,7 +1440,7 @@ export default function PlaybookStudio({
                 <input 
                   type="text" 
                   className="form-control" 
-                  placeholder="e.g. bluecoach-bby-894"
+                  placeholder="e.g. floorvision-bby-894"
                   style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                   value={firebaseConfig.projectId}
                   onChange={(e) => setFirebaseConfig({ ...firebaseConfig, projectId: e.target.value })}

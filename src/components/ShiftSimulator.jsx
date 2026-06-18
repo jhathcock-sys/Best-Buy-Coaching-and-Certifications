@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Play, Sparkles, RefreshCw, BarChart3, AlertCircle, FileText, CheckCircle2, Star, DollarSign, Award, Users } from 'lucide-react';
+import { useState } from 'react';
+import { Play, Sparkles, RefreshCw, AlertCircle, FileText, Star, Award, Users } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { runStoreShiftSimulationGemini } from '../services/ai';
 

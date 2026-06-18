@@ -3,10 +3,15 @@ export function calculateCVI(employee, rosterHistory, activePeriod) {
   
   const sortedPeriods = Object.keys(rosterHistory).sort((a, b) => {
     const parsePeriod = (p) => {
-      const [month, year] = p.split(' ');
+      if (!p || typeof p !== 'string') return new Date(0);
+      const parts = p.trim().split(/\s+/);
+      const month = parts[0] || 'Jan';
+      const yearStr = parts[1] || '2026';
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      const monthIdx = months.findIndex(m => month.startsWith(m)) || 0;
-      return new Date(parseInt(year), monthIdx);
+      const monthIdx = months.findIndex(m => month.toLowerCase().startsWith(m.toLowerCase()));
+      const safeMonthIdx = monthIdx === -1 ? 0 : monthIdx;
+      const parsedYear = parseInt(yearStr) || 2026;
+      return new Date(parsedYear, safeMonthIdx);
     };
     return parsePeriod(a) - parsePeriod(b);
   });

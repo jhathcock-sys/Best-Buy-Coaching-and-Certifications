@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { X } from 'lucide-react';
 
 export default function PerformanceWizardModal({ 
@@ -6,8 +6,7 @@ export default function PerformanceWizardModal({
   onClose, 
   employee, 
   onSave, 
-  activePeriod, 
-  deptGoals 
+  activePeriod 
 }) {
   const [currentEditStep, setCurrentEditStep] = useState(1);
   const [editForm, setEditForm] = useState({
@@ -28,7 +27,10 @@ export default function PerformanceWizardModal({
 
   const DEPARTMENTS = ['Front End', 'General Sales', 'Appliances', 'Computing', 'Mobile', 'Home Theatre', 'Geek Squad'];
 
-  useEffect(() => {
+  const [prevEmployee, setPrevEmployee] = useState(employee);
+
+  if (employee !== prevEmployee) {
+    setPrevEmployee(employee);
     if (employee) {
       setCurrentEditStep(1);
       setEditForm({
@@ -47,7 +49,7 @@ export default function PerformanceWizardModal({
         gap: employee.gap || 'None'
       });
     }
-  }, [employee]);
+  }
 
   if (!isOpen || !employee) return null;
 

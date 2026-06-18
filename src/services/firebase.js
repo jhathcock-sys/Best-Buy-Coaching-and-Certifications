@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore, enableIndexedDbPersistence, doc, onSnapshot, setDoc, getDoc, collection, addDoc, query, orderBy, limit, deleteDoc, getDocs } from 'firebase/firestore';
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, onSnapshot, setDoc, getDoc, collection, addDoc, query, orderBy, limit, deleteDoc, getDocs } from 'firebase/firestore';
 
 let app = null;
 let db = null;
@@ -43,15 +43,10 @@ export const initFirebase = (customConfig = null) => {
     } else {
       app = getApp();
     }
-    db = getFirestore(app);
-
-    // Enable offline local database caching and synchronization
-    enableIndexedDbPersistence(db).catch((err) => {
-      if (err.code === 'failed-precondition') {
-        console.warn('Firestore persistence failed: Multiple tabs open.');
-      } else if (err.code === 'unimplemented') {
-        console.warn('Firestore persistence failed: Browser not supported.');
-      }
+    
+    // Enable offline local database caching and synchronization with the modern API
+    db = initializeFirestore(app, {
+      localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
     });
 
     return db;
@@ -148,6 +143,37 @@ export const saveActivePeriodToCloud = async (activePeriod) => {
     return true;
   } catch (e) {
     console.error('Failed to save activePeriod to cloud:', e);
+    return false;
+  }
+};
+
+// Subscribe to Daily Snapshots (Trend Reporting)
+export const subscribeToDailySnapshots = (onUpdate) => {
+  if (!db) return null;
+  try {
+    const colRef = collection(db, 'stores', 'store-1', 'dailySnapshots');
+    return onSnapshot(colRef, (snap) => {
+      const snapshots = {};
+      snap.forEach((doc) => {
+        snapshots[doc.id] = doc.data().metrics || [];
+      });
+      onUpdate(snapshots);
+    });
+  } catch (e) {
+    console.error('Failed to subscribe to dailySnapshots collection:', e);
+    return null;
+  }
+};
+
+// Write Daily Snapshot to Cloud
+export const saveDailySnapshotToCloud = async (dateKey, metrics) => {
+  if (!db) return false;
+  try {
+    const docRef = doc(db, 'stores', 'store-1', 'dailySnapshots', dateKey);
+    await setDoc(docRef, { metrics }, { merge: true });
+    return true;
+  } catch (e) {
+    console.error('Failed to save daily snapshot to cloud:', e);
     return false;
   }
 };

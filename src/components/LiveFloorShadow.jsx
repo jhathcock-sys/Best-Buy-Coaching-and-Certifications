@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ShieldCheck, ChevronLeft, ChevronRight, Check, Clipboard, Calendar, Users, AlertCircle } from 'lucide-react';
 import { generateCoachingLogGemini } from '../services/ai';
 
@@ -17,15 +17,17 @@ export default function LiveFloorShadow({
   const [department, setDepartment] = useState('General Sales');
   const [isGenerating, setIsGenerating] = useState(false);
 
-  useEffect(() => {
+  const [prevPreselectedEmployee, setPrevPreselectedEmployee] = useState(preselectedEmployee);
+
+  if (preselectedEmployee !== prevPreselectedEmployee) {
+    setPrevPreselectedEmployee(preselectedEmployee);
     if (preselectedEmployee) {
       setSelectedEmpId(preselectedEmployee.id || '');
-      const timer = setTimeout(() => {
+      setTimeout(() => {
         if (clearPreselectedEmployee) clearPreselectedEmployee();
       }, 50);
-      return () => clearTimeout(timer);
     }
-  }, [preselectedEmployee]);
+  }
   
   // DISC Checklist States
   const [checklist, setChecklist] = useState({
@@ -162,7 +164,7 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
     }
 
     setIsGenerating(true);
-    let logText = '';
+    let logText;
 
     try {
       if (playbookSettings?.useGemini && apiKey?.trim().length > 10) {

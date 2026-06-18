@@ -1,9 +1,61 @@
-import React, { useMemo, useState } from 'react';
-import { Award, TrendingUp, Compass, ShieldCheck, CreditCard, Star, DollarSign, ArrowUpRight, MessageSquare, Play, ClipboardList, Check, AlertCircle, Sparkles } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { TrendingUp, Compass, ShieldCheck, CreditCard, Star, DollarSign, ArrowUpRight, MessageSquare, Play, ClipboardList, Check, AlertCircle, Sparkles } from 'lucide-react';
 import { calculateCVI } from '../store/cviHelper';
+import { useStore } from '../store/useStore';
+
+// Circular Gauge Helper
+const CircularGauge = ({ value, max = 100, label, prefix = "", suffix = "%", color, icon: Icon, description }) => {
+  const percentage = Math.min((value / max) * 100, 100);
+  const radius = 46;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+  return (
+    <div 
+      className="glass-card metric-card" 
+      style={{ 
+        transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease',
+        cursor: 'pointer' 
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-6px)';
+        e.currentTarget.style.boxShadow = `0 12px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.02), 0 0 15px ${color}20`;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = 'none';
+      }}
+    >
+      <div className="metric-circle-container">
+        <svg className="metric-svg" viewBox="0 0 120 120" width="120" height="120">
+          <circle className="metric-circle-bg" cx="60" cy="60" r={radius} />
+          <circle 
+            className="metric-circle-fill" 
+            cx="60" 
+            cy="60" 
+            r={radius} 
+            stroke={color}
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
+            strokeLinecap="round"
+            style={{ filter: `drop-shadow(0 0 5px ${color}a0)` }}
+          />
+        </svg>
+        <div className="metric-val" style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', textShadow: `0 0 10px ${color}50` }}>
+          {prefix && <span style={{ fontSize: '0.95rem', opacity: 0.8, marginRight: '1px' }}>{prefix}</span>}
+          <span style={{ fontSize: value >= 1000 ? '1.25rem' : '1.55rem' }}>{value}</span>
+          {suffix && <span style={{ fontSize: '0.85rem', opacity: 0.8, marginLeft: '1px' }}>{suffix}</span>}
+        </div>
+      </div>
+      <div className="metric-label" style={{ fontWeight: 700, color: '#fff', fontSize: '0.9rem' }}>{label}</div>
+      <div className="metric-sub" style={{ fontSize: '0.75rem', marginTop: '0.15rem' }}>{description}</div>
+      <Icon style={{ color: color, position: 'absolute', top: '1rem', right: '1rem', opacity: 0.15, width: 22, height: 22 }} />
+    </div>
+  );
+};
 
 export default function Dashboard({ 
-  metrics, 
+
   recentSessions, 
   onNavigate, 
   roster = [], 
@@ -21,6 +73,53 @@ export default function Dashboard({
 }) {
   const [rankMetric, setRankMetric] = useState('memberships');
   const [chartMetric, setChartMetric] = useState('memberships');
+  const dailySnapshots = useStore(state => state.dailySnapshots);
+
+  const calculatedMetrics = useMemo(() => {
+    if (!roster || roster.length === 0) return { memberships: 0, creditCards: 0, warranty: 0, surveys: 0, rph: 0 };
+    
+    let totalMemberships = 0;
+    let totalCreditCards = 0;
+    let sumWarranty = 0;
+    let sumSurveys = 0;
+    
+    let totalRev = 0;
+    let totalHours = 0;
+    
+    let countWarranty = 0;
+    let countSurveys = 0;
+
+    roster.forEach(emp => {
+      totalMemberships += (emp.memberships || 0);
+      totalCreditCards += (emp.creditCards || 0);
+      
+      if (emp.warranty > 0) {
+        sumWarranty += emp.warranty;
+        countWarranty++;
+      }
+      if (emp.surveys > 0) {
+        sumSurveys += emp.surveys;
+        countSurveys++;
+      }
+      
+      const hours = emp.hours || 0;
+      const rph = emp.rph || 0;
+      totalHours += hours;
+      totalRev += (hours * rph);
+    });
+
+    const avgWarranty = countWarranty > 0 ? (sumWarranty / countWarranty) : 0;
+    const avgSurveys = countSurveys > 0 ? (sumSurveys / countSurveys) : 0;
+    const avgRph = totalHours > 0 ? (totalRev / totalHours) : 0;
+
+    return {
+      memberships: totalMemberships,
+      creditCards: totalCreditCards,
+      warranty: Number(avgWarranty.toFixed(1)),
+      surveys: Number(avgSurveys.toFixed(1)),
+      rph: Math.round(avgRph)
+    };
+  }, [roster]);
 
   // 1. Focus 5 Shift Alerts calculation
   const activeFocus5Alerts = useMemo(() => {
@@ -110,7 +209,7 @@ export default function Dashboard({
 
   const chartData = useMemo(() => {
     const isMemb = chartMetric === 'memberships';
-    const currentVal = isMemb ? (metrics?.memberships || 52) : (metrics?.creditCards || 4);
+    const currentVal = isMemb ? (calculatedMetrics?.memberships || 0) : (calculatedMetrics?.creditCards || 0);
     
     const w1 = isMemb ? 42 : Math.max(1, currentVal - 3);
     const w2 = isMemb ? 47 : Math.max(2, currentVal - 1);
@@ -132,7 +231,7 @@ export default function Dashboard({
     const areaPath = `${linePath} L 440 170 L 80 170 Z`;
 
     return { points, linePath, areaPath };
-  }, [metrics, chartMetric]);
+  }, [calculatedMetrics, chartMetric]);
 
   const { points, linePath, areaPath } = chartData;
 
@@ -150,98 +249,110 @@ export default function Dashboard({
       })
       .slice(0, 5);
   }, [roster, rankMetric]);
-  // Circular Gauge Helper
-  const CircularGauge = ({ value, max = 100, label, prefix = "", suffix = "%", color, icon: Icon, description }) => {
-    const percentage = Math.min((value / max) * 100, 100);
-    const radius = 46;
-    const circumference = 2 * Math.PI * radius;
-    const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
-    return (
-      <div 
-        className="glass-card metric-card" 
-        style={{ 
-          transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease',
-          cursor: 'pointer' 
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-6px)';
-          e.currentTarget.style.boxShadow = `0 12px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.02), 0 0 15px ${color}20`;
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = 'none';
-        }}
-      >
-        <div className="metric-circle-container">
-          <svg className="metric-svg" viewBox="0 0 120 120" width="120" height="120">
-            <circle className="metric-circle-bg" cx="60" cy="60" r={radius} />
-            <circle 
-              className="metric-circle-fill" 
-              cx="60" 
-              cy="60" 
-              r={radius} 
-              stroke={color}
-              strokeDasharray={circumference}
-              strokeDashoffset={strokeDashoffset}
-              strokeLinecap="round"
-              style={{ filter: `drop-shadow(0 0 5px ${color}a0)` }}
-            />
-          </svg>
-          <div className="metric-val" style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', textShadow: `0 0 10px ${color}50` }}>
-            {prefix && <span style={{ fontSize: '0.95rem', opacity: 0.8, marginRight: '1px' }}>{prefix}</span>}
-            <span style={{ fontSize: value >= 1000 ? '1.25rem' : '1.55rem' }}>{value}</span>
-            {suffix && <span style={{ fontSize: '0.85rem', opacity: 0.8, marginLeft: '1px' }}>{suffix}</span>}
-          </div>
-        </div>
-        <div className="metric-label" style={{ fontWeight: 700, color: '#fff', fontSize: '0.9rem' }}>{label}</div>
-        <div className="metric-sub" style={{ fontSize: '0.75rem', marginTop: '0.15rem' }}>{description}</div>
-        <Icon style={{ color: color, position: 'absolute', top: '1rem', right: '1rem', opacity: 0.15, width: 22, height: 22 }} />
-      </div>
-    );
-  };
-
-  // Get active suggestions based on metric thresholds
+  // Get active suggestions based on metric thresholds and week-over-week trends
   const suggestions = useMemo(() => {
     const list = [];
-    if (metrics.memberships < 60) {
+    
+    // 1. Proactive Trend Anomaly Detection
+    if (dailySnapshots && Object.keys(dailySnapshots).length > 0 && roster && roster.length > 0) {
+      const sortedDates = Object.keys(dailySnapshots).sort((a, b) => new Date(b) - new Date(a));
+      const today = new Date();
+      let comparisonSnap = null;
+      
+      // Find a snapshot from ~7 days ago
+      for (const dateStr of sortedDates) {
+        const d = new Date(dateStr);
+        const diffDays = (today - d) / (1000 * 60 * 60 * 24);
+        if (diffDays >= 5 && diffDays <= 14) {
+          comparisonSnap = dailySnapshots[dateStr];
+          break;
+        }
+      }
+      
+      // Fallback to oldest snapshot if we have at least 2 but none are 7 days old
+      if (!comparisonSnap && sortedDates.length >= 2) {
+        comparisonSnap = dailySnapshots[sortedDates[sortedDates.length - 1]];
+      }
+
+      if (comparisonSnap) {
+        roster.forEach(emp => {
+          const pastEmp = comparisonSnap.find(e => e.id === emp.id || e.name === emp.name);
+          if (!pastEmp) return;
+
+          const checkDrop = (metricKey, label) => {
+            const currentVal = emp[metricKey] || 0;
+            const pastVal = pastEmp[metricKey] || 0;
+            
+            if (pastVal > 0) {
+              const dropPercent = ((pastVal - currentVal) / pastVal) * 100;
+              // Trigger alert if metric dropped by >= 15% and past value was meaningful
+              if (dropPercent >= 15 && pastVal >= (metricKey === 'warranty' ? 5 : metricKey === 'surveys' ? 3 : 500)) {
+                list.push({
+                  id: `trend-${emp.id}-${metricKey}`,
+                  type: 'warning',
+                  text: `🚨 ${emp.name}'s ${label} dropped by ${Math.round(dropPercent)}% compared to last week (from ${pastVal}${metricKey === 'warranty' ? '%' : ''} down to ${currentVal}${metricKey === 'warranty' ? '%' : ''}). Assign a coaching shadow.`,
+                  actionLabel: `Shadow ${emp.name.split(' ')[0]}`,
+                  navTarget: 'shadow'
+                });
+              }
+            }
+          };
+
+          // We only check percentage/average metrics for week-over-week drops, since raw counts (apps/memberships) are cumulative over the month
+          checkDrop('warranty', 'Protection Attach');
+          checkDrop('surveys', 'Customer 5-Star Index');
+          checkDrop('rph', 'Revenue Per Hour');
+        });
+      }
+    }
+
+    // 2. Store-Wide Metric Insights
+    if (!calculatedMetrics) return list;
+
+    if (calculatedMetrics.memberships < 60) {
       list.push({
         id: 1,
         type: 'warning',
-        text: `Membership attach rate is currently ${metrics.memberships}% (Goal: 65%). Practice pitching My Best Buy Total early in discovery.`,
+        text: `Membership attach count is currently ${calculatedMetrics.memberships}. Practice pitching My Best Buy Total early in discovery.`,
         actionLabel: 'Total Support Roleplay',
         navTarget: 'roleplay'
       });
     }
-    if (metrics.warranty < 15) {
+
+    if (calculatedMetrics.warranty < 15) {
       list.push({
         id: 2,
-        type: 'info',
-        text: `Geek Squad Protection attach rate is ${metrics.warranty}% (Goal: 18%). Try the OLED TV setup scenario to practice warranty attach.`,
+        type: 'warning',
+        text: `Geek Squad Protection attach rate is ${calculatedMetrics.warranty}% (Goal: 18%). Try the OLED TV setup scenario to practice warranty attach.`,
         actionLabel: 'HT OLED Roleplay',
         navTarget: 'roleplay'
       });
     }
-    if (metrics.surveys < 4.8) {
+
+    if (calculatedMetrics.surveys < 4.8) {
       list.push({
         id: 3,
         type: 'warning',
-        text: `Customer 5-Star Survey Index is ${metrics.surveys === 0.2 ? '0' : metrics.surveys}. Try building stronger rapport at the beginning of interactions.`,
+        text: `Customer 5-Star Survey Index is ${calculatedMetrics.surveys === 0.2 ? '0' : calculatedMetrics.surveys}. Try building stronger rapport at the beginning of interactions.`,
         actionLabel: 'Connect Training',
         navTarget: 'roleplay'
       });
     }
+
     if (list.length === 0) {
       list.push({
-        id: 0,
+        id: 'default-success',
         type: 'success',
         text: 'All core sales metrics are currently meeting or exceeding store goals. Excellent job maintaining Best Buy standards!',
         actionLabel: 'Start Practice',
         navTarget: 'roleplay'
       });
     }
+
     return list;
-  }, [metrics]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [calculatedMetrics]);
 
   // Compute Automated Coaching Recommendations
   const coachingRecommendations = useMemo(() => {
@@ -329,6 +440,7 @@ export default function Dashboard({
 
         if (dates.length > 0) {
           const mostRecentTime = Math.max(...dates);
+          // eslint-disable-next-line react-hooks/purity
           const diffMs = Date.now() - mostRecentTime;
           lastCoachedDaysAgo = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
         }
@@ -536,24 +648,24 @@ export default function Dashboard({
       {/* Core Metrics Grid */}
       <div className="metrics-grid">
         <CircularGauge 
-          value={metrics.memberships} 
-          label="Membership Attach" 
-          suffix="%"
+          value={calculatedMetrics.memberships} 
+          label="Total Memberships" 
+          suffix=""
           color="var(--bby-blue)" 
           icon={Compass} 
           description="Plus & Total Memberships"
         />
         <CircularGauge 
-          value={metrics.creditCards} 
-          max={10}
+          value={calculatedMetrics.creditCards} 
+          max={Math.max(10, calculatedMetrics.creditCards + 5)}
           label="BBY Credit Cards" 
           suffix=""
           color="var(--bby-yellow)" 
           icon={CreditCard} 
-          description="Submitted Applications (Goal: 10)"
+          description="Submitted Applications"
         />
         <CircularGauge 
-          value={metrics.warranty} 
+          value={calculatedMetrics.warranty} 
           label="Protection Attach" 
           suffix="%"
           color="var(--success)" 
@@ -561,7 +673,7 @@ export default function Dashboard({
           description="Geek Squad Protection"
         />
         <CircularGauge 
-          value={metrics.surveys} 
+          value={calculatedMetrics.surveys} 
           max={5}
           label="5-Star Surveys" 
           suffix="/5"
@@ -570,14 +682,14 @@ export default function Dashboard({
           description="Customer Survey Index"
         />
         <CircularGauge 
-          value={metrics.rph} 
+          value={calculatedMetrics.rph} 
           max={1200}
           label="RPH" 
           prefix="$"
           suffix=""
           color="var(--bby-blue)" 
           icon={DollarSign} 
-          description="Revenue Per Hour (Goal: $1,200)"
+          description="Store Average Revenue Per Hour"
         />
         <CircularGauge 
           value={recentSessions ? recentSessions.length : 0} 
@@ -722,8 +834,8 @@ export default function Dashboard({
         
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
-          gap: '1.25rem' 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', 
+          gap: '1rem' 
         }}>
           {Object.entries(shadowingHeatmapData).map(([dept, count]) => {
             const hue = Math.min(count * 45, 180);
@@ -736,7 +848,7 @@ export default function Dashboard({
                   background: `linear-gradient(135deg, ${cellColor}, rgba(255,255,255,0.02))`, 
                   border: `1px solid ${borderColor}`,
                   borderRadius: '12px',
-                  padding: '1.25rem',
+                  padding: '1rem 0.75rem',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
@@ -744,7 +856,8 @@ export default function Dashboard({
                   gap: '0.25rem',
                   transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                   cursor: 'pointer',
-                  minHeight: '100px'
+                  minHeight: '100px',
+                  textAlign: 'center'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-4px)';
@@ -755,10 +868,10 @@ export default function Dashboard({
                   e.currentTarget.style.boxShadow = 'none';
                 }}
               >
-                <span style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.7)', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                <span style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.7)', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', wordBreak: 'break-word', lineHeight: '1.2' }}>
                   {dept}
                 </span>
-                <span style={{ fontSize: '2rem', fontWeight: 800, color: '#fff', fontFamily: 'var(--font-heading)', margin: '0.25rem 0' }}>
+                <span style={{ fontSize: '2rem', fontWeight: 800, color: '#fff', fontFamily: 'var(--font-heading)', margin: '0.15rem 0' }}>
                   {count}
                 </span>
                 <span style={{ fontSize: '0.7rem', color: 'rgba(255, 255, 255, 0.5)' }}>

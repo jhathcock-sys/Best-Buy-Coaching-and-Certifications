@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Trash2, Volume2, BookOpen, Clock, ArrowLeft, Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Trash2, Volume2, BookOpen, Clock } from 'lucide-react';
 
 export default function CoachingHistory({ coachingLogs = [], onDeleteLog }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -39,7 +39,7 @@ export default function CoachingHistory({ coachingLogs = [], onDeleteLog }) {
     const cleanText = text
       .replace(/## 📋 /g, '')
       .replace(/\* \*\*(.*?)\*\*/g, '$1')
-      .replace(/\-\-\-/g, '')
+      .replace(/---/g, '')
       .replace(/### 🔍 /g, '')
       .replace(/\*/g, '');
 

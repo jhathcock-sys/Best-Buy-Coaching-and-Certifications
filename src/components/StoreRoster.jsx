@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Users, Search, AlertTriangle, CheckCircle, TrendingUp, Sparkles, Clock, HelpCircle, Sliders, BarChart3 } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Users, Search, AlertTriangle, CheckCircle, Clock, HelpCircle, Sliders } from 'lucide-react';
 import AddEmployeeModal from './AddEmployeeModal';
 import PerformanceWizardModal from './PerformanceWizardModal';
 import RosterImporterModal from './RosterImporterModal';
 import AssociateProfileModal from './AssociateProfileModal';
 import { calculateCVI } from '../store/cviHelper';
 import RosterAuditor from './RosterAuditor';
+import RentsDueAuditor from './RentsDueAuditor';
 
 
 const getDeptStyle = (dept) => {
@@ -39,6 +40,7 @@ export default function StoreRoster({
   rosterHistory = {}, 
   onChangePeriod, 
   onEditEmployee, 
+  onDeleteEmployee,
   onCreatePeriod, 
   onBulkImportEmployees, 
   coachingLogs = [],
@@ -51,7 +53,8 @@ export default function StoreRoster({
     'Mobile': { memberships: 6000, membershipsType: 'Dollars', creditCards: 8000, creditCardsType: 'Dollars', warranty: 8.0, surveys: 1.0, rph: 700 },
     'Home Theatre': { memberships: 10000, membershipsType: 'Dollars', creditCards: 12000, creditCardsType: 'Dollars', warranty: 11.0, surveys: 1.0, rph: 800, basket: 250, audio: 35.0 },
     'Geek Squad': { memberships: 5000, membershipsType: 'Dollars', creditCards: 15000, creditCardsType: 'Dollars', warranty: 12.0, surveys: 1.0, rph: 500 }
-  } 
+  },
+  apiKey
 }) {
   const [selectedProfileEmployee, setSelectedProfileEmployee] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -78,7 +81,7 @@ export default function StoreRoster({
   // View options & layout configuration settings
   const [activeSubView, setActiveSubView] = useState('list');
   const [showViewSettings, setShowViewSettings] = useState(false);
-  const [isDense, setIsDense] = useState(false);
+  const [isDense, setIsDense] = useState(window.innerWidth < 1024);
   const [visibleCols, setVisibleCols] = useState({
     hours: true,
     dept: true,
@@ -105,17 +108,10 @@ export default function StoreRoster({
 
   const DEPARTMENTS = ['All', 'Front End', 'General Sales', 'Appliances', 'Computing', 'Mobile', 'Home Theatre', 'Geek Squad'];
 
-  const DEFAULT_GOALS = {
-    memberships: 8.0, membershipsType: 'Hours', 
-    creditCards: 12.5, creditCardsType: 'Hours', 
-    warranty: 11.0, surveys: 1.0, rph: 640,
-    basket: 150, m365: 60.0, audio: 35.0
-  };
-
   // Audits employee metrics dynamically based on their department goals!
   const getMetricClass = (val, type, dept, emp) => {
-    const goals = (deptGoals && (deptGoals[dept] || deptGoals['Front End'])) || DEFAULT_GOALS;
-    const target = goals[type] !== undefined ? goals[type] : (DEFAULT_GOALS[type] || 0);
+    const goals = (deptGoals && (deptGoals[dept] || deptGoals['Front End'])) || {};
+    const target = goals[type] !== undefined ? goals[type] : 0;
     const typeKey = type + 'Type';
     const isHoursType = goals[typeKey] === 'Hours';
     const isDollarsType = goals[typeKey] === 'Dollars';
@@ -172,7 +168,7 @@ export default function StoreRoster({
   };
 
   const getPaceText = (val, type, dept, emp) => {
-    const goals = (deptGoals && (deptGoals[dept] || deptGoals['Front End'])) || DEFAULT_GOALS;
+    const goals = (deptGoals && (deptGoals[dept] || deptGoals['Front End'])) || {};
     const typeKey = type + 'Type';
     const isHoursType = goals[typeKey] === 'Hours';
     const isDollarsType = goals[typeKey] === 'Dollars';
@@ -193,7 +189,6 @@ export default function StoreRoster({
   };
 
   const renderMetricCell = (val, type, dept, emp, displayValue) => {
-    const goals = (deptGoals && (deptGoals[dept] || deptGoals['Front End'])) || DEFAULT_GOALS;
     
     const isDeptMetric = (
       type !== 'basket' && type !== 'm365' && type !== 'audio'
@@ -205,7 +200,7 @@ export default function StoreRoster({
     
     if (!isDeptMetric) {
       return (
-        <td style={{ padding: isDense ? '0.45rem 0.5rem' : '0.85rem 1rem', textAlign: 'center', opacity: 0.15 }}>
+        <td style={{ padding: isDense ? '0.45rem 0.5rem' : '0.85rem 0.75rem', textAlign: 'center', opacity: 0.15 }}>
           <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>—</span>
         </td>
       );
@@ -238,7 +233,7 @@ export default function StoreRoster({
     const showPace = val > 0 && paceText && paceText !== 'No pace';
 
     return (
-      <td style={{ padding: isDense ? '0.45rem 0.5rem' : '0.85rem 1rem', textAlign: 'center' }}>
+      <td style={{ padding: isDense ? '0.45rem 0.5rem' : '0.85rem 0.75rem', textAlign: 'center' }}>
         <div style={{ 
           display: 'inline-flex', 
           flexDirection: 'column', 
@@ -270,7 +265,6 @@ export default function StoreRoster({
   };
 
   const renderMobileMetricBadge = (val, type, dept, emp, label, displayValue) => {
-    const goals = (deptGoals && (deptGoals[dept] || deptGoals['Front End'])) || DEFAULT_GOALS;
     
     const isDeptMetric = (
       type !== 'basket' && type !== 'm365' && type !== 'audio'
@@ -440,7 +434,7 @@ export default function StoreRoster({
                 boxShadow: 'none'
               }}
             >
-              {Object.keys(rosterHistory).map(p => (
+              {Object.keys(rosterHistory || {}).map(p => (
                 <option key={p} value={p} style={{ background: '#0b0f19', color: '#fff' }}>{p}</option>
               ))}
             </select>
@@ -483,6 +477,23 @@ export default function StoreRoster({
           onClick={() => setActiveSubView('audit')}
         >
           AI Metrics Auditor
+        </button>
+        <button
+          className="btn"
+          style={{
+            background: 'transparent',
+            border: 'none',
+            borderBottom: activeSubView === 'rentsDue' ? '2.5px solid var(--bby-blue)' : 'none',
+            color: activeSubView === 'rentsDue' ? '#fff' : 'var(--text-muted)',
+            borderRadius: 0,
+            padding: '0.75rem 1.25rem',
+            fontWeight: 700,
+            fontSize: '0.85rem',
+            cursor: 'pointer'
+          }}
+          onClick={() => setActiveSubView('rentsDue')}
+        >
+          Rents Due Auditor
         </button>
       </div>
 
@@ -711,18 +722,18 @@ export default function StoreRoster({
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
             <thead>
               <tr style={{ background: 'rgba(16, 24, 48, 0.7)', borderBottom: '1px solid var(--border-glass)', color: 'var(--text-secondary)' }}>
-                <th style={{ padding: isDense ? '0.75rem 1.5rem' : '1.25rem 1.5rem', fontWeight: 600 }}>Associate</th>
-                {visibleCols.hours && <th style={{ padding: isDense ? '0.75rem 1rem' : '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}><Clock size={14} style={{ display: 'inline', marginRight: '0.25rem', verticalAlign: 'text-bottom' }} />Hours</th>}
-                {visibleCols.dept && <th style={{ padding: isDense ? '0.75rem 1.5rem' : '1.25rem 1.5rem', fontWeight: 600 }}>Department</th>}
-                {visibleCols.memberships && <th style={{ padding: isDense ? '0.75rem 1rem' : '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>Memberships</th>}
-                {visibleCols.creditCards && <th style={{ padding: isDense ? '0.75rem 1rem' : '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>BBY Cards</th>}
-                {visibleCols.warranty && <th style={{ padding: isDense ? '0.75rem 1rem' : '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>Warranty/GSP</th>}
-                {visibleCols.surveys && <th style={{ padding: isDense ? '0.75rem 1rem' : '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>5 Star</th>}
-                {visibleCols.rph && <th style={{ padding: isDense ? '0.75rem 1rem' : '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>RPH</th>}
-                {visibleCols.basket && <th style={{ padding: isDense ? '0.75rem 1rem' : '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>Basket ($)</th>}
-                {visibleCols.attach && <th style={{ padding: isDense ? '0.75rem 1rem' : '1.25rem 1rem', fontWeight: 600, textAlign: 'center' }}>Dept Attach</th>}
-                {visibleCols.status && <th style={{ padding: isDense ? '0.75rem 1.5rem' : '1.25rem 1.5rem', fontWeight: 600 }}>Status</th>}
-                <th style={{ padding: isDense ? '0.75rem 1.5rem' : '1.25rem 1.5rem', fontWeight: 600, textAlign: 'right' }}>Actions</th>
+                <th style={{ padding: isDense ? '0.5rem 1rem' : '1rem 1rem', fontWeight: 600 }}>Associate</th>
+                {visibleCols.hours && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}><Clock size={14} style={{ display: 'inline', marginRight: '0.25rem', verticalAlign: 'text-bottom' }} />Hours</th>}
+                {visibleCols.dept && <th style={{ padding: isDense ? '0.5rem 1rem' : '1rem 1rem', fontWeight: 600 }}>Department</th>}
+                {visibleCols.memberships && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>Memberships</th>}
+                {visibleCols.creditCards && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>BBY Cards</th>}
+                {visibleCols.warranty && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>Warranty/GSP</th>}
+                {visibleCols.surveys && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>5 Star</th>}
+                {visibleCols.rph && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>RPH</th>}
+                {visibleCols.basket && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center', whiteSpace: 'nowrap' }}>Basket ($)</th>}
+                {visibleCols.attach && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>Dept Attach</th>}
+                {visibleCols.status && <th style={{ padding: isDense ? '0.5rem 1rem' : '1rem 1rem', fontWeight: 600 }}>Status</th>}
+                <th style={{ padding: isDense ? '0.5rem 1rem' : '1rem 1rem', fontWeight: 600, textAlign: 'right', whiteSpace: 'nowrap', width: '320px' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -753,7 +764,7 @@ export default function StoreRoster({
                       onMouseEnter={(e) => e.currentTarget.style.background = hoverBg}
                       onMouseLeave={(e) => e.currentTarget.style.background = rowBg}
                     >
-                      <td style={{ padding: isDense ? '0.45rem 1.5rem' : '1rem 1.5rem', fontWeight: 600, color: '#fff' }}>
+                      <td style={{ padding: isDense ? '0.45rem 1rem' : '0.85rem 1rem', fontWeight: 600, color: '#fff' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', alignItems: 'flex-start' }}>
                           <span 
                             style={{ cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'rgba(255,255,255,0.3)', fontSize: '0.925rem', fontWeight: 700 }}
@@ -763,6 +774,11 @@ export default function StoreRoster({
                           >
                             {emp.name}
                           </span>
+                          {emp.employeeNumber && (
+                            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'monospace', marginTop: '-0.15rem' }}>
+                              ID: {emp.employeeNumber}
+                            </span>
+                          )}
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
                             {(() => {
                               const cvi = calculateCVI(emp, rosterHistory, activePeriod);
@@ -816,12 +832,12 @@ export default function StoreRoster({
                         </div>
                       </td>
                       {visibleCols.hours && (
-                        <td style={{ padding: isDense ? '0.45rem 1rem' : '1rem 1rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                        <td style={{ padding: isDense ? '0.45rem 0.5rem' : '0.85rem 0.75rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
                           {emp.hours} hrs
                         </td>
                       )}
                       {visibleCols.dept && (
-                        <td style={{ padding: isDense ? '0.25rem 1.5rem' : '0.5rem 1.5rem' }}>
+                        <td style={{ padding: isDense ? '0.25rem 1rem' : '0.5rem 1rem' }}>
                           {(() => {
                             const deptStyle = getDeptStyle(emp.dept);
                             return (
@@ -869,11 +885,11 @@ export default function StoreRoster({
                         emp.dept === 'Computing' ? `${emp.m365 || 0}% M365` : emp.dept === 'Home Theatre' ? `${emp.audio || 0}% Audio` : '—'
                       )}
                       {visibleCols.status && (
-                        <td style={{ padding: isDense ? '0.45rem 1.5rem' : '1rem 1.5rem' }}>
+                        <td style={{ padding: isDense ? '0.45rem 1rem' : '0.85rem 1rem' }}>
                           {getStatusBadge(gap)}
                         </td>
                       )}
-                      <td style={{ padding: isDense ? '0.45rem 1.5rem' : '1rem 1.5rem', textAlign: 'right' }}>
+                      <td style={{ padding: isDense ? '0.45rem 1rem' : '0.85rem 1rem', textAlign: 'right', whiteSpace: 'nowrap', width: '320px' }}>
                         <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
                           <button 
                             className="btn btn-secondary" 
@@ -896,6 +912,19 @@ export default function StoreRoster({
                           >
                             Log Builder
                           </button>
+                          {onDeleteEmployee && (
+                            <button 
+                              className="btn btn-danger" 
+                              style={{ padding: isDense ? '0.25rem 0.45rem' : '0.35rem 0.6rem', fontSize: '0.75rem' }}
+                              onClick={() => {
+                                if (confirm(`Are you sure you want to delete ${emp.name} from the roster?`)) {
+                                  onDeleteEmployee(emp.id);
+                                }
+                              }}
+                            >
+                              Delete
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -1003,6 +1032,7 @@ export default function StoreRoster({
                       </h4>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
                         {emp.hours} hrs worked
+                        {emp.employeeNumber && <span style={{ marginLeft: '0.5rem', fontFamily: 'monospace' }}>• ID: {emp.employeeNumber}</span>}
                       </div>
                     </div>
                     {getStatusBadge(gap)}
@@ -1097,6 +1127,19 @@ export default function StoreRoster({
                     >
                       Log Builder
                     </button>
+                    {onDeleteEmployee && (
+                      <button 
+                        className="btn btn-danger" 
+                        style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', textAlign: 'center' }}
+                        onClick={() => {
+                          if (confirm(`Are you sure you want to delete ${emp.name} from the roster?`)) {
+                            onDeleteEmployee(emp.id);
+                          }
+                        }}
+                      >
+                        Delete
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -1152,6 +1195,16 @@ export default function StoreRoster({
 
       {activeSubView === 'audit' && (
         <RosterAuditor roster={roster} />
+      )}
+
+      {activeSubView === 'rentsDue' && (
+        <RentsDueAuditor 
+          roster={roster} 
+          activePeriod={activePeriod}
+          rosterHistory={rosterHistory}
+          onBulkImportEmployees={onBulkImportEmployees}
+          apiKey={apiKey}
+        />
       )}
 
       {/* Performance Wizard Modal */}

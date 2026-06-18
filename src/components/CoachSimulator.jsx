@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+/* eslint-disable no-useless-escape */
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { toast } from 'react-hot-toast';
 import { 
   EMPLOYEE_SCENARIOS, 
   runOfflineEmployeeCoachingStep, 
@@ -9,7 +11,10 @@ import {
   runGeminiEmployeeCoachingStep,
   evaluateCoachingSessionGemini
 } from '../services/ai';
-import { Users, Sparkles, MessageSquare, ArrowLeft, RefreshCw, Send, HelpCircle, FileText, Check, Copy, AlertCircle, Volume2, Mic, MicOff } from 'lucide-react';
+import { 
+  Users, Sparkles, ArrowLeft, RefreshCw, Send, HelpCircle, 
+  FileText, Check, Copy, Volume2, Mic, MicOff 
+} from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function CoachSimulator({ 
@@ -35,6 +40,7 @@ export default function CoachSimulator({
   const [outputViewMode, setOutputViewMode] = useState('grow'); // 'grow' or 'huddle'
   
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setActiveTab(initialTab);
   }, [initialTab]);
   
@@ -154,7 +160,7 @@ export default function CoachSimulator({
       .replace(/## 📋 /g, '')
       .replace(/## 💬 /g, '')
       .replace(/\* \*\*(.*?)\*\*/g, '$1')
-      .replace(/\-\-\-/g, '')
+      .replace(/---/g, '')
       .replace(/### 🔍 /g, '')
       .replace(/\*/g, '');
       
@@ -214,6 +220,7 @@ export default function CoachSimulator({
       };
 
       recognition.onerror = (event) => {
+        toast.error("Speech recognition error.");
         console.error("Speech recognition error:", event.error);
         setIsListening(false);
       };
@@ -225,6 +232,7 @@ export default function CoachSimulator({
       recognitionRef.current = recognition;
       recognition.start();
     } catch (err) {
+      toast.error("Failed to start speech recognition.");
       console.error("Failed to start speech recognition:", err);
       setIsListening(false);
     }
@@ -306,7 +314,9 @@ export default function CoachSimulator({
         coachingGoal: `Coaching plan for ${preselectedEmployee.name} based on retail metrics.`
       };
       
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveTab('sim');
+      // eslint-disable-next-line
       startCoaching(dynamicScen);
       
       const timer = setTimeout(() => {
@@ -314,6 +324,7 @@ export default function CoachSimulator({
       }, 50);
       return () => clearTimeout(timer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preselectedEmployee]);
 
   // Handle prefilled Coaching Log Builder from Store Roster
@@ -327,7 +338,7 @@ export default function CoachSimulator({
         if (gap.includes('survey')) return '5-Star Surveys';
         return 'RPH';
       };
-
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setBuilderForm({
         employeeName: prefillBuilderData.name || '',
         what: '',
@@ -349,6 +360,7 @@ export default function CoachSimulator({
       }, 50);
       return () => clearTimeout(timer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prefillBuilderData]);
 
   const loadTemplate = (type) => {
@@ -450,6 +462,7 @@ export default function CoachSimulator({
         }));
       }
     } catch (e) {
+      toast.error("Cloud generation failed, falling back to offline mode.");
       console.error(e);
       alert("An error occurred during cloud generation. Falling back to local offline generation.");
       const localData = generateCoachingLogLocal(
@@ -587,6 +600,7 @@ Let's crush it! Let me know if you have any questions or need me to jump in and 
         });
       }
     } catch (err) {
+      toast.error("Evaluation generation error.");
       console.error("Evaluation error:", err);
       const evalResult = evaluateCoachingSession(historyObj);
       setEvaluation(evalResult);
@@ -690,6 +704,7 @@ Let's crush it! Let me know if you have any questions or need me to jump in and 
         nextState = runOfflineEmployeeCoachingStep(currentMsg, historyObj, selectedEmployee);
       }
     } catch (err) {
+      toast.error("Coaching generation error.");
       console.error("Coaching step generation error:", err);
       // Fallback in case of error
       const historyObj = {

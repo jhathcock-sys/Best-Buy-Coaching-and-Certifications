@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { Upload, X, Check, AlertCircle, FileText, Camera, ChevronRight } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { X, Check, AlertCircle, FileText, Camera } from 'lucide-react';
 import { parseScheduleImage } from '../services/ai';
 
 // standard department/zone mapping helper
@@ -192,7 +192,7 @@ export default function ImportScheduleModal({ isOpen, onClose, roster = [], onIm
   const [parsedItems, setParsedItems] = useState([]); // Array of raw extracted rows
   const [reviews, setReviews] = useState([]); // Array of resolved objects
   const [fileName, setFileName] = useState('');
-  const [imagePreview, setImagePreview] = useState(null);
+
   const [errorMsg, setErrorMsg] = useState('');
   
   // CSV specific states
@@ -218,7 +218,7 @@ export default function ImportScheduleModal({ isOpen, onClose, roster = [], onIm
     const reader = new FileReader();
     reader.onload = async (e) => {
       const base64Url = e.target.result;
-      setImagePreview(base64Url);
+
       
       const base64Data = base64Url.split(',')[1];
       const mimeType = file.type;
@@ -487,8 +487,8 @@ export default function ImportScheduleModal({ isOpen, onClose, roster = [], onIm
     const finalBreakSchedule = [];
 
     activeReviews.forEach(rev => {
-      let empId = rev.matchedEmpId;
-      let empName = rev.originalName;
+      let empId;
+      let empName;
 
       if (rev.matchedEmpId === 'create_new') {
         // Create new employee dynamically with unique ID and default parameters

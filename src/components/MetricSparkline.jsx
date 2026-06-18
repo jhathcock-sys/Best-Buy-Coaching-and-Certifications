@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 export default function MetricSparkline({ dataPoints = [], color = 'var(--bby-blue)' }) {
   if (!dataPoints || dataPoints.length === 0) {

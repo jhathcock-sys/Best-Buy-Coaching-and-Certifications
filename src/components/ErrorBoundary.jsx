@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { AlertTriangle, RotateCcw } from 'lucide-react';
 
 export default class ErrorBoundary extends Component {
@@ -18,7 +18,10 @@ export default class ErrorBoundary extends Component {
 
   handleReset = () => {
     this.setState({ hasError: false, error: null, errorInfo: null });
-    // Reset path/view or clear cache if needed, or simply reload page
+    // Reset cache if it's a corruption issue
+    localStorage.removeItem('bby_active_shift');
+    localStorage.removeItem('bby_roster_history');
+    localStorage.removeItem('bby_active_period');
     window.location.reload();
   };
 
@@ -63,7 +66,7 @@ export default class ErrorBoundary extends Component {
             </h2>
             
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.5, marginBottom: '1.5rem' }}>
-              BlueCoach AI encountered a rendering exception. This could be due to malformed local cache or database sync conflicts.
+              FloorVision encountered a rendering exception. This could be due to malformed local cache or database sync conflicts.
             </p>
 
             {this.state.error && (

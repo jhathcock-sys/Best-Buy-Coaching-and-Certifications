@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Clock, Trash2 } from 'lucide-react';
 
 export default function BreakRunSheet({ breakSchedule = [], roster = [], onAddBreak, onToggleBreak, onDeleteBreak }) {

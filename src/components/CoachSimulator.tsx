@@ -28,6 +28,7 @@ export default function CoachSimulator({
   onImportScenario, 
   onLogCoachingSession,
   coachingLogs = [],
+  roster = [],
   initialTab = 'sim'
 }) {
   const { apiKey, setActiveView } = useApp();
@@ -892,9 +893,15 @@ Let's crush it! Let me know if you have any questions or need me to jump in and 
                     type="text" 
                     className="form-control" 
                     placeholder="Enter Employee Name"
+                    list="roster-employee-names"
                     value={builderForm.employeeName}
                     onChange={(e) => setBuilderForm({ ...builderForm, employeeName: e.target.value })}
                   />
+                  <datalist id="roster-employee-names">
+                    {roster && roster.map(emp => (
+                      <option key={emp.id || emp.name} value={emp.name} />
+                    ))}
+                  </datalist>
                 </div>
                 <div className="form-group">
                   <label className="form-label">Metric Gap Focus:</label>

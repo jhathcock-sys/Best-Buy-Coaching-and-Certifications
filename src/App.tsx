@@ -621,6 +621,7 @@ function AppContent() {
                 onImportScenario={importCustomScenario}
                 onLogCoachingSession={logCoachingSession}
                 coachingLogs={coachingLogs}
+                roster={rosterHistory[activePeriod] || []}
                 initialTab="sim"
               />
             } />

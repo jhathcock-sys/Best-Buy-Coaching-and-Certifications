@@ -1,4 +1,4 @@
-const CACHE_NAME = 'floorvision-assets-v3';
+const CACHE_NAME = 'floorvision-assets-v4';
 
 // We pre-cache the root documents so they load immediately offline
 const PRECACHE_URLS = [

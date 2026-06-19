@@ -1,16 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
-@import "tailwindcss";
-
-@theme {
-  --color-brand-blue: #0046be;
-  --color-brand-blue-hover: #003796;
-  --color-brand-yellow: #ffe600;
-  --color-brand-yellow-hover: #e6ce00;
-  
-  --color-neutral-950: #060913;
-  --color-neutral-900: #0b0f19;
-  --color-neutral-800: #1e2538;
-}
 
 :root {
   /* Color System */

@@ -3,6 +3,8 @@ import { Employee } from '../types/index';
 import { useStore } from '../store/useStore';
 import DashboardHeader from './Dashboard/DashboardHeader';
 import DashboardAlerts from './Dashboard/DashboardAlerts';
+import DashboardSystemAlerts from './Dashboard/DashboardSystemAlerts';
+import DashboardCoachingEngine from './Dashboard/DashboardCoachingEngine';
 import DashboardTrendChart from './Dashboard/DashboardTrendChart';
 import DashboardLeaderboard from './Dashboard/DashboardLeaderboard';
 import MetricCards from './Dashboard/MetricCards';
@@ -148,6 +150,15 @@ export default function Dashboard({
         shadowingHeatmapData={shadowingHeatmapData} 
         rosterHistory={rosterHistory}
         activePeriod={activePeriod}
+        activeManager={activeManager}
+      />
+
+      <DashboardSystemAlerts 
+        roster={roster} 
+        rosterHistory={rosterHistory} 
+        calculatedMetrics={calculatedMetrics} 
+        activePeriod={activePeriod} 
+        onNavigate={onNavigate} 
       />
 
       <DashboardAlerts 
@@ -164,9 +175,18 @@ export default function Dashboard({
         recentSessions={recentSessions} 
       />
 
-      <DashboardTrendChart 
-        calculatedMetrics={calculatedMetrics} 
-      />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
+        <DashboardCoachingEngine 
+          roster={roster} 
+          recentSessions={recentSessions} 
+          deptGoals={deptGoals} 
+          onShadowEmployee={onShadowEmployee} 
+          onCoachEmployee={onCoachEmployee} 
+        />
+        <DashboardTrendChart 
+          calculatedMetrics={calculatedMetrics} 
+        />
+      </div>
 
       <DashboardLeaderboard 
         roster={roster} 

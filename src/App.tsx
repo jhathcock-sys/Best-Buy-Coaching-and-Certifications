@@ -23,7 +23,6 @@ import {
   subscribeToMetrics,
   subscribeToFollowUpTasks,
   subscribeToFloorLeaderShifts,
-  pushOfflineDataToCloud,
   subscribeToCoachingLogs,
   subscribeToManagers,
   subscribeToDailySnapshots
@@ -163,34 +162,6 @@ function AppContent() {
   useEffect(() => {
     if (!dbConnected || !isAuthenticated || !storeId) return;
 
-    // Seed existing offline data from localStorage to cloud if cloud database is empty!
-    const seedCloud = async () => {
-      const savedSettings = localStorage.getItem('bby_playbook_settings');
-      const savedGoals = localStorage.getItem('bby_dept_goals');
-      const savedHistory = localStorage.getItem('bby_roster_history');
-      const savedPeriod = localStorage.getItem('bby_active_period');
-      const savedSessions = localStorage.getItem('bby_recent_sessions');
-      const savedMetrics = localStorage.getItem('bby_metrics');
-      const savedFollowUp = localStorage.getItem('bby_follow_up_tasks');
-      const savedFloorLeaderShifts = localStorage.getItem('bby_floor_leader_shifts');
-      const savedCoachingLogs = localStorage.getItem('bby_coaching_logs');
-      const savedManagers = localStorage.getItem('bby_managers');
- 
-      await pushOfflineDataToCloud(storeId, {
-        activePeriod: savedPeriod || 'May 2026',
-        rosterHistory: safeJsonParse(savedHistory, null),
-        playbookSettings: safeJsonParse(savedSettings, null),
-        deptGoals: safeJsonParse(savedGoals, null),
-        recentSessions: safeJsonParse(savedSessions, null),
-        metrics: safeJsonParse(savedMetrics, null),
-        followUpTasks: safeJsonParse(savedFollowUp, null),
-        floorLeaderShifts: safeJsonParse(savedFloorLeaderShifts, null),
-        coachingLogs: safeJsonParse(savedCoachingLogs, null),
-        managers: safeJsonParse(savedManagers, null)
-      });
-    };
-    seedCloud();
-
     // Subscribe to active period
     const unsubPeriod = subscribeToActivePeriod(storeId, (p) => {
       if (p) setActivePeriod(p);
@@ -199,78 +170,7 @@ function AppContent() {
     // Subscribe to roster history
     const unsubRoster = subscribeToRosterHistory(storeId, (h) => {
       if (h) {
-        const localHistory = useStore.getState().rosterHistory || {};
-        const mergedHistory = { ...localHistory };
-
-        let deletedEmpIds = [];
-        let deletedEmpNames = [];
-        try {
-          deletedEmpIds = JSON.parse(localStorage.getItem('bby_deleted_employees') || '[]');
-          deletedEmpNames = JSON.parse(localStorage.getItem('bby_deleted_employee_names') || '[]');
-        } catch (e) {
-          console.error(e);
-        }
-
-        // Union of all period keys from local and cloud
-        const allPeriods = new Set([
-          ...Object.keys(localHistory),
-          ...Object.keys(h)
-        ]);
-
-        allPeriods.forEach(period => {
-          const cloudList = h[period] || [];
-          const localList = localHistory[period] || [];
-
-          // If period only exists locally (not in cloud), keep it
-          if (!h[period]) {
-            return;
-          }
-
-          // Merge lists of employees for this period
-          const employeeMap = {};
-          
-          // 1. Populate with local list
-          localList.forEach(emp => {
-            if (emp && emp.name) {
-              const key = emp.name.toLowerCase().trim();
-              if (!deletedEmpIds.includes(emp.id) && !deletedEmpNames.includes(key)) {
-                employeeMap[key] = emp;
-              }
-            }
-          });
-
-          // 2. Merge with cloud list based on lastUpdated timestamp
-          cloudList.forEach(cloudEmp => {
-            if (!cloudEmp || !cloudEmp.name) return;
-            const key = cloudEmp.name.toLowerCase().trim();
-            if (deletedEmpIds.includes(cloudEmp.id) || deletedEmpNames.includes(key)) {
-              return;
-            }
-            const localEmp = employeeMap[key];
-
-            if (localEmp) {
-              const localTime = localEmp.lastUpdated || 0;
-              const cloudTime = cloudEmp.lastUpdated || 0;
-
-              if (cloudTime >= localTime) {
-                employeeMap[key] = {
-                  ...localEmp,
-                  ...cloudEmp,
-                  id: localEmp.id || cloudEmp.id
-                };
-              } else {
-                // Local is newer, keep localEmp
-              }
-            } else {
-              employeeMap[key] = cloudEmp;
-            }
-          });
-
-          mergedHistory[period] = Object.values(employeeMap);
-        });
-
-        setRosterHistory(mergedHistory);
-        localStorage.setItem('bby_roster_history', JSON.stringify(mergedHistory));
+        setRosterHistory(h);
       }
     });
 

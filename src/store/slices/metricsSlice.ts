@@ -8,66 +8,23 @@ import {
   saveDeptGoalsToCloud,
   saveDailySnapshotToCloud
 } from '../../services/firebase';
-import { safeJsonParse, INITIAL_ROSTER, DEFAULT_DEPT_GOALS } from './constants';
+import { INITIAL_ROSTER, DEFAULT_DEPT_GOALS } from './constants';
+
+const getCurrentPeriodStr = () => {
+  const d = new Date();
+  return `${d.toLocaleString('default', { month: 'long' })} ${d.getFullYear()}`;
+};
 
 export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> = (set, get) => {
-  const initialActivePeriod = localStorage.getItem('bby_active_period') || 'May 2026';
-
-  let initialRosterHistory = { 'May 2026': INITIAL_ROSTER };
-  const savedHistory = localStorage.getItem('bby_roster_history');
-  if (savedHistory) {
-    const parsed = safeJsonParse(savedHistory, null);
-    if (parsed) {
-      initialRosterHistory = parsed;
-    }
-  } else {
-    const savedRoster = localStorage.getItem('bby_roster');
-    if (savedRoster) {
-      const parsedRoster = safeJsonParse(savedRoster, null);
-      if (parsedRoster && Array.isArray(parsedRoster)) {
-        let rosterToMigrate = parsedRoster;
-        if (parsedRoster.some(e => e.id === 'jordan') || 
-            parsedRoster.some(e => e.id === 'yinel' && e.dept === 'General Sales') || 
-            !parsedRoster.some(e => e.id === 'yinel') || 
-            !parsedRoster.some(e => e.id === 'yinel' && 'hours' in e)) {
-          rosterToMigrate = INITIAL_ROSTER;
-        }
-        initialRosterHistory = { 'May 2026': rosterToMigrate };
-        localStorage.setItem('bby_roster_history', JSON.stringify(initialRosterHistory));
-      }
-    }
-  }
-
-  let initialDeptGoals = DEFAULT_DEPT_GOALS;
-  const savedGoals = localStorage.getItem('bby_dept_goals');
-  if (savedGoals) {
-    const parsed = safeJsonParse(savedGoals, null);
-    if (parsed) {
-      initialDeptGoals = parsed;
-      let changed = false;
-      if (!initialDeptGoals['Front End']) {
-        initialDeptGoals['Front End'] = { memberships: 8.0,  creditCards: 12.5,  warranty: 11.0, surveys: 1.0, rph: 640 };
-        changed = true;
-      }
-      if (!initialDeptGoals['General Sales']) {
-        initialDeptGoals['General Sales'] = { memberships: 5000, membershipsType: 'Dollars', creditCards: 8000, creditCardsType: 'Dollars', warranty: 11.0, surveys: 1.0, rph: 640 };
-        changed = true;
-      }
-      if (changed) {
-        localStorage.setItem('bby_dept_goals', JSON.stringify(initialDeptGoals));
-      }
-    }
-  }
-
-  const initialMetrics = safeJsonParse(localStorage.getItem('bby_metrics'), { memberships: 52, creditCards: 4, warranty: 12, surveys: 4.7, rph: 1050 });
-  const initialDailySnapshots = safeJsonParse(localStorage.getItem('bby_daily_snapshots'), {});
+  const defaultPeriod = getCurrentPeriodStr();
+  const initialActivePeriod = localStorage.getItem('bby_active_period') || defaultPeriod;
 
   return {
-    rosterHistory: initialRosterHistory,
+    rosterHistory: { [defaultPeriod]: INITIAL_ROSTER },
     activePeriod: initialActivePeriod,
-    deptGoals: initialDeptGoals,
-    metrics: initialMetrics,
-    dailySnapshots: initialDailySnapshots,
+    deptGoals: DEFAULT_DEPT_GOALS,
+    metrics: { memberships: 0, creditCards: 0, warranty: 0, surveys: 5.0, rph: 0 },
+    dailySnapshots: {},
 
     setRosterHistory: (rosterHistory) => set({ rosterHistory }),
     setActivePeriod: (activePeriod) => set({ activePeriod }),
@@ -81,14 +38,11 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       set({ dailySnapshots: newSnapshots });
       if (get().dbConnected) {
         saveDailySnapshotToCloud(dateKey, metrics);
-      } else {
-        localStorage.setItem('bby_daily_snapshots', JSON.stringify(newSnapshots));
       }
     },
 
     saveDeptGoals: (newGoals) => {
       set({ deptGoals: newGoals });
-      localStorage.setItem('bby_dept_goals', JSON.stringify(newGoals));
       if (get().dbConnected) {
         saveDeptGoalsToCloud(newGoals);
       }
@@ -100,15 +54,6 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       const dbConnected = get().dbConnected;
       const currentRoster = Array.isArray(rosterHistory[activePeriod]) ? rosterHistory[activePeriod] : [];
       
-      try {
-        const deletedIds = JSON.parse(localStorage.getItem('bby_deleted_employees') || '[]');
-        const deletedNames = JSON.parse(localStorage.getItem('bby_deleted_employee_names') || '[]');
-        const nameKey = newEmp.name.toLowerCase().trim();
-        
-        localStorage.setItem('bby_deleted_employees', JSON.stringify(deletedIds.filter(id => id !== newEmp.id)));
-        localStorage.setItem('bby_deleted_employee_names', JSON.stringify(deletedNames.filter(n => n !== nameKey)));
-      } catch (e) { console.error('Failed to update deleted employees storage', e); }
-
       const empWithTimestamp = {
         ...newEmp,
         lastUpdated: Date.now()
@@ -116,7 +61,6 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       const updated = [...currentRoster, empWithTimestamp];
       const newHistory = { ...rosterHistory, [activePeriod]: updated };
       set({ rosterHistory: newHistory });
-      localStorage.setItem('bby_roster_history', JSON.stringify(newHistory));
       if (dbConnected) {
         saveRosterHistoryToCloud(updated, activePeriod);
       }
@@ -135,7 +79,6 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       });
       const newHistory = { ...rosterHistory, [activePeriod]: updated };
       set({ rosterHistory: newHistory });
-      localStorage.setItem('bby_roster_history', JSON.stringify(newHistory));
       if (dbConnected) {
         saveRosterHistoryToCloud(updated, activePeriod);
       }
@@ -152,23 +95,7 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       const updated = currentRoster.filter(emp => emp.id !== empId);
       const newHistory = { ...rosterHistory, [activePeriod]: updated };
       
-      try {
-        const deletedIds = JSON.parse(localStorage.getItem('bby_deleted_employees') || '[]');
-        if (!deletedIds.includes(empId)) {
-          localStorage.setItem('bby_deleted_employees', JSON.stringify([...deletedIds, empId]));
-        }
-        
-        const deletedNames = JSON.parse(localStorage.getItem('bby_deleted_employee_names') || '[]');
-        const empNameKey = targetEmp.name.toLowerCase().trim();
-        if (!deletedNames.includes(empNameKey)) {
-          localStorage.setItem('bby_deleted_employee_names', JSON.stringify([...deletedNames, empNameKey]));
-        }
-      } catch (e) {
-        console.error('Failed to update deleted employees storage', e);
-      }
-
       set({ rosterHistory: newHistory });
-      localStorage.setItem('bby_roster_history', JSON.stringify(newHistory));
       if (dbConnected) {
         saveRosterHistoryToCloud(updated, activePeriod);
       }
@@ -184,13 +111,6 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       const dbConnected = get().dbConnected;
       const currentRoster = Array.isArray(rosterHistory[activePeriod]) ? rosterHistory[activePeriod] : [];
       
-      try {
-        const deletedNames = JSON.parse(localStorage.getItem('bby_deleted_employee_names') || '[]');
-        const importedNames = importedEmployees.map(e => e.name.toLowerCase().trim());
-        const filteredNames = deletedNames.filter(n => !importedNames.includes(n));
-        localStorage.setItem('bby_deleted_employee_names', JSON.stringify(filteredNames));
-      } catch (e) { console.error('Failed to clean tombstones', e); }
-
       const rosterMap = {};
       currentRoster.forEach(emp => {
         rosterMap[emp.name.toLowerCase().trim()] = emp;
@@ -221,7 +141,6 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       const updated = Object.values(rosterMap);
       const newHistory = { ...rosterHistory, [activePeriod]: updated };
       set({ rosterHistory: newHistory });
-      localStorage.setItem('bby_roster_history', JSON.stringify(newHistory));
       if (dbConnected) {
         saveRosterHistoryToCloud(updated, activePeriod);
       }
@@ -255,7 +174,6 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       
       const newHistory = { ...rosterHistory, [newPeriodName]: newRoster };
       set({ rosterHistory: newHistory, activePeriod: newPeriodName });
-      localStorage.setItem('bby_roster_history', JSON.stringify(newHistory));
       localStorage.setItem('bby_active_period', newPeriodName);
       if (dbConnected) {
         saveRosterHistoryToCloud(newRoster, newPeriodName);

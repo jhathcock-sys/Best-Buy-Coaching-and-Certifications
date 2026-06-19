@@ -7,9 +7,10 @@ interface DashboardHeaderProps {
   shadowingHeatmapData: Record<string, number>;
   rosterHistory: Record<string, Employee[]>;
   activePeriod: string;
+  activeManager?: any;
 }
 
-export default function DashboardHeader({ roster, shadowingHeatmapData, rosterHistory, activePeriod }: DashboardHeaderProps) {
+export default function DashboardHeader({ roster, shadowingHeatmapData, rosterHistory, activePeriod, activeManager }: DashboardHeaderProps) {
   
   // Calculate CVI Store Health
   let accelerating = 0;
@@ -27,7 +28,7 @@ export default function DashboardHeader({ roster, shadowingHeatmapData, rosterHi
         <h1 style={{ fontSize: '2.25rem', fontWeight: 800, margin: '0 0 0.5rem 0', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           FloorVision
         </h1>
-        <p style={{ margin: 0, color: 'var(--text-secondary)' }}>Welcome back. Here's what's happening on the floor today.</p>
+        <p style={{ margin: 0, color: 'var(--text-secondary)' }}>Welcome back{activeManager?.name ? `, ${activeManager.name.split(' ')[0]}` : ''}. Here's what's happening on the floor today.</p>
       </div>
 
       <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>

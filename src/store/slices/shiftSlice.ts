@@ -6,8 +6,6 @@ import { ShiftSchema } from '../../schemas';
 import { safeJsonParse } from './constants';
 
 export const createShiftSlice: StateCreator<StoreState, [], [], ShiftSlice> = (set, get) => {
-  const initialFloorLeaderShifts = safeJsonParse(localStorage.getItem('bby_floor_leader_shifts'), []);
-
   let initialActiveShift = null;
   const rawActiveShift = safeJsonParse(localStorage.getItem('bby_active_shift'), null);
   if (rawActiveShift) {
@@ -20,7 +18,7 @@ export const createShiftSlice: StateCreator<StoreState, [], [], ShiftSlice> = (s
   }
 
   return {
-    floorLeaderShifts: initialFloorLeaderShifts,
+    floorLeaderShifts: [],
     activeShift: initialActiveShift,
 
     setFloorLeaderShifts: (floorLeaderShifts) => set({ floorLeaderShifts }),
@@ -49,7 +47,6 @@ export const createShiftSlice: StateCreator<StoreState, [], [], ShiftSlice> = (s
       }
       
       set({ floorLeaderShifts: updated });
-      localStorage.setItem('bby_floor_leader_shifts', JSON.stringify(updated));
       if (dbConnected) {
         saveFloorLeaderShiftToCloud(shiftWithTime);
       }
@@ -60,17 +57,7 @@ export const createShiftSlice: StateCreator<StoreState, [], [], ShiftSlice> = (s
       const dbConnected = get().dbConnected;
       const updated = (Array.isArray(floorLeaderShifts) ? floorLeaderShifts : []).filter(s => s.id !== shiftId);
       
-      try {
-        const deleted = JSON.parse(localStorage.getItem('bby_deleted_shifts') || '[]');
-        if (!deleted.includes(shiftId)) {
-          localStorage.setItem('bby_deleted_shifts', JSON.stringify([...deleted, shiftId]));
-        }
-      } catch (e) {
-        console.error('Failed to update bby_deleted_shifts', e);
-      }
-
       set({ floorLeaderShifts: updated });
-      localStorage.setItem('bby_floor_leader_shifts', JSON.stringify(updated));
       if (dbConnected) {
         deleteFloorLeaderShiftFromCloud(shiftId);
       }

@@ -26,9 +26,9 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
         
         if (isManagerPin || isStorePin) {
           setIsSuccess(true);
-          localStorage.setItem('bby_last_store', storeId || 'store-1');
+          localStorage.setItem('bby_last_store', storeId || '1480');
           setTimeout(() => {
-            onLoginSuccess(newPin, storeId || 'store-1');
+            onLoginSuccess(newPin, storeId || '1480');
           }, 800);
         } else {
           setIsShaking(true);

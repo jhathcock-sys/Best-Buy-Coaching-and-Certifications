@@ -35,10 +35,8 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
 
   handleReset = () => {
     this.setState({ hasError: false, error: null, errorInfo: null });
-    // Reset cache if it's a corruption issue
+    // Reset any local UI cache if it's a corruption issue
     localStorage.removeItem('bby_active_shift');
-    localStorage.removeItem('bby_roster_history');
-    localStorage.removeItem('bby_active_period');
     window.location.reload();
   };
 

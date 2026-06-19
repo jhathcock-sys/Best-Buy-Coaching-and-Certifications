@@ -45,7 +45,7 @@ export default function LoginGate({ correctPin = '1234', onLoginSuccess, dbConne
           <span style={{ fontWeight: 600 }}>Back</span>
         </button>
         <AdvisorLogin 
-          onLoginSuccess={(id, data) => onLoginSuccess('', 'store-1', 'advisor', data)}
+          onLoginSuccess={(id, data) => onLoginSuccess('', '1480', 'advisor', data)}
           roster={roster}
           dbConnected={dbConnected}
         />

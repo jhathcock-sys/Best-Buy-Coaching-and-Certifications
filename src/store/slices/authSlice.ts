@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { StateCreator } from 'zustand';
 import { StoreState, AuthSlice } from '../../types/store';
-import { initFirebase, saveManagersToCloud } from '../../services/firebase';
+import { initFirebase, isFirebaseConnected, saveManagersToCloud } from '../../services/firebase';
 import { MANAGERS } from './constants';
 
 export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set, get) => {
@@ -32,10 +32,12 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
     }
   }
 
+  const initialDbConnected = isFirebaseConnected();
+
   return {
     activeView: 'dashboard',
     apiKey: initialApiKey,
-    dbConnected: false, // will be overwritten by useStore init if firebase is connected
+    dbConnected: initialDbConnected,
     isAuthenticated: sessionStorage.getItem('bby_authenticated') === 'true',
     storePin: '1234', // will be overwritten by playbook settings in useStore
     activeManager: initialActiveManager,

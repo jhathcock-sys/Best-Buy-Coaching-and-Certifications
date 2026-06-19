@@ -1,15 +1,15 @@
 // @ts-nocheck
 import { StateCreator } from 'zustand';
 import { StoreState, PlaybookSlice } from '../../types/store';
+import { DEFAULT_PLAYBOOK_SETTINGS } from './constants';
 import { 
   savePlaybookSettingsToCloud,
   saveRecentSessionsToCloud,
-  saveFollowUpTaskToCloud,
   saveCoachingLogToCloud,
   deleteCoachingLogFromCloud,
+  saveFollowUpTaskToCloud,
   saveMetricsToCloud
 } from '../../services/firebase';
-import { safeJsonParse, DEFAULT_PLAYBOOK_SETTINGS } from './constants';
 
 export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice> = (set, get) => {
   let initialPlaybookSettings = DEFAULT_PLAYBOOK_SETTINGS;
@@ -17,25 +17,18 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
     const savedSettings = localStorage.getItem('bby_playbook_settings');
     if (savedSettings) {
       const parsed = JSON.parse(savedSettings);
-      if (parsed) {
-        initialPlaybookSettings = parsed;
-      }
+      initialPlaybookSettings = { ...DEFAULT_PLAYBOOK_SETTINGS, ...parsed };
     }
   } catch (e) {
     console.error('Failed to parse playbook settings', e);
   }
 
-  const initialRecentSessions = safeJsonParse(localStorage.getItem('bby_recent_sessions'), []);
-  const initialCustomScenarios = safeJsonParse(localStorage.getItem('bby_custom_scenarios'), []);
-  const initialFollowUpTasks = safeJsonParse(localStorage.getItem('bby_follow_up_tasks'), []);
-  const initialCoachingLogs = safeJsonParse(localStorage.getItem('bby_coaching_logs'), []);
-
   return {
-    recentSessions: initialRecentSessions,
-    customScenarios: initialCustomScenarios,
+    recentSessions: [],
+    customScenarios: [],
     playbookSettings: initialPlaybookSettings,
-    followUpTasks: initialFollowUpTasks,
-    coachingLogs: initialCoachingLogs,
+    followUpTasks: [],
+    coachingLogs: [],
 
     setRecentSessions: (recentSessions) => set({ recentSessions }),
     setCustomScenarios: (customScenarios) => set({ customScenarios }),
@@ -62,14 +55,12 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       const customScenarios = get().customScenarios || [];
       const updated = [...(Array.isArray(customScenarios) ? customScenarios : []), newScenario];
       set({ customScenarios: updated });
-      localStorage.setItem('bby_custom_scenarios', JSON.stringify(updated));
     },
 
     deleteCustomScenario: (scenarioId) => {
       const customScenarios = get().customScenarios || [];
       const updated = (Array.isArray(customScenarios) ? customScenarios : []).filter(s => s.id !== scenarioId);
       set({ customScenarios: updated });
-      localStorage.setItem('bby_custom_scenarios', JSON.stringify(updated));
     },
 
     logCoachingSession: (session) => {
@@ -90,7 +81,6 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       
       const updatedSessions = [newSession, ...(Array.isArray(recentSessions) ? recentSessions : [])].slice(0, 15);
       set({ recentSessions: updatedSessions });
-      localStorage.setItem('bby_recent_sessions', JSON.stringify(updatedSessions));
       if (dbConnected) {
         saveRecentSessionsToCloud(updatedSessions);
       }
@@ -110,7 +100,6 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       
       const updatedLogs = [newLog, ...(Array.isArray(coachingLogs) ? coachingLogs : [])];
       set({ coachingLogs: updatedLogs });
-      localStorage.setItem('bby_coaching_logs', JSON.stringify(updatedLogs));
       if (dbConnected) {
         saveCoachingLogToCloud(newLog);
       }
@@ -121,7 +110,6 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       const dbConnected = get().dbConnected;
       const updatedSessions = (Array.isArray(recentSessions) ? recentSessions : []).filter((_, idx) => idx !== index);
       set({ recentSessions: updatedSessions });
-      localStorage.setItem('bby_recent_sessions', JSON.stringify(updatedSessions));
       if (dbConnected) {
         saveRecentSessionsToCloud(updatedSessions);
       }
@@ -137,13 +125,11 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       
       const updatedLogs = (Array.isArray(coachingLogs) ? coachingLogs : []).filter(l => l.id !== logId && l.timestamp !== logId);
       set({ coachingLogs: updatedLogs });
-      localStorage.setItem('bby_coaching_logs', JSON.stringify(updatedLogs));
       
       const updatedSessions = (Array.isArray(recentSessions) ? recentSessions : []).filter(s => 
         !(s.customerName === logToDelete.employeeName && s.date === logToDelete.date && s.notes === logToDelete.notes)
       );
       set({ recentSessions: updatedSessions });
-      localStorage.setItem('bby_recent_sessions', JSON.stringify(updatedSessions));
       
       if (dbConnected) {
         if (logToDelete.id) {
@@ -163,7 +149,6 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       };
       const updated = [...(Array.isArray(followUpTasks) ? followUpTasks : []), newTask];
       set({ followUpTasks: updated });
-      localStorage.setItem('bby_follow_up_tasks', JSON.stringify(updated));
       if (dbConnected) {
         saveFollowUpTaskToCloud(newTask);
       }
@@ -181,7 +166,6 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
         return t;
       });
       set({ followUpTasks: updated });
-      localStorage.setItem('bby_follow_up_tasks', JSON.stringify(updated));
       if (dbConnected && targetTask) {
         saveFollowUpTaskToCloud(targetTask);
       }
@@ -202,7 +186,6 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       };
       const updatedSessions = [newSession, ...(Array.isArray(recentSessions) ? recentSessions : [])].slice(0, 15);
       set({ recentSessions: updatedSessions });
-      localStorage.setItem('bby_recent_sessions', JSON.stringify(updatedSessions));
       if (dbConnected) {
         saveRecentSessionsToCloud(updatedSessions);
       }
@@ -216,7 +199,6 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
           rph: Math.round((metrics.rph * 2 + newMetrics.rph) / 3)
         };
         set({ metrics: averagedMetrics });
-        localStorage.setItem('bby_metrics', JSON.stringify(averagedMetrics));
         if (dbConnected) {
           saveMetricsToCloud(averagedMetrics);
         }

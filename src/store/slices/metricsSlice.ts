@@ -17,7 +17,7 @@ const getCurrentPeriodStr = () => {
 
 export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> = (set, get) => {
   const defaultPeriod = getCurrentPeriodStr();
-  const initialActivePeriod = localStorage.getItem('bby_active_period') || defaultPeriod;
+  const initialActivePeriod = defaultPeriod;
 
   return {
     rosterHistory: { [defaultPeriod]: INITIAL_ROSTER },
@@ -148,7 +148,6 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
 
     changePeriod: (p) => {
       set({ activePeriod: p });
-      localStorage.setItem('bby_active_period', p);
       if (get().dbConnected) {
         saveActivePeriodToCloud(p);
       }
@@ -174,7 +173,6 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       
       const newHistory = { ...rosterHistory, [newPeriodName]: newRoster };
       set({ rosterHistory: newHistory, activePeriod: newPeriodName });
-      localStorage.setItem('bby_active_period', newPeriodName);
       if (dbConnected) {
         saveRosterHistoryToCloud(newRoster, newPeriodName);
         saveActivePeriodToCloud(newPeriodName);

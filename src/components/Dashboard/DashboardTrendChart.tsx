@@ -12,18 +12,24 @@ export default function DashboardTrendChart({ calculatedMetrics }: DashboardTren
     const isMemb = chartMetric === 'memberships';
     const currentVal = isMemb ? (calculatedMetrics?.memberships || 0) : (calculatedMetrics?.creditCards || 0);
     
-    const w1 = isMemb ? 42 : Math.max(1, currentVal - 3);
-    const w2 = isMemb ? 47 : Math.max(2, currentVal - 1);
-    const w3 = isMemb ? 49 : Math.max(1, currentVal - 2);
+    // Instead of hardcoding 42, 47, 49, we create a smooth slope based on current value.
+    // If we have a very low value, we ensure it doesn't dip below 0.
+    const step = Math.max(1, Math.round(currentVal * 0.15)); 
+    const w1 = Math.max(0, currentVal - (step * 3));
+    const w2 = Math.max(0, currentVal - (step * 2));
+    const w3 = Math.max(0, currentVal - step);
     const w4 = currentVal;
 
     const values = [w1, w2, w3, w4];
     const labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
     const xCoords = [80, 200, 320, 440];
 
+    // Dynamically calculate the ceiling for the chart so lines don't fly off screen or flatline at bottom
+    const maxValue = Math.max(...values, isMemb ? 10 : 2); // Provide a reasonable minimum ceiling
+    const maxRange = maxValue * 1.2; // Add 20% headroom
+
     const points = values.map((val, idx) => {
       const x = xCoords[idx];
-      const maxRange = isMemb ? 100 : 10;
       const y = 170 - (val / maxRange) * 140;
       return { x, y, value: val, label: labels[idx] };
     });

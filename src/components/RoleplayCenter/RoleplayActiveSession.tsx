@@ -29,7 +29,7 @@ export default function RoleplayActiveSession({
  }) {
   return (
     <>
-        isEvaluating ? (
+        {isEvaluating ? (
           <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', padding: '3rem', minHeight: '500px', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
             <div style={{ position: 'relative', width: '120px', height: '120px' }}>
               <div className="skeleton-pulse" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '50%', border: '8px solid rgba(255, 230, 0, 0.05)', borderTopColor: 'var(--bby-yellow)', animation: 'spin 1.5s linear infinite' }}></div>
@@ -197,7 +197,7 @@ export default function RoleplayActiveSession({
           </div>
           </div>
           </div>
-        )
+        )}
     </>
   );
 }

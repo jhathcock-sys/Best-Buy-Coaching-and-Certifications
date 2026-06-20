@@ -97,8 +97,10 @@ export default function LogBuilderTab({
             strengths: data.strengths || prev.strengths,
             expectation: data.expectation,
             validation: data.validation,
-            discFocus: data.discStep ? (Array.isArray(prev.discFocus) ? [data.discStep] : data.discStep) : prev.discFocus
           }));
+          toast.success('AI Coaching Log generated!');
+        } else {
+          toast.error("Gemini API failed to generate a response. Please check your API key and connection.");
         }
       } else {
         await new Promise(resolve => setTimeout(resolve, 800));

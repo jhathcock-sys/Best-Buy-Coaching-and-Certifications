@@ -2,7 +2,6 @@ import React from 'react';
 import { Clock, Plus, Minus, Power, Trash2, Calendar, User, CheckCircle2, XCircle, Upload, Flame, Trophy, Undo, TrendingUp, AlertCircle } from 'lucide-react';
 
 export default function ShiftTrackerSidebar({ 
-  hourlyLogs,
   storeConfig,
   currentHourKey,
   selectedLog,

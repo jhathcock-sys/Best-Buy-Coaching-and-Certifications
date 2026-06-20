@@ -23,6 +23,7 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
   });
   const [isLoading, setIsLoading] = useState(false);
   const [complexity, setComplexity] = useState('Standard');
+  const [customerTone, setCustomerTone] = useState('Neutral');
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [evaluation, setEvaluation] = useState(null);
   

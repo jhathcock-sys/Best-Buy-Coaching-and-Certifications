@@ -15,6 +15,7 @@ export function useLiveFloorShadow({
   const [department, setDepartment] = useState('General Sales');
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [customerPersona, setCustomerPersona] = useState('');
   const [customPersona, setCustomPersona] = useState('');
 
   const [prevPreselectedEmployee, setPrevPreselectedEmployee] = useState(preselectedEmployee);

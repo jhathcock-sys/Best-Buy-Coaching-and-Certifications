@@ -71,7 +71,7 @@ export default function ShiftTrackerTab({ activeShift, setActiveShift, roster = 
               
           <ShiftTrackerGoals 
 
-  hourlyLogs={hourlyLogs}
+
   storeConfig={storeConfig}
   currentHourKey={currentHourKey}
   selectedLog={selectedLog}
@@ -90,7 +90,7 @@ export default function ShiftTrackerTab({ activeShift, setActiveShift, roster = 
  />
           <ShiftTrackerHourlyLog 
 
-  hourlyLogs={hourlyLogs}
+
   storeConfig={storeConfig}
   currentHourKey={currentHourKey}
   selectedLog={selectedLog}
@@ -109,7 +109,7 @@ export default function ShiftTrackerTab({ activeShift, setActiveShift, roster = 
  />
           <ShiftTrackerSidebar 
 
-  hourlyLogs={hourlyLogs}
+
   storeConfig={storeConfig}
   currentHourKey={currentHourKey}
   selectedLog={selectedLog}

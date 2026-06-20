@@ -1,21 +1,21 @@
 import React from 'react';
-import { ShieldAlert, Plus, Edit2, Trash2, Check, Eye, EyeOff, Key } from 'lucide-react';
+import { ShieldAlert, Plus, Edit2, Trash2, Check, Eye, EyeOff, Key, Users, UserPlus } from 'lucide-react';
 
 export default function SupervisorProfilesTab({ 
   managers, 
-  newManagerName, setNewManagerName, 
-  newManagerRole, setNewManagerRole, 
+  newManagerName, setNewManagerName,
+  newManagerRole, setNewManagerRole,
   newManagerPin, setNewManagerPin,
   editingManagerIndex, setEditingManagerIndex,
   editingManagerName, setEditingManagerName,
   editingManagerRole, setEditingManagerRole,
   editingManagerPin, setEditingManagerPin,
-  visiblePins,
-  togglePinVisibility,
+  visiblePins, togglePinVisibility,
   handleAddManager,
   startEditingManager,
   saveEditingManager,
-  handleDeleteManager
+  handleDeleteManager,
+  storePin, setStorePin
 }) {
   return (
     <>

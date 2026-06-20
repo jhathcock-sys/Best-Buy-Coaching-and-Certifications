@@ -1,7 +1,8 @@
 import React from 'react';
 import { Sparkles, BookOpen } from 'lucide-react';
 
-export default function SystemPromptsTab({ customSystemPrompt, setCustomSystemPrompt }) {
+export default function SystemPromptsTab({ customSystemPrompt, setCustomSystemPrompt, playbookSettings }) {
+  const trainingLogs = playbookSettings?.trainingLogs || [];
   return (
     <>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '950px', margin: '0 auto', width: '100%' }}>

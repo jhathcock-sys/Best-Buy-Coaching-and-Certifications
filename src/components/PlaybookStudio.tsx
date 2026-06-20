@@ -211,6 +211,7 @@ export default function PlaybookStudio({
         <SystemPromptsTab 
           customSystemPrompt={customSystemPrompt} 
           setCustomSystemPrompt={setCustomSystemPrompt} 
+          playbookSettings={playbookSettings}
         />
       )}
 
@@ -233,13 +234,16 @@ export default function PlaybookStudio({
       )}
 
       {activeTab === 'vocab' && (
-        <BbyVocabTab />
+        <BbyVocabTab 
+          playbookSettings={playbookSettings}
+          setPlaybookSettings={onSaveSettings}
+        />
       )}
 
       {activeTab === 'targets' && (
         <DepartmentTargetsTab 
           selectedDept={selectedDept} setSelectedDept={setSelectedDept}
-          deptGoals={deptGoals} handleSaveDeptGoals={onUpdateDeptGoals}
+          deptGoals={deptGoals} handleSaveDeptGoals={onSaveDeptGoals}
         />
       )}
 

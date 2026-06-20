@@ -1,5 +1,5 @@
 import React from 'react';
-import { RefreshCw, CheckCircle, AlertTriangle, Compass } from 'lucide-react';
+import { RefreshCw, CheckCircle, AlertTriangle, Compass, ShieldAlert } from 'lucide-react';
 
 export default function SyncDiagnosticsTab({
   runDiagnostics, isRunningDiagnostics, diagnosticsLogs, dbConnected,

@@ -1,7 +1,60 @@
-import React from 'react';
-import { BookOpen, ShieldAlert } from 'lucide-react';
+import React, { useState } from 'react';
+import { BookOpen, ShieldAlert, Plus, Trash2 } from 'lucide-react';
 
-export default function BbyVocabTab() {
+export default function BbyVocabTab({ playbookSettings, setPlaybookSettings }) {
+  const [newAllowed, setNewAllowed] = useState('');
+  const [newForbidden, setNewForbidden] = useState('');
+
+  const allowedPhrases = playbookSettings?.bbyDictionary?.allowedPhrases || [];
+  const forbiddenPhrases = playbookSettings?.bbyDictionary?.forbiddenPhrases || [];
+
+  const handleAddAllowed = () => {
+    if (!newAllowed.trim() || allowedPhrases.includes(newAllowed.trim())) return;
+    setPlaybookSettings({
+      ...playbookSettings,
+      bbyDictionary: {
+        ...playbookSettings.bbyDictionary,
+        allowedPhrases: [...allowedPhrases, newAllowed.trim()]
+      }
+    });
+    setNewAllowed('');
+  };
+
+  const handleRemoveAllowed = (index) => {
+    const arr = [...allowedPhrases];
+    arr.splice(index, 1);
+    setPlaybookSettings({
+      ...playbookSettings,
+      bbyDictionary: {
+        ...playbookSettings.bbyDictionary,
+        allowedPhrases: arr
+      }
+    });
+  };
+
+  const handleAddForbidden = () => {
+    if (!newForbidden.trim() || forbiddenPhrases.includes(newForbidden.trim())) return;
+    setPlaybookSettings({
+      ...playbookSettings,
+      bbyDictionary: {
+        ...playbookSettings.bbyDictionary,
+        forbiddenPhrases: [...forbiddenPhrases, newForbidden.trim()]
+      }
+    });
+    setNewForbidden('');
+  };
+
+  const handleRemoveForbidden = (index) => {
+    const arr = [...forbiddenPhrases];
+    arr.splice(index, 1);
+    setPlaybookSettings({
+      ...playbookSettings,
+      bbyDictionary: {
+        ...playbookSettings.bbyDictionary,
+        forbiddenPhrases: arr
+      }
+    });
+  };
   return (
     <>
         <div style={{ maxWidth: '800px', margin: '0 auto', width: '100%' }}>

@@ -8,6 +8,7 @@ import RoleplayActiveSession from './RoleplayCenter/RoleplayActiveSession';
 import RoleplayResults from './RoleplayCenter/RoleplayResults';
 export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, customScenarios = [] }) {
   const { apiKey, setActiveView } = useApp();
+  const scenarios = useMemo(() => [...STANDARD_SCENARIOS, ...customScenarios], [customScenarios]);
   const [selectedScenario, setSelectedScenario] = useState(null);
   const [sessionActive, setSessionActive] = useState(false);
   const [messages, setMessages] = useState([]);

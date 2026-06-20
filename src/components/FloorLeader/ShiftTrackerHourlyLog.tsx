@@ -284,6 +284,7 @@ export default function ShiftTrackerHourlyLog({
                     <Plus size={16} /> Add Hour {activeShift.hours.length + 1}
                   </button>
                 </div>
+              </div>
     </>
   );
 }

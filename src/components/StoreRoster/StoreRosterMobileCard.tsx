@@ -97,6 +97,7 @@ export default function StoreRosterMobileCard({
         </div>
       ) : (
         filteredRoster.map(emp => {
+          if (!emp) return null;
           const gap = getEmployeeGap(emp, deptGoals);
           const isExceeding = gap === 'None' || gap === '';
           const cardBg = isExceeding ? 'rgba(16, 185, 129, 0.018)' : emp.focus5 ? 'rgba(239, 68, 68, 0.018)' : 'rgba(255,255,255,0.005)';

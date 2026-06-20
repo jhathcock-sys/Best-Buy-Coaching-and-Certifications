@@ -119,6 +119,7 @@ export default function ShiftTrackerGoals({
                     })()}
                   </div>
                 </div>
+              </div>
     </>
   );
 }

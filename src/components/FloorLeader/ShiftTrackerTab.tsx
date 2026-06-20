@@ -1,5 +1,8 @@
 // @ts-nocheck
 import { Trophy, CheckCircle2, XCircle, Plus, Minus, Trash2, Flame, Undo } from 'lucide-react';
+import ShiftTrackerGoals from './ShiftTrackerGoals';
+import ShiftTrackerHourlyLog from './ShiftTrackerHourlyLog';
+import ShiftTrackerSidebar from './ShiftTrackerSidebar';
 
 export default function ShiftTrackerTab({ activeShift, setActiveShift, roster = [], handleAddHour, handleUpdateMetric, handleUpdateStartRevenue, handleUpdateEndRevenue, handleRemoveHour, handleLogFloorWin, selectedEmpId, setSelectedEmpId, winType, setWinType, ocvEmpId, setOcvEmpId, ocvConnect, setOcvConnect, ocvRecommend, setOcvRecommend, ocvProtect, setOcvProtect, ocvClose, setOcvClose, ocvNotes, setOcvNotes, handleLogOcvObservation, ocvSuccessMsg, handleUndoWin }) {
 

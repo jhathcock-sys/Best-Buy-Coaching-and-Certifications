@@ -2,6 +2,9 @@
 // @ts-nocheck
 import { useState } from 'react';
 import { X } from 'lucide-react';
+import WizardStep1General from './PerformanceWizardModal/WizardStep1General';
+import WizardStep2Attach from './PerformanceWizardModal/WizardStep2Attach';
+import WizardStep3Quality from './PerformanceWizardModal/WizardStep3Quality';
 
 export default function PerformanceWizardModal({ 
   isOpen, 
@@ -162,238 +165,27 @@ export default function PerformanceWizardModal({
           
           {/* STEP 1: General Info */}
           {currentEditStep === 1 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.25s ease' }}>
-              <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.8rem' }}>Associate Name:</label>
-                <input 
-                  type="text" 
-                  className="form-control" 
-                  style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                  value={editForm.name}
-                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                />
-              </div>
-              
-              <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.8rem' }}>Department:</label>
-                <select 
-                  className="form-control"
-                  style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                  value={editForm.dept}
-                  onChange={(e) => setEditForm({ ...editForm, dept: e.target.value })}
-                >
-                  {DEPARTMENTS.map(d => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.8rem' }}>Hours Worked:</label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, hours: Math.max(0, parseFloat((parseFloat(prev.hours) - 1).toFixed(1))) }))}>-</button>
-                  <input 
-                    type="number" 
-                    className="form-control" 
-                    style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
-                    value={editForm.hours}
-                    onChange={(e) => setEditForm({ ...editForm, hours: e.target.value })}
-                  />
-                  <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, hours: parseFloat((parseFloat(prev.hours) + 1).toFixed(1)) }))}>+</button>
-                </div>
-              </div>
-
-              <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
-                <input 
-                  type="checkbox" 
-                  id="edit-focus5"
-                  style={{ width: '16px', height: '16px', cursor: 'pointer' }}
-                  checked={editForm.focus5}
-                  onChange={(e) => setEditForm({ ...editForm, focus5: e.target.checked })}
-                />
-                <label htmlFor="edit-focus5" style={{ fontSize: '0.85rem', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>
-                  🔥 Supervisor Focus 5 List (Priority Shift Coaching)
-                </label>
-              </div>
-            </div>
+            <WizardStep1General 
+              editForm={editForm}
+              handleFormChange={handleFormChange}
+              departmentGoals={departmentGoals}
+ />
           )}
 
-          {/* STEP 2: Attach Targets */}
           {currentEditStep === 2 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.25s ease' }}>
-              <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.8rem' }}>Memberships Attach:</label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, memberships: Math.max(0, parseInt(prev.memberships) - 1) }))}>-</button>
-                  <input 
-                    type="number" 
-                    className="form-control" 
-                    style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
-                    value={editForm.memberships}
-                    onChange={(e) => setEditForm({ ...editForm, memberships: e.target.value })}
-                  />
-                  <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, memberships: parseInt(prev.memberships) + 1 }))}>+</button>
-                </div>
-              </div>
-              
-              <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.8rem' }}>BBY Credit Card Apps:</label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, creditCards: Math.max(0, parseInt(prev.creditCards) - 1) }))}>-</button>
-                  <input 
-                    type="number" 
-                    className="form-control" 
-                    style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
-                    value={editForm.creditCards}
-                    onChange={(e) => setEditForm({ ...editForm, creditCards: e.target.value })}
-                  />
-                  <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, creditCards: parseInt(prev.creditCards) + 1 }))}>+</button>
-                </div>
-              </div>
-              
-              <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.8rem' }}>GSP/Warranty Attach %:</label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, warranty: Math.max(0, parseFloat((parseFloat(prev.warranty) - 1).toFixed(1))) }))}>-</button>
-                  <input 
-                    type="number" 
-                    className="form-control" 
-                    style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
-                    value={editForm.warranty}
-                    onChange={(e) => setEditForm({ ...editForm, warranty: e.target.value })}
-                  />
-                  <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, warranty: parseFloat((parseFloat(prev.warranty) + 1).toFixed(1)) }))}>+</button>
-                </div>
-              </div>
-
-              {/* Conditional Department-Specific Metrics */}
-              {(editForm.dept === 'Computing' || editForm.dept === 'Home Theatre') && (
-                <div className="form-group">
-                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Basket Size ($):</label>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, basket: Math.max(0, parseFloat((parseFloat(prev.basket) - 10).toFixed(2))) }))}>-10</button>
-                    <input 
-                      type="number" 
-                      step="0.01"
-                      className="form-control" 
-                      style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
-                      value={editForm.basket}
-                      onChange={(e) => setEditForm({ ...editForm, basket: e.target.value })}
-                    />
-                    <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, basket: parseFloat((parseFloat(prev.basket) + 10).toFixed(2)) }))}>+10</button>
-                  </div>
-                </div>
-              )}
-              
-              {editForm.dept === 'Computing' && (
-                <div className="form-group">
-                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Microsoft 365 Attach %:</label>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, m365: Math.max(0, parseFloat((parseFloat(prev.m365) - 5).toFixed(1))) }))}>-5</button>
-                    <input 
-                      type="number" 
-                      step="0.1"
-                      className="form-control" 
-                      style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
-                      value={editForm.m365}
-                      onChange={(e) => setEditForm({ ...editForm, m365: e.target.value })}
-                    />
-                    <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, m365: parseFloat((parseFloat(prev.m365) + 5).toFixed(1)) }))}>+5</button>
-                  </div>
-                </div>
-              )}
-
-              {editForm.dept === 'Home Theatre' && (
-                <div className="form-group">
-                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Audio Attach %:</label>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, audio: Math.max(0, parseFloat((parseFloat(prev.audio) - 5).toFixed(1))) }))}>-5</button>
-                    <input 
-                      type="number" 
-                      step="0.1"
-                      className="form-control" 
-                      style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
-                      value={editForm.audio}
-                      onChange={(e) => setEditForm({ ...editForm, audio: e.target.value })}
-                    />
-                    <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, audio: parseFloat((parseFloat(prev.audio) + 5).toFixed(1)) }))}>+5</button>
-                  </div>
-                </div>
-              )}
-            </div>
+            <WizardStep2Attach 
+              editForm={editForm}
+              handleFormChange={handleFormChange}
+              departmentGoals={departmentGoals}
+ />
           )}
 
-          {/* STEP 3: Quality & Gap */}
           {currentEditStep === 3 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.25s ease' }}>
-              <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.8rem' }}>5 Star Surveys:</label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <button 
-                    type="button" 
-                    className="stepper-btn" 
-                    onClick={() => {
-                      setEditForm(prev => {
-                        if (prev.surveys === 'Failing') {
-                          return { ...prev, surveys: '0' };
-                        }
-                        const val = parseInt(prev.surveys) || 0;
-                        if (val <= 0) {
-                          return { ...prev, surveys: 'Failing' };
-                        }
-                        return { ...prev, surveys: (val - 1).toString() };
-                      });
-                    }}
-                  >-</button>
-                  <input 
-                    type="text" 
-                    className="form-control" 
-                    style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
-                    value={editForm.surveys}
-                    onChange={(e) => setEditForm({ ...editForm, surveys: e.target.value })}
-                  />
-                  <button 
-                    type="button" 
-                    className="stepper-btn" 
-                    onClick={() => {
-                      setEditForm(prev => {
-                        if (prev.surveys === 'Failing') {
-                          return { ...prev, surveys: '1' };
-                        }
-                        const val = parseInt(prev.surveys) || 0;
-                        return { ...prev, surveys: (val + 1).toString() };
-                      });
-                    }}
-                  >+</button>
-                </div>
-              </div>
-              
-              <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.8rem' }}>RPH index ($):</label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, rph: Math.max(0, parseInt(prev.rph) - 50) }))}>-50</button>
-                  <input 
-                    type="number" 
-                    className="form-control" 
-                    style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
-                    value={editForm.rph}
-                    onChange={(e) => setEditForm({ ...editForm, rph: e.target.value })}
-                  />
-                  <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, rph: parseInt(prev.rph) + 50 }))}>+50</button>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.8rem' }}>Opportunity Gap Description:</label>
-                <input 
-                  type="text" 
-                  className="form-control" 
-                  style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                  value={editForm.gap}
-                  onChange={(e) => setEditForm({ ...editForm, gap: e.target.value })}
-                />
-              </div>
-            </div>
+            <WizardStep3Quality 
+              editForm={editForm}
+              handleFormChange={handleFormChange}
+              departmentGoals={departmentGoals}
+ />
           )}
           
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'space-between', marginTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>

@@ -20,18 +20,21 @@ export const EmployeeSchema = z.object({
 }).passthrough();
 
 export const ShiftHourSchema = z.object({
-  hour: z.string(),
-  revenue: z.number(),
-  apps: z.number(),
-  pms: z.number()
-});
+  hourNumber: z.number().optional(),
+  hour: z.string().optional(),
+  startRevenue: z.union([z.number(), z.string()]).optional(),
+  endRevenue: z.union([z.number(), z.string()]).optional(),
+  revenue: z.union([z.number(), z.string()]).optional().default(0),
+  apps: z.number().optional().default(0),
+  pms: z.number().optional().default(0)
+}).passthrough();
 
 export const ShiftWinSchema = z.object({
   id: z.string(),
   empId: z.string(),
   type: z.enum(['app', 'pm']),
   timestamp: z.number()
-});
+}).passthrough();
 
 export const ZoneAssignmentsSchema = z.record(z.string(), z.array(z.string()));
 
@@ -45,7 +48,7 @@ export const ShiftSchema = z.object({
   hours: z.array(ShiftHourSchema).optional().default([]),
   wins: z.array(ShiftWinSchema).optional().default([]),
   zoneAssignments: ZoneAssignmentsSchema.optional().default({})
-});
+}).passthrough();
 
 export const CoachingLogSchema = z.object({
   id: z.string(),

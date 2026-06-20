@@ -1,5 +1,5 @@
 // Pre-defined offline simulation dialogue database for standard scenarios
-const OFFLINE_DIALOGUES = {
+export const OFFLINE_DIALOGUES = {
   'computing-college': {
     connect: {
       met: "Thanks for greeting me so nicely. Yes, my freshman is heading to college for engineering. We want something that will last him all four years, but honestly, it needs to be reliable. He's a bit clumsy, and I don't want to have to buy a new computer in a year. What do you recommend?",

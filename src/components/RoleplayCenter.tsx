@@ -21,8 +21,8 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
     protect: false,
     close: false
   });
-  
   const [isLoading, setIsLoading] = useState(false);
+  const [complexity, setComplexity] = useState('Standard');
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [evaluation, setEvaluation] = useState(null);
   

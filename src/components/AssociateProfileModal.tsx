@@ -49,6 +49,8 @@ export default function AssociateProfileModal({
     activeGoals
   } = useAssociateProfile(isOpen, employee, rosterHistory, coachingLogs, followUpTasks, deptGoals);
 
+  if (!isOpen || !employee) return null;
+
   return (
     <div className="modal-overlay" style={{ zIndex: 1050 }} onClick={onClose}>
       <div 

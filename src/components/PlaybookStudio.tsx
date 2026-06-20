@@ -239,7 +239,7 @@ export default function PlaybookStudio({
       {activeTab === 'targets' && (
         <DepartmentTargetsTab 
           selectedDept={selectedDept} setSelectedDept={setSelectedDept}
-          deptGoals={deptGoals} handleSaveDeptGoals={handleSaveDeptGoals}
+          deptGoals={deptGoals} handleSaveDeptGoals={onUpdateDeptGoals}
         />
       )}
 

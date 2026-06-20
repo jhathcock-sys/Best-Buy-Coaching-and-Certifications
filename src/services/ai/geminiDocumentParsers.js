@@ -4,7 +4,7 @@ export async function parseScheduleImage(base64Data, mimeType, apiKey) {
   try {
     const aiInstance = new GoogleGenerativeAI(apiKey);
     // Use gemini-1.5-flash for fast vision processing
-    const model = aiInstance.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = aiInstance.getGenerativeModel({ model: 'gemini-1.5-pro' });
 
     const systemPrompt = `
       You are an administrative assistant for a Best Buy store.
@@ -59,7 +59,7 @@ export const parseRentsDueDocumentGemini = async (base64Image, mimeType, textInp
     }
 
     const genAI = new GoogleGenerativeAI(keyToUse);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
 
     const systemPrompt = `
       You are an expert retail operations auditor. Your task is to parse a "Rents Due" salesperson performance report.

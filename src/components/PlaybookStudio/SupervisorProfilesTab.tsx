@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldAlert, Plus, Edit2, Trash2, Check, Eye, EyeOff } from 'lucide-react';
+import { ShieldAlert, Plus, Edit2, Trash2, Check, Eye, EyeOff, Key } from 'lucide-react';
 
 export default function SupervisorProfilesTab({ 
   managers, 

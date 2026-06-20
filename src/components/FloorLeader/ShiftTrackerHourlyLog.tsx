@@ -5,6 +5,7 @@ export default function ShiftTrackerHourlyLog({
   activeSummary,
   activeShift,
   setActiveShift,
+  checkHourStatus,
   handleAddHour,
   handleUpdateMetric,
   handleUpdateStartRevenue,

@@ -201,6 +201,7 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
       {/* 1. SCENARIOS SELECTOR VIEW */}
           {!sessionActive && (
             <RoleplayConfiguration 
+              apiKey={apiKey}
               allScenarios={allScenarios}
               selectedScenario={selectedScenario}
               setSelectedScenario={setSelectedScenario}
@@ -224,6 +225,7 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
 
           {sessionActive && !evaluation && (
             <RoleplayActiveSession 
+              apiKey={apiKey}
               allScenarios={allScenarios}
               selectedScenario={selectedScenario}
               setSelectedScenario={setSelectedScenario}
@@ -247,6 +249,7 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
 
           {evaluation && (
             <RoleplayResults 
+              apiKey={apiKey}
               allScenarios={allScenarios}
               selectedScenario={selectedScenario}
               setSelectedScenario={setSelectedScenario}

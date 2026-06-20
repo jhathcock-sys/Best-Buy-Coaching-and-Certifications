@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeft, Send, Users, ShieldCheck, Star, Award, CheckCircle2, ChevronRight, MessageSquare, PlusCircle, User, Loader2, Sparkles, RefreshCw, XCircle } from 'lucide-react';
 
 export default function RoleplayActiveSession({ 
+  apiKey,
   allScenarios,
   selectedScenario,
   setSelectedScenario,

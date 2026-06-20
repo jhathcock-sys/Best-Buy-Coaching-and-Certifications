@@ -321,6 +321,7 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
   return {
     currentStep, setCurrentStep,
     selectedEmpId, setSelectedEmpId,
+    handleSelectEmployee,
     department, setDepartment,
     isGenerating, setIsGenerating,
     checklist, setChecklist,
@@ -328,7 +329,7 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
     customPersona, setCustomPersona,
     notes, setNotes,
     coachingInsight, setCoachingInsight,
-    handleGenerateCoaching: handleCompileAndLog,
-    handleComplete
+    handleGenerateCoaching: generateActionPlan,
+    handleComplete: handleCompileAndLog
   };
 }

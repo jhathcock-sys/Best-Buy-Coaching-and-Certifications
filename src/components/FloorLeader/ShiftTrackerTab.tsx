@@ -106,6 +106,7 @@ export default function ShiftTrackerTab({ activeShift, setActiveShift, roster = 
   activeSummary={activeSummary}
   activeShift={activeShift}
   setActiveShift={setActiveShift}
+  checkHourStatus={checkHourStatus}
   handleAddHour={handleAddHour}
   handleUpdateMetric={handleUpdateMetric}
   handleUpdateStartRevenue={handleUpdateStartRevenue}

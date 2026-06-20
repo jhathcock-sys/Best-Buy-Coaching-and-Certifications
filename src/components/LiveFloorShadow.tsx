@@ -120,7 +120,7 @@ export default function LiveFloorShadow({
                 setNotes={setNotes}
                 isGenerating={isGenerating}
                 setIsGenerating={setIsGenerating}
-                generateActionPlan={generateActionPlan}
+                handleGenerateCoaching={handleGenerateCoaching}
                 activeEmployee={activeEmployee}
               />
             )}
@@ -144,7 +144,7 @@ export default function LiveFloorShadow({
                 setNotes={setNotes}
                 isGenerating={isGenerating}
                 setIsGenerating={setIsGenerating}
-                handleGenerateCoaching={generateActionPlan}
+                handleGenerateCoaching={handleGenerateCoaching}
                 coachingInsight={coachingInsight}
                 setCoachingInsight={setCoachingInsight}
               />
@@ -169,7 +169,7 @@ export default function LiveFloorShadow({
                 setNotes={setNotes}
                 isGenerating={isGenerating}
                 setIsGenerating={setIsGenerating}
-                handleGenerateCoaching={generateActionPlan}
+                handleGenerateCoaching={handleGenerateCoaching}
                 coachingInsight={coachingInsight}
                 setCoachingInsight={setCoachingInsight}
                 handleCopyInsight={handleCopyInsight}

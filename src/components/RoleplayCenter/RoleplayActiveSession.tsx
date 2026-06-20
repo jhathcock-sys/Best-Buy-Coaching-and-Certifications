@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Send, Users, ShieldCheck, Star, Award, CheckCircle2, ChevronRight, MessageSquare, PlusCircle, User, Loader2, Sparkles, RefreshCw, XCircle } from 'lucide-react';
+import { ArrowLeft, Send, Users, ShieldCheck, Star, Award, CheckCircle2, ChevronRight, MessageSquare, PlusCircle, User, Loader2, Sparkles, RefreshCw, XCircle, BookOpen } from 'lucide-react';
 
 export default function RoleplayActiveSession({ 
   apiKey,
@@ -23,7 +23,9 @@ export default function RoleplayActiveSession({
   roster,
   completedSteps,
   currentActiveStep,
-  isEvaluating
+  isEvaluating,
+  setSessionActive,
+  stepHint
  }) {
   return (
     <>
@@ -146,7 +148,7 @@ export default function RoleplayActiveSession({
                     </div>
                   </div>
                 )}
-                <div ref={chatBottomRef} />
+                <div ref={messagesEndRef} />
               </div>
 
               <div className="chat-input-bar">
@@ -154,13 +156,13 @@ export default function RoleplayActiveSession({
                   type="text" 
                   className="chat-input" 
                   placeholder="Type your response to the customer..."
-                  value={inputVal}
-                  onChange={(e) => setInputVal(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
                   disabled={isLoading}
                 />
-                <button className="btn btn-primary btn-icon" onClick={handleSend} disabled={isLoading}>
-                  <Send size={16} />
+                <button className="btn btn-primary btn-icon" onClick={sendMessage} disabled={isLoading}>
+                  <Send size={18} />
                 </button>
               </div>
             </div>

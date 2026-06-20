@@ -33,7 +33,9 @@ export default function ShiftTrackerSidebar({
   getEmployeesOnShift,
   handleLogFloorWin,
   handleLogOcvObservation,
-  ocvSuccessMsg
+  ocvSuccessMsg,
+  roster,
+  getShiftLeaderboard
  }: any) {
   return (
     <>

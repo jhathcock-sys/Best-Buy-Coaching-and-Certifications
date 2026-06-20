@@ -217,6 +217,8 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
               completedSteps={completedSteps}
               currentActiveStep={currentActiveStep}
               isEvaluating={isEvaluating}
+              setSessionActive={setSessionActive}
+              stepHint={stepHint}
               sendMessage={handleSend}
               isLoading={isLoading}
               messagesEndRef={chatBottomRef}
@@ -245,6 +247,8 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
               completedSteps={completedSteps}
               currentActiveStep={currentActiveStep}
               isEvaluating={isEvaluating}
+              setSessionActive={setSessionActive}
+              stepHint={stepHint}
               sendMessage={handleSend}
               isLoading={isLoading}
               messagesEndRef={chatBottomRef}
@@ -273,6 +277,8 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
               completedSteps={completedSteps}
               currentActiveStep={currentActiveStep}
               isEvaluating={isEvaluating}
+              setSessionActive={setSessionActive}
+              stepHint={stepHint}
               sendMessage={handleSend}
               isLoading={isLoading}
               messagesEndRef={chatBottomRef}

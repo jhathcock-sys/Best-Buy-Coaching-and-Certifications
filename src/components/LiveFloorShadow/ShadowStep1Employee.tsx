@@ -21,7 +21,9 @@ export default function ShadowStep1Employee({
   handleGenerateCoaching,
   coachingInsight,
   setCoachingInsight,
-  handleComplete
+  handleComplete,
+  handleSelectEmployee,
+  activeEmployee
  }) {
   return (
     <>
@@ -71,21 +73,21 @@ export default function ShadowStep1Employee({
                   </div>
                 </div>
 
-                {selectedEmployee && (
+                {activeEmployee && (
                   <div style={{ marginTop: '1.5rem', padding: '1.25rem', borderRadius: '12px', background: 'rgba(0,70,190,0.06)', border: '1px solid rgba(0,70,190,0.15)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ fontWeight: 'bold', fontSize: '1rem', color: '#fff' }}>{selectedEmployee.name}</span>
-                      <span className="tag-pill tag-pill-active">{selectedEmployee.dept}</span>
+                      <span style={{ fontWeight: 'bold', fontSize: '1rem', color: '#fff' }}>{activeEmployee.name}</span>
+                      <span className="tag-pill tag-pill-active">{activeEmployee.dept}</span>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                      <div>Hours: <strong style={{ color: '#fff' }}>{selectedEmployee.hours}</strong></div>
-                      <div>Memberships: <strong style={{ color: '#fff' }}>{selectedEmployee.memberships}</strong></div>
-                      <div>BBY Cards: <strong style={{ color: '#fff' }}>{selectedEmployee.creditCards}</strong></div>
-                      <div>GSP Attach: <strong style={{ color: '#fff' }}>{selectedEmployee.warranty}%</strong></div>
+                      <div>Hours: <strong style={{ color: '#fff' }}>{activeEmployee.hours}</strong></div>
+                      <div>Memberships: <strong style={{ color: '#fff' }}>{activeEmployee.memberships}</strong></div>
+                      <div>BBY Cards: <strong style={{ color: '#fff' }}>{activeEmployee.creditCards}</strong></div>
+                      <div>GSP Attach: <strong style={{ color: '#fff' }}>{activeEmployee.warranty}%</strong></div>
                     </div>
-                    {selectedEmployee.gap && selectedEmployee.gap !== 'None' && (
+                    {activeEmployee.gap && activeEmployee.gap !== 'None' && (
                       <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: '#ffe600' }}>
-                        <AlertCircle size={14} /> Gap focus: {selectedEmployee.gap}
+                        <AlertCircle size={14} /> Gap focus: {activeEmployee.gap}
                       </div>
                     )}
                   </div>

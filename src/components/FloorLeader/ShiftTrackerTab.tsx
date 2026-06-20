@@ -173,6 +173,8 @@ export default function ShiftTrackerTab({ activeShift, setActiveShift, roster = 
   handleLogFloorWin={handleLogFloorWin}
   handleLogOcvObservation={handleLogOcvObservation}
   ocvSuccessMsg={ocvSuccessMsg}
+  roster={roster}
+  getShiftLeaderboard={getShiftLeaderboard}
  />
           </div>
           

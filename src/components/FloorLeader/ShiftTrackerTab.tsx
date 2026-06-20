@@ -1,10 +1,24 @@
-// @ts-nocheck
-import { Trophy, CheckCircle2, XCircle, Plus, Minus, Trash2, Flame, Undo } from 'lucide-react';
+import React, { useState } from 'react';
+import { Trophy, CheckCircle2, XCircle, Plus, Minus, Trash2, Flame, Undo, TrendingUp, AlertCircle } from 'lucide-react';
 import ShiftTrackerGoals from './ShiftTrackerGoals';
 import ShiftTrackerHourlyLog from './ShiftTrackerHourlyLog';
 import ShiftTrackerSidebar from './ShiftTrackerSidebar';
 
 export default function ShiftTrackerTab({ activeShift, setActiveShift, roster = [], handleAddHour, handleUpdateMetric, handleUpdateStartRevenue, handleUpdateEndRevenue, handleRemoveHour, handleLogFloorWin, selectedEmpId, setSelectedEmpId, winType, setWinType, ocvEmpId, setOcvEmpId, ocvConnect, setOcvConnect, ocvRecommend, setOcvRecommend, ocvProtect, setOcvProtect, ocvClose, setOcvClose, ocvNotes, setOcvNotes, handleLogOcvObservation, ocvSuccessMsg, handleUndoWin }) {
+  const [currentHourKey, setCurrentHourKey] = useState(null);
+  const [selectedLog, setSelectedLog] = useState(null);
+  const [newObservation, setNewObservation] = useState('');
+  const [newWinMsg, setNewWinMsg] = useState('');
+  const [winFeed, setWinFeed] = useState([]);
+
+  const handleSaveHourlyLog = () => {};
+  const handleSaveObservation = () => {};
+  const handleLogWin = () => {};
+  const renderPaceIndicator = (current, target) => {
+    if (current >= target) return <Flame size={14} color="var(--success)" />;
+    if (current >= target * 0.8) return <TrendingUp size={14} color="var(--bby-yellow)" />;
+    return <AlertCircle size={14} color="var(--danger)" />;
+  };
 
   const getEmployeesOnShift = () => {
     if (!activeShift || !activeShift.hours || activeShift.hours.length === 0) return [];

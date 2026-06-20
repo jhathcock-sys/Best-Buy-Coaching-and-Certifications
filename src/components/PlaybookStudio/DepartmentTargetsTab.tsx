@@ -4,6 +4,26 @@ import { Compass, Check } from 'lucide-react';
 export default function DepartmentTargetsTab({
   selectedDept, setSelectedDept, deptGoals, handleSaveDeptGoals
 }) {
+  const [editedGoals, setEditedGoals] = React.useState(deptGoals || {});
+
+  React.useEffect(() => {
+    if (deptGoals) setEditedGoals(deptGoals);
+  }, [deptGoals]);
+
+  const handleGoalChange = (key, value) => {
+    const updated = {
+      ...editedGoals,
+      [selectedDept]: {
+        ...(editedGoals[selectedDept] || {}),
+        [key]: value
+      }
+    };
+    setEditedGoals(updated);
+    if (handleSaveDeptGoals) {
+      handleSaveDeptGoals(updated);
+    }
+  };
+
   const deptKeys = [
     'Computers', 'Home Theater', 'Mobile', 'Appliances', 'Smart Home', 'Digital Imaging', 'Front End'
   ];

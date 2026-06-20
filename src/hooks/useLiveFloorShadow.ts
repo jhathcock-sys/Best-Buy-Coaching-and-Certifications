@@ -59,6 +59,7 @@ export function useLiveFloorShadow({
   const [gapDetails, setGapDetails] = useState('');
   const [followUpAction, setFollowUpAction] = useState('');
   const [followUpDate, setFollowUpDate] = useState('');
+  const [notes, setNotes] = useState('');
 
   // UI status
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);

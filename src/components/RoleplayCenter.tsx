@@ -201,7 +201,7 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
       {/* 1. SCENARIOS SELECTOR VIEW */}
           {!sessionActive && (
             <RoleplayConfiguration 
-              scenarios={scenarios}
+              allScenarios={allScenarios}
               selectedScenario={selectedScenario}
               setSelectedScenario={setSelectedScenario}
               complexity={complexity}
@@ -224,7 +224,7 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
 
           {sessionActive && !evaluation && (
             <RoleplayActiveSession 
-              scenarios={scenarios}
+              allScenarios={allScenarios}
               selectedScenario={selectedScenario}
               setSelectedScenario={setSelectedScenario}
               complexity={complexity}
@@ -247,7 +247,7 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
 
           {evaluation && (
             <RoleplayResults 
-              scenarios={scenarios}
+              allScenarios={allScenarios}
               selectedScenario={selectedScenario}
               setSelectedScenario={setSelectedScenario}
               complexity={complexity}

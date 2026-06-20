@@ -212,6 +212,7 @@ export default function PlaybookStudio({
           customSystemPrompt={customSystemPrompt} 
           setCustomSystemPrompt={setCustomSystemPrompt} 
           playbookSettings={playbookSettings}
+          onSaveSettings={onSaveSettings}
         />
       )}
 

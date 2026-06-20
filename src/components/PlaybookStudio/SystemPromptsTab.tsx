@@ -1,8 +1,32 @@
 import React from 'react';
 import { Sparkles, BookOpen, Trash2 } from 'lucide-react';
 
-export default function SystemPromptsTab({ customSystemPrompt, setCustomSystemPrompt, playbookSettings }) {
+export default function SystemPromptsTab({ customSystemPrompt, setCustomSystemPrompt, playbookSettings, onSaveSettings }) {
+  const [isAddingLog, setIsAddingLog] = React.useState(false);
+  const [newLogLabel, setNewLogLabel] = React.useState('');
+  const [newLogBody, setNewLogBody] = React.useState('');
+
   const trainingLogs = playbookSettings?.trainingLogs || [];
+
+  const handleAddTrainingLog = () => {
+    if (!newLogLabel.trim() || !newLogBody.trim()) return;
+    const newLogs = [...trainingLogs, { label: newLogLabel, content: newLogBody }];
+    if (onSaveSettings) {
+      onSaveSettings({ ...playbookSettings, trainingLogs: newLogs });
+    }
+    setNewLogLabel('');
+    setNewLogBody('');
+    setIsAddingLog(false);
+  };
+
+  const handleRemoveTrainingLog = (index) => {
+    const newLogs = [...trainingLogs];
+    newLogs.splice(index, 1);
+    if (onSaveSettings) {
+      onSaveSettings({ ...playbookSettings, trainingLogs: newLogs });
+    }
+  };
+
   return (
     <>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '950px', margin: '0 auto', width: '100%' }}>

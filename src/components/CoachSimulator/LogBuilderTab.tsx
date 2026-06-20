@@ -259,6 +259,21 @@ Let's crush it! Let me know if you have any questions or need me to jump in and 
           isPausedSpeech={isPausedSpeech}
         />
       </div>
+
+      {/* Right Column: Dynamic Preview */}
+      <LogPreview 
+        isGeneratingLog={isGeneratingLog}
+        outputViewMode={outputViewMode}
+        setOutputViewMode={setOutputViewMode}
+        coachingLogText={compileCoachingLogText()}
+        huddleScriptText={compileHuddleScriptText()}
+        copySuccess={copySuccess}
+        handleCopyToClipboard={handleCopyToClipboard}
+        isPlayingSpeech={isPlayingSpeech}
+        isPausedSpeech={isPausedSpeech}
+        handleSpeech={handleSpeech}
+        handleStopSpeech={handleStopSpeech}
+      />
     </div>
   );
 }

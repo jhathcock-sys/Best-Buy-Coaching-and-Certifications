@@ -109,26 +109,70 @@ export default function LiveFloorShadow({
                 setSelectedEmpId={setSelectedEmpId}
                 department={department}
                 setDepartment={setDepartment}
+                setCurrentStep={setCurrentStep}
+                checklist={checklist}
+                setChecklist={setChecklist}
                 customerPersona={customerPersona}
                 setCustomerPersona={setCustomerPersona}
                 customPersona={customPersona}
                 setCustomPersona={setCustomPersona}
+                notes={notes}
+                setNotes={setNotes}
+                isGenerating={isGenerating}
+                setIsGenerating={setIsGenerating}
+                generateActionPlan={generateActionPlan}
+                activeEmployee={activeEmployee}
               />
             )}
 
             {/* Step 2: Observation Checklist */}
             {currentStep === 2 && (
               <ShadowStep2Observation 
+                roster={roster}
+                selectedEmpId={selectedEmpId}
+                setSelectedEmpId={setSelectedEmpId}
+                department={department}
+                setDepartment={setDepartment}
+                setCurrentStep={setCurrentStep}
                 checklist={checklist}
                 setChecklist={setChecklist}
+                customerPersona={customerPersona}
+                setCustomerPersona={setCustomerPersona}
+                customPersona={customPersona}
+                setCustomPersona={setCustomPersona}
+                notes={notes}
+                setNotes={setNotes}
+                isGenerating={isGenerating}
+                setIsGenerating={setIsGenerating}
+                handleGenerateCoaching={generateActionPlan}
+                coachingInsight={coachingInsight}
+                setCoachingInsight={setCoachingInsight}
               />
             )}
 
-            {/* Step 3: Coaching Insight */}
+            {/* Step 3: Coaching Action Plan */}
             {currentStep === 3 && (
               <ShadowStep3Coaching 
+                roster={roster}
+                selectedEmpId={selectedEmpId}
+                setSelectedEmpId={setSelectedEmpId}
+                department={department}
+                setDepartment={setDepartment}
+                setCurrentStep={setCurrentStep}
+                checklist={checklist}
+                setChecklist={setChecklist}
+                customerPersona={customerPersona}
+                setCustomerPersona={setCustomerPersona}
+                customPersona={customPersona}
+                setCustomPersona={setCustomPersona}
                 notes={notes}
                 setNotes={setNotes}
+                isGenerating={isGenerating}
+                setIsGenerating={setIsGenerating}
+                handleGenerateCoaching={generateActionPlan}
+                coachingInsight={coachingInsight}
+                setCoachingInsight={setCoachingInsight}
+                handleCopyInsight={handleCopyInsight}
               />
             )}
             

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, BookOpen } from 'lucide-react';
+import { Sparkles, BookOpen, Trash2 } from 'lucide-react';
 
 export default function SystemPromptsTab({ customSystemPrompt, setCustomSystemPrompt, playbookSettings }) {
   const trainingLogs = playbookSettings?.trainingLogs || [];

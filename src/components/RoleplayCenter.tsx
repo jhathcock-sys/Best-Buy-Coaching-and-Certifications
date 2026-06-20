@@ -151,6 +151,14 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
     }
   };
 
+  const saveAndReturn = () => {
+    if (evaluation && onCompleteRoleplay) {
+      onCompleteRoleplay(evaluation);
+    }
+    setSessionActive(false);
+    setSelectedScenario(null);
+  };
+
   const getStepHint = () => {
     switch (currentActiveStep) {
       case 'connect':
@@ -202,15 +210,15 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
               setCustomerTone={setCustomerTone}
               startRoleplay={startRoleplay}
               messages={messages}
-              inputText={inputText}
-              setInputText={setInputText}
-              sendMessage={sendMessage}
+
+              setInputText={setInputVal}
+              sendMessage={handleSend}
               isLoading={isLoading}
-              messagesEndRef={messagesEndRef}
-              endRoleplay={endRoleplay}
+              messagesEndRef={chatBottomRef}
+              endRoleplay={endAndEvaluate}
               evaluation={evaluation}
               saveAndReturn={saveAndReturn}
-              roster={roster}
+              roster={[]}
  />
           )}
 
@@ -225,15 +233,15 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
               setCustomerTone={setCustomerTone}
               startRoleplay={startRoleplay}
               messages={messages}
-              inputText={inputText}
-              setInputText={setInputText}
-              sendMessage={sendMessage}
+
+              setInputText={setInputVal}
+              sendMessage={handleSend}
               isLoading={isLoading}
-              messagesEndRef={messagesEndRef}
-              endRoleplay={endRoleplay}
+              messagesEndRef={chatBottomRef}
+              endRoleplay={endAndEvaluate}
               evaluation={evaluation}
               saveAndReturn={saveAndReturn}
-              roster={roster}
+              roster={[]}
  />
           )}
 
@@ -248,15 +256,15 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
               setCustomerTone={setCustomerTone}
               startRoleplay={startRoleplay}
               messages={messages}
-              inputText={inputText}
-              setInputText={setInputText}
-              sendMessage={sendMessage}
+
+              setInputText={setInputVal}
+              sendMessage={handleSend}
               isLoading={isLoading}
-              messagesEndRef={messagesEndRef}
-              endRoleplay={endRoleplay}
+              messagesEndRef={chatBottomRef}
+              endRoleplay={endAndEvaluate}
               evaluation={evaluation}
               saveAndReturn={saveAndReturn}
-              roster={roster}
+              roster={[]}
  />
           )}
     </div>

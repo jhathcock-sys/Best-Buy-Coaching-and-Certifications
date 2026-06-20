@@ -4,6 +4,9 @@ import { Compass, Check } from 'lucide-react';
 export default function DepartmentTargetsTab({
   selectedDept, setSelectedDept, deptGoals, handleSaveDeptGoals
 }) {
+  const deptKeys = [
+    'Computers', 'Home Theater', 'Mobile', 'Appliances', 'Smart Home', 'Digital Imaging', 'Front End'
+  ];
   return (
     <>
         <div style={{ maxWidth: '850px', margin: '0 auto', width: '100%' }}>

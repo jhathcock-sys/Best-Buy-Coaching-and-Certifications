@@ -153,6 +153,26 @@ export default function ShiftTrackerTab({ activeShift, setActiveShift, roster = 
   handleLogWin={handleLogWin}
   renderPaceIndicator={renderPaceIndicator}
   handleUndoWin={handleUndoWin}
+  selectedEmpId={selectedEmpId}
+  setSelectedEmpId={setSelectedEmpId}
+  winType={winType}
+  setWinType={setWinType}
+  ocvEmpId={ocvEmpId}
+  setOcvEmpId={setOcvEmpId}
+  ocvConnect={ocvConnect}
+  setOcvConnect={setOcvConnect}
+  ocvRecommend={ocvRecommend}
+  setOcvRecommend={setOcvRecommend}
+  ocvProtect={ocvProtect}
+  setOcvProtect={setOcvProtect}
+  ocvClose={ocvClose}
+  setOcvClose={setOcvClose}
+  ocvNotes={ocvNotes}
+  setOcvNotes={setOcvNotes}
+  getEmployeesOnShift={getEmployeesOnShift}
+  handleLogFloorWin={handleLogFloorWin}
+  handleLogOcvObservation={handleLogOcvObservation}
+  ocvSuccessMsg={ocvSuccessMsg}
  />
           </div>
           

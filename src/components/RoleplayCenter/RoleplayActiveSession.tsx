@@ -20,7 +20,10 @@ export default function RoleplayActiveSession({
   endRoleplay,
   evaluation,
   saveAndReturn,
-  roster
+  roster,
+  completedSteps,
+  currentActiveStep,
+  isEvaluating
  }) {
   return (
     <>

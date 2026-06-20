@@ -212,7 +212,11 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
               startRoleplay={startRoleplay}
               messages={messages}
 
+              inputText={inputVal}
               setInputText={setInputVal}
+              completedSteps={completedSteps}
+              currentActiveStep={currentActiveStep}
+              isEvaluating={isEvaluating}
               sendMessage={handleSend}
               isLoading={isLoading}
               messagesEndRef={chatBottomRef}
@@ -236,7 +240,11 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
               startRoleplay={startRoleplay}
               messages={messages}
 
+              inputText={inputVal}
               setInputText={setInputVal}
+              completedSteps={completedSteps}
+              currentActiveStep={currentActiveStep}
+              isEvaluating={isEvaluating}
               sendMessage={handleSend}
               isLoading={isLoading}
               messagesEndRef={chatBottomRef}
@@ -260,7 +268,11 @@ export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, c
               startRoleplay={startRoleplay}
               messages={messages}
 
+              inputText={inputVal}
               setInputText={setInputVal}
+              completedSteps={completedSteps}
+              currentActiveStep={currentActiveStep}
+              isEvaluating={isEvaluating}
               sendMessage={handleSend}
               isLoading={isLoading}
               messagesEndRef={chatBottomRef}

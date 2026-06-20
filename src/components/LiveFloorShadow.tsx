@@ -7,6 +7,7 @@ import ShadowStep3Coaching from './LiveFloorShadow/ShadowStep3Coaching';
 import { useLiveFloorShadow } from '../hooks/useLiveFloorShadow';
 import { generateCoachingLogGemini } from '../services/ai';
 
+
 export default function LiveFloorShadow({ 
   roster = [], 
   onLogCoachingSession, 
@@ -20,6 +21,8 @@ export default function LiveFloorShadow({
   const {
     currentStep, setCurrentStep,
     selectedEmpId, setSelectedEmpId,
+    selectedEmployee,
+    handleSelectEmployee,
     department, setDepartment,
     isGenerating, setIsGenerating,
     checklist, setChecklist,
@@ -125,7 +128,7 @@ export default function LiveFloorShadow({
                 isGenerating={isGenerating}
                 setIsGenerating={setIsGenerating}
                 handleGenerateCoaching={handleGenerateCoaching}
-                activeEmployee={activeEmployee}
+                activeEmployee={selectedEmployee}
               />
             )}
 

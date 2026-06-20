@@ -321,6 +321,7 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
   return {
     currentStep, setCurrentStep,
     selectedEmpId, setSelectedEmpId,
+    selectedEmployee,
     handleSelectEmployee,
     department, setDepartment,
     isGenerating, setIsGenerating,

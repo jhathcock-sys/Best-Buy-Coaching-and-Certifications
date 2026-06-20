@@ -18,7 +18,22 @@ export default function ShiftTrackerSidebar({
   handleSaveObservation,
   handleLogWin,
   renderPaceIndicator,
-  handleUndoWin
+  handleUndoWin,
+  selectedEmpId,
+  setSelectedEmpId,
+  winType,
+  setWinType,
+  ocvEmpId,
+  setOcvEmpId,
+  ocvConnect, setOcvConnect,
+  ocvRecommend, setOcvRecommend,
+  ocvProtect, setOcvProtect,
+  ocvClose, setOcvClose,
+  ocvNotes, setOcvNotes,
+  getEmployeesOnShift,
+  handleLogFloorWin,
+  handleLogOcvObservation,
+  ocvSuccessMsg
  }: any) {
   return (
     <>

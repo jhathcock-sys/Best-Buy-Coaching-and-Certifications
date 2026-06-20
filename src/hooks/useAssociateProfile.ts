@@ -59,7 +59,21 @@ export function useAssociateProfile(isOpen, employee, rosterHistory, coachingLog
 
   
 
-  if (!isOpen || !employee) return null;
+  if (!isOpen || !employee) return {
+    activeTab, setActiveTab,
+    playingLogId, setPlayingLogId,
+    expandedLogId, setExpandedLogId,
+    isGeneratingReview, setIsGeneratingReview,
+    generatedReview, setGeneratedReview,
+    handlePlayTTS,
+    handleGenerateReview,
+    sortedPeriods: [],
+    historyPoints: [],
+    activeHistoryPoints: [],
+    associateLogs: [],
+    associateTasks: [],
+    activeGoals: {}
+  };
 
   // 1. Gather historical data for this associate
   const sortedPeriods = Object.keys(rosterHistory).sort((a, b) => {

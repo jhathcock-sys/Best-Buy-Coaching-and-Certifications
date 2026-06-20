@@ -5,7 +5,7 @@ import { Clock, Plus, Minus, Power, Trash2, Calendar, User, CheckCircle2, XCircl
 import { useFloorLeaderTracker } from '../hooks/useFloorLeaderTracker';
 import FloorLeaderHeader from './FloorLeaderTracker/FloorLeaderHeader';
 import FloorLeaderTabs from './FloorLeaderTracker/FloorLeaderTabs';
-// HistoricalShiftsArchive is already imported below
+import HistoricalShiftsArchive from './FloorLeaderTracker/HistoricalShiftsArchive';
 import { useApp } from '../context/AppContext';
 import { useStore } from '../store/useStore';
 import ZoneScheduler from './ZoneScheduler';

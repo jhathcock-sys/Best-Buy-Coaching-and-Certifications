@@ -48,8 +48,9 @@ export function useStoreRoster(roster) {
 
   const filteredRoster = useMemo(() => {
     return roster.filter(emp => {
-      const matchesSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesDept = activeDept === 'All' || emp.dept === activeDept;
+      if (!emp) return false;
+      const matchesSearch = emp?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
+      const matchesDept = activeDept === 'All' || emp?.dept === activeDept;
       return matchesSearch && matchesDept;
     });
   }, [roster, searchTerm, activeDept]);

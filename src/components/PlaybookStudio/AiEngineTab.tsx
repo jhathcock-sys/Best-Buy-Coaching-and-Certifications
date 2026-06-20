@@ -1,5 +1,5 @@
 import React from 'react';
-import { Key } from 'lucide-react';
+import { Key, ShieldAlert, Cpu, Sparkles } from 'lucide-react';
 
 export default function AiEngineTab({ aiMode, setAiMode, localApiKey, setLocalApiKey, playbookSettings, storePin, setStorePin }) {
   return (

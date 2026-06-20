@@ -60,6 +60,7 @@ export function useLiveFloorShadow({
   const [followUpAction, setFollowUpAction] = useState('');
   const [followUpDate, setFollowUpDate] = useState('');
   const [notes, setNotes] = useState('');
+  const [coachingInsight, setCoachingInsight] = useState('');
 
   // UI status
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);

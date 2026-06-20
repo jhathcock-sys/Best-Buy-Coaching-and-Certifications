@@ -24,6 +24,12 @@ export default function DepartmentTargetsTab({
     }
   };
 
+  const handleSaveGoals = () => {
+    if (handleSaveDeptGoals) {
+      handleSaveDeptGoals(editedGoals);
+    }
+  };
+
   const deptKeys = [
     'Computers', 'Home Theater', 'Mobile', 'Appliances', 'Smart Home', 'Digital Imaging', 'Front End'
   ];

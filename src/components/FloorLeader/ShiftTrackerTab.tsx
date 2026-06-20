@@ -84,9 +84,9 @@ export default function ShiftTrackerTab({ activeShift, setActiveShift, roster = 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               
           <ShiftTrackerGoals 
-
-
-
+  activeSummary={activeSummary}
+  activeShift={activeShift}
+  setActiveShift={setActiveShift}
   currentHourKey={currentHourKey}
   selectedLog={selectedLog}
   setSelectedLog={setSelectedLog}
@@ -103,9 +103,14 @@ export default function ShiftTrackerTab({ activeShift, setActiveShift, roster = 
   handleUndoWin={handleUndoWin}
  />
           <ShiftTrackerHourlyLog 
-
-
-
+  activeSummary={activeSummary}
+  activeShift={activeShift}
+  setActiveShift={setActiveShift}
+  handleAddHour={handleAddHour}
+  handleUpdateMetric={handleUpdateMetric}
+  handleUpdateStartRevenue={handleUpdateStartRevenue}
+  handleUpdateEndRevenue={handleUpdateEndRevenue}
+  handleRemoveHour={handleRemoveHour}
   currentHourKey={currentHourKey}
   selectedLog={selectedLog}
   setSelectedLog={setSelectedLog}
@@ -122,9 +127,9 @@ export default function ShiftTrackerTab({ activeShift, setActiveShift, roster = 
   handleUndoWin={handleUndoWin}
  />
           <ShiftTrackerSidebar 
-
-
-
+  activeSummary={activeSummary}
+  activeShift={activeShift}
+  setActiveShift={setActiveShift}
   currentHourKey={currentHourKey}
   selectedLog={selectedLog}
   setSelectedLog={setSelectedLog}

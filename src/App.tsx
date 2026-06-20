@@ -394,130 +394,136 @@ function AppContent() {
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
         }>
-          <Routes>
-            <Route path="/" element={
-              <Dashboard 
-                metrics={metrics}
-                recentSessions={recentSessions}
-                onNavigate={setActiveView}
-                roster={rosterHistory[activePeriod] || []}
-                followUpTasks={followUpTasks}
-                onCompleteFollowUpTask={completeFollowUpTask}
-                deptGoals={deptGoals}
-                onCoachEmployee={handleCoachEmployeeFromRoster}
-                onCreateLog={handleCreateLogFromRoster}
-                onShadowEmployee={handleShadowEmployeeFromRoster}
-                floorLeaderShifts={floorLeaderShifts}
-                coachingLogs={coachingLogs}
-                activePeriod={activePeriod}
-                rosterHistory={rosterHistory}
-                activeManager={activeManager}
-              />
-            } />
-            <Route path="/shadow" element={
-              <LiveFloorShadow 
-                roster={rosterHistory[activePeriod] || []}
-                onLogCoachingSession={logCoachingSession}
-                onAddFollowUpTask={addFollowUpTask}
-                onNavigate={setActiveView}
-                preselectedEmployee={prefillShadowEmployee}
-                clearPreselectedEmployee={() => setPrefillShadowEmployee(null)}
-                playbookSettings={playbookSettings}
-                apiKey={apiKey}
-              />
-            } />
-            <Route path="/roster" element={
-              <StoreRoster 
-                roster={rosterHistory[activePeriod] || []}
-                activePeriod={activePeriod}
-                rosterHistory={rosterHistory}
-                onChangePeriod={changePeriod}
-                onCoachEmployee={handleCoachEmployeeFromRoster}
-                onCreateLog={handleCreateLogFromRoster}
-                deptGoals={deptGoals}
-                onUpdateEmployeeDept={updateEmployeeDept}
-                onAddEmployee={addEmployee}
-                onEditEmployee={editEmployee}
-                onDeleteEmployee={deleteEmployee}
-                onBulkImportEmployees={bulkImportEmployees}
-                onCreatePeriod={createPeriodArchive}
-                coachingLogs={coachingLogs}
-                followUpTasks={followUpTasks}
-                apiKey={apiKey}
-              />
-            } />
-            <Route path="/trends" element={<TrendReporting />} />
-            <Route path="/roleplay" element={
-              <RoleplayCenter 
-                playbookSettings={playbookSettings}
-                onCompleteRoleplay={completeRoleplay}
-                customScenarios={customScenarios}
-              />
-            } />
-            <Route path="/coach" element={
-              <CoachSimulator 
-                playbookSettings={playbookSettings}
-                customScenarios={customScenarios}
-                preselectedEmployee={selectedCoachingRosterEmployee}
-                clearPreselectedEmployee={() => setSelectedCoachingRosterEmployee(null)}
-                prefillBuilderData={prefillBuilderData}
-                clearPrefillBuilderData={() => setPrefillBuilderData(null)}
-                onImportScenario={importCustomScenario}
-                onLogCoachingSession={logCoachingSession}
-                coachingLogs={coachingLogs}
-                roster={rosterHistory[activePeriod] || []}
-                initialTab="sim"
-              />
-            } />
-            <Route path="/builder" element={
-              <CoachSimulator 
-                playbookSettings={playbookSettings}
-                customScenarios={customScenarios}
-                preselectedEmployee={selectedCoachingRosterEmployee}
-                clearPreselectedEmployee={() => setSelectedCoachingRosterEmployee(null)}
-                prefillBuilderData={prefillBuilderData}
-                clearPrefillBuilderData={() => setPrefillBuilderData(null)}
-                onImportScenario={importCustomScenario}
-                onLogCoachingSession={logCoachingSession}
-                coachingLogs={coachingLogs}
-                initialTab="builder"
-              />
-            } />
-            <Route path="/playbook" element={
-              <PlaybookStudio 
-                playbookSettings={playbookSettings}
-                onSaveSettings={saveSettings}
-                deptGoals={deptGoals}
-                onSaveDeptGoals={saveDeptGoals}
-                customScenarios={customScenarios}
-                onAddCustomScenario={importCustomScenario}
-                onDeleteCustomScenario={deleteCustomScenario}
-                rosterHistory={rosterHistory}
-                coachingLogs={coachingLogs}
-                followUpTasks={followUpTasks}
-                floorLeaderShifts={floorLeaderShifts}
-                managers={managers}
-                onSaveManagers={saveManagers}
-              />
-            } />
-            <Route path="/floorLeader" element={
-              <FloorLeaderTracker 
-                shifts={floorLeaderShifts}
-                onSaveShift={saveFloorLeaderShift}
-                onDeleteShift={deleteFloorLeaderShift}
-                roster={rosterHistory[activePeriod] || []}
-                activeManager={activeManager}
-                onAddEmployee={addEmployee}
-              />
-            } />
-            <Route path="/history" element={
-              <CoachingHistory 
-                coachingLogs={coachingLogs}
-                onDeleteLog={deleteCoachingLog}
-              />
-            } />
-            <Route path="*" element={<Dashboard metrics={metrics} recentSessions={recentSessions} onNavigate={setActiveView} roster={rosterHistory[activePeriod] || []} followUpTasks={followUpTasks} onCompleteFollowUpTask={completeFollowUpTask} deptGoals={deptGoals} onCoachEmployee={handleCoachEmployeeFromRoster} onCreateLog={handleCreateLogFromRoster} onShadowEmployee={handleShadowEmployeeFromRoster} floorLeaderShifts={floorLeaderShifts} coachingLogs={coachingLogs} activePeriod={activePeriod} rosterHistory={rosterHistory} activeManager={activeManager} />} />
-          </Routes>
+          {activeView === 'dashboard' && (
+            <Dashboard 
+              metrics={metrics}
+              recentSessions={recentSessions}
+              onNavigate={setActiveView}
+              roster={rosterHistory[activePeriod] || []}
+              followUpTasks={followUpTasks}
+              onCompleteFollowUpTask={completeFollowUpTask}
+              deptGoals={deptGoals}
+              onCoachEmployee={handleCoachEmployeeFromRoster}
+              onCreateLog={handleCreateLogFromRoster}
+              onShadowEmployee={handleShadowEmployeeFromRoster}
+              floorLeaderShifts={floorLeaderShifts}
+              coachingLogs={coachingLogs}
+              activePeriod={activePeriod}
+              rosterHistory={rosterHistory}
+              activeManager={activeManager}
+            />
+          )}
+
+          {activeView === 'roster' && (
+            <StoreRoster 
+              roster={rosterHistory[activePeriod] || []}
+              activePeriod={activePeriod}
+              rosterHistory={rosterHistory}
+              onChangePeriod={changePeriod}
+              onCoachEmployee={handleCoachEmployeeFromRoster}
+              onCreateLog={handleCreateLogFromRoster}
+              deptGoals={deptGoals}
+              onUpdateEmployeeDept={updateEmployeeDept}
+              onAddEmployee={addEmployee}
+              onEditEmployee={editEmployee}
+              onDeleteEmployee={deleteEmployee}
+              onBulkImportEmployees={bulkImportEmployees}
+              onCreatePeriod={createPeriodArchive}
+              coachingLogs={coachingLogs}
+              followUpTasks={followUpTasks}
+              apiKey={apiKey}
+            />
+          )}
+
+          {activeView === 'shadow' && (
+            <LiveFloorShadow 
+              roster={rosterHistory[activePeriod] || []}
+              onLogCoachingSession={logCoachingSession}
+              onAddFollowUpTask={addFollowUpTask}
+              onNavigate={setActiveView}
+              preselectedEmployee={prefillShadowEmployee}
+              clearPreselectedEmployee={() => setPrefillShadowEmployee(null)}
+              playbookSettings={playbookSettings}
+              apiKey={apiKey}
+            />
+          )}
+
+          {activeView === 'floorLeader' && (
+            <FloorLeaderTracker 
+              shifts={floorLeaderShifts}
+              onSaveShift={saveFloorLeaderShift}
+              onDeleteShift={deleteFloorLeaderShift}
+              roster={rosterHistory[activePeriod] || []}
+              activeManager={activeManager}
+              onAddEmployee={addEmployee}
+            />
+          )}
+
+          {activeView === 'trends' && <TrendReporting />}
+
+          {activeView === 'roleplay' && (
+            <RoleplayCenter 
+              playbookSettings={playbookSettings}
+              onCompleteRoleplay={completeRoleplay}
+              customScenarios={customScenarios}
+            />
+          )}
+
+          {activeView === 'coach' && (
+            <CoachSimulator 
+              playbookSettings={playbookSettings}
+              customScenarios={customScenarios}
+              preselectedEmployee={selectedCoachingRosterEmployee}
+              clearPreselectedEmployee={() => setSelectedCoachingRosterEmployee(null)}
+              prefillBuilderData={prefillBuilderData}
+              clearPrefillBuilderData={() => setPrefillBuilderData(null)}
+              onImportScenario={importCustomScenario}
+              onLogCoachingSession={logCoachingSession}
+              coachingLogs={coachingLogs}
+              roster={rosterHistory[activePeriod] || []}
+              initialTab="sim"
+            />
+          )}
+
+          {activeView === 'builder' && (
+            <CoachSimulator 
+              playbookSettings={playbookSettings}
+              customScenarios={customScenarios}
+              preselectedEmployee={selectedCoachingRosterEmployee}
+              clearPreselectedEmployee={() => setSelectedCoachingRosterEmployee(null)}
+              prefillBuilderData={prefillBuilderData}
+              clearPrefillBuilderData={() => setPrefillBuilderData(null)}
+              onImportScenario={importCustomScenario}
+              onLogCoachingSession={logCoachingSession}
+              coachingLogs={coachingLogs}
+              initialTab="builder"
+            />
+          )}
+
+          {activeView === 'history' && (
+            <CoachingHistory 
+              coachingLogs={coachingLogs}
+              onDeleteLog={deleteCoachingLog}
+            />
+          )}
+
+          {activeView === 'playbook' && (
+            <PlaybookStudio 
+              playbookSettings={playbookSettings}
+              onSaveSettings={saveSettings}
+              deptGoals={deptGoals}
+              onSaveDeptGoals={saveDeptGoals}
+              customScenarios={customScenarios}
+              onAddCustomScenario={importCustomScenario}
+              onDeleteCustomScenario={deleteCustomScenario}
+              rosterHistory={rosterHistory}
+              coachingLogs={coachingLogs}
+              followUpTasks={followUpTasks}
+              floorLeaderShifts={floorLeaderShifts}
+              managers={managers}
+              onSaveManagers={saveManagers}
+            />
+          )}
         </Suspense>
       </main>
 

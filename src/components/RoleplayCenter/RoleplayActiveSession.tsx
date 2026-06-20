@@ -76,7 +76,7 @@ export default function RoleplayActiveSession({
               <button className="btn btn-secondary" onClick={() => startRoleplay(selectedScenario)}>
                 <RefreshCw size={14} /> Restart
               </button>
-              <button className="btn btn-accent" onClick={endAndEvaluate} disabled={isLoading}>
+              <button className="btn btn-accent" onClick={endRoleplay} disabled={isLoading}>
                 Complete Session & Evaluate
               </button>
             </div>

@@ -21,6 +21,14 @@ export default function ShadowStep3Coaching({
   handleGenerateCoaching,
   coachingInsight,
   setCoachingInsight,
+  strengths,
+  setStrengths,
+  gapDetails,
+  setGapDetails,
+  followUpAction,
+  setFollowUpAction,
+  followUpDate,
+  setFollowUpDate,
   handleComplete
  }) {
   return (

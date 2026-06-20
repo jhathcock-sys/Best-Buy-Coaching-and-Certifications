@@ -329,7 +329,11 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
     customPersona, setCustomPersona,
     notes, setNotes,
     coachingInsight, setCoachingInsight,
-    handleGenerateCoaching: generateActionPlan,
+    strengths, setStrengths,
+    gapDetails, setGapDetails,
+    followUpAction, setFollowUpAction,
+    followUpDate, setFollowUpDate,
+    handleGenerateCoaching: generateGrowLog,
     handleComplete: handleCompileAndLog
   };
 }

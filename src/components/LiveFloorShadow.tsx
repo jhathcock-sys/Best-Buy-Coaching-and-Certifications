@@ -27,6 +27,10 @@ export default function LiveFloorShadow({
     customPersona, setCustomPersona,
     notes, setNotes,
     coachingInsight, setCoachingInsight,
+    strengths, setStrengths,
+    gapDetails, setGapDetails,
+    followUpAction, setFollowUpAction,
+    followUpDate, setFollowUpDate,
     handleGenerateCoaching,
     handleComplete
   } = useLiveFloorShadow({
@@ -172,6 +176,14 @@ export default function LiveFloorShadow({
                 handleGenerateCoaching={handleGenerateCoaching}
                 coachingInsight={coachingInsight}
                 setCoachingInsight={setCoachingInsight}
+                strengths={strengths}
+                setStrengths={setStrengths}
+                gapDetails={gapDetails}
+                setGapDetails={setGapDetails}
+                followUpAction={followUpAction}
+                setFollowUpAction={setFollowUpAction}
+                followUpDate={followUpDate}
+                setFollowUpDate={setFollowUpDate}
                 handleCopyInsight={handleCopyInsight}
               />
             )}

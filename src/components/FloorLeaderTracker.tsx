@@ -34,14 +34,6 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
     isWeekend, setIsWeekend,
     leaderTab, setLeaderTab,
     isImportModalOpen, setIsImportModalOpen,
-    selectedEmpId, setSelectedEmpId,
-    winType, setWinType,
-    ocvEmpId, setOcvEmpId,
-    ocvConnect, setOcvConnect,
-    ocvRecommend, setOcvRecommend,
-    ocvProtect, setOcvProtect,
-    ocvClose, setOcvClose,
-    ocvNotes, setOcvNotes,
     ocvSuccessMsg, setOcvSuccessMsg,
     handleStartShift,
     handleAddHour,
@@ -92,7 +84,7 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
             handleEndShift={handleEndShift} 
           />
 
-                    {leaderTab === 'tracker' && (
+          {leaderTab === 'tracker' && (
             <ShiftTrackerTab 
               activeShift={activeShift}
               setActiveShift={setActiveShift}
@@ -103,29 +95,11 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
               handleUpdateEndRevenue={handleUpdateEndRevenue}
               handleRemoveHour={handleRemoveHour}
               handleLogFloorWin={handleLogFloorWin}
-              selectedEmpId={selectedEmpId}
-              setSelectedEmpId={setSelectedEmpId}
-              winType={winType}
-              setWinType={setWinType}
-              ocvEmpId={ocvEmpId}
-              setOcvEmpId={setOcvEmpId}
-              ocvConnect={ocvConnect}
-              setOcvConnect={setOcvConnect}
-              ocvRecommend={ocvRecommend}
-              setOcvRecommend={setOcvRecommend}
-              ocvProtect={ocvProtect}
-              setOcvProtect={setOcvProtect}
-              ocvClose={ocvClose}
-              setOcvClose={setOcvClose}
-              ocvNotes={ocvNotes}
-              setOcvNotes={setOcvNotes}
               handleLogOcvObservation={handleLogOcvObservation}
               ocvSuccessMsg={ocvSuccessMsg}
               handleUndoWin={handleUndoWin}
             />
           )}
-
-
 
           {leaderTab === 'scheduler' && (
             /* Interactive Floor Zone & Break Scheduler Tab content */

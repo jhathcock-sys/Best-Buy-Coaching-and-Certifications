@@ -328,7 +328,7 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
     customPersona, setCustomPersona,
     notes, setNotes,
     coachingInsight, setCoachingInsight,
-    handleGenerateCoaching,
+    handleGenerateCoaching: handleCompileAndLog,
     handleComplete
   };
 }

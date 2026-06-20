@@ -36,15 +36,15 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       const currentSnapshots = get().dailySnapshots || {};
       const newSnapshots = { ...currentSnapshots, [dateKey]: metrics };
       set({ dailySnapshots: newSnapshots });
-      if (get().dbConnected) {
-        saveDailySnapshotToCloud(dateKey, metrics);
+      if (get().dbConnected && get().storeId) {
+        saveDailySnapshotToCloud(get().storeId, dateKey, metrics);
       }
     },
 
     saveDeptGoals: (newGoals) => {
       set({ deptGoals: newGoals });
-      if (get().dbConnected) {
-        saveDeptGoalsToCloud(newGoals);
+      if (get().dbConnected && get().storeId) {
+        saveDeptGoalsToCloud(get().storeId, newGoals);
       }
     },
 

@@ -1,7 +1,7 @@
 import React from 'react';
-import { Clock } from 'lucide-react';
+import { Clock, Trash2 } from 'lucide-react';
 
-export default function HistoricalShiftsArchive({ shifts }: any) {
+export default function HistoricalShiftsArchive({ shifts, onDeleteShift }: any) {
   return (
     <>
       {/* HISTORICAL SHIFTS LIST */}

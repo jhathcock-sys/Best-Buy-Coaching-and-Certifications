@@ -61,7 +61,7 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       const newHistory = { ...rosterHistory, [activePeriod]: updated };
       set({ rosterHistory: newHistory });
       if (dbConnected) {
-        saveRosterHistoryToCloud(updated, activePeriod);
+        saveRosterHistoryToCloud(get().storeId, updated, activePeriod);
       }
     },
 
@@ -79,7 +79,7 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       const newHistory = { ...rosterHistory, [activePeriod]: updated };
       set({ rosterHistory: newHistory });
       if (dbConnected) {
-        saveRosterHistoryToCloud(updated, activePeriod);
+        saveRosterHistoryToCloud(get().storeId, updated, activePeriod);
       }
     },
 
@@ -96,7 +96,7 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       
       set({ rosterHistory: newHistory });
       if (dbConnected) {
-        saveRosterHistoryToCloud(updated, activePeriod);
+        saveRosterHistoryToCloud(get().storeId, updated, activePeriod);
       }
     },
 
@@ -167,14 +167,14 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       const newHistory = { ...rosterHistory, [activePeriod]: updated };
       set({ rosterHistory: newHistory });
       if (dbConnected) {
-        saveRosterHistoryToCloud(updated, activePeriod);
+        saveRosterHistoryToCloud(get().storeId, updated, activePeriod);
       }
     },
 
     changePeriod: (p) => {
       set({ activePeriod: p });
       if (get().dbConnected) {
-        saveActivePeriodToCloud(p);
+        saveActivePeriodToCloud(get().storeId, p);
       }
     },
 
@@ -199,8 +199,8 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       const newHistory = { ...rosterHistory, [newPeriodName]: newRoster };
       set({ rosterHistory: newHistory, activePeriod: newPeriodName });
       if (dbConnected) {
-        saveRosterHistoryToCloud(newRoster, newPeriodName);
-        saveActivePeriodToCloud(newPeriodName);
+        saveRosterHistoryToCloud(get().storeId, newRoster, newPeriodName);
+        saveActivePeriodToCloud(get().storeId, newPeriodName);
       }
     }
   };

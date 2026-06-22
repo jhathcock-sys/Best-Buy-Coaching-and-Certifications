@@ -1,5 +1,5 @@
 import React from 'react';
-import { Send, Users, ShieldCheck, Star, Award, CheckCircle2, ChevronRight, MessageSquare, PlusCircle, User, Loader2, Sparkles, RefreshCw, XCircle } from 'lucide-react';
+import { Send, Users, ShieldCheck, Star, Award, CheckCircle2, ChevronRight, MessageSquare, PlusCircle, User, Loader2, Sparkles, RefreshCw, XCircle, CheckCircle } from 'lucide-react';
 
 export default function RoleplayResults({ 
   allScenarios,
@@ -19,7 +19,8 @@ export default function RoleplayResults({
   endRoleplay,
   evaluation,
   saveAndReturn,
-  roster
+  roster,
+  setActiveView
  }) {
   return (
     <>
@@ -45,7 +46,7 @@ export default function RoleplayResults({
             
             {/* Left Box: Score Dial & Passed Status */}
             <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '3rem 2rem' }}>
-              <div style={{ position: 'relative', width: '160px', height: '160px', display: 'flex', alignItems: 'center', justifyCenter: 'center', marginBottom: '1.5rem' }}>
+              <div style={{ position: 'relative', width: '160px', height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
                 <svg style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
                   <circle cx="80" cy="80" r="70" stroke="rgba(255,255,255,0.03)" strokeWidth="12" fill="none" />
                   <circle 

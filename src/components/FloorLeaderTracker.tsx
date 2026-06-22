@@ -25,6 +25,7 @@ export default function FloorLeaderTracker() {
   const roster = rosterHistory[activePeriod] || [];
   const shifts = useStore((state) => state.floorLeaderShifts) || [];
   const onSaveShift = useStore((state) => state.saveFloorLeaderShift);
+  const onDeleteShift = useStore((state) => state.deleteFloorLeaderShift);
   const onAddEmployee = useStore((state) => state.addEmployee);
   const apiKey = useStore((state) => state.apiKey);
   const [isHandoffModalOpen, setIsHandoffModalOpen] = useState(false);
@@ -167,7 +168,7 @@ export default function FloorLeaderTracker() {
       )}
 
       {/* HISTORICAL SHIFTS LIST */}
-      <HistoricalShiftsArchive shifts={shifts} />
+      <HistoricalShiftsArchive shifts={shifts} onDeleteShift={onDeleteShift} />
 
       {/* Import Schedule Modal */}
       <ImportScheduleModal 

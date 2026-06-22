@@ -16,7 +16,8 @@ import {
 } from '../services/firebase';
 
 export default function SyncManager() {
-  const { dbConnected, isAuthenticated, storeId } = useApp();
+  const { dbConnected, isAuthenticated } = useApp();
+  const storeId = useStore((state) => state.storeId);
 
   const setActivePeriod = useStore((state) => state.setActivePeriod);
   const setRosterHistory = useStore((state) => state.setRosterHistory);

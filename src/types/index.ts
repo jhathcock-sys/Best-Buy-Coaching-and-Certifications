@@ -109,3 +109,10 @@ export interface FollowUpTask {
   completed?: boolean;
   notes?: string;
 }
+
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}

@@ -19,9 +19,6 @@ export default function ShadowStep1Employee({
   isGenerating,
   setIsGenerating,
   handleGenerateCoaching,
-  coachingInsight,
-  setCoachingInsight,
-  handleComplete,
   handleSelectEmployee,
   activeEmployee
  }) {

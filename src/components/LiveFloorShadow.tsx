@@ -41,7 +41,8 @@ export default function LiveFloorShadow({
     followUpAction, setFollowUpAction,
     followUpDate, setFollowUpDate,
     handleGenerateCoaching,
-    handleComplete
+    handleComplete,
+    toggleChecklistItem
   } = useLiveFloorShadow({
     roster,
     onLogCoachingSession,
@@ -122,6 +123,7 @@ export default function LiveFloorShadow({
                 setSelectedEmpId={setSelectedEmpId}
                 department={department}
                 setDepartment={setDepartment}
+                handleSelectEmployee={handleSelectEmployee}
                 setCurrentStep={setCurrentStep}
                 checklist={checklist}
                 setChecklist={setChecklist}
@@ -160,6 +162,7 @@ export default function LiveFloorShadow({
                 handleGenerateCoaching={handleGenerateCoaching}
                 coachingInsight={coachingInsight}
                 setCoachingInsight={setCoachingInsight}
+                toggleChecklistItem={toggleChecklistItem}
               />
             )}
 
@@ -193,7 +196,7 @@ export default function LiveFloorShadow({
                 setFollowUpAction={setFollowUpAction}
                 followUpDate={followUpDate}
                 setFollowUpDate={setFollowUpDate}
-                handleCopyInsight={handleCopyInsight}
+                handleComplete={handleComplete}
               />
             )}
             

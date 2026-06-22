@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Camera, CheckCircle, AlertCircle, RefreshCw, Sparkles, FileText } from 'lucide-react';
+import { Camera, CheckCircle, AlertCircle, RefreshCw, Sparkles, FileText, ClipboardCopy } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useStore } from '../store/useStore';
 import { auditStoreFloorGemini } from '../services/ai';
@@ -44,7 +44,7 @@ const playbookSettings = useStore((state) => state.playbookSettings);
 
     try {
       const base64Data = selectedImage.split(',')[1];
-      const result = await auditStoreFloorGemini(apiKey, base64Data, imageMime, playbookSettings);
+      const result = await auditStoreFloorGemini(apiKey, base64Data, imageMime);
       setAuditResult(result);
     } catch (e) {
       console.error(e);
@@ -236,7 +236,7 @@ Let's move fast, get our customers greeted, and ensure checkout remains smooth. 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '0.725rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 700 }}>Huddle Announcement Script</span>
                     <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.7rem', height: 'auto', display: 'flex', alignItems: 'center', gap: '0.25rem' }} onClick={() => { navigator.clipboard.writeText(huddleScript); alert('Copied to clipboard!'); }}>
-                      <Clipboard size={12} /> Copy Script
+                      <ClipboardCopy size={12} /> Copy Script
                     </button>
                   </div>
                   <textarea 

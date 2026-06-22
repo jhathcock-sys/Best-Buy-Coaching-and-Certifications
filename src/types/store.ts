@@ -71,14 +71,14 @@ export interface MetricsSlice {
   activePeriod: string;
   deptGoals: Record<string, DeptGoal>;
   metrics: MetricAverages;
-  dailySnapshots: Record<string, MetricAverages>;
+  dailySnapshots: Record<string, Employee[]>;
 
   setRosterHistory: (history: Record<string, Employee[]>) => void;
   setActivePeriod: (period: string) => void;
   setDeptGoals: (goals: Record<string, DeptGoal>) => void;
   setMetrics: (metrics: MetricAverages) => void;
-  setDailySnapshots: (snapshots: Record<string, MetricAverages>) => void;
-  addDailySnapshot: (dateKey: string, metrics: MetricAverages) => void;
+  setDailySnapshots: (snapshots: Record<string, Employee[]>) => void;
+  addDailySnapshot: (dateKey: string, metrics: Employee[]) => void;
   saveDeptGoals: (newGoals: Record<string, DeptGoal>) => void;
   addEmployee: (newEmp: Employee) => void;
   editEmployee: (empId: string, updatedFields: Partial<Employee>) => void;

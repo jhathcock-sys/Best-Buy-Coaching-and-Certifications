@@ -10,8 +10,8 @@ export default function TrendReporting() {
 
   // 1. Get all unique employee names from all snapshots for the dropdown
   const allEmployees = useMemo(() => {
-    const names = new Set();
-    Object.values(dailySnapshots).forEach(snapshotArray => {
+    const names = new Set<string>();
+    Object.values(dailySnapshots).forEach((snapshotArray: any) => {
       snapshotArray.forEach(emp => {
         if (emp.name) names.add(emp.name);
       });
@@ -24,7 +24,7 @@ export default function TrendReporting() {
     const sortedDates = Object.keys(dailySnapshots).sort();
     if (sortedDates.length === 0) return [];
 
-    const aggregated = {}; // Key will be date/week/month string
+    const aggregated: Record<string, { key: string, revenue: number, apps: number, memberships: number }> = {}; // Key will be date/week/month string
 
     sortedDates.forEach(dateStr => {
       const snapshotArray = dailySnapshots[dateStr];
@@ -51,8 +51,8 @@ export default function TrendReporting() {
       // Sum up the data for the target entity
       snapshotArray.forEach(emp => {
         if (targetEntity === 'Store Total' || emp.name === targetEntity) {
-          aggregated[groupKey].revenue += (emp.revenue || 0);
-          aggregated[groupKey].apps += (emp.apps || 0);
+          aggregated[groupKey].revenue += (emp.rph * emp.hours || 0);
+          aggregated[groupKey].apps += (emp.creditCards || 0);
           aggregated[groupKey].memberships += (emp.memberships || 0);
         }
       });

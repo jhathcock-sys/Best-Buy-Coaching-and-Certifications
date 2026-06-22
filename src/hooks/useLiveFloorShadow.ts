@@ -335,6 +335,7 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
     followUpAction, setFollowUpAction,
     followUpDate, setFollowUpDate,
     handleGenerateCoaching: generateGrowLog,
-    handleComplete: handleCompileAndLog
+    handleComplete: handleCompileAndLog,
+    toggleChecklistItem
   };
 }

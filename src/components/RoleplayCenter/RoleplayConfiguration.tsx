@@ -9,18 +9,8 @@ export default function RoleplayConfiguration({
   setComplexity,
   customerTone,
   setCustomerTone,
-  startRoleplay,
-  messages,
-  inputText,
-  setInputText,
-  sendMessage,
-  isLoading,
-  messagesEndRef,
-  endRoleplay,
-  evaluation,
-  saveAndReturn,
-  roster
- }) {
+  startRoleplay
+ }: any) {
   return (
     <>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>

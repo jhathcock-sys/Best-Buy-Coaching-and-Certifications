@@ -97,8 +97,8 @@ export default function SystemPromptsTab({ customSystemPrompt, setCustomSystemPr
                       rows={8} 
                       style={{ resize: 'none', fontSize: '0.8rem', fontFamily: 'monospace' }}
                       placeholder="Paste a complete 4-section coaching log that represents your personal writing style..."
-                      value={newTrainingLog}
-                      onChange={(e) => setNewTrainingLog(e.target.value)}
+                      value={newLogBody}
+                      onChange={(e) => setNewLogBody(e.target.value)}
                     />
                   </div>
                   <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>

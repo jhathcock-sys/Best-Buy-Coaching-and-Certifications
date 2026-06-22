@@ -14,9 +14,10 @@ import SyncDiagnosticsTab from './PlaybookStudio/SyncDiagnosticsTab';
 import CustomScenariosTab from './Playbook/CustomScenariosTab';
 
 export default function PlaybookStudio() {
+  const storeId = useStore((state) => state.storeId);
   const apiKey = useStore((state) => state.apiKey);
-const dbConnected = useStore((state) => state.dbConnected);
-const handleSaveFirebaseConfig = useStore((state) => state.handleSaveFirebaseConfig);
+  const dbConnected = useStore((state) => state.dbConnected);
+  const handleSaveFirebaseConfig = useStore((state) => state.handleSaveFirebaseConfig);
   
   const playbookSettings = useStore(state => state.playbookSettings);
   const onSaveSettings = useStore(state => state.saveSettings);
@@ -43,8 +44,8 @@ const handleSaveFirebaseConfig = useStore((state) => state.handleSaveFirebaseCon
     setIsRunningDiagnostics(true);
     setDiagnosticsLogs([]);
     
-    const addLog = (msg, delay) => {
-      return new Promise((resolve) => {
+    const addLog = (msg: string, delay = 0) => {
+      return new Promise<void>((resolve) => {
         setTimeout(() => {
           setDiagnosticsLogs(prev => [...prev, msg]);
           resolve();
@@ -61,7 +62,7 @@ const handleSaveFirebaseConfig = useStore((state) => state.handleSaveFirebaseCon
       await addLog(`📡 Testing Firebase connection latency...`, 300);
       
       if (dbConnected) {
-        const latency = await testLatency();
+        const latency = await testLatency(storeId);
         if (latency !== -1) {
           const rating = latency < 50 ? 'Excellent' : latency < 150 ? 'Good' : 'Fair';
           await addLog(`✅ Firebase Connection: Connected. Latency: ${latency}ms (${rating}).`, 200);
@@ -156,12 +157,15 @@ const handleSaveFirebaseConfig = useStore((state) => state.handleSaveFirebaseCon
           className="btn btn-primary" 
           onClick={() => {
             const nextMode = aiMode === 'local' ? 'local' : aiMode;
-            onSaveSettings({
-              useGemini: nextMode === 'flash' || nextMode === 'pro',
-              aiMode: nextMode,
-              customSystemPrompt,
-              storePin
-            });
+              onSaveSettings({
+                apiKey: localApiKey,
+                playbookSettings: {
+                  ...playbookSettings,
+                  aiMode: nextMode,
+                  customSystemPrompt,
+                  storePin
+                }
+              });
             alert('Settings saved globally! Changes will apply immediately.');
           }}
           style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.25rem' }}
@@ -235,6 +239,8 @@ const handleSaveFirebaseConfig = useStore((state) => state.handleSaveFirebaseCon
           startEditingManager={startEditingManager}
           saveEditingManager={saveEditingManager}
           handleDeleteManager={handleDeleteManager}
+          storePin={storePin}
+          setStorePin={setStorePin}
         />
       )}
 

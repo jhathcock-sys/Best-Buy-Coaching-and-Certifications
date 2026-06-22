@@ -1,0 +1,136 @@
+﻿
+> best-buy-coaching-and-certifications@0.0.0 typecheck
+> tsc --noEmit
+
+src/components/FloorAudit.tsx(47,81): error TS2554: Expected 3 arguments, but got 4.
+src/components/FloorAudit.tsx(239,23): error TS2607: JSX element class does not support attributes because it does not have a 'props' property.
+src/components/FloorAudit.tsx(239,24): error TS2786: 'Clipboard' cannot be used as a JSX component.
+  Its type '{ new (): Clipboard; prototype: Clipboard; }' is not a valid JSX element type.
+    Type '{ new (): Clipboard; prototype: Clipboard; }' is not assignable to type 'new (props: any, context: any) => Component<any, any, any>'.
+      Type 'Clipboard' is missing the following properties from type 'Component<any, any, any>': context, setState, forceUpdate, render, and 2 more.
+src/components/FloorLeader/ShiftSetupForm.tsx(56,20): error TS2345: Argument of type '{ id: string; leaderName: any; date: string; isWeekend: boolean; dailyRevenueGoal: number; dailyAppsGoal: number; dailyPmsGoal: number; preExistingRevenue: number; preExistingApps: number; preExistingPms: number; ... 4 more ...; wins: any[]; }' is not assignable to parameter of type 'ShiftEvent'.
+  Type '{ id: string; leaderName: any; date: string; isWeekend: boolean; dailyRevenueGoal: number; dailyAppsGoal: number; dailyPmsGoal: number; preExistingRevenue: number; preExistingApps: number; preExistingPms: number; ... 4 more ...; wins: any[]; }' is missing the following properties from type 'ShiftEvent': type, manager
+src/components/FloorLeader/ShiftTrackerTab.tsx(36,13): error TS2339: Property 'forEach' does not exist on type 'unknown'.
+src/components/ImportSchedule/ImportScheduleRow.tsx(77,31): error TS2304: Cannot find name 'breaks'.
+src/components/ImportSchedule/ImportScheduleRow.tsx(81,36): error TS2304: Cannot find name 'breaks'.
+src/components/ImportScheduleModal.tsx(3,51): error TS2440: Import declaration conflicts with local declaration of 'CalendarIcon'.
+src/components/ImportScheduleModal.tsx(93,164): error TS2353: Object literal may only specify known properties, and 'justifyText' does not exist in type 'Properties<string | number, string & {}>'.
+src/components/ImportScheduleModal.tsx(103,68): error TS2304: Cannot find name 'runDemoParse'.
+src/components/ImportScheduleModal.tsx(122,164): error TS2353: Object literal may only specify known properties, and 'justifyText' does not exist in type 'Properties<string | number, string & {}>'.
+src/components/ImportScheduleModal.tsx(144,53): error TS2304: Cannot find name 'WEEKDAY_KEYS'.
+src/components/ImportScheduleModal.tsx(196,128): error TS2304: Cannot find name 'generatePreviewFromCsv'.
+src/components/LiveFloorShadow.tsx(119,16): error TS2739: Type '{ roster: Employee[]; selectedEmpId: string; setSelectedEmpId: Dispatch<SetStateAction<string>>; department: string; setDepartment: Dispatch<SetStateAction<string>>; ... 12 more ...; activeEmployee: any; }' is missing the following properties from type '{ roster: any; selectedEmpId: any; setSelectedEmpId: any; department: any; setDepartment: any; setCurrentStep: any; checklist: any; setChecklist: any; customerPersona: any; setCustomerPersona: any; ... 11 more ...; activeEmployee: any; }': coachingInsight, setCoachingInsight, handleComplete, handleSelectEmployee
+src/components/LiveFloorShadow.tsx(143,16): error TS2741: Property 'handleComplete' is missing in type '{ roster: Employee[]; selectedEmpId: string; setSelectedEmpId: Dispatch<SetStateAction<string>>; department: string; setDepartment: Dispatch<SetStateAction<string>>; ... 13 more ...; setCoachingInsight: Dispatch<...>; }' but required in type '{ roster: any; selectedEmpId: any; setSelectedEmpId: any; department: any; setDepartment: any; setCurrentStep: any; checklist: any; setChecklist: any; customerPersona: any; setCustomerPersona: any; ... 9 more ...; handleComplete: any; }'.
+src/components/LiveFloorShadow.tsx(196,17): error TS2322: Type '{ roster: Employee[]; selectedEmpId: string; setSelectedEmpId: Dispatch<SetStateAction<string>>; department: string; setDepartment: Dispatch<SetStateAction<string>>; ... 22 more ...; handleCopyInsight: any; }' is not assignable to type 'IntrinsicAttributes & { roster: any; selectedEmpId: any; setSelectedEmpId: any; department: any; setDepartment: any; setCurrentStep: any; checklist: any; setChecklist: any; ... 19 more ...; handleComplete: any; }'.
+  Property 'handleCopyInsight' does not exist on type 'IntrinsicAttributes & { roster: any; selectedEmpId: any; setSelectedEmpId: any; department: any; setDepartment: any; setCurrentStep: any; checklist: any; setChecklist: any; ... 19 more ...; handleComplete: any; }'.
+src/components/LiveFloorShadow.tsx(196,36): error TS2304: Cannot find name 'handleCopyInsight'.
+src/components/LiveFloorShadow/ShadowStep2Observation.tsx(81,93): error TS2304: Cannot find name 'toggleChecklistItem'.
+src/components/LiveFloorShadow/ShadowStep2Observation.tsx(85,97): error TS2304: Cannot find name 'toggleChecklistItem'.
+src/components/LiveFloorShadow/ShadowStep2Observation.tsx(89,95): error TS2304: Cannot find name 'toggleChecklistItem'.
+src/components/LiveFloorShadow/ShadowStep2Observation.tsx(93,98): error TS2304: Cannot find name 'toggleChecklistItem'.
+src/components/LiveFloorShadow/ShadowStep2Observation.tsx(97,101): error TS2304: Cannot find name 'toggleChecklistItem'.
+src/components/LiveFloorShadow/ShadowStep2Observation.tsx(110,97): error TS2304: Cannot find name 'toggleChecklistItem'.
+src/components/LiveFloorShadow/ShadowStep2Observation.tsx(114,100): error TS2304: Cannot find name 'toggleChecklistItem'.
+src/components/LiveFloorShadow/ShadowStep2Observation.tsx(118,96): error TS2304: Cannot find name 'toggleChecklistItem'.
+src/components/LiveFloorShadow/ShadowStep2Observation.tsx(122,103): error TS2304: Cannot find name 'toggleChecklistItem'.
+src/components/LiveFloorShadow/ShadowStep2Observation.tsx(135,102): error TS2304: Cannot find name 'toggleChecklistItem'.
+src/components/LiveFloorShadow/ShadowStep2Observation.tsx(139,101): error TS2304: Cannot find name 'toggleChecklistItem'.
+src/components/LiveFloorShadow/ShadowStep2Observation.tsx(143,100): error TS2304: Cannot find name 'toggleChecklistItem'.
+src/components/LiveFloorShadow/ShadowStep2Observation.tsx(156,102): error TS2304: Cannot find name 'toggleChecklistItem'.
+src/components/LiveFloorShadow/ShadowStep2Observation.tsx(160,102): error TS2304: Cannot find name 'toggleChecklistItem'.
+src/components/LiveFloorShadow/ShadowStep2Observation.tsx(164,100): error TS2304: Cannot find name 'toggleChecklistItem'.
+src/components/LiveFloorShadow/ShadowStep2Observation.tsx(168,98): error TS2304: Cannot find name 'toggleChecklistItem'.
+src/components/Navigation/AppSidebar.tsx(6,11): error TS2339: Property 'isOnline' does not exist on type 'StoreState'.
+src/components/Navigation/AppSidebar.tsx(6,21): error TS2339: Property 'syncStatus' does not exist on type 'StoreState'.
+src/components/Navigation/AppSidebar.tsx(6,70): error TS2339: Property 'collapsedCategories' does not exist on type 'StoreState'.
+src/components/Navigation/AppSidebar.tsx(6,91): error TS2339: Property 'toggleCategory' does not exist on type 'StoreState'.
+src/components/PerformanceWizardModal.tsx(68,25): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/components/PerformanceWizardModal.tsx(69,29): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/components/PerformanceWizardModal.tsx(70,29): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/components/PerformanceWizardModal.tsx(71,28): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/components/PerformanceWizardModal.tsx(73,21): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/components/PerformanceWizardModal.tsx(74,97): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/components/PerformanceWizardModal.tsx(75,57): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/components/PerformanceWizardModal.tsx(76,61): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/components/PerformanceWizardModal.tsx(169,33): error TS2304: Cannot find name 'handleFormChange'.
+src/components/PerformanceWizardModal.tsx(170,32): error TS2304: Cannot find name 'departmentGoals'.
+src/components/PerformanceWizardModal.tsx(177,33): error TS2304: Cannot find name 'handleFormChange'.
+src/components/PerformanceWizardModal.tsx(178,32): error TS2304: Cannot find name 'departmentGoals'.
+src/components/PerformanceWizardModal.tsx(185,33): error TS2304: Cannot find name 'handleFormChange'.
+src/components/PerformanceWizardModal.tsx(186,32): error TS2304: Cannot find name 'departmentGoals'.
+src/components/PerformanceWizardModal/WizardStep1General.tsx(19,36): error TS2552: Cannot find name 'setEditForm'. Did you mean 'editForm'?
+src/components/PerformanceWizardModal/WizardStep1General.tsx(29,36): error TS2552: Cannot find name 'setEditForm'. Did you mean 'editForm'?
+src/components/PerformanceWizardModal/WizardStep1General.tsx(31,20): error TS2304: Cannot find name 'DEPARTMENTS'.
+src/components/PerformanceWizardModal/WizardStep1General.tsx(40,80): error TS2552: Cannot find name 'setEditForm'. Did you mean 'editForm'?
+src/components/PerformanceWizardModal/WizardStep1General.tsx(46,38): error TS2552: Cannot find name 'setEditForm'. Did you mean 'editForm'?
+src/components/PerformanceWizardModal/WizardStep1General.tsx(48,80): error TS2552: Cannot find name 'setEditForm'. Did you mean 'editForm'?
+src/components/PerformanceWizardModal/WizardStep1General.tsx(58,36): error TS2552: Cannot find name 'setEditForm'. Did you mean 'editForm'?
+src/components/PerformanceWizardModal/WizardStep2Attach.tsx(15,80): error TS2552: Cannot find name 'setEditForm'. Did you mean 'editForm'?
+src/components/PerformanceWizardModal/WizardStep2Attach.tsx(21,38): error TS2552: Cannot find name 'setEditForm'. Did you mean 'editForm'?
+src/components/PerformanceWizardModal/WizardStep2Attach.tsx(23,80): error TS2552: Cannot find name 'setEditForm'. Did you mean 'editForm'?
+src/components/PerformanceWizardModal/WizardStep2Attach.tsx(30,80): error TS2304: Cannot find name 'setEditForm'.
+src/components/PerformanceWizardModal/WizardStep2Attach.tsx(36,38): error TS2304: Cannot find name 'setEditForm'.
+src/components/PerformanceWizardModal/WizardStep2Attach.tsx(38,80): error TS2304: Cannot find name 'setEditForm'.
+src/components/PerformanceWizardModal/WizardStep2Attach.tsx(45,80): error TS2304: Cannot find name 'setEditForm'.
+src/components/PerformanceWizardModal/WizardStep2Attach.tsx(51,38): error TS2304: Cannot find name 'setEditForm'.
+src/components/PerformanceWizardModal/WizardStep2Attach.tsx(53,80): error TS2304: Cannot find name 'setEditForm'.
+src/components/PerformanceWizardModal/WizardStep2Attach.tsx(62,82): error TS2304: Cannot find name 'setEditForm'.
+src/components/PerformanceWizardModal/WizardStep2Attach.tsx(69,40): error TS2304: Cannot find name 'setEditForm'.
+src/components/PerformanceWizardModal/WizardStep2Attach.tsx(71,82): error TS2304: Cannot find name 'setEditForm'.
+src/components/PerformanceWizardModal/WizardStep2Attach.tsx(80,82): error TS2304: Cannot find name 'setEditForm'.
+src/components/PerformanceWizardModal/WizardStep2Attach.tsx(87,40): error TS2304: Cannot find name 'setEditForm'.
+src/components/PerformanceWizardModal/WizardStep2Attach.tsx(89,82): error TS2304: Cannot find name 'setEditForm'.
+src/components/PerformanceWizardModal/WizardStep2Attach.tsx(98,82): error TS2304: Cannot find name 'setEditForm'.
+src/components/PerformanceWizardModal/WizardStep2Attach.tsx(105,40): error TS2304: Cannot find name 'setEditForm'.
+src/components/PerformanceWizardModal/WizardStep2Attach.tsx(107,82): error TS2304: Cannot find name 'setEditForm'.
+src/components/PerformanceWizardModal/WizardStep3Quality.tsx(19,23): error TS2304: Cannot find name 'setEditForm'.
+src/components/PerformanceWizardModal/WizardStep3Quality.tsx(36,38): error TS2304: Cannot find name 'setEditForm'.
+src/components/PerformanceWizardModal/WizardStep3Quality.tsx(42,23): error TS2304: Cannot find name 'setEditForm'.
+src/components/PerformanceWizardModal/WizardStep3Quality.tsx(57,80): error TS2304: Cannot find name 'setEditForm'.
+src/components/PerformanceWizardModal/WizardStep3Quality.tsx(63,38): error TS2304: Cannot find name 'setEditForm'.
+src/components/PerformanceWizardModal/WizardStep3Quality.tsx(65,80): error TS2304: Cannot find name 'setEditForm'.
+src/components/PerformanceWizardModal/WizardStep3Quality.tsx(76,36): error TS2304: Cannot find name 'setEditForm'.
+src/components/Playbook/CustomScenariosTab.tsx(33,72): error TS2339: Property 'gemini' does not exist on type 'string'.
+src/components/PlaybookStudio.tsx(50,11): error TS2794: Expected 1 arguments, but got 0. Did you forget to include 'void' in your type argument to 'Promise'?
+src/components/PlaybookStudio.tsx(64,31): error TS2554: Expected 1 arguments, but got 0.
+src/components/PlaybookStudio.tsx(160,15): error TS2353: Object literal may only specify known properties, and 'useGemini' does not exist in type '{ apiKey: string; playbookSettings: PlaybookSettings; }'.
+src/components/PlaybookStudio.tsx(224,10): error TS2739: Type '{ managers: Manager[]; newManagerName: string; setNewManagerName: Dispatch<SetStateAction<string>>; newManagerRole: string; setNewManagerRole: Dispatch<...>; ... 15 more ...; handleDeleteManager: (idx: any) => void; }' is missing the following properties from type '{ managers: any; newManagerName: any; setNewManagerName: any; newManagerRole: any; setNewManagerRole: any; newManagerPin: any; setNewManagerPin: any; editingManagerIndex: any; setEditingManagerIndex: any; ... 13 more ...; setStorePin: any; }': storePin, setStorePin
+src/components/PlaybookStudio/SupervisorProfilesTab.tsx(117,132): error TS2304: Cannot find name 'handleSaveEditManager'.
+src/components/PlaybookStudio/SupervisorProfilesTab.tsx(145,44): error TS2304: Cannot find name 'handleEditManager'.
+src/components/PlaybookStudio/SystemPromptsTab.tsx(100,30): error TS2304: Cannot find name 'newTrainingLog'.
+src/components/PlaybookStudio/SystemPromptsTab.tsx(101,40): error TS2304: Cannot find name 'setNewTrainingLog'.
+src/components/RentsDueAuditor.tsx(48,38): error TS2339: Property 'split' does not exist on type 'string | ArrayBuffer'.
+  Property 'split' does not exist on type 'ArrayBuffer'.
+src/components/RentsDueAuditor.tsx(275,33): error TS2304: Cannot find name 'handleTextSubmit'.
+src/components/RentsDueAuditor.tsx(303,33): error TS2304: Cannot find name 'handleTextSubmit'.
+src/components/RentsDueAuditor/RentsDueLedger.tsx(40,73): error TS2304: Cannot find name 'gaps'.
+src/components/RentsDueAuditor/RentsDueLedger.tsx(41,19): error TS2304: Cannot find name 'gaps'.
+src/components/RentsDueAuditor/RentsDueLedger.tsx(48,73): error TS2304: Cannot find name 'gaps'.
+src/components/RentsDueAuditor/RentsDueLedger.tsx(49,18): error TS2304: Cannot find name 'gaps'.
+src/components/RentsDueAuditor/RentsDueLedger.tsx(56,73): error TS2304: Cannot find name 'gaps'.
+src/components/RentsDueAuditor/RentsDueLedger.tsx(57,18): error TS2304: Cannot find name 'gaps'.
+src/components/RentsDueAuditor/RentsDueUploader.tsx(54,25): error TS2304: Cannot find name 'handleProcessFile'.
+src/components/RentsDueAuditor/RentsDueUploader.tsx(97,26): error TS2304: Cannot find name 'loadDemoData'.
+src/components/RentsDueAuditor/RentsDueUploader.tsx(104,26): error TS2304: Cannot find name 'handleManualTextParse'.
+src/components/RoleplayCenter.tsx(223,15): error TS2322: Type '{ allScenarios: any[]; selectedScenario: any; setSelectedScenario: Dispatch<any>; complexity: string; setComplexity: Dispatch<SetStateAction<string>>; ... 17 more ...; roster: undefined[]; }' is not assignable to type 'IntrinsicAttributes & { allScenarios: any; selectedScenario: any; setSelectedScenario: any; complexity: any; setComplexity: any; customerTone: any; setCustomerTone: any; ... 10 more ...; roster: any; }'.
+  Property 'completedSteps' does not exist on type 'IntrinsicAttributes & { allScenarios: any; selectedScenario: any; setSelectedScenario: any; complexity: any; setComplexity: any; customerTone: any; setCustomerTone: any; ... 10 more ...; roster: any; }'.
+src/components/RoleplayCenter.tsx(239,14): error TS2741: Property 'apiKey' is missing in type '{ allScenarios: any[]; selectedScenario: any; setSelectedScenario: Dispatch<any>; complexity: string; setComplexity: Dispatch<SetStateAction<string>>; ... 17 more ...; roster: undefined[]; }' but required in type '{ apiKey: any; allScenarios: any; selectedScenario: any; setSelectedScenario: any; complexity: any; setComplexity: any; customerTone: any; setCustomerTone: any; startRoleplay: any; messages: any; ... 13 more ...; stepHint: any; }'.
+src/components/RoleplayCenter.tsx(281,15): error TS2322: Type '{ allScenarios: any[]; selectedScenario: any; setSelectedScenario: Dispatch<any>; complexity: string; setComplexity: Dispatch<SetStateAction<string>>; ... 17 more ...; roster: undefined[]; }' is not assignable to type 'IntrinsicAttributes & { allScenarios: any; selectedScenario: any; setSelectedScenario: any; complexity: any; setComplexity: any; customerTone: any; setCustomerTone: any; ... 11 more ...; setActiveView: any; }'.
+  Property 'completedSteps' does not exist on type 'IntrinsicAttributes & { allScenarios: any; selectedScenario: any; setSelectedScenario: any; complexity: any; setComplexity: any; customerTone: any; setCustomerTone: any; ... 11 more ...; setActiveView: any; }'.
+src/components/RosterImporterModal.tsx(108,65): error TS2339: Property 'name' does not exist on type '{}'.
+src/components/RosterImporterModal.tsx(109,76): error TS2339: Property 'department' does not exist on type '{}'.
+src/components/TrendReporting.tsx(54,48): error TS2339: Property 'revenue' does not exist on type 'Employee'.
+src/components/TrendReporting.tsx(55,45): error TS2339: Property 'apps' does not exist on type 'Employee'.
+src/components/TrendReporting.tsx(122,25): error TS2322: Type 'unknown' is not assignable to type 'Key'.
+src/components/TrendReporting.tsx(122,36): error TS2322: Type 'unknown' is not assignable to type 'string | number | readonly string[]'.
+src/components/TrendReporting.tsx(122,49): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/components/ZoneScheduler.tsx(196,60): error TS2353: Object literal may only specify known properties, and 'justifyText' does not exist in type 'Properties<string | number, string & {}>'.
+src/components/ZoneScheduler.tsx(289,50): error TS2538: Type 'unknown' cannot be used as an index type.
+src/components/ZoneScheduler.tsx(292,26): error TS2322: Type 'unknown' is not assignable to type 'Key'.
+src/store/slices/authSlice.ts(120,9): error TS2554: Expected 2 arguments, but got 1.
+src/store/slices/metricsSlice.ts(168,13): error TS2322: Type '{ [x: string]: unknown[] | Employee[]; }' is not assignable to type 'Record<string, Employee[]>'.
+  'string' index signatures are incompatible.
+    Type 'unknown[] | Employee[]' is not assignable to type 'Employee[]'.
+      Type 'unknown[]' is not assignable to type 'Employee[]'.
+        Type '{}' is missing the following properties from type 'Employee': id, name, dept, hours, and 5 more.
+src/store/slices/playbookSlice.ts(123,68): error TS2339: Property 'rating' does not exist on type '{ employeeId: any; employeeName: any; category: any; avatar: any; score: any; date: string; notes: any; timestamp: number; coachName: string; }'.

@@ -20,14 +20,17 @@ export default function RentsDueUploader({
   setTextInput,
   handleFileChange,
   fileInputRef,
-  handleTextSubmit,
+  handleManualTextParse,
+    handleProcessFile,
+    loadDemoData,
   parsedEmployees,
   setParsedEmployees,
   syncSuccess,
   setSyncSuccess,
   handleSyncToRoster,
-  comparisonRoster
- }) {
+  comparisonRoster,
+  gaps
+ }: any) {
   return (
     <>
         /* UPLOAD PORTAL */

@@ -5,7 +5,7 @@ import { parseScheduleImage } from '../services/ai';
 
 // standard department/zone mapping helper
 import { useScheduleParser } from '../hooks/useScheduleParser';
-import { generateBreaks } from '../utils/scheduleParserUtils';
+import { generateBreaks, WEEKDAY_KEYS } from '../utils/scheduleParserUtils';
 import ImportWizardStep1 from './ImportSchedule/ImportWizardStep1';
 import ImportWizardStep2 from './ImportSchedule/ImportWizardStep2';
 
@@ -28,7 +28,9 @@ export default function ImportScheduleModal({ isOpen, onClose, roster = [], onIm
     handleMatchChange,
     handleZoneChange,
     handleShiftTimeChange,
-    handleConfirmImport
+    handleConfirmImport,
+    runDemoParse,
+    generatePreviewFromCsv
   } = useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAddEmployee, isOpen);
 
   if (!isOpen) return null;
@@ -41,6 +43,7 @@ export default function ImportScheduleModal({ isOpen, onClose, roster = [], onIm
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 2rem', borderBottom: '1px solid var(--border-glass)' }}>
           <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
             <CalendarIcon size={20} color="var(--bby-yellow)" /> Floor Schedule Importer
+
           </h3>
           <button className="btn btn-secondary btn-icon" style={{ padding: '0.4rem' }} onClick={onClose}>
             <X size={16} />
@@ -90,7 +93,7 @@ export default function ImportScheduleModal({ isOpen, onClose, roster = [], onIm
                       accept="image/*" 
                       style={{ display: 'none' }} 
                     />
-                    <div style={{ background: 'rgba(0, 70, 190, 0.08)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyText: 'center', alignContent: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
+                    <div style={{ background: 'rgba(0, 70, 190, 0.08)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
                       <Camera size={32} color="var(--info)" />
                     </div>
                     <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>Drag & Drop Schedule Screenshot</h4>
@@ -119,7 +122,7 @@ export default function ImportScheduleModal({ isOpen, onClose, roster = [], onIm
                       accept=".csv" 
                       style={{ display: 'none' }} 
                     />
-                    <div style={{ background: 'rgba(0, 70, 190, 0.08)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyText: 'center', alignContent: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
+                    <div style={{ background: 'rgba(0, 70, 190, 0.08)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
                       <FileText size={32} color="var(--info)" />
                     </div>
                     <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>Drag & Drop Schedule CSV</h4>
@@ -240,9 +243,6 @@ export default function ImportScheduleModal({ isOpen, onClose, roster = [], onIm
                   </thead>
                   <tbody>
                     {reviews.map((rev) => {
-                      const matched = rev.matchedEmpId !== '';
-                      const breaks = generateBreaks(rev.matchedEmpId, 'Mock', rev.startTimeStr, rev.durationHours);
-
                       return (
                         <ImportScheduleRow 
                           key={rev.id}
@@ -283,16 +283,3 @@ export default function ImportScheduleModal({ isOpen, onClose, roster = [], onIm
     </div>
   );
 }
-
-// Inline mini Calendar icon representation to avoid extra Lucide import concerns
-function CalendarIcon({ size = 16, color = 'currentColor' }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-      <line x1="16" y1="2" x2="16" y2="6"></line>
-      <line x1="8" y1="2" x2="8" y2="6"></line>
-      <line x1="3" y1="10" x2="21" y2="10"></line>
-    </svg>
-  );
-}
-

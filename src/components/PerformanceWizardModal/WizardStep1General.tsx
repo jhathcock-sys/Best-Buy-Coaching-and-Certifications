@@ -3,8 +3,9 @@ import { X } from 'lucide-react';
 
 export default function WizardStep1General({ 
   editForm,
-  handleFormChange,
-  departmentGoals
+  setEditForm,
+  departmentGoals,
+  DEPARTMENTS
  }) {
   return (
     <>

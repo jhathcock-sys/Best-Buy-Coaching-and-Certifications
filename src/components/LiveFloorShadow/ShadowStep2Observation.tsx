@@ -21,7 +21,7 @@ export default function ShadowStep2Observation({
   handleGenerateCoaching,
   coachingInsight,
   setCoachingInsight,
-  handleComplete
+  toggleChecklistItem
  }) {
   const [isListening, setIsListening] = React.useState(false);
 

@@ -30,6 +30,8 @@ export default function ShiftSetupForm({ activeManager }) {
     const newShift = {
       id: 'shift_' + Date.now(),
       leaderName: leaderName.trim(),
+      manager: leaderName.trim(),
+      type: 'floor-leader-shift',
       date: new Date().toLocaleDateString(),
       isWeekend: isWeekend,
       dailyRevenueGoal: parseFloat(dailyRevenueGoal) || 10000,

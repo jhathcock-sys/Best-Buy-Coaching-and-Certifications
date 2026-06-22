@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { normalizeZone, fuzzyMatchName, parseShiftHours, generateBreaks, WEEKDAY_KEYS } from '../utils/scheduleParserUtils';
+import { parseScheduleImage } from '../services/ai';
 
 export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAddEmployee, isOpen) {
   const [activeTab, setActiveTab] = useState('image'); // 'image' | 'csv'
@@ -368,6 +369,8 @@ export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAd
     handleMatchChange,
     handleZoneChange,
     handleShiftTimeChange,
-    handleConfirmImport
+    handleConfirmImport,
+    runDemoParse,
+    generatePreviewFromCsv
   };
 }

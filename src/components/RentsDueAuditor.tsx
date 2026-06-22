@@ -44,14 +44,14 @@ export default function RentsDueAuditor({ roster = [], activePeriod, rosterHisto
     const reader = new FileReader();
     if (file.type.startsWith('image/')) {
       reader.onload = async (e) => {
-        const base64Url = e.target.result;
-        const base64Data = base64Url.split(',')[1];
+        const base64Url = e.target?.result?.toString() || '';
+        const base64Data = base64Url.split(',')[1] || '';
         runOcrParsing(base64Data, file.type, '');
       };
       reader.readAsDataURL(file);
     } else if (file.name.endsWith('.csv') || file.type === 'text/csv' || file.type === 'text/plain') {
       reader.onload = async (e) => {
-        const text = e.target.result;
+        const text = e.target?.result?.toString() || '';
         runOcrParsing('', '', text);
       };
       reader.readAsText(file);
@@ -272,7 +272,9 @@ export default function RentsDueAuditor({ roster = [], activePeriod, rosterHisto
               setTextInput={setTextInput}
               handleFileChange={handleFileChange}
               fileInputRef={fileInputRef}
-              handleTextSubmit={handleTextSubmit}
+              handleManualTextParse={handleManualTextParse}
+              handleProcessFile={handleProcessFile}
+              loadDemoData={loadDemoData}
               parsedEmployees={parsedEmployees}
               setParsedEmployees={setParsedEmployees}
               syncSuccess={syncSuccess}
@@ -282,6 +284,7 @@ export default function RentsDueAuditor({ roster = [], activePeriod, rosterHisto
  />
           ) : (
             <RentsDueLedger 
+              gaps={gaps}
               selectedPeriod={selectedPeriod}
               setSelectedPeriod={setSelectedPeriod}
               showNewPeriodInput={showNewPeriodInput}
@@ -293,14 +296,7 @@ export default function RentsDueAuditor({ roster = [], activePeriod, rosterHisto
               rosterHistory={rosterHistory}
               activePeriod={activePeriod}
               todayStr={todayStr}
-              fileName={fileName}
-              errorMsg={errorMsg}
-              isParsing={isParsing}
-              textInput={textInput}
-              setTextInput={setTextInput}
-              handleFileChange={handleFileChange}
-              fileInputRef={fileInputRef}
-              handleTextSubmit={handleTextSubmit}
+
               parsedEmployees={parsedEmployees}
               setParsedEmployees={setParsedEmployees}
               syncSuccess={syncSuccess}

@@ -74,11 +74,11 @@ export default function ImportScheduleRow({
                           {/* Auto Break Math Info */}
                           <td style={{ padding: '0.85rem 1rem', color: 'var(--text-secondary)' }}>
                             {matched ? (
-                              breaks.length === 0 ? (
+                              rev.breaks.length === 0 ? (
                                 <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>No breaks (&lt;4h)</span>
                               ) : (
                                 <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
-                                  {breaks.map((b, i) => (
+                                  {rev.breaks.map((b: any, i: number) => (
                                     <span key={i} style={{ padding: '0.15rem 0.35rem', background: 'rgba(255,255,255,0.03)', borderRadius: '4px', fontSize: '0.65rem', border: '1px solid rgba(255,255,255,0.05)' }} title={b.type}>
                                       {b.time} ({b.type.includes('15') ? '15m' : '30m'})
                                     </span>

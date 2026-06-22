@@ -10,7 +10,7 @@ export default function ZoneScheduler({
   onToggleBreakState
 }) {
   const zones = ['Computing', 'Mobile', 'Home Theatre', 'Front End', 'Geek Squad', 'Appliances'];
-  const assignedEmpIds = Object.values(zoneAssignments).flat();
+  const assignedEmpIds = Object.values(zoneAssignments).flat() as string[];
   const unassignedEmps = roster.filter(emp => !assignedEmpIds.includes(emp.id));
 
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'timeline'
@@ -193,7 +193,7 @@ export default function ZoneScheduler({
                               </button>
                             </div>
                           ) : (
-                            <div style={{ display: 'flex', justifyText: 'center', justifyItems: 'center', alignContent: 'center', alignItems: 'center', gap: '0.5rem', width: '100%' }}>
+                            <div style={{ display: 'flex', justifyContent: 'center', textAlign: 'center', alignContent: 'center', alignItems: 'center', gap: '0.5rem', width: '100%' }}>
                               <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>Send on:</span>
                               <div style={{ display: 'flex', gap: '0.25rem', marginLeft: 'auto' }}>
                                 <button

@@ -114,7 +114,7 @@ export default function SupervisorProfilesTab({
                           />
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
-                          <button className="btn btn-primary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }} onClick={handleSaveEditManager}>
+                          <button className="btn btn-primary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }} onClick={saveEditingManager}>
                             Save
                           </button>
                           <button className="btn btn-secondary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }} onClick={() => setEditingManagerIndex(null)}>
@@ -142,7 +142,7 @@ export default function SupervisorProfilesTab({
                           <button 
                             className="btn btn-secondary" 
                             style={{ padding: '0.4rem', borderRadius: '8px' }} 
-                            onClick={() => handleEditManager(idx)}
+                            onClick={() => startEditingManager(idx)}
                             title="Edit Supervisor"
                           >
                             <Edit2 size={14} />

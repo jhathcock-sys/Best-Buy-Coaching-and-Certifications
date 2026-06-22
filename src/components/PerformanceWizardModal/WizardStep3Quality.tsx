@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 
 export default function WizardStep3Quality({ 
   editForm,
-  handleFormChange,
+  setEditForm,
   departmentGoals
  }) {
   return (

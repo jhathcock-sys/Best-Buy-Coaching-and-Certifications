@@ -2,26 +2,14 @@ import React from 'react';
 import { Send, Users, ShieldCheck, Star, Award, CheckCircle2, ChevronRight, MessageSquare, PlusCircle, User, Loader2, Sparkles, RefreshCw, XCircle, CheckCircle } from 'lucide-react';
 
 export default function RoleplayResults({ 
-  allScenarios,
   selectedScenario,
-  setSelectedScenario,
   complexity,
-  setComplexity,
   customerTone,
-  setCustomerTone,
-  startRoleplay,
-  messages,
-  inputText,
-  setInputText,
-  sendMessage,
-  isLoading,
-  messagesEndRef,
-  endRoleplay,
   evaluation,
   saveAndReturn,
-  roster,
+  startRoleplay,
   setActiveView
- }) {
+ }: any) {
   return (
     <>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>

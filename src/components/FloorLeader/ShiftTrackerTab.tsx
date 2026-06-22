@@ -32,7 +32,7 @@ export default function ShiftTrackerTab({ activeShift, setActiveShift, roster = 
     if (!activeShift || !activeShift.hours || activeShift.hours.length === 0) return [];
     const assignedIds = new Set();
     if (activeShift.zoneAssignments) {
-      Object.values(activeShift.zoneAssignments).forEach(arr => {
+      (Object.values(activeShift.zoneAssignments) as string[][]).forEach(arr => {
         arr.forEach(id => assignedIds.add(id));
       });
     }

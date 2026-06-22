@@ -65,15 +65,15 @@ export default function PerformanceWizardModal({
     const updated = {
       name: editForm.name.trim(),
       dept: editForm.dept,
-      hours: parseFloat(editForm.hours) || 0,
-      memberships: parseInt(editForm.memberships) || 0,
-      creditCards: parseInt(editForm.creditCards) || 0,
-      warranty: parseFloat(editForm.warranty) || 0,
-      surveys: editForm.surveys === 'Failing' || editForm.surveys === 'failing' ? 0.2 : parseFloat(editForm.surveys) || 0,
-      rph: parseInt(editForm.rph) || 0,
-      basket: (editForm.dept === 'Computing' || editForm.dept === 'Home Theatre') ? (parseFloat(editForm.basket) || 0) : 0,
-      m365: editForm.dept === 'Computing' ? (parseFloat(editForm.m365) || 0) : 0,
-      audio: editForm.dept === 'Home Theatre' ? (parseFloat(editForm.audio) || 0) : 0,
+      hours: Number(editForm.hours as any) || 0,
+      memberships: Number(editForm.memberships as any) || 0,
+      creditCards: Number(editForm.creditCards as any) || 0,
+      warranty: Number(editForm.warranty as any) || 0,
+      surveys: editForm.surveys === 'Failing' || editForm.surveys === 'failing' ? 0.2 : Number(editForm.surveys as any) || 0,
+      rph: Number(editForm.rph as any) || 0,
+      basket: (editForm.dept === 'Computing' || editForm.dept === 'Home Theatre') ? (Number(editForm.basket as any) || 0) : 0,
+      m365: editForm.dept === 'Computing' ? (Number(editForm.m365 as any) || 0) : 0,
+      audio: editForm.dept === 'Home Theatre' ? (Number(editForm.audio as any) || 0) : 0,
       focus5: editForm.focus5 || false,
       gap: editForm.gap || 'None'
     };
@@ -166,25 +166,26 @@ export default function PerformanceWizardModal({
           {currentEditStep === 1 && (
             <WizardStep1General 
               editForm={editForm}
-              handleFormChange={handleFormChange}
-              departmentGoals={departmentGoals}
- />
+              setEditForm={setEditForm}
+              departmentGoals={deptGoals}
+              DEPARTMENTS={DEPARTMENTS}
+            />
           )}
 
           {currentEditStep === 2 && (
             <WizardStep2Attach 
               editForm={editForm}
-              handleFormChange={handleFormChange}
-              departmentGoals={departmentGoals}
- />
+              setEditForm={setEditForm}
+              departmentGoals={deptGoals}
+            />
           )}
 
           {currentEditStep === 3 && (
             <WizardStep3Quality 
               editForm={editForm}
-              handleFormChange={handleFormChange}
-              departmentGoals={departmentGoals}
- />
+              setEditForm={setEditForm}
+              departmentGoals={deptGoals}
+            />
           )}
           
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'space-between', marginTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>

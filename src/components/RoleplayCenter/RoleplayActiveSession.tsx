@@ -3,30 +3,23 @@ import { ArrowLeft, Send, Users, ShieldCheck, Star, Award, CheckCircle2, Chevron
 
 export default function RoleplayActiveSession({ 
   apiKey,
-  allScenarios,
   selectedScenario,
-  setSelectedScenario,
   complexity,
-  setComplexity,
   customerTone,
-  setCustomerTone,
-  startRoleplay,
   messages,
   inputText,
   setInputText,
-  sendMessage,
-  isLoading,
-  messagesEndRef,
-  endRoleplay,
-  evaluation,
-  saveAndReturn,
-  roster,
   completedSteps,
   currentActiveStep,
   isEvaluating,
   setSessionActive,
-  stepHint
- }) {
+  stepHint,
+  sendMessage,
+  isLoading,
+  messagesEndRef,
+  endRoleplay,
+  startRoleplay
+ }: any) {
   const [isListening, setIsListening] = React.useState(false);
 
   const toggleMic = () => {

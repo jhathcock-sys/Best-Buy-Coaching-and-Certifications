@@ -13,21 +13,15 @@ export default function RentsDueLedger({
   rosterHistory,
   activePeriod,
   todayStr,
-  fileName,
-  errorMsg,
-  isParsing,
-  textInput,
-  setTextInput,
-  handleFileChange,
-  fileInputRef,
-  handleTextSubmit,
+
+  gaps,
   parsedEmployees,
   setParsedEmployees,
   syncSuccess,
   setSyncSuccess,
   handleSyncToRoster,
   comparisonRoster
- }) {
+ }: any) {
   return (
     <>
         /* AUDIT RESULTS VIEW */

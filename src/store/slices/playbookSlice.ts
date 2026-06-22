@@ -46,7 +46,7 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       localStorage.setItem('bby_api_key', newKey);
       localStorage.setItem('bby_playbook_settings', JSON.stringify(newSettings));
       if (get().dbConnected) {
-        savePlaybookSettingsToCloud(newSettings);
+        savePlaybookSettingsToCloud(get().storeId, newSettings);
       }
     },
 
@@ -81,7 +81,7 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       const updatedSessions = [newSession, ...(Array.isArray(recentSessions) ? recentSessions : [])].slice(0, 15);
       set({ recentSessions: updatedSessions });
       if (dbConnected) {
-        saveRecentSessionsToCloud(updatedSessions);
+        saveRecentSessionsToCloud(get().storeId, updatedSessions);
       }
 
       const empId = session.employeeId || (rosterHistory[activePeriod] || []).find(e => e.name === session.customerName)?.id || `emp-${Date.now()}`;
@@ -100,7 +100,7 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       const updatedLogs = [newLog, ...(Array.isArray(coachingLogs) ? coachingLogs : [])];
       set({ coachingLogs: updatedLogs });
       if (dbConnected) {
-        saveCoachingLogToCloud(newLog);
+        saveCoachingLogToCloud(get().storeId, newLog);
       }
 
       // Check for PIP generation (3 consecutive gaps/fails) or Perfect Score Trophies
@@ -120,7 +120,7 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
         const employeeLogs = updatedLogs.filter(l => l.employeeId === empId);
         if (employeeLogs.length >= 3) {
           const lastThree = employeeLogs.slice(0, 3);
-          const allFailed = lastThree.every(l => l.score < 60 || l.rating === 'Needs Work');
+          const allFailed = lastThree.every(l => l.score < 60);
           
           if (allFailed) {
             const currentPlans = targetEmp.actionPlans || [];
@@ -162,7 +162,7 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       const updatedSessions = (Array.isArray(recentSessions) ? recentSessions : []).filter((_, idx) => idx !== index);
       set({ recentSessions: updatedSessions });
       if (dbConnected) {
-        saveRecentSessionsToCloud(updatedSessions);
+        saveRecentSessionsToCloud(get().storeId, updatedSessions);
       }
     },
 
@@ -171,10 +171,10 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       const recentSessions = get().recentSessions || [];
       const dbConnected = get().dbConnected;
       
-      const logToDelete = (Array.isArray(coachingLogs) ? coachingLogs : []).find(l => l.id === logId || (logId && l.timestamp === logId));
+      const logToDelete = (Array.isArray(coachingLogs) ? coachingLogs : []).find(l => l.id === logId || (logId && String(l.timestamp) === String(logId)));
       if (!logToDelete) return;
       
-      const updatedLogs = (Array.isArray(coachingLogs) ? coachingLogs : []).filter(l => l.id !== logId && l.timestamp !== logId);
+      const updatedLogs = (Array.isArray(coachingLogs) ? coachingLogs : []).filter(l => l.id !== logId && String(l.timestamp) !== String(logId));
       set({ coachingLogs: updatedLogs });
       
       const updatedSessions = (Array.isArray(recentSessions) ? recentSessions : []).filter(s => 
@@ -184,9 +184,9 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       
       if (dbConnected) {
         if (logToDelete.id) {
-          await deleteCoachingLogFromCloud(logToDelete.id);
+          await deleteCoachingLogFromCloud(get().storeId, logToDelete.id);
         }
-        saveRecentSessionsToCloud(updatedSessions);
+        saveRecentSessionsToCloud(get().storeId, updatedSessions);
       }
     },
 
@@ -201,7 +201,7 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       const updated = [...(Array.isArray(followUpTasks) ? followUpTasks : []), newTask];
       set({ followUpTasks: updated });
       if (dbConnected) {
-        saveFollowUpTaskToCloud(newTask);
+        saveFollowUpTaskToCloud(get().storeId, newTask);
       }
     },
 
@@ -218,7 +218,7 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       });
       set({ followUpTasks: updated });
       if (dbConnected && targetTask) {
-        saveFollowUpTaskToCloud(targetTask);
+        saveFollowUpTaskToCloud(get().storeId, targetTask);
       }
     },
 
@@ -238,7 +238,7 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       const updatedSessions = [newSession, ...(Array.isArray(recentSessions) ? recentSessions : [])].slice(0, 15);
       set({ recentSessions: updatedSessions });
       if (dbConnected) {
-        saveRecentSessionsToCloud(updatedSessions);
+        saveRecentSessionsToCloud(get().storeId, updatedSessions);
       }
 
       // Check for PIP generation (3 consecutive fails) or Perfect Score Trophies
@@ -314,7 +314,7 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
         };
         set({ metrics: averagedMetrics });
         if (dbConnected) {
-          saveMetricsToCloud(averagedMetrics);
+          saveMetricsToCloud(get().storeId, averagedMetrics);
         }
       }
     }

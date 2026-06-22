@@ -85,7 +85,7 @@ const apiKey = useStore((state) => state.apiKey);
         nextState = await runGeminiSimulationStep(apiKey, currentMsg, history, selectedScenario, playbookSettings);
       } else {
         // Use standard offline Sandbox dialog engine
-        nextState = runOfflineSimulationStep(currentMsg, history, selectedScenario, playbookSettings);
+        nextState = runOfflineSimulationStep(currentMsg, history, selectedScenario);
       }
       
       // Update states
@@ -127,7 +127,7 @@ const apiKey = useStore((state) => state.apiKey);
       } else if (hasApiKey) {
         result = await evaluateSessionGemini(apiKey, history, selectedScenario, playbookSettings);
       } else {
-        result = evaluateSessionOffline(history, selectedScenario, playbookSettings);
+        result = evaluateSessionOffline(history);
       }
       
       setEvaluation(result);
@@ -208,7 +208,6 @@ const apiKey = useStore((state) => state.apiKey);
       {/* 1. SCENARIOS SELECTOR VIEW */}
           {!sessionActive && (
             <RoleplayConfiguration 
-              apiKey={apiKey}
               allScenarios={allScenarios}
               selectedScenario={selectedScenario}
               setSelectedScenario={setSelectedScenario}
@@ -217,38 +216,16 @@ const apiKey = useStore((state) => state.apiKey);
               customerTone={customerTone}
               setCustomerTone={setCustomerTone}
               startRoleplay={startRoleplay}
-              messages={messages}
-
-              inputText={inputVal}
-              setInputText={setInputVal}
-              completedSteps={completedSteps}
-              currentActiveStep={currentActiveStep}
-              isEvaluating={isEvaluating}
-              setSessionActive={setSessionActive}
-              stepHint={stepHint}
-              sendMessage={handleSend}
-              isLoading={isLoading}
-              messagesEndRef={chatBottomRef}
-              endRoleplay={endAndEvaluate}
-              evaluation={evaluation}
-              saveAndReturn={saveAndReturn}
-              roster={[]}
- />
+            />
           )}
 
           {sessionActive && !evaluation && (
             <RoleplayActiveSession 
               apiKey={apiKey}
-              allScenarios={allScenarios}
               selectedScenario={selectedScenario}
-              setSelectedScenario={setSelectedScenario}
               complexity={complexity}
-              setComplexity={setComplexity}
               customerTone={customerTone}
-              setCustomerTone={setCustomerTone}
-              startRoleplay={startRoleplay}
               messages={messages}
-
               inputText={inputVal}
               setInputText={setInputVal}
               completedSteps={completedSteps}
@@ -260,40 +237,20 @@ const apiKey = useStore((state) => state.apiKey);
               isLoading={isLoading}
               messagesEndRef={chatBottomRef}
               endRoleplay={endAndEvaluate}
-              evaluation={evaluation}
-              saveAndReturn={saveAndReturn}
-              roster={[]}
- />
+              startRoleplay={startRoleplay}
+            />
           )}
 
           {evaluation && (
             <RoleplayResults 
-              apiKey={apiKey}
-              allScenarios={allScenarios}
               selectedScenario={selectedScenario}
-              setSelectedScenario={setSelectedScenario}
               complexity={complexity}
-              setComplexity={setComplexity}
               customerTone={customerTone}
-              setCustomerTone={setCustomerTone}
-              startRoleplay={startRoleplay}
-              messages={messages}
-
-              inputText={inputVal}
-              setInputText={setInputVal}
-              completedSteps={completedSteps}
-              currentActiveStep={currentActiveStep}
-              isEvaluating={isEvaluating}
-              setSessionActive={setSessionActive}
-              stepHint={stepHint}
-              sendMessage={handleSend}
-              isLoading={isLoading}
-              messagesEndRef={chatBottomRef}
-              endRoleplay={endAndEvaluate}
               evaluation={evaluation}
               saveAndReturn={saveAndReturn}
-              roster={[]}
- />
+              setActiveView={setActiveView}
+              startRoleplay={startRoleplay}
+            />
           )}
     </div>
   );

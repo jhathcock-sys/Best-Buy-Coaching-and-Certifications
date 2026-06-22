@@ -30,7 +30,7 @@ export default function CustomScenariosTab({ customScenarios = [], onAddCustomSc
     setIsGenerating(true);
     setAiError('');
     try {
-      const generated = await generateCustomScenario(aiPrompt, apiKey?.gemini);
+      const generated = await generateCustomScenario(aiPrompt, apiKey);
       setScenTitle(generated.title || '');
       setScenName(generated.name || '');
       setScenCategory(generated.category || 'Computing');

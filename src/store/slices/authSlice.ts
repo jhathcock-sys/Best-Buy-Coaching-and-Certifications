@@ -117,7 +117,7 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
       set({ managers: newManagers });
       localStorage.setItem('bby_managers', JSON.stringify(newManagers));
       if (get().dbConnected) {
-        saveManagersToCloud(newManagers);
+        saveManagersToCloud(get().storeId, newManagers);
       }
     }
   };

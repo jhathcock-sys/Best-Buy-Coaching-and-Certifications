@@ -1,5 +1,6 @@
 import { StateCreator } from 'zustand';
 import { StoreState, MetricsSlice } from '../../types/store';
+import { Employee } from '../../types';
 import { EmployeeSchema } from '../../schemas';
 import { 
   saveActivePeriodToCloud,
@@ -163,7 +164,7 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
         }
       });
 
-      const updated = Object.values(rosterMap);
+      const updated = Object.values(rosterMap) as Employee[];
       const newHistory = { ...rosterHistory, [activePeriod]: updated };
       set({ rosterHistory: newHistory });
       if (dbConnected) {

@@ -91,7 +91,7 @@ export default function RosterImporterModal({ isOpen, onClose, onImport }) {
     setCsvData(lines.slice(1).map(line => parseCSVLine(line)));
 
     // Generate initial intelligent mappings
-    const initialMappings = {};
+    const initialMappings: Record<string, number> = {};
     Object.keys(FUZZY_MAP).forEach(key => {
       const matchIndex = parsedHeaders.findIndex(header => {
         const normalizedHeader = header.toLowerCase().replace(/[^a-z0-9]/g, '');

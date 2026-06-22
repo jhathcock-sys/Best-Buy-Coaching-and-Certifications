@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
+import { ShiftEvent } from '../types';
 import { 
   subscribeToActivePeriod,
   subscribeToRosterHistory,
@@ -135,7 +136,7 @@ export function useAppStoreSync(dbConnected, isAuthenticated, storeId) {
         }
 
         // Merge lists of shifts by ID and lastUpdated
-        const shiftMap = {};
+        const shiftMap: Record<string, ShiftEvent> = {};
         
         // 1. Populate with local shifts (filtering out deleted ones)
         localShifts.forEach(s => {

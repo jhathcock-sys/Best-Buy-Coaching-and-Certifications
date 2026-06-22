@@ -16,6 +16,14 @@ export interface Employee {
   focus5?: boolean;
   trophies?: any[];
   actionPlans?: any[];
+  revenue?: number;
+  revenueOwed?: number;
+  revenueStatus?: 'on-track' | 'off-track' | 'none';
+  apps?: number;
+  appsOwed?: number;
+  appsStatus?: 'on-track' | 'off-track' | 'none';
+  membershipsOwed?: number;
+  membershipsStatus?: 'on-track' | 'off-track' | 'none';
 }
 
 export interface DeptGoal {
@@ -69,6 +77,7 @@ export interface CoachingLog {
   timestamp: number;
   coachName: string;
   customerName?: string;
+  rating?: string;
 }
 
 export interface ShiftEvent {

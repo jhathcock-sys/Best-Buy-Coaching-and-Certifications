@@ -23,3 +23,8 @@ After every significant upgrade, change, or feature completion, you must:
 2. Push the changes to the remote GitHub repository.
 3. Deploy the updated application to the hosting environment (e.g., via `npm run build` and `firebase deploy`, or the appropriate deployment commands for this project).
 4. Log these deployment actions in the daily memory log.
+
+## State Refactoring Verification
+When refactoring state logic or extracting components that depend on global state:
+1. **Verify Hook Signatures**: Always double-check the interface of custom hooks (e.g., `useApp()` vs `useStore()`) before destructing variables from them. Do not assume all global variables reside in the same hook.
+2. **Trace Dependencies**: Explicitly confirm the original source of every variable being moved to ensure it will not evaluate to `undefined` in its new context.

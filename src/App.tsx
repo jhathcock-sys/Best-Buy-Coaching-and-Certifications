@@ -134,7 +134,7 @@ function AppContent() {
   if (!isAuthenticated) {
     return (
       <LoginGate 
-        correctPin={storePin}
+        correctPin={playbookSettings?.storePin || storePin}
         onLoginSuccess={(enteredPin, storeId, type, advisorData) => {
           if (type === 'supervisor') {
             login(enteredPin, storeId);

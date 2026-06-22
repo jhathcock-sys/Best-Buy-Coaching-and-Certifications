@@ -1,0 +1,11 @@
+- `[x]` Phase 1: State Hook Cleanup
+  - `[x]` Remove Zustand pass-throughs from `AppContext.jsx`
+  - `[x]` Update `App.tsx` and core layout components to use `useStore` directly
+- `[x]` Phase 2: Component Modularity
+  - `[x]` Break down `StoreRoster.tsx` (Verified: Already using tab pattern)
+  - `[x]` Break down `PlaybookStudio.tsx` (Verified: Already using tab pattern)
+  - `[x]` Break down `RoleplayCenter.tsx` (Verified: Already using tab pattern)
+- `[x]` Phase 3: TypeScript Adoption
+  - `[x]` Define TypeScript interfaces for store slices (Verified: Already in types/store.ts)
+  - `[x]` Define interfaces for component props
+  - `[x]` Remove `// @ts-nocheck` directives from all components

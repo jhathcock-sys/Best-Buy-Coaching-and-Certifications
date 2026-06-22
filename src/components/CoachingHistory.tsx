@@ -1,8 +1,11 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import { Search, Trash2, Volume2, BookOpen, Clock } from 'lucide-react';
+import { useStore } from '../store/useStore';
 
-export default function CoachingHistory({ coachingLogs = [], onDeleteLog }) {
+export default function CoachingHistory() {
+  const coachingLogs = useStore(state => state.coachingLogs) || [];
+  const onDeleteLog = useStore(state => state.deleteCoachingLog);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [selectedSession, setSelectedSession] = useState(null);

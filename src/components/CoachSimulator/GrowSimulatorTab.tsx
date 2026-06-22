@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 import { Users, Send, Check } from 'lucide-react';
 

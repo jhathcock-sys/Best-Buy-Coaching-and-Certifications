@@ -87,6 +87,8 @@ export interface MetricsSlice {
   bulkImportEmployees: (importedEmployees: Employee[], targetPeriod?: string) => void;
   changePeriod: (p: string) => void;
   createPeriodArchive: (newPeriodName: string, copyOption: string) => void;
+  addTrophy: (empId: string, trophy: any) => void;
+  addActionPlan: (empId: string, plan: any) => void;
 }
 
 export type StoreState = AuthSlice & ShiftSlice & PlaybookSlice & MetricsSlice;

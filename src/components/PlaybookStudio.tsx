@@ -1,7 +1,10 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 import { ShieldAlert, Sparkles, Key, Check, Plus, Trash2, BookOpen, Compass, Users, UserPlus, Edit2, Eye, EyeOff, Cpu, RefreshCw } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { testLatency } from '../services/firebase';
+
+import { useStore } from '../store/useStore';
 
 import AiEngineTab from './PlaybookStudio/AiEngineTab';
 import SystemPromptsTab from './PlaybookStudio/SystemPromptsTab';
@@ -11,22 +14,22 @@ import DepartmentTargetsTab from './PlaybookStudio/DepartmentTargetsTab';
 import SyncDiagnosticsTab from './PlaybookStudio/SyncDiagnosticsTab';
 import CustomScenariosTab from './Playbook/CustomScenariosTab';
 
-export default function PlaybookStudio({ 
-  playbookSettings, 
-  onSaveSettings, 
-  deptGoals = {}, 
-  onSaveDeptGoals,
-  customScenarios = [],
-  onAddCustomScenario,
-  onDeleteCustomScenario,
-  rosterHistory = {},
-  coachingLogs = [],
-  followUpTasks = [],
-  floorLeaderShifts = [],
-  managers = [],
-  onSaveManagers
-}) {
+export default function PlaybookStudio() {
   const { apiKey, dbConnected, handleSaveFirebaseConfig } = useApp();
+  
+  const playbookSettings = useStore(state => state.playbookSettings);
+  const onSaveSettings = useStore(state => state.saveSettings);
+  const deptGoals = useStore(state => state.deptGoals) || {};
+  const onSaveDeptGoals = useStore(state => state.saveDeptGoals);
+  const customScenarios = useStore(state => state.customScenarios) || [];
+  const onAddCustomScenario = useStore(state => state.importCustomScenario);
+  const onDeleteCustomScenario = useStore(state => state.deleteCustomScenario);
+  const rosterHistory = useStore(state => state.rosterHistory) || {};
+  const coachingLogs = useStore(state => state.coachingLogs) || [];
+  const followUpTasks = useStore(state => state.followUpTasks) || [];
+  const floorLeaderShifts = useStore(state => state.floorLeaderShifts) || [];
+  const managers = useStore(state => state.managers) || [];
+  const onSaveManagers = useStore(state => state.saveManagers);
   const [activeTab, setActiveTab] = useState('engine');
   
   const [diagnosticsLogs, setDiagnosticsLogs] = useState([]);

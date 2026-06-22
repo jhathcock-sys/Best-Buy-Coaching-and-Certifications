@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useStore } from '../../store/useStore';
 
 export function useFloorLogging(roster, activeShift, setActiveShift, logCoachingSession, editEmployee) {
   const [selectedEmpId, setSelectedEmpId] = useState('');
@@ -107,6 +108,14 @@ ${ocvNotes || 'No specific observation notes logged.'}`;
     editEmployee(emp.id, {
       memberships: (emp.memberships || 0) + (winType === 'pm' ? 1 : 0),
       creditCards: (emp.creditCards || 0) + (winType === 'app' ? 1 : 0)
+    });
+
+    useStore.getState().addTrophy(emp.id, {
+      id: `trophy-${Date.now()}`,
+      type: winType === 'pm' ? 'Plus/Total Membership' : 'Best Buy Credit Card',
+      category: 'Floor Win',
+      date: new Date().toLocaleDateString(),
+      icon: winType === 'pm' ? 'ShieldCheck' : 'CreditCard'
     });
 
     setSelectedEmpId('');

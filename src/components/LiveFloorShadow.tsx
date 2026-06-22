@@ -8,16 +8,23 @@ import { useLiveFloorShadow } from '../hooks/useLiveFloorShadow';
 import { generateCoachingLogGemini } from '../services/ai';
 
 
+import { useApp } from '../context/AppContext';
+import { useStore } from '../store/useStore';
+
 export default function LiveFloorShadow({ 
-  roster = [], 
-  onLogCoachingSession, 
-  onAddFollowUpTask, 
   onNavigate, 
   preselectedEmployee, 
-  clearPreselectedEmployee,
-  playbookSettings,
-  apiKey
-}) {
+  clearPreselectedEmployee
+}: any) {
+  const { apiKey } = useApp();
+  
+  const playbookSettings = useStore((state) => state.playbookSettings);
+  const activePeriod = useStore((state) => state.activePeriod);
+  const rosterHistory = useStore((state) => state.rosterHistory) || {};
+  const roster = rosterHistory[activePeriod] || [];
+  
+  const onLogCoachingSession = useStore((state) => state.logCoachingSession);
+  const onAddFollowUpTask = useStore((state) => state.addFollowUpTask);
   const {
     currentStep, setCurrentStep,
     selectedEmpId, setSelectedEmpId,

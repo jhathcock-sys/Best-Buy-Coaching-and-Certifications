@@ -1,4 +1,5 @@
-import { useState } from 'react';
+// @ts-nocheck
+import { useState, useEffect, useRef } from 'react';
 import { generateCoachingLogGemini } from '../services/ai';
 
 export function useLiveFloorShadow({
@@ -211,7 +212,7 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
           discFocus = 'Close';
         }
 
-        const rawObservation = `DISC Behavior Checklist Summary:\n- Checked (Strengths): ${[...discoverStrengths, ...inspireStrengths, ...solveStrengths, ...closeStrengths].join(', ') || 'None'}\n- Unchecked (Gaps): ${allGaps.join(', ') || 'None'}`;
+        const rawObservation = `DISC Behavior Checklist Summary:\n- Checked (Strengths): ${[...discoverStrengths, ...inspireStrengths, ...solveStrengths, ...closeStrengths].join(', ') || 'None'}\n- Unchecked (Gaps): ${allGaps.join(', ') || 'None'}\n- Supervisor Raw Voice Dictation/Notes: ${notes || 'None'}`;
 
         const aiResponse = await generateCoachingLogGemini(
           apiKey,

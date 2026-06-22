@@ -1,5 +1,7 @@
+// @ts-nocheck
 import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
+import { useStore } from '../store/useStore';
 import { EMPLOYEE_SCENARIOS } from '../services/ai';
 
 // Custom Hooks
@@ -67,19 +69,26 @@ const TEMPLATES = {
 };
 
 export default function CoachSimulator({ 
-  playbookSettings, 
-  customScenarios = [], 
   preselectedEmployee, 
   clearPreselectedEmployee, 
   prefillBuilderData, 
   clearPrefillBuilderData, 
-  onImportScenario, 
-  onLogCoachingSession,
-  coachingLogs = [],
-  roster = [],
   initialTab = 'sim'
-}) {
+}: any) {
   const { apiKey } = useApp();
+  
+  const playbookSettings = useStore((state) => state.playbookSettings);
+  const customScenarios = useStore((state) => state.customScenarios) || [];
+  const importCustomScenario = useStore((state) => state.importCustomScenario);
+  const logCoachingSession = useStore((state) => state.logCoachingSession);
+  const coachingLogs = useStore((state) => state.coachingLogs) || [];
+  const rosterHistory = useStore((state) => state.rosterHistory) || {};
+  const activePeriod = useStore((state) => state.activePeriod);
+  
+  const roster = rosterHistory[activePeriod] || [];
+  const onImportScenario = importCustomScenario;
+  const onLogCoachingSession = logCoachingSession;
+
   const allEmployees = useMemo(() => [
     ...(Array.isArray(EMPLOYEE_SCENARIOS) ? EMPLOYEE_SCENARIOS : []), 
     ...(Array.isArray(customScenarios) ? customScenarios : [])

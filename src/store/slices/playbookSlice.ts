@@ -103,6 +103,58 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       if (dbConnected) {
         saveCoachingLogToCloud(newLog);
       }
+
+      // Check for PIP generation (3 consecutive gaps/fails) or Perfect Score Trophies
+      const targetEmp = (rosterHistory[activePeriod] || []).find(e => e.id === empId);
+      
+      if (targetEmp) {
+        if (newLog.score === 100 || session.rating === 'Exceptional') {
+          get().addTrophy(targetEmp.id, {
+            id: 'trophy_' + Date.now(),
+            type: 'Exceptional Floor Observation',
+            category: session.category || 'Coaching',
+            date: new Date().toLocaleDateString(),
+            icon: 'Award'
+          });
+        }
+
+        const employeeLogs = updatedLogs.filter(l => l.employeeId === empId);
+        if (employeeLogs.length >= 3) {
+          const lastThree = employeeLogs.slice(0, 3);
+          const allFailed = lastThree.every(l => l.score < 60 || l.rating === 'Needs Work');
+          
+          if (allFailed) {
+            const currentPlans = targetEmp.actionPlans || [];
+            const hasActivePip = currentPlans.some(p => p.status === 'Active');
+            
+            if (!hasActivePip) {
+              const newPip = {
+                id: 'pip_' + Date.now(),
+                type: '30-Day Action Plan',
+                reason: 'Recurring behavioral gaps identified in 3 consecutive observations',
+                dateCreated: new Date().toLocaleDateString(),
+                status: 'Active'
+              };
+              get().addActionPlan(targetEmp.id, newPip);
+              
+              get().addFollowUpTask({
+                employeeId: targetEmp.id,
+                employeeName: targetEmp.name,
+                department: targetEmp.dept || 'Sales',
+                action: `Week 1 PIP: Schedule an extended 1-on-1 to review recent coaching logs and reset expectations.`,
+                dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+              });
+              get().addFollowUpTask({
+                employeeId: targetEmp.id,
+                employeeName: targetEmp.name,
+                department: targetEmp.dept || 'Sales',
+                action: `Week 2 PIP: Run a Coach Simulator session addressing the recurring gaps in ${session.category || 'Floor Skills'}.`,
+                dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+              });
+            }
+          }
+        }
+      }
     },
 
     deleteCoachingSession: (index) => {
@@ -188,6 +240,69 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       set({ recentSessions: updatedSessions });
       if (dbConnected) {
         saveRecentSessionsToCloud(updatedSessions);
+      }
+
+      // Check for PIP generation (3 consecutive fails) or Perfect Score Trophies
+      const activePeriod = get().activePeriod;
+      const rosterHistory = get().rosterHistory || {};
+      const targetEmp = (rosterHistory[activePeriod] || []).find(e => e.name === customerName);
+      
+      if (targetEmp) {
+        if (score === 100) {
+          get().addTrophy(targetEmp.id, {
+            id: 'trophy_' + Date.now(),
+            type: 'Perfect Roleplay Score',
+            category: category,
+            date: new Date().toLocaleDateString(),
+            icon: 'Star'
+          });
+        }
+
+        const employeeSessions = updatedSessions.filter(s => s.customerName === customerName);
+        if (employeeSessions.length >= 3) {
+          const lastThree = employeeSessions.slice(0, 3);
+          const allFailed = lastThree.every(s => s.score < 60);
+          
+          if (allFailed) {
+            // Check if they already have an active PIP
+            const currentPlans = targetEmp.actionPlans || [];
+            const hasActivePip = currentPlans.some(p => p.status === 'Active');
+            
+            if (!hasActivePip) {
+              const newPip = {
+                id: 'pip_' + Date.now(),
+                type: '30-Day Action Plan',
+                reason: 'Failed 3 consecutive AI Roleplays',
+                dateCreated: new Date().toLocaleDateString(),
+                status: 'Active'
+              };
+              get().addActionPlan(targetEmp.id, newPip);
+              
+              // Auto-inject Follow-Up Tasks for the manager
+              get().addFollowUpTask({
+                employeeId: targetEmp.id,
+                employeeName: targetEmp.name,
+                department: targetEmp.dept || 'Sales',
+                action: `Week 1 PIP: Shadow ${targetEmp.name} on the floor for 30 minutes to observe ${category} skills.`,
+                dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+              });
+              get().addFollowUpTask({
+                employeeId: targetEmp.id,
+                employeeName: targetEmp.name,
+                department: targetEmp.dept || 'Sales',
+                action: `Week 2 PIP: Run a Coach Simulator session addressing the recurring gaps in ${category}.`,
+                dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+              });
+              get().addFollowUpTask({
+                employeeId: targetEmp.id,
+                employeeName: targetEmp.name,
+                department: targetEmp.dept || 'Sales',
+                action: `Week 3 PIP: ${targetEmp.name} must score > 80% on the ${category} Roleplay Arena.`,
+                dueDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+              });
+            }
+          }
+        }
       }
 
       if (passed && newMetrics) {

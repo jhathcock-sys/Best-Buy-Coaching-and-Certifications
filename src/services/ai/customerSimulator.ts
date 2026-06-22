@@ -289,7 +289,7 @@ export async function runGeminiSimulationStep(apiKey, message, history, scenario
   } catch (error) {
     console.error('Gemini API Error:', error);
     // Fall back to offline simulation seamlessly in case of error
-    return runOfflineSimulationStep(message, history, scenario, playbookSettings);
+    return runOfflineSimulationStep(message, history, scenario);
   }
 }
 
@@ -358,7 +358,7 @@ export async function evaluateSessionGemini(apiKey, history, scenario, playbookS
     return JSON.parse(result.response.text());
   } catch (error) {
     console.error('Gemini Evaluation Error:', error);
-    return evaluateSessionOffline(history, scenario, playbookSettings);
+    return evaluateSessionOffline(history);
   }
 }
 

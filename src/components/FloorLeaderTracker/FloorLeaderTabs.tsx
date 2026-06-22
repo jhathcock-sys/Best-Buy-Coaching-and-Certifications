@@ -1,7 +1,7 @@
 import React from 'react';
-import { Power } from 'lucide-react';
+import { Power, FileText } from 'lucide-react';
 
-export default function FloorLeaderTabs({ leaderTab, setLeaderTab, handleEndShift }: any) {
+export default function FloorLeaderTabs({ leaderTab, setLeaderTab, handleEndShift, handleGenerateHandoff }: any) {
   return (
     <>
           {/* Tab Selection Header bar with End Shift */}
@@ -95,9 +95,14 @@ export default function FloorLeaderTabs({ leaderTab, setLeaderTab, handleEndShif
 
             </div>
             
-            <button className="btn btn-accent" onClick={handleEndShift} style={{ padding: '0.5rem 1.25rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', color: 'var(--error)', height: '36px', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              <Power size={14} /> End Shift
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button className="btn btn-secondary" onClick={handleGenerateHandoff} style={{ padding: '0.5rem 1.25rem', height: '36px', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
+                <FileText size={16} color="var(--bby-blue)" /> Generate Handoff
+              </button>
+              <button className="btn btn-accent" onClick={handleEndShift} style={{ padding: '0.5rem 1.25rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', color: 'var(--error)', height: '36px', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                <Power size={14} /> End Shift
+              </button>
+            </div>
           </div>
     </>
   );

@@ -1,12 +1,10 @@
 // @ts-nocheck
-export * from './ai/constants.js';
-export * from './ai/core.js';
-export * from './ai/customerSimulator.js';
-export * from './ai/employeeSimulator.js';
-export * from './ai/floorSimulator.js';
-export * from './ai/scenarioGenerator.js';
-export * from './ai/geminiAuditors.js';
-export * from './ai/geminiDocumentParsers.js';
-export * from './ai/geminiCoaching.js';
-
-
+export * from './ai/constants';
+export * from './ai/core';
+export * from './ai/customerSimulator';
+export * from './ai/employeeSimulator';
+export * from './ai/floorSimulator';
+export * from './ai/scenarioGenerator';
+export * from './ai/geminiAuditors';
+export * from './ai/geminiDocumentParsers';
+export * from './ai/geminiCoaching';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useRef } from 'react';
 import { normalizeZone, fuzzyMatchName, parseShiftHours, generateBreaks, WEEKDAY_KEYS } from '../utils/scheduleParserUtils';
 

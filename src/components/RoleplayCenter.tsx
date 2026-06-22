@@ -3,11 +3,18 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { STANDARD_SCENARIOS, runOfflineSimulationStep, runGeminiSimulationStep, evaluateSessionOffline, evaluateSessionGemini } from '../services/ai';
 import { ArrowLeft, RefreshCw, Send, CheckCircle, Sparkles, BookOpen } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useStore } from '../store/useStore';
 import RoleplayConfiguration from './RoleplayCenter/RoleplayConfiguration';
 import RoleplayActiveSession from './RoleplayCenter/RoleplayActiveSession';
 import RoleplayResults from './RoleplayCenter/RoleplayResults';
-export default function RoleplayCenter({ playbookSettings, onCompleteRoleplay, customScenarios = [] }) {
+
+export default function RoleplayCenter() {
   const { apiKey, setActiveView } = useApp();
+  const customScenarios = useStore((state) => state.customScenarios) || [];
+  const playbookSettings = useStore((state) => state.playbookSettings);
+  const completeRoleplay = useStore((state) => state.completeRoleplay);
+  const onCompleteRoleplay = completeRoleplay; // Alias to match existing calls
+  
   const scenarios = useMemo(() => [...STANDARD_SCENARIOS, ...customScenarios], [customScenarios]);
   const [selectedScenario, setSelectedScenario] = useState(null);
   const [sessionActive, setSessionActive] = useState(false);

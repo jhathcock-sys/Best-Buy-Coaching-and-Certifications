@@ -16,7 +16,10 @@ export default function ProfileAppraisalsTab({
   renderMarkdown,
   playingLogId,
   setPlayingLogId,
-  handlePlayAudio
+  handlePlayAudio,
+  isGeneratingReview,
+  generatedReview,
+  handleGenerateReview
  }) {
   return (
     <>

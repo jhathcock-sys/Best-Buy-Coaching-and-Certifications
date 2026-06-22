@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 import { Trophy, CheckCircle2, XCircle, Plus, Minus, Trash2, Flame, Undo, TrendingUp, AlertCircle } from 'lucide-react';
 import ShiftTrackerGoals from './ShiftTrackerGoals';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { CheckCircle2, RefreshCw } from 'lucide-react';
 

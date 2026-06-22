@@ -1,7 +1,7 @@
-import ImportScheduleRow from './ImportSchedule/ImportScheduleRow';
 // @ts-nocheck
-import { useState, useRef } from 'react';
-import { X, Check, AlertCircle, FileText, Camera } from 'lucide-react';
+import ImportScheduleRow from './ImportSchedule/ImportScheduleRow';
+import React, { useState, useRef } from 'react';
+import { X, Check, AlertCircle, FileText, Camera, Calendar as CalendarIcon } from 'lucide-react';
 import { parseScheduleImage } from '../services/ai';
 
 // standard department/zone mapping helper

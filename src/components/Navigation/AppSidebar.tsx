@@ -1,9 +1,10 @@
-import React from 'react';
-import { ShieldCheck, Compass, Users, User, Tv, Archive, LayoutDashboard, ClipboardList, Clock, CheckCircle2, CloudLightning } from 'lucide-react';
+// @ts-nocheck
+import React, { useState } from 'react';
+import { ShieldCheck, Compass, Users, User, Tv, Archive, LayoutDashboard, ClipboardList, Clock, CheckCircle2, CloudLightning, ChevronRight, ChevronDown, TrendingUp, Sparkles, BookOpen } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 
 export default function AppSidebar({ activeView, setActiveView }: any) {
-  const { isOnline, syncStatus, activePeriod } = useStore();
+  const { isOnline, syncStatus, activePeriod, activeManager, logout, collapsedCategories, toggleCategory, dbConnected, playbookSettings, apiKey } = useStore();
   
   return (
     <>

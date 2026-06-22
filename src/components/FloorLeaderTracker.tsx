@@ -6,6 +6,7 @@ import { useFloorLeaderTracker } from '../hooks/useFloorLeaderTracker';
 import FloorLeaderHeader from './FloorLeaderTracker/FloorLeaderHeader';
 import FloorLeaderTabs from './FloorLeaderTracker/FloorLeaderTabs';
 import HistoricalShiftsArchive from './FloorLeaderTracker/HistoricalShiftsArchive';
+import HistoricalShiftsArchive from './FloorLeaderTracker/HistoricalShiftsArchive';
 import { useApp } from '../context/AppContext';
 import { useStore } from '../store/useStore';
 import ZoneScheduler from './ZoneScheduler';
@@ -16,10 +17,19 @@ import ShiftSimulator from './ShiftSimulator';
 import FiveStarAuditor from './FiveStarAuditor';
 import ShiftSetupForm from './FloorLeader/ShiftSetupForm';
 import ShiftTrackerTab from './FloorLeader/ShiftTrackerTab';
+import HandoffReportModal from './FloorLeaderTracker/HandoffReportModal';
 
 
-export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteShift, roster = [], activeManager, onAddEmployee }) {
+export default function FloorLeaderTracker() {
+  const activeManager = useStore((state) => state.activeManager);
+  const activePeriod = useStore((state) => state.activePeriod);
+  const rosterHistory = useStore((state) => state.rosterHistory) || {};
+  const roster = rosterHistory[activePeriod] || [];
+  const shifts = useStore((state) => state.floorLeaderShifts) || [];
+  const onSaveShift = useStore((state) => state.saveFloorLeaderShift);
+  const onAddEmployee = useStore((state) => state.addEmployee);
   const { apiKey } = useApp();
+  const [isHandoffModalOpen, setIsHandoffModalOpen] = useState(false);
   
   const {
     activeShift, setActiveShift,
@@ -82,6 +92,7 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
             leaderTab={leaderTab} 
             setLeaderTab={setLeaderTab} 
             handleEndShift={handleEndShift} 
+            handleGenerateHandoff={() => setIsHandoffModalOpen(true)}
           />
 
           {leaderTab === 'tracker' && (
@@ -145,6 +156,16 @@ export default function FloorLeaderTracker({ shifts = [], onSaveShift, onDeleteS
 
 
         </div>
+      )}
+
+      {/* Handoff Modal */}
+      {isHandoffModalOpen && (
+        <HandoffReportModal
+          activeShift={activeShift}
+          activeSummary={activeSummary}
+          apiKey={apiKey}
+          onClose={() => setIsHandoffModalOpen(false)}
+        />
       )}
 
       {/* HISTORICAL SHIFTS LIST */}

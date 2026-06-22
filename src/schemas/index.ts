@@ -16,7 +16,9 @@ export const EmployeeSchema = z.object({
   m365: z.number().optional().default(0),
   audio: z.number().optional().default(0),
   opportunityGap: z.string().optional(),
-  lastUpdated: z.number().optional()
+  lastUpdated: z.number().optional(),
+  trophies: z.array(z.any()).optional().default([]),
+  actionPlans: z.array(z.any()).optional().default([])
 }).passthrough();
 
 export const ShiftHourSchema = z.object({

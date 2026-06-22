@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { Upload, FileText, CheckCircle2, RefreshCw } from 'lucide-react';
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
+import { generateMonthlyOneOnOne, generateActionPlan } from '../services/ai/geminiCoaching';
 
 export function useAssociateProfile(isOpen, employee, rosterHistory, coachingLogs, followUpTasks, deptGoals) {
   const [activeTab, setActiveTab] = useState('trends');
@@ -7,6 +8,8 @@ export function useAssociateProfile(isOpen, employee, rosterHistory, coachingLog
   const [expandedLogId, setExpandedLogId] = useState<any>(null);
   const [isGeneratingReview, setIsGeneratingReview] = useState(false);
   const [generatedReview, setGeneratedReview] = useState<any>(null);
+  const [isGeneratingActionPlan, setIsGeneratingActionPlan] = useState(false);
+  const [generatedActionPlan, setGeneratedActionPlan] = useState<any>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -47,13 +50,28 @@ export function useAssociateProfile(isOpen, employee, rosterHistory, coachingLog
     setGeneratedReview(null);
     try {
       const apiKey = (useStore.getState().apiKey as any)?.gemini;
-      const reviewText = await (globalThis as any).generateMonthlyOneOnOne(employee, associateLogs, apiKey);
+      const reviewText = await generateMonthlyOneOnOne(employee, associateLogs, apiKey);
       setGeneratedReview(reviewText);
     } catch (err) {
       console.error(err);
       setGeneratedReview("Error generating review. Please check your API key.");
     } finally {
       setIsGeneratingReview(false);
+    }
+  };
+
+  const handleGenerateActionPlan = async () => {
+    setIsGeneratingActionPlan(true);
+    try {
+      const apiKey = (useStore.getState().apiKey as any)?.gemini;
+      const plan = await generateActionPlan(employee, associateLogs, apiKey);
+      if (plan) {
+        setGeneratedActionPlan(plan);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsGeneratingActionPlan(false);
     }
   };
 
@@ -65,8 +83,11 @@ export function useAssociateProfile(isOpen, employee, rosterHistory, coachingLog
     expandedLogId, setExpandedLogId,
     isGeneratingReview, setIsGeneratingReview,
     generatedReview, setGeneratedReview,
+    isGeneratingActionPlan, setIsGeneratingActionPlan,
+    generatedActionPlan, setGeneratedActionPlan,
     handlePlayTTS,
     handleGenerateReview,
+    handleGenerateActionPlan,
     sortedPeriods: [],
     historyPoints: [],
     activeHistoryPoints: [],
@@ -131,8 +152,11 @@ export function useAssociateProfile(isOpen, employee, rosterHistory, coachingLog
     expandedLogId, setExpandedLogId,
     isGeneratingReview, setIsGeneratingReview,
     generatedReview, setGeneratedReview,
+    isGeneratingActionPlan, setIsGeneratingActionPlan,
+    generatedActionPlan, setGeneratedActionPlan,
     handlePlayTTS,
     handleGenerateReview,
+    handleGenerateActionPlan,
     sortedPeriods,
     historyPoints,
     activeHistoryPoints,

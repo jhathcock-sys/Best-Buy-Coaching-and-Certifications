@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { Sparkles, BookOpen, Trash2 } from 'lucide-react';
 

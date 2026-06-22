@@ -105,6 +105,32 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       get().editEmployee(empId, { dept: newDept });
     },
 
+    addTrophy: (empId, trophy) => {
+      const activePeriod = get().activePeriod;
+      const rosterHistory = get().rosterHistory || {};
+      const currentRoster = Array.isArray(rosterHistory[activePeriod]) ? rosterHistory[activePeriod] : [];
+      const targetEmp = currentRoster.find(emp => emp.id === empId);
+      if (!targetEmp) return;
+
+      const currentTrophies = targetEmp.trophies || [];
+      const updatedTrophies = [trophy, ...currentTrophies];
+      
+      get().editEmployee(empId, { trophies: updatedTrophies });
+    },
+
+    addActionPlan: (empId, plan) => {
+      const activePeriod = get().activePeriod;
+      const rosterHistory = get().rosterHistory || {};
+      const currentRoster = Array.isArray(rosterHistory[activePeriod]) ? rosterHistory[activePeriod] : [];
+      const targetEmp = currentRoster.find(emp => emp.id === empId);
+      if (!targetEmp) return;
+
+      const currentPlans = targetEmp.actionPlans || [];
+      const updatedPlans = [plan, ...currentPlans];
+      
+      get().editEmployee(empId, { actionPlans: updatedPlans });
+    },
+
     bulkImportEmployees: (importedEmployees, targetPeriod) => {
       const activePeriod = targetPeriod || get().activePeriod;
       const rosterHistory = get().rosterHistory || {};

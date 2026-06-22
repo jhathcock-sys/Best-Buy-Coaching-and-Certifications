@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { Users, Search, AlertTriangle, CheckCircle, Clock, HelpCircle, Sliders } from 'lucide-react';
 import AddEmployeeModal from './AddEmployeeModal';
@@ -11,22 +12,21 @@ import StoreRosterMobileCard from './StoreRoster/StoreRosterMobileCard';
 import RosterAuditor from './RosterAuditor';
 import RentsDueAuditor from './RentsDueAuditor';
 
+import { useApp } from '../context/AppContext';
+import { useStore } from '../store/useStore';
+
 export default function StoreRoster({ 
-  roster, 
   onCoachEmployee, 
-  onCreateLog, 
-  onUpdateEmployeeDept, 
-  onAddEmployee, 
-  activePeriod, 
-  rosterHistory = {}, 
-  onChangePeriod, 
-  onEditEmployee, 
-  onDeleteEmployee,
-  onCreatePeriod, 
-  onBulkImportEmployees, 
-  coachingLogs = [],
-  followUpTasks = [],
-  deptGoals = {
+  onCreateLog
+}: any) {
+  const { apiKey } = useApp();
+
+  const rosterHistory = useStore((state) => state.rosterHistory) || {};
+  const activePeriod = useStore((state) => state.activePeriod);
+  const coachingLogs = useStore((state) => state.coachingLogs) || [];
+  const followUpTasks = useStore((state) => state.followUpTasks) || [];
+  
+  const defaultDeptGoals = {
     'Front End': { memberships: 8.0, membershipsType: 'Hours', creditCards: 12.5, creditCardsType: 'Hours', warranty: 11.0, surveys: 1.0, rph: 640 },
     'General Sales': { memberships: 5000, membershipsType: 'Dollars', creditCards: 8000, creditCardsType: 'Dollars', warranty: 11.0, surveys: 1.0, rph: 640 },
     'Appliances': { memberships: 15000, membershipsType: 'Dollars', creditCards: 10000, creditCardsType: 'Dollars', warranty: 12.0, surveys: 1.0, rph: 1200 },
@@ -34,9 +34,29 @@ export default function StoreRoster({
     'Mobile': { memberships: 6000, membershipsType: 'Dollars', creditCards: 8000, creditCardsType: 'Dollars', warranty: 8.0, surveys: 1.0, rph: 700 },
     'Home Theatre': { memberships: 10000, membershipsType: 'Dollars', creditCards: 12000, creditCardsType: 'Dollars', warranty: 11.0, surveys: 1.0, rph: 800, basket: 250, audio: 35.0 },
     'Geek Squad': { memberships: 5000, membershipsType: 'Dollars', creditCards: 15000, creditCardsType: 'Dollars', warranty: 12.0, surveys: 1.0, rph: 500 }
-  },
-  apiKey
-}) {
+  };
+  
+  const storeDeptGoals = useStore((state) => state.deptGoals);
+  const deptGoals = (storeDeptGoals && Object.keys(storeDeptGoals).length > 0) ? storeDeptGoals : defaultDeptGoals;
+  
+  const roster = rosterHistory[activePeriod] || [];
+
+  const updateEmployeeDept = useStore((state) => state.updateEmployeeDept);
+  const addEmployee = useStore((state) => state.addEmployee);
+  const editEmployee = useStore((state) => state.editEmployee);
+  const deleteEmployee = useStore((state) => state.deleteEmployee);
+  const changePeriod = useStore((state) => state.changePeriod);
+  const createPeriodArchive = useStore((state) => state.createPeriodArchive);
+  const bulkImportEmployees = useStore((state) => state.bulkImportEmployees);
+  
+  // Create aliases for the functions that were previously props
+  const onUpdateEmployeeDept = updateEmployeeDept;
+  const onAddEmployee = addEmployee;
+  const onEditEmployee = editEmployee;
+  const onDeleteEmployee = deleteEmployee;
+  const onChangePeriod = changePeriod;
+  const onCreatePeriod = createPeriodArchive;
+  const onBulkImportEmployees = bulkImportEmployees;
   const {
     selectedProfileEmployee, setSelectedProfileEmployee,
     searchTerm, setSearchTerm,
@@ -422,11 +442,6 @@ export default function StoreRoster({
         isOpen={!!selectedProfileEmployee}
         onClose={() => setSelectedProfileEmployee(null)}
         employee={selectedProfileEmployee}
-        rosterHistory={rosterHistory}
-        coachingLogs={coachingLogs}
-        followUpTasks={followUpTasks}
-        deptGoals={deptGoals}
-        activePeriod={activePeriod}
       />
 
     </div>

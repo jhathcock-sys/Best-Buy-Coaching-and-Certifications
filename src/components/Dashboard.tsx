@@ -10,21 +10,22 @@ import DashboardLeaderboard from './Dashboard/DashboardLeaderboard';
 import MetricCards from './Dashboard/MetricCards';
 
 export default function Dashboard({ 
-  recentSessions, 
   onNavigate, 
-  roster = [], 
-  followUpTasks = [], 
   onCompleteFollowUpTask, 
-  deptGoals = {}, 
   onCoachEmployee, 
-  onShadowEmployee,
-  floorLeaderShifts = [],
-  coachingLogs = [],
-  activePeriod,
-  rosterHistory = {},
-  activeManager
+  onShadowEmployee
 }: any) {
   
+  const recentSessions = useStore((state) => state.recentSessions);
+  const followUpTasks = useStore((state) => state.followUpTasks);
+  const deptGoals = useStore((state) => state.deptGoals);
+  const floorLeaderShifts = useStore((state) => state.floorLeaderShifts);
+  const coachingLogs = useStore((state) => state.coachingLogs);
+  const activePeriod = useStore((state) => state.activePeriod);
+  const rosterHistory = useStore((state) => state.rosterHistory);
+  const activeManager = useStore((state) => state.activeManager);
+
+  const roster = rosterHistory[activePeriod] || [];
   const calculatedMetrics = useMemo(() => {
     if (!roster || roster.length === 0) return { memberships: 0, creditCards: 0, warranty: 0, surveys: 0, rph: 0 };
     

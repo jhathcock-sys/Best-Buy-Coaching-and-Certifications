@@ -108,7 +108,7 @@ export const generateMonthlyOneOnOne = async (employeeData, logs, apiKey) => {
       RECENT COACHING LOGS (Last 30 Days):
       ${JSON.stringify(logs, null, 2)}
       
-      Please write a professional, firm but supportive 1-on-1 document using the GROW framework. 
+      Please write a professional, firm but supportive 1-on-1 document using the Start / Stop / Continue framework. 
       Format the output in strict Markdown.
       Use the following structure:
       
@@ -116,16 +116,19 @@ export const generateMonthlyOneOnOne = async (employeeData, logs, apiKey) => {
       **Date:** Current Month
       **Department:** ${employeeData.dept}
       
-      ## 1. Goal (Current Performance vs Expectations)
+      ## Performance Snapshot
       Summarize their hard metrics. Celebrate their wins and clearly state what metrics they are missing based on store standards.
       
-      ## 2. Reality (Observations & Coaching Feedback)
-      Synthesize the themes from the provided coaching logs. What behaviors are causing the metric wins or gaps? If there are no logs, mention that we need to spend more time observing them.
+      ## 🟢 Start
+      Based on the coaching logs and metrics, what new behaviors, sales tactics, or routines should the associate START doing immediately to improve performance? Be specific.
       
-      ## 3. Options (Pathways to Improvement)
-      Suggest 2 or 3 specific roleplay scenarios or floor actions they can take this month to address their gaps.
+      ## 🔴 Stop
+      What bad habits, missed steps in the sales process (like missing the pitch), or non-productive behaviors should the associate STOP doing?
       
-      ## 4. Will (Commitment)
+      ## 🔵 Continue
+      What is the associate doing well that they should CONTINUE doing? Highlight their strengths and recent wins.
+      
+      ## Commitment
       Provide a blank commitment statement they need to agree to (e.g., "I commit to...").
       
       Use professional retail leadership language. Be concise and actionable.
@@ -154,3 +157,50 @@ I commit to: ___________________________`;
   }
 };
 
+export const generateActionPlan = async (employeeData, logs, apiKey) => {
+  try {
+    const isAvailable = isGeminiAvailable(apiKey);
+    if (!isAvailable) {
+      throw new Error("Gemini API Key is not available");
+    }
+
+    const aiInstance = new GoogleGenerativeAI(apiKey);
+    const model = aiInstance.getGenerativeModel({ model: 'gemini-1.5-pro' });
+
+    const prompt = `
+      You are an expert Best Buy Store Manager tasked with creating a 30-Day Performance Improvement Plan (Action Plan) for an associate.
+      
+      ASSOCIATE DATA:
+      Name: ${employeeData.name}
+      Department: ${employeeData.dept}
+      Memberships: ${employeeData.memberships || 0}
+      Credit Cards: ${employeeData.creditCards || 0}
+      RPH: $${employeeData.rph || 0}
+      
+      RECENT COACHING LOGS:
+      ${JSON.stringify(logs, null, 2)}
+      
+      Create a strict, structured 4-week action plan.
+      Output format must be a JSON object matching this exact schema:
+      {
+        "type": "30-Day Action Plan: Focus Area",
+        "status": "Active",
+        "reason": "Brief summary of why this plan was generated based on data",
+        "dateCreated": "Today's Date",
+        "planText": "Markdown formatted 4-week detailed plan"
+      }
+    `;
+
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: 'application/json'
+      }
+    });
+    
+    return JSON.parse(result.response.text());
+  } catch (error) {
+    console.error("Action Plan Generation Error:", error);
+    return null;
+  }
+};

@@ -14,6 +14,8 @@ export interface Employee {
   m365?: number;
   audio?: number;
   focus5?: boolean;
+  trophies?: any[];
+  actionPlans?: any[];
 }
 
 export interface DeptGoal {
@@ -79,6 +81,10 @@ export interface ShiftEvent {
   totalRevenue?: number;
   action?: string;
   dueDate?: string;
+  timestamp?: number;
+  zoneAssignments?: Record<string, string[]>;
+  breakSchedule?: any[];
+  activeBreaks?: Record<string, string>;
 }
 
 export interface FollowUpTask {

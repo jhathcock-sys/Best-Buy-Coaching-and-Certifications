@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   Compass, Users, BookOpen, LayoutDashboard, Sparkles, 
   ShieldCheck, ClipboardList, Archive, Clock, 
-  ChevronDown, ChevronRight, TrendingUp 
+  ChevronDown, ChevronRight, TrendingUp, MonitorPlay, CalendarDays
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -111,6 +111,12 @@ export default function Sidebar({
               <ShieldCheck className="menu-item-icon" /> Floor Shadowing
             </li>
             <li 
+              className={`menu-item ${activeView === 'dailyLineup' ? 'active' : ''}`}
+              onClick={() => setActiveView('dailyLineup')}
+            >
+              <CalendarDays className="menu-item-icon" /> Daily Lineup
+            </li>
+            <li 
               className={`menu-item ${activeView === 'floorLeader' ? 'active' : ''}`}
               onClick={() => setActiveView('floorLeader')}
             >
@@ -121,6 +127,12 @@ export default function Sidebar({
               onClick={() => setActiveView('trends')}
             >
               <TrendingUp className="menu-item-icon" /> Trend Reporting
+            </li>
+            <li 
+              className={`menu-item ${activeView === 'tv' ? 'active' : ''}`}
+              onClick={() => setActiveView('tv')}
+            >
+              <MonitorPlay className="menu-item-icon" /> Breakroom TV (Kiosk)
             </li>
           </>
         )}

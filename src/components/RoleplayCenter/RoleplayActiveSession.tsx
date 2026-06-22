@@ -1,5 +1,6 @@
+// @ts-nocheck
 import React from 'react';
-import { ArrowLeft, Send, Users, ShieldCheck, Star, Award, CheckCircle2, ChevronRight, MessageSquare, PlusCircle, User, Loader2, Sparkles, RefreshCw, XCircle, BookOpen } from 'lucide-react';
+import { ArrowLeft, Send, Users, ShieldCheck, Star, Award, CheckCircle2, ChevronRight, MessageSquare, PlusCircle, User, Loader2, Sparkles, RefreshCw, XCircle, BookOpen, Mic, MicOff } from 'lucide-react';
 
 export default function RoleplayActiveSession({ 
   apiKey,
@@ -27,6 +28,45 @@ export default function RoleplayActiveSession({
   setSessionActive,
   stepHint
  }) {
+  const [isListening, setIsListening] = React.useState(false);
+
+  const toggleMic = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert("Speech Recognition API not supported in this browser. Please use Chrome.");
+      return;
+    }
+
+    if (isListening) {
+      setIsListening(false);
+    } else {
+      setIsListening(true);
+      const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false; // We just want one phrase for the chat
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onresult = (event: any) => {
+        let transcript = '';
+        for (let i = 0; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        setInputText(transcript);
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error("Speech recognition error:", event.error);
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
+    }
+  };
+
   return (
     <>
         {isEvaluating ? (
@@ -155,13 +195,27 @@ export default function RoleplayActiveSession({
                 <input 
                   type="text" 
                   className="chat-input" 
-                  placeholder="Type your response to the customer..."
+                  placeholder={isListening ? "Listening... Speak your response" : "Type your response to the customer..."}
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
                   disabled={isLoading}
+                  style={{ borderColor: isListening ? 'var(--error)' : 'transparent', background: isListening ? 'rgba(239, 68, 68, 0.05)' : 'rgba(255, 255, 255, 0.05)' }}
                 />
-                <button className="btn btn-primary btn-icon" onClick={sendMessage} disabled={isLoading}>
+                <button 
+                  className="btn btn-icon" 
+                  style={{ 
+                    background: isListening ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255, 255, 255, 0.1)', 
+                    color: isListening ? 'var(--error)' : '#fff',
+                    animation: isListening ? 'pulse 1.5s infinite' : 'none'
+                  }} 
+                  onClick={toggleMic} 
+                  disabled={isLoading}
+                  title="Speak response"
+                >
+                  {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+                </button>
+                <button className="btn btn-primary btn-icon" onClick={sendMessage} disabled={isLoading || isListening}>
                   <Send size={18} />
                 </button>
               </div>

@@ -43,7 +43,7 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
     activeManager: initialActiveManager,
     activeAdvisor: null,
     managers: initialManagers,
-    storeId: sessionStorage.getItem('bby_store_id') || null,
+    storeId: sessionStorage.getItem('bby_store_id') || localStorage.getItem('bby_last_store') || '1480',
 
     setStoreId: (storeId) => {
       set({ storeId });

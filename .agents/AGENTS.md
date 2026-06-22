@@ -24,7 +24,11 @@ After every significant upgrade, change, or feature completion, you must:
 3. Deploy the updated application to the hosting environment (e.g., via `npm run build` and `firebase deploy`, or the appropriate deployment commands for this project).
 4. Log these deployment actions in the daily memory log.
 
-## State Refactoring Verification
-When refactoring state logic or extracting components that depend on global state:
+## Refactoring & Component Extraction Safeguards
+When extracting components, splitting large files, or refactoring state logic:
 1. **Verify Hook Signatures**: Always double-check the interface of custom hooks (e.g., `useApp()` vs `useStore()`) before destructing variables from them. Do not assume all global variables reside in the same hook.
-2. **Trace Dependencies**: Explicitly confirm the original source of every variable being moved to ensure it will not evaluate to `undefined` in its new context.
+2. **Variable Scope & References**: Identify all variables, functions, and state referenced in the extracted block. Ensure every single one is explicitly passed as a prop, re-imported, or redefined in the new component to prevent `ReferenceError`s.
+3. **Props Verification**: Double-check that the parent component actually passes every prop that the new child component expects. Watch out for prop name mismatches.
+4. **Import Completeness**: Verify all required hooks, types, utilities, and external components are imported into the newly created file.
+5. **Initialization & Fallback Logic**: Preserve initial state logic, especially local storage or cached fallbacks. Do not silently drop caching logic or overwrite it with hardcoded defaults.
+6. **Null Safety**: When moving state or props, ensure you maintain optional chaining (`?.`) and fallback values to prevent null destructuring crashes.

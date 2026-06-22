@@ -32,7 +32,7 @@ export default function SyncManager() {
   const setDailySnapshots = useStore((state) => state.setDailySnapshots);
 
   useEffect(() => {
-    if (!dbConnected || !isAuthenticated || !storeId) return;
+    if (!dbConnected || !storeId) return;
 
     const unsubPeriod = subscribeToActivePeriod(storeId, (p) => {
       if (p) setActivePeriod(p);

@@ -37,6 +37,8 @@ export interface MetricAverages {
   warranty: number;
   surveys: number;
   rph: number;
+  revenue?: number;
+  apps?: number;
 }
 
 export interface PlaybookSettings {
@@ -46,6 +48,7 @@ export interface PlaybookSettings {
   forbiddenPhrases: string[];
   storePin: string;
   trainingLogs: string[];
+  aiMode?: string;
 }
 
 export interface Manager {
@@ -65,6 +68,7 @@ export interface CoachingLog {
   notes: string;
   timestamp: number;
   coachName: string;
+  customerName?: string;
 }
 
 export interface ShiftEvent {
@@ -85,6 +89,14 @@ export interface ShiftEvent {
   zoneAssignments?: Record<string, string[]>;
   breakSchedule?: any[];
   activeBreaks?: Record<string, string>;
+  dailyRevenueGoal?: number;
+  dailyAppsGoal?: number;
+  dailyPmsGoal?: number;
+  preExistingRevenue?: number;
+  preExistingApps?: number;
+  preExistingPms?: number;
+  isWeekend?: boolean;
+  wins?: any[];
 }
 
 export interface FollowUpTask {

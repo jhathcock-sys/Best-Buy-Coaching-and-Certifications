@@ -9,14 +9,14 @@ export default function ProfileCoachingTab({
   activeHistoryPoints,
   associateLogs,
   associateTasks,
-  associateShifts,
-  associateSimulations,
-  getRankAndPercentile,
+  expandedLogId,
+  setExpandedLogId,
+  handlePlayTTS,
+  formatMarkdownNotes,
   calculateCVI,
   renderMarkdown,
   playingLogId,
   setPlayingLogId,
-  handlePlayAudio
  }) {
   return (
     <>

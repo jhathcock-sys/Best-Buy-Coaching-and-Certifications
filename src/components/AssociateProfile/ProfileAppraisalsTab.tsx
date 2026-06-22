@@ -4,22 +4,10 @@ import MetricSparkline from '../MetricSparkline';
 
 export default function ProfileAppraisalsTab({ 
   employee,
-  rosterHistory,
-  activePeriod,
-  activeHistoryPoints,
-  associateLogs,
-  associateTasks,
-  associateShifts,
-  associateSimulations,
-  getRankAndPercentile,
-  calculateCVI,
-  renderMarkdown,
-  playingLogId,
-  setPlayingLogId,
-  handlePlayAudio,
   isGeneratingReview,
   generatedReview,
-  handleGenerateReview
+  handleGenerateReview,
+  renderMarkdown
  }) {
   return (
     <>

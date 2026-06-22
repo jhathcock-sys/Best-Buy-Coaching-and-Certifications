@@ -3,20 +3,7 @@ import { TrendingUp, ClipboardList, Calendar, Volume2, Square, Clock, AlertCircl
 import MetricSparkline from '../MetricSparkline';
 
 export default function ProfileCommitmentsTab({ 
-  employee,
-  rosterHistory,
-  activePeriod,
-  activeHistoryPoints,
-  associateLogs,
-  associateTasks,
-  associateShifts,
-  associateSimulations,
-  getRankAndPercentile,
-  calculateCVI,
-  renderMarkdown,
-  playingLogId,
-  setPlayingLogId,
-  handlePlayAudio
+  associateTasks
  }) {
   return (
     <>

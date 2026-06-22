@@ -1,11 +1,12 @@
 import React from 'react';
-import { Trophy, Star, Activity, Monitor, Watch, Headphones, Smartphone, CreditCard, ShieldCheck } from 'lucide-react';
+import { Trophy, Star, Activity, Monitor, Watch, Headphones, Smartphone, CreditCard, ShieldCheck, Flame, Sparkles, TrendingUp, Users } from 'lucide-react';
 
 export default function TVAchievementsSlide({ 
   currentTime,
   storeConfig,
   currentMetric,
-  sortedRoster
+  sortedRoster,
+  achievements
  }) {
   return (
     <>

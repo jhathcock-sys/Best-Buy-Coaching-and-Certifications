@@ -288,14 +288,11 @@ export default function AssociateProfileModal({
               activeHistoryPoints={activeHistoryPoints}
               associateLogs={associateLogs}
               associateTasks={associateTasks}
-              associateShifts={associateShifts}
-              associateSimulations={associateSimulations}
-              getRankAndPercentile={getRankAndPercentile}
+              activeGoals={activeGoals}
               calculateCVI={calculateCVI}
               renderMarkdown={renderMarkdown}
               playingLogId={playingLogId}
               setPlayingLogId={setPlayingLogId}
-              handlePlayAudio={handlePlayAudio}
  />
           )}
 
@@ -308,34 +305,21 @@ export default function AssociateProfileModal({
               activeHistoryPoints={activeHistoryPoints}
               associateLogs={associateLogs}
               associateTasks={associateTasks}
-              associateShifts={associateShifts}
-              associateSimulations={associateSimulations}
-              getRankAndPercentile={getRankAndPercentile}
+              expandedLogId={expandedLogId}
+              setExpandedLogId={setExpandedLogId}
+              handlePlayTTS={handlePlayTTS}
+              formatMarkdownNotes={formatMarkdownNotes}
               calculateCVI={calculateCVI}
               renderMarkdown={renderMarkdown}
               playingLogId={playingLogId}
               setPlayingLogId={setPlayingLogId}
-              handlePlayAudio={handlePlayAudio}
  />
           )}
 
           {/* TAB 3: Commitments Follow-up Tasks */}
           {activeTab === 'commitments' && (
             <ProfileCommitmentsTab 
-              employee={employee}
-              rosterHistory={rosterHistory}
-              activePeriod={activePeriod}
-              activeHistoryPoints={activeHistoryPoints}
-              associateLogs={associateLogs}
               associateTasks={associateTasks}
-              associateShifts={associateShifts}
-              associateSimulations={associateSimulations}
-              getRankAndPercentile={getRankAndPercentile}
-              calculateCVI={calculateCVI}
-              renderMarkdown={renderMarkdown}
-              playingLogId={playingLogId}
-              setPlayingLogId={setPlayingLogId}
-              handlePlayAudio={handlePlayAudio}
  />
           )}
 
@@ -343,19 +327,7 @@ export default function AssociateProfileModal({
           {activeTab === 'oneOnOne' && (
             <ProfileAppraisalsTab 
               employee={employee}
-              rosterHistory={rosterHistory}
-              activePeriod={activePeriod}
-              activeHistoryPoints={activeHistoryPoints}
-              associateLogs={associateLogs}
-              associateTasks={associateTasks}
-              associateShifts={associateShifts}
-              associateSimulations={associateSimulations}
-              getRankAndPercentile={getRankAndPercentile}
-              calculateCVI={calculateCVI}
               renderMarkdown={renderMarkdown}
-              playingLogId={playingLogId}
-              setPlayingLogId={setPlayingLogId}
-              handlePlayAudio={handlePlayAudio}
               isGeneratingReview={isGeneratingReview}
               generatedReview={generatedReview}
               handleGenerateReview={handleGenerateReview}

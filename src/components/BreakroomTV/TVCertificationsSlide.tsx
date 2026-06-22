@@ -1,11 +1,12 @@
 import React from 'react';
-import { Trophy, Star, Activity, Monitor, Watch, Headphones, Smartphone, CreditCard, ShieldCheck } from 'lucide-react';
+import { Trophy, Star, Activity, Monitor, Watch, Headphones, Smartphone, CreditCard, ShieldCheck, Award, Sparkles } from 'lucide-react';
 
 export default function TVCertificationsSlide({ 
   currentTime,
   storeConfig,
   currentMetric,
-  sortedRoster
+  sortedRoster,
+  earnedCerts
  }) {
   return (
     <>

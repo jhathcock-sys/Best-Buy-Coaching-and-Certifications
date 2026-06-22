@@ -5,7 +5,8 @@ export default function TVHeader({
   currentTime,
   storeConfig,
   currentMetric,
-  sortedRoster
+  sortedRoster,
+  activePeriod
  }) {
   return (
     <>

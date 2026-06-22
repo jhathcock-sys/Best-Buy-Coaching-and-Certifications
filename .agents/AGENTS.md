@@ -17,6 +17,13 @@ Example entry:
 
 Ensure you update the memory log before ending your turn on major tasks.
 
+## Artifact Archiving
+To maintain a permanent history of our technical planning and analysis, all agents must archive their final planning artifacts into the project repository before ending their turn on major tasks.
+1. Create a directory for the current day if it doesn't exist: `agent_memory/archives/YYYY-MM-DD/`.
+2. Copy your final artifacts (e.g., `implementation_plan.md`, `task.md`, `walkthrough.md`, `tech_debt_analysis.md`, `health_check.md`) into this directory.
+3. Rename the copied files to include a descriptive prefix or timestamp (e.g., `agent_memory/archives/2026-06-22/14-30_tech_debt_analysis.md` or `feature_x_implementation_plan.md`).
+4. Commit and push these archives along with your other code changes.
+
 ## Deployment & Version Control
 After every significant upgrade, change, or feature completion, you must:
 1. Commit the changes to version control using Git (`git add`, `git commit`).

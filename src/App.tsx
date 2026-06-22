@@ -183,14 +183,15 @@ function AppContent() {
           </div>
         </div>
         <div style={{ flex: 1, overflow: 'hidden' }}>
-          {activeView === 'roleplay' ? (
-            <RoleplayCenter />
-          ) : (
-            <AdvisorDashboard 
-              employee={activeAdvisor}
-              onNavigate={setActiveView}
-            />
-          )}
+          <Routes>
+            <Route path="/roleplay" element={<RoleplayCenter />} />
+            <Route path="*" element={
+              <AdvisorDashboard 
+                employee={activeAdvisor}
+                onNavigate={setActiveView}
+              />
+            } />
+          </Routes>
         </div>
       </div>
     );
@@ -219,74 +220,69 @@ function AppContent() {
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
         }>
-          {activeView === 'dashboard' && (
-            <Dashboard 
-              onNavigate={setActiveView}
-              onCoachEmployee={handleCoachEmployeeFromRoster}
-              onShadowEmployee={handleShadowEmployeeFromRoster}
-            />
-          )}
-
-          {activeView === 'roster' && (
-            <StoreRoster 
-              onCoachEmployee={handleCoachEmployeeFromRoster}
-              onCreateLog={handleCreateLogFromRoster}
-            />
-          )}
-
-          {activeView === 'shadow' && (
-            <LiveFloorShadow 
-              onNavigate={setActiveView}
-              preselectedEmployee={prefillShadowEmployee}
-              clearPreselectedEmployee={() => setPrefillShadowEmployee(null)}
-            />
-          )}
-
-          {activeView === 'dailyLineup' && (
-            <DailyLineupBuilder />
-          )}
-
-          {activeView === 'floorLeader' && (
-            <FloorLeaderTracker />
-          )}
-
-          {activeView === 'trends' && <TrendReporting />}
-
-          {activeView === 'tv' && (
-            <BreakroomTV onClose={() => setActiveView('dashboard')} />
-          )}
-
-          {activeView === 'roleplay' && (
-            <RoleplayCenter />
-          )}
-
-          {activeView === 'coach' && (
-            <CoachSimulator 
-              preselectedEmployee={selectedCoachingRosterEmployee}
-              clearPreselectedEmployee={() => setSelectedCoachingRosterEmployee(null)}
-              prefillBuilderData={prefillBuilderData}
-              clearPrefillBuilderData={() => setPrefillBuilderData(null)}
-              initialTab="sim"
-            />
-          )}
-
-          {activeView === 'builder' && (
-            <CoachSimulator 
-              preselectedEmployee={selectedCoachingRosterEmployee}
-              clearPreselectedEmployee={() => setSelectedCoachingRosterEmployee(null)}
-              prefillBuilderData={prefillBuilderData}
-              clearPrefillBuilderData={() => setPrefillBuilderData(null)}
-              initialTab="builder"
-            />
-          )}
-
-          {activeView === 'history' && (
-            <CoachingHistory />
-          )}
-
-          {activeView === 'playbook' && (
-            <PlaybookStudio />
-          )}
+          <Routes>
+            <Route path="/" element={
+              <Dashboard 
+                onNavigate={setActiveView}
+                onCoachEmployee={handleCoachEmployeeFromRoster}
+                onShadowEmployee={handleShadowEmployeeFromRoster}
+              />
+            } />
+            <Route path="/dashboard" element={
+              <Dashboard 
+                onNavigate={setActiveView}
+                onCoachEmployee={handleCoachEmployeeFromRoster}
+                onShadowEmployee={handleShadowEmployeeFromRoster}
+              />
+            } />
+            <Route path="/roster" element={
+              <StoreRoster 
+                onCoachEmployee={handleCoachEmployeeFromRoster}
+                onCreateLog={handleCreateLogFromRoster}
+              />
+            } />
+            <Route path="/shadow" element={
+              <LiveFloorShadow 
+                onNavigate={setActiveView}
+                preselectedEmployee={prefillShadowEmployee}
+                clearPreselectedEmployee={() => setPrefillShadowEmployee(null)}
+              />
+            } />
+            <Route path="/dailyLineup" element={<DailyLineupBuilder />} />
+            <Route path="/floorLeader" element={<FloorLeaderTracker />} />
+            <Route path="/trends" element={<TrendReporting />} />
+            <Route path="/tv" element={
+              <BreakroomTV onClose={() => setActiveView('dashboard')} />
+            } />
+            <Route path="/roleplay" element={<RoleplayCenter />} />
+            <Route path="/coach" element={
+              <CoachSimulator 
+                preselectedEmployee={selectedCoachingRosterEmployee}
+                clearPreselectedEmployee={() => setSelectedCoachingRosterEmployee(null)}
+                prefillBuilderData={prefillBuilderData}
+                clearPrefillBuilderData={() => setPrefillBuilderData(null)}
+                initialTab="sim"
+              />
+            } />
+            <Route path="/builder" element={
+              <CoachSimulator 
+                preselectedEmployee={selectedCoachingRosterEmployee}
+                clearPreselectedEmployee={() => setSelectedCoachingRosterEmployee(null)}
+                prefillBuilderData={prefillBuilderData}
+                clearPrefillBuilderData={() => setPrefillBuilderData(null)}
+                initialTab="builder"
+              />
+            } />
+            <Route path="/history" element={<CoachingHistory />} />
+            <Route path="/playbook" element={<PlaybookStudio />} />
+            <Route path="*" element={
+              <Dashboard 
+                onNavigate={setActiveView}
+                onCoachEmployee={handleCoachEmployeeFromRoster}
+                onShadowEmployee={handleShadowEmployeeFromRoster}
+              />
+            } />
+          </Routes>
         </Suspense>
       </main>
 

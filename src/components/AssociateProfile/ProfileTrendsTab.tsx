@@ -9,14 +9,11 @@ export default function ProfileTrendsTab({
   activeHistoryPoints,
   associateLogs,
   associateTasks,
-  associateShifts,
-  associateSimulations,
-  getRankAndPercentile,
+  activeGoals,
   calculateCVI,
   renderMarkdown,
   playingLogId,
   setPlayingLogId,
-  handlePlayAudio
  }) {
   return (
     <>

@@ -5,7 +5,8 @@ export default function TVLeaderboardSlide({
   currentTime,
   storeConfig,
   currentMetric,
-  sortedRoster
+  sortedRoster,
+  topAdvisors
  }) {
   return (
     <>

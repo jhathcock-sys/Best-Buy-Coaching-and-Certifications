@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Users, Search, AlertTriangle, CheckCircle, Clock, HelpCircle, Sliders } from 'lucide-react';
-import AddEmployeeModal from './AddEmployeeModal';
-import PerformanceWizardModal from './PerformanceWizardModal';
-import RosterImporterModal from './RosterImporterModal';
-import AssociateProfileModal from './AssociateProfileModal';
+import AddEmployeeModal from '../components/AddEmployeeModal';
+import PerformanceWizardModal from '../components/PerformanceWizardModal';
+import RosterImporterModal from '../components/RosterImporterModal';
+import AssociateProfileModal from '../components/AssociateProfileModal';
 import { calculateCVI } from '../store/cviHelper';
-import RosterAuditor from './RosterAuditor';
-import RentsDueAuditor from './RentsDueAuditor';
+import RosterAuditor from '../components/RosterAuditor';
+import RentsDueAuditor from '../components/RentsDueAuditor';
 
 
 export const getDeptStyle = (dept) => {

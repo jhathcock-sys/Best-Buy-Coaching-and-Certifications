@@ -1,3 +1,4 @@
+import { toast } from 'react-hot-toast';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, onSnapshot, setDoc, getDoc, collection, addDoc, query, orderBy, limit, deleteDoc, getDocs } from 'firebase/firestore';
 
@@ -143,6 +144,7 @@ export const saveActivePeriodToCloud = async (storeId: string, activePeriod: str
     return true;
   } catch (e) {
     console.error('Failed to save activePeriod to cloud:', e);
+    toast.error('Failed to save activePeriod to cloud:');
     return false;
   }
 };
@@ -174,6 +176,7 @@ export const saveDailySnapshotToCloud = async (storeId: string, dateKey: string,
     return true;
   } catch (e) {
     console.error('Failed to save daily snapshot to cloud:', e);
+    toast.error('Failed to save daily snapshot to cloud:');
     return false;
   }
 };
@@ -187,6 +190,7 @@ export const saveRosterHistoryToCloud = async (storeId: string, roster: any, per
     return true;
   } catch (e) {
     console.error('Failed to save period roster to cloud:', e);
+    toast.error('Failed to save period roster to cloud:');
     return false;
   }
 };
@@ -200,6 +204,7 @@ export const savePlaybookSettingsToCloud = async (storeId: string, settings: any
     return true;
   } catch (e) {
     console.error('Failed to save playbookSettings to cloud:', e);
+    toast.error('Failed to save playbookSettings to cloud:');
     return false;
   }
 };
@@ -213,6 +218,7 @@ export const saveManagersToCloud = async (storeId: string, managers: any) => {
     return true;
   } catch (e) {
     console.error('Failed to save managers to cloud:', e);
+    toast.error('Failed to save managers to cloud:');
     return false;
   }
 };
@@ -226,6 +232,7 @@ export const saveDeptGoalsToCloud = async (storeId: string, goals: any) => {
     return true;
   } catch (e) {
     console.error('Failed to save deptGoals to cloud:', e);
+    toast.error('Failed to save deptGoals to cloud:');
     return false;
   }
 };
@@ -250,6 +257,7 @@ export const saveRecentSessionsToCloud = async (storeId: string, sessions: any) 
     return true;
   } catch (e) {
     console.error('Failed to save recentSessions to cloud:', e);
+    toast.error('Failed to save recentSessions to cloud:');
     return false;
   }
 };
@@ -274,6 +282,7 @@ export const saveMetricsToCloud = async (storeId: string, metrics: any) => {
     return true;
   } catch (e) {
     console.error('Failed to save metrics to cloud:', e);
+    toast.error('Failed to save metrics to cloud:');
     return false;
   }
 };
@@ -309,6 +318,7 @@ export const saveFollowUpTaskToCloud = async (storeId: string, task: any) => {
     return true;
   } catch (e) {
     console.error('Failed to save task to cloud:', e);
+    toast.error('Failed to save task to cloud:');
     return false;
   }
 };
@@ -322,6 +332,7 @@ export const deleteFollowUpTaskFromCloud = async (storeId: string, taskId: strin
     return true;
   } catch (e) {
     console.error('Failed to delete task from cloud:', e);
+    toast.error('Failed to delete task from cloud:');
     return false;
   }
 };
@@ -357,6 +368,7 @@ export const saveFloorLeaderShiftToCloud = async (storeId: string, shift: any) =
     return true;
   } catch (e) {
     console.error('Failed to save floor leader shift to cloud:', e);
+    toast.error('Failed to save floor leader shift to cloud:');
     return false;
   }
 };
@@ -370,6 +382,7 @@ export const deleteFloorLeaderShiftFromCloud = async (storeId: string, shiftId: 
     return true;
   } catch (e) {
     console.error('Failed to delete shift from cloud:', e);
+    toast.error('Failed to delete shift from cloud:');
     return false;
   }
 };
@@ -451,6 +464,7 @@ export const pushOfflineDataToCloud = async (storeId: string, offlineData: any) 
     return true;
   } catch (e) {
     console.error('Failed to seed offline data:', e);
+    toast.error('Failed to seed offline data:');
     return false;
   }
 };
@@ -499,6 +513,7 @@ export const deleteCoachingLogFromCloud = async (storeId: string, logId: string)
     return true;
   } catch (e) {
     console.error('Failed to delete coaching log:', e);
+    toast.error('Failed to delete coaching log:');
     return false;
   }
 };

@@ -47,7 +47,10 @@ export const createShiftSlice: StateCreator<StoreState, [], [], ShiftSlice> = (s
       
       set({ floorLeaderShifts: updated });
       if (dbConnected) {
-        saveFloorLeaderShiftToCloud(shiftWithTime);
+        const storeId = get().storeId;
+        if (storeId) {
+          saveFloorLeaderShiftToCloud(storeId, shiftWithTime);
+        }
       }
     },
 
@@ -58,7 +61,10 @@ export const createShiftSlice: StateCreator<StoreState, [], [], ShiftSlice> = (s
       
       set({ floorLeaderShifts: updated });
       if (dbConnected) {
-        deleteFloorLeaderShiftFromCloud(shiftId);
+        const storeId = get().storeId;
+        if (storeId) {
+          deleteFloorLeaderShiftFromCloud(storeId, shiftId);
+        }
       }
     }
   };

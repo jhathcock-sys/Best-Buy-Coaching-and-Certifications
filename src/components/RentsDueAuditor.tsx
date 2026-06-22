@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useRef } from 'react';
 import { Upload, FileText, CheckCircle2, RefreshCw } from 'lucide-react';
 import RentsDueUploader from './RentsDueAuditor/RentsDueUploader';

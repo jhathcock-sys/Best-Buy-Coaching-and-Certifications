@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState, useEffect } from 'react';
 import { Search, Trash2, Volume2, BookOpen, Clock } from 'lucide-react';
 import { useStore } from '../store/useStore';

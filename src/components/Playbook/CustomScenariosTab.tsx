@@ -1,8 +1,8 @@
-// @ts-nocheck
 import { useState } from 'react';
 import { Trash2, Sparkles, Compass, Wand2, Loader2 } from 'lucide-react';
 import { generateCustomScenario } from '../../services/ai';
 import { useApp } from '../../context/AppContext';
+import { useStore } from '../../store/useStore';
 
 export default function CustomScenariosTab({ customScenarios = [], onAddCustomScenario, onDeleteCustomScenario }) {
   const [scenTitle, setScenTitle] = useState('');
@@ -20,7 +20,7 @@ export default function CustomScenariosTab({ customScenarios = [], onAddCustomSc
   const [scenDiscoverKw, setScenDiscoverKw] = useState('major, engineering, budget');
   const [scenRecommendKw, setScenRecommendKw] = useState('laptop, total, membership');
   const [scenProtectKw, setScenProtectKw] = useState('geek squad, gsp, drop');
-  const { apiKey } = useApp();
+  const apiKey = useStore((state) => state.apiKey);
   const [aiPrompt, setAiPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [aiError, setAiError] = useState('');

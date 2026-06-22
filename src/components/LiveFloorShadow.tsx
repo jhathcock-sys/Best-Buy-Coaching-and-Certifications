@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState } from 'react';
 import { ShieldCheck, ChevronLeft, ChevronRight, Check, Clipboard, Calendar, Users, AlertCircle } from 'lucide-react';
 import ShadowStep1Employee from './LiveFloorShadow/ShadowStep1Employee';
@@ -16,7 +15,7 @@ export default function LiveFloorShadow({
   preselectedEmployee, 
   clearPreselectedEmployee
 }: any) {
-  const { apiKey } = useApp();
+  const apiKey = useStore((state) => state.apiKey);
   
   const playbookSettings = useStore((state) => state.playbookSettings);
   const activePeriod = useStore((state) => state.activePeriod);

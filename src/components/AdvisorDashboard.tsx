@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState } from 'react';
 import { Target, TrendingUp, Calendar, CheckCircle, Award, Trophy, Medal, Zap, Star } from 'lucide-react';
 import { useStore } from '../store/useStore';

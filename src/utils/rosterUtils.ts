@@ -1,5 +1,3 @@
-// @ts-nocheck
-// @ts-nocheck
 import { useState, useEffect, useMemo } from 'react';
 import { Users, Search, AlertTriangle, CheckCircle, Clock, HelpCircle, Sliders } from 'lucide-react';
 import AddEmployeeModal from './AddEmployeeModal';

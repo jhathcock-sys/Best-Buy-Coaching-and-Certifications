@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState } from 'react';
 import { Clock, User, Calendar } from 'lucide-react';
 import { useStore } from '../../store/useStore';

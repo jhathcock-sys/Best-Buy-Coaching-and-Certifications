@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState } from 'react';
 import { ShieldCheck, Compass, Users, User, Tv, Archive, LayoutDashboard, ClipboardList, Clock, CheckCircle2, CloudLightning, ChevronRight, ChevronDown, TrendingUp, Sparkles, BookOpen } from 'lucide-react';
 import { useStore } from '../../store/useStore';

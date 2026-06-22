@@ -1,5 +1,3 @@
-// @ts-nocheck
-// @ts-nocheck
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { Clock, Plus, Minus, Power, Trash2, Calendar, User, CheckCircle2, XCircle, Upload, Flame, Trophy, Undo } from 'lucide-react';
@@ -28,7 +26,7 @@ export default function FloorLeaderTracker() {
   const shifts = useStore((state) => state.floorLeaderShifts) || [];
   const onSaveShift = useStore((state) => state.saveFloorLeaderShift);
   const onAddEmployee = useStore((state) => state.addEmployee);
-  const { apiKey } = useApp();
+  const apiKey = useStore((state) => state.apiKey);
   const [isHandoffModalOpen, setIsHandoffModalOpen] = useState(false);
   
   const {

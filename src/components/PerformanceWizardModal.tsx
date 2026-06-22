@@ -1,5 +1,3 @@
-// @ts-nocheck
-// @ts-nocheck
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import WizardStep1General from './PerformanceWizardModal/WizardStep1General';
@@ -11,8 +9,9 @@ export default function PerformanceWizardModal({
   onClose, 
   employee, 
   onSave, 
-  activePeriod 
-}) {
+  activePeriod,
+  deptGoals
+}: any) {
   const [currentEditStep, setCurrentEditStep] = useState(1);
   const [editForm, setEditForm] = useState({
     name: '',

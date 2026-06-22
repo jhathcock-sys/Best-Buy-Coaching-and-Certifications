@@ -1,5 +1,3 @@
-// @ts-nocheck
-// @ts-nocheck
 import { useState, useRef } from 'react';
 import { Upload, X, Check, AlertCircle, FileText, ChevronRight } from 'lucide-react';
 

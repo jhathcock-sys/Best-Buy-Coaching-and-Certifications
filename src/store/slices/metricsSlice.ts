@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { StateCreator } from 'zustand';
 import { StoreState, MetricsSlice } from '../../types/store';
 import { EmployeeSchema } from '../../schemas';

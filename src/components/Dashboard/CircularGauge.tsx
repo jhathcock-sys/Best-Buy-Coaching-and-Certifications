@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState, useMemo } from 'react';
 import { TrendingUp } from 'lucide-react';
 

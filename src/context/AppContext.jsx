@@ -11,33 +11,12 @@ export function AppProvider({ children }) {
   const activeView = location.pathname === '/' ? 'dashboard' : location.pathname.substring(1);
   const setActiveView = (view) => navigate(view === 'dashboard' ? '/' : `/${view}`);
 
-  const apiKey = useStore((state) => state.apiKey);
-  const setApiKey = useStore((state) => state.setApiKey);
-  const dbConnected = useStore((state) => state.dbConnected);
-  const setDbConnected = useStore((state) => state.setDbConnected);
-  const handleSaveFirebaseConfig = useStore((state) => state.handleSaveFirebaseConfig);
-  const isAuthenticated = useStore((state) => state.isAuthenticated);
-  const setIsAuthenticated = useStore((state) => state.setIsAuthenticated);
-  const storePin = useStore((state) => state.storePin);
-  const setStorePin = useStore((state) => state.setStorePin);
-  const login = useStore((state) => state.login);
-  const logout = useStore((state) => state.logout);
+
 
   return (
     <AppContext.Provider value={{
       activeView,
-      setActiveView,
-      apiKey,
-      setApiKey,
-      dbConnected,
-      setDbConnected,
-      handleSaveFirebaseConfig,
-      isAuthenticated,
-      setIsAuthenticated,
-      storePin,
-      setStorePin,
-      login,
-      logout
+      setActiveView
     }}>
       {children}
     </AppContext.Provider>

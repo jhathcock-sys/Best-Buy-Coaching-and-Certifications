@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { Send, Users, ShieldCheck, Star, Award, CheckCircle2, ChevronRight, MessageSquare, PlusCircle, User, Loader2, Sparkles, RefreshCw, XCircle } from 'lucide-react';
 

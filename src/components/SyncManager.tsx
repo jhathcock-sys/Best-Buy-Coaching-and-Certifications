@@ -16,7 +16,8 @@ import {
 } from '../services/firebase';
 
 export default function SyncManager() {
-  const { dbConnected, isAuthenticated } = useApp();
+  const dbConnected = useStore((state) => state.dbConnected);
+const isAuthenticated = useStore((state) => state.isAuthenticated);
   const storeId = useStore((state) => state.storeId);
 
   const setActivePeriod = useStore((state) => state.setActivePeriod);

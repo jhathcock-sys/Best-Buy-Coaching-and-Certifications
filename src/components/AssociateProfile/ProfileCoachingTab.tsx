@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { TrendingUp, ClipboardList, Calendar, Volume2, Square, Clock, AlertCircle, CheckCircle, FileText, Loader2 } from 'lucide-react';
 import MetricSparkline from '../MetricSparkline';

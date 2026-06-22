@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { StateCreator } from 'zustand';
 import { StoreState, AuthSlice } from '../../types/store';
 import { initFirebase, isFirebaseConnected, saveManagersToCloud } from '../../services/firebase';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { Trophy, Star, Activity, Monitor, Watch, Headphones, Smartphone, CreditCard, ShieldCheck } from 'lucide-react';
 

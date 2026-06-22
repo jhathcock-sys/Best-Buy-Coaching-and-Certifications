@@ -51,13 +51,7 @@ export default function App() {
 function AppContent() {
   const { 
     activeView, 
-    setActiveView, 
-    apiKey, 
-    dbConnected, 
-    isAuthenticated,
-    storePin,
-    login,
-    loginAdvisor
+    setActiveView 
   } = useApp();
   
   // Zustand Store Selectors
@@ -69,7 +63,13 @@ function AppContent() {
   const managers = useStore((state) => state.managers);
 
   // Zustand Store Actions
+  const dbConnected = useStore((state) => state.dbConnected);
+  const isAuthenticated = useStore((state) => state.isAuthenticated);
+  const storePin = useStore((state) => state.storePin);
+  const login = useStore((state) => state.login);
+  const loginAdvisor = useStore((state) => state.loginAdvisor);
   const logout = useStore((state) => state.logout);
+  const apiKey = useStore((state) => state.apiKey);
 
   // Local UI-only state
   const [selectedCoachingRosterEmployee, setSelectedCoachingRosterEmployee] = useState(null);
@@ -148,6 +148,7 @@ function AppContent() {
         managers={managers}
         roster={rosterHistory[activePeriod] || []}
       />
+      </>
     );
   }
 

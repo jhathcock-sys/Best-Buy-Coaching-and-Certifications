@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { ShieldAlert, Plus, Edit2, Trash2, Check, Eye, EyeOff, Key, Users, UserPlus } from 'lucide-react';
 

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState } from 'react';
 import { ShieldAlert, Sparkles, Key, Check, Plus, Trash2, BookOpen, Compass, Users, UserPlus, Edit2, Eye, EyeOff, Cpu, RefreshCw } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -15,7 +14,9 @@ import SyncDiagnosticsTab from './PlaybookStudio/SyncDiagnosticsTab';
 import CustomScenariosTab from './Playbook/CustomScenariosTab';
 
 export default function PlaybookStudio() {
-  const { apiKey, dbConnected, handleSaveFirebaseConfig } = useApp();
+  const apiKey = useStore((state) => state.apiKey);
+const dbConnected = useStore((state) => state.dbConnected);
+const handleSaveFirebaseConfig = useStore((state) => state.handleSaveFirebaseConfig);
   
   const playbookSettings = useStore(state => state.playbookSettings);
   const onSaveSettings = useStore(state => state.saveSettings);

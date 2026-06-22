@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { ShieldCheck, ChevronLeft, ChevronRight, Check, Clipboard, Calendar, Users, AlertCircle, Mic, MicOff } from 'lucide-react';
 

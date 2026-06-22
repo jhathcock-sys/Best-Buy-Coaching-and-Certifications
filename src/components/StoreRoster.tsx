@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { Users, Search, AlertTriangle, CheckCircle, Clock, HelpCircle, Sliders } from 'lucide-react';
 import AddEmployeeModal from './AddEmployeeModal';
@@ -14,19 +13,20 @@ import RentsDueAuditor from './RentsDueAuditor';
 
 import { useApp } from '../context/AppContext';
 import { useStore } from '../store/useStore';
+import { DeptGoal } from '../types';
 
 export default function StoreRoster({ 
   onCoachEmployee, 
   onCreateLog
 }: any) {
-  const { apiKey } = useApp();
+  const apiKey = useStore((state) => state.apiKey);
 
   const rosterHistory = useStore((state) => state.rosterHistory) || {};
   const activePeriod = useStore((state) => state.activePeriod);
   const coachingLogs = useStore((state) => state.coachingLogs) || [];
   const followUpTasks = useStore((state) => state.followUpTasks) || [];
   
-  const defaultDeptGoals = {
+  const defaultDeptGoals: Record<string, DeptGoal> = {
     'Front End': { memberships: 8.0, membershipsType: 'Hours', creditCards: 12.5, creditCardsType: 'Hours', warranty: 11.0, surveys: 1.0, rph: 640 },
     'General Sales': { memberships: 5000, membershipsType: 'Dollars', creditCards: 8000, creditCardsType: 'Dollars', warranty: 11.0, surveys: 1.0, rph: 640 },
     'Appliances': { memberships: 15000, membershipsType: 'Dollars', creditCards: 10000, creditCardsType: 'Dollars', warranty: 12.0, surveys: 1.0, rph: 1200 },

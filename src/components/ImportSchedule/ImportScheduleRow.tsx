@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { Clock, Plus, HelpCircle } from 'lucide-react';
 

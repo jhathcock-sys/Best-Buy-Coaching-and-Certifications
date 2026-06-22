@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { Target, CheckCircle, User, Zap, Activity, MessageSquare } from 'lucide-react';
 

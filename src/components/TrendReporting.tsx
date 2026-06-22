@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState, useMemo } from 'react';
 import { TrendingUp, Calendar, DollarSign, Award, CreditCard, ChevronDown } from 'lucide-react';
 import { useStore } from '../store/useStore';

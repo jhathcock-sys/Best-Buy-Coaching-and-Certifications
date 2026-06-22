@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState } from 'react';
 import { Camera, CheckCircle, AlertCircle, RefreshCw, Sparkles, Star, Upload, FileText, Save } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -9,7 +8,8 @@ import { auditFiveStarSurveyGemini } from '../services/ai';
 const MOCK_SURVEY_IMAGE = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
 
 export default function FiveStarAuditor({ roster = [] }) {
-  const { apiKey, playbookSettings } = useApp();
+  const apiKey = useStore((state) => state.apiKey);
+const playbookSettings = useStore((state) => state.playbookSettings);
   const logCoachingSession = useStore((state) => state.logCoachingSession);
 
   const [selectedImage, setSelectedImage] = useState(null);

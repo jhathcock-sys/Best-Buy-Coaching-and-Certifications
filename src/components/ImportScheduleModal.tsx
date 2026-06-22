@@ -1,4 +1,3 @@
-// @ts-nocheck
 import ImportScheduleRow from './ImportSchedule/ImportScheduleRow';
 import React, { useState, useRef } from 'react';
 import { X, Check, AlertCircle, FileText, Camera, Calendar as CalendarIcon } from 'lucide-react';

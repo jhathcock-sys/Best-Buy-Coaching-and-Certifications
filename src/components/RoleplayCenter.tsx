@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { STANDARD_SCENARIOS, runOfflineSimulationStep, runGeminiSimulationStep, evaluateSessionOffline, evaluateSessionGemini } from '../services/ai';
 import { ArrowLeft, RefreshCw, Send, CheckCircle, Sparkles, BookOpen } from 'lucide-react';
@@ -9,7 +8,8 @@ import RoleplayActiveSession from './RoleplayCenter/RoleplayActiveSession';
 import RoleplayResults from './RoleplayCenter/RoleplayResults';
 
 export default function RoleplayCenter() {
-  const { apiKey, setActiveView } = useApp();
+  const { setActiveView } = useApp();
+const apiKey = useStore((state) => state.apiKey);
   const customScenarios = useStore((state) => state.customScenarios) || [];
   const playbookSettings = useStore((state) => state.playbookSettings);
   const completeRoleplay = useStore((state) => state.completeRoleplay);

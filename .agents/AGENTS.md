@@ -32,3 +32,9 @@ When extracting components, splitting large files, or refactoring state logic:
 4. **Import Completeness**: Verify all required hooks, types, utilities, and external components are imported into the newly created file.
 5. **Initialization & Fallback Logic**: Preserve initial state logic, especially local storage or cached fallbacks. Do not silently drop caching logic or overwrite it with hardcoded defaults.
 6. **Null Safety**: When moving state or props, ensure you maintain optional chaining (`?.`) and fallback values to prevent null destructuring crashes.
+
+## Architectural & Implementation Guidelines
+1. **Authentication Data Hydration**: Any data required for authentication, initialization, or tenant configuration (e.g., custom PINs, store IDs) must be fetched *outside* or *prior* to the authentication gate. Never place cloud sync logic for login credentials inside components that require the user to already be authenticated.
+2. **Component Modularity (Anti-God Object)**: Prevent top-level files from becoming bloated God Objects. When adding significant new features, create discrete, modular child components rather than appending hundreds of lines of state and UI to an existing view.
+3. **Decoupled Routing & Callbacks**: Decouple form submissions and authentication from hardcoded routing redirects. Use explicit callbacks (e.g., `onLoginSuccess`) to ensure state is synchronized and finalized *before* triggering navigation changes.
+4. **Storage Hierarchy**: Prioritize Environment Variables (`.env`) for critical configuration and API keys. When hydrating state from `localStorage` on startup, implement explicit checks to ensure stale local data does not silently override `.env` values or required application defaults.

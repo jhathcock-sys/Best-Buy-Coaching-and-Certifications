@@ -1,7 +1,7 @@
-// @ts-nocheck
 import { useState } from 'react';
 import { Sparkles, FileText, BarChart3, AlertCircle, RefreshCw } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useStore } from '../store/useStore';
 import { auditPerformanceWorkbookGemini } from '../services/ai';
 
 // Mock performance CSV data
@@ -14,7 +14,8 @@ Taylor,880,1.8%,3,6.2%,4.5
 Corey,740,4.5%,5,12.2%,4.8`;
 
 export default function RosterAuditor({ roster }) {
-  const { apiKey, playbookSettings } = useApp();
+  const apiKey = useStore((state) => state.apiKey);
+const playbookSettings = useStore((state) => state.playbookSettings);
   const [inputText, setInputText] = useState('');
   const [isAuditing, setIsAuditing] = useState(false);
   const [auditResult, setAuditResult] = useState(null);

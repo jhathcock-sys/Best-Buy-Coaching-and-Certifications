@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useStore } from '../store/useStore';
 import { toast } from 'react-hot-toast';
 import { useFloorSetup } from './FloorLeader/useFloorSetup';

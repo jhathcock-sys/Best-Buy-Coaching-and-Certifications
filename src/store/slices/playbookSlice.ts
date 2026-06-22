@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { StateCreator } from 'zustand';
 import { StoreState, PlaybookSlice } from '../../types/store';
 import { DEFAULT_PLAYBOOK_SETTINGS } from './constants';

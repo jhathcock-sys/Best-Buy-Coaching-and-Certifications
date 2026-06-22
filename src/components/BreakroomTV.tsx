@@ -10,7 +10,7 @@ export default function BreakroomTV({ onClose }: any) {
   const roster = rosterHistory[activePeriod] || [];
   const recentSessions = useStore((state) => state.coachingLogs) || [];
   const deptGoals = useStore((state) => state.deptGoals) || {};
-  const { apiKey } = useApp();
+  const apiKey = useStore((state) => state.apiKey);
   const [activeSlide, setActiveSlide] = useState(0); // 0: Store Goals, 1: Top 3 Leaderboard, 2: Recent Wins
   const [currentTime, setCurrentTime] = useState(new Date());
 

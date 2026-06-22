@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { useStore } from '../store/useStore';
@@ -75,7 +74,7 @@ export default function CoachSimulator({
   clearPrefillBuilderData, 
   initialTab = 'sim'
 }: any) {
-  const { apiKey } = useApp();
+  const apiKey = useStore((state) => state.apiKey);
   
   const playbookSettings = useStore((state) => state.playbookSettings);
   const customScenarios = useStore((state) => state.customScenarios) || [];

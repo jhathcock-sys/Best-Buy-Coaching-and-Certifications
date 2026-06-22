@@ -1,11 +1,12 @@
-// @ts-nocheck
 import { useState } from 'react';
 import { Play, Sparkles, RefreshCw, AlertCircle, FileText, Star, Award, Users } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useStore } from '../store/useStore';
 import { runStoreShiftSimulationGemini } from '../services/ai';
 
 export default function ShiftSimulator({ roster }) {
-  const { apiKey, playbookSettings } = useApp();
+  const apiKey = useStore((state) => state.apiKey);
+const playbookSettings = useStore((state) => state.playbookSettings);
   
   // Placement State
   const [placements, setPlacements] = useState({

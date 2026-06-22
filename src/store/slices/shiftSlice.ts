@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { StateCreator } from 'zustand';
 import { StoreState, ShiftSlice } from '../../types/store';
 import { saveFloorLeaderShiftToCloud, deleteFloorLeaderShiftFromCloud } from '../../services/firebase';

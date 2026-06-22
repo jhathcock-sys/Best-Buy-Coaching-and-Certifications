@@ -1,14 +1,15 @@
-// @ts-nocheck
 import { useState } from 'react';
 import { Camera, CheckCircle, AlertCircle, RefreshCw, Sparkles, FileText } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useStore } from '../store/useStore';
 import { auditStoreFloorGemini } from '../services/ai';
 
 // Base64 Mock Retail Queue Image for Demo
 const MOCK_RETAIL_IMAGE = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
 
 export default function FloorAudit() {
-  const { apiKey, playbookSettings } = useApp();
+  const apiKey = useStore((state) => state.apiKey);
+const playbookSettings = useStore((state) => state.playbookSettings);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageMime, setImageMime] = useState('image/png');
   const [isAuditing, setIsAuditing] = useState(false);

@@ -8,6 +8,8 @@ import { useStoreRoster } from '../hooks/useStoreRoster';
 import StoreRosterHeader from './StoreRoster/StoreRosterHeader';
 import StoreRosterTable from './StoreRoster/StoreRosterTable';
 import StoreRosterMobileCard from './StoreRoster/StoreRosterMobileCard';
+import StartNewPeriodForm from './StoreRoster/StartNewPeriodForm';
+import RosterDisplaySettings from './StoreRoster/RosterDisplaySettings';
 import RosterAuditor from './RosterAuditor';
 import RentsDueAuditor from './RentsDueAuditor';
 
@@ -211,119 +213,24 @@ export default function StoreRoster({
             setShowViewSettings={setShowViewSettings}
           />
 
-          {/* View Settings Drawer */}
-          {showViewSettings && (
-            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.25rem 2rem', border: '1px solid rgba(255, 255, 255, 0.08)', animation: 'fadeIn 0.25s ease' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                <h4 style={{ margin: 0, fontSize: '0.95rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}>
-                  <Sliders size={16} color="var(--bby-blue)" /> Roster Display Settings
-                </h4>
-                <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                  <input 
-                    type="checkbox" 
-                    checked={isDense} 
-                    onChange={(e) => setIsDense(e.target.checked)} 
-                    style={{ cursor: 'pointer' }}
-                  />
-                  <span>Enable Dense Grid Layout</span>
-                </label>
-              </div>
+          <RosterDisplaySettings 
+            showViewSettings={showViewSettings}
+            isDense={isDense}
+            setIsDense={setIsDense}
+            visibleCols={visibleCols}
+            setVisibleCols={setVisibleCols}
+          />
 
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem 1.25rem', padding: '0.75rem', background: 'rgba(0,0,0,0.15)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.02)' }}>
-                {Object.keys(visibleCols).map(col => {
-                  const label = 
-                    col === 'hours' ? 'Hours' :
-                    col === 'dept' ? 'Department' :
-                    col === 'memberships' ? 'Memberships' :
-                    col === 'creditCards' ? 'BBY Cards' :
-                    col === 'warranty' ? 'GSP/Warranty' :
-                    col === 'surveys' ? '5 Star Surveys' :
-                    col === 'rph' ? 'RPH Index' :
-                    col === 'basket' ? 'Basket' :
-                    col === 'attach' ? 'Dept Attach' :
-                    col === 'status' ? 'Status' : col;
-
-                  return (
-                    <label key={col} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.8rem', color: '#fff' }}>
-                      <input 
-                        type="checkbox" 
-                        checked={visibleCols[col]} 
-                        onChange={(e) => setVisibleCols({ ...visibleCols, [col]: e.target.checked })} 
-                        style={{ cursor: 'pointer' }}
-                      />
-                      <span>{label}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Collapsible Start New Period Card */}
-          {showNewPeriodForm && (
-            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', border: '1.5px solid var(--bby-yellow)', padding: '1.5rem 2rem', animation: 'fadeIn 0.3s ease' }}>
-              <h3 style={{ fontSize: '1.2rem', color: '#fff', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', fontFamily: 'var(--font-heading)', letterSpacing: '-0.01em' }}>
-                Start New Performance Period / Month Archive
-              </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '-0.5rem' }}>
-                Create a fresh performance tracker for a new month or week. The existing month's data will be safely archived and accessible anytime using the period switcher.
-              </p>
-              <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
-                <div className="form-group" style={{ flex: 1, minWidth: '250px' }}>
-                  <label className="form-label" style={{ fontSize: '0.8rem' }}>New Period Name:</label>
-                  <input 
-                    type="text" 
-                    className="form-control" 
-                    placeholder="e.g. June 2026, Week 23"
-                    style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                    value={newPeriodName}
-                    onChange={(e) => setNewPeriodName(e.target.value)}
-                  />
-                </div>
-                
-                <div className="form-group" style={{ flex: 1, minWidth: '250px' }}>
-                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Data Cloning Option:</label>
-                  <select 
-                    className="form-control"
-                    style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
-                    value={copyOption}
-                    onChange={(e) => setCopyOption(e.target.value)}
-                  >
-                    <option value="roster-only">Carry over associates only (Metrics set to 0 - Recommended for new months)</option>
-                    <option value="roster-and-metrics">Carry over associates AND all current performance metrics</option>
-                  </select>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
-                <button className="btn btn-secondary" style={{ padding: '0.55rem 1.25rem' }} onClick={() => setShowNewPeriodForm(false)}>
-                  Cancel
-                </button>
-                <button 
-                  className="btn btn-primary" 
-                  style={{ padding: '0.55rem 1.25rem', background: 'var(--bby-yellow)', color: '#000' }} 
-                  onClick={() => {
-                    if (!newPeriodName.trim()) {
-                      alert("Please enter a valid period name!");
-                      return;
-                    }
-                    if (rosterHistory && rosterHistory[newPeriodName.trim()]) {
-                      if (!confirm(`A period named "${newPeriodName.trim()}" already exists. Do you want to overwrite it?`)) {
-                        return;
-                      }
-                    }
-                    if (onCreatePeriod) {
-                      onCreatePeriod(newPeriodName.trim(), copyOption);
-                    }
-                    setNewPeriodName('');
-                    setShowNewPeriodForm(false);
-                  }}
-                >
-                  Start New Period & Switch
-                </button>
-              </div>
-            </div>
-          )}
+          <StartNewPeriodForm 
+            showNewPeriodForm={showNewPeriodForm}
+            setShowNewPeriodForm={setShowNewPeriodForm}
+            newPeriodName={newPeriodName}
+            setNewPeriodName={setNewPeriodName}
+            copyOption={copyOption}
+            setCopyOption={setCopyOption}
+            rosterHistory={rosterHistory}
+            onCreatePeriod={onCreatePeriod}
+          />
 
           {/* Add Associate Modal */}
           <AddEmployeeModal

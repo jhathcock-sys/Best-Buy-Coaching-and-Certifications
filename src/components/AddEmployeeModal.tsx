@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { X, Users } from 'lucide-react';
 import { EmployeeSchema } from '../schemas';
 
+import { z } from 'zod';
 
 export interface AddEmployeeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddEmployee: (emp: any) => void;
+  onAddEmployee: (emp: z.infer<typeof EmployeeSchema>) => void;
 }
 
 export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: AddEmployeeModalProps) {
@@ -32,8 +33,8 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
 
   const DEPARTMENTS = ['Front End', 'General Sales', 'Appliances', 'Computing', 'Mobile', 'Home Theatre', 'Geek Squad'];
 
-  const handleSubmit = (e: any) => {
-    (e as any).preventDefault();
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     if (!form.name.trim()) {
       alert("Please enter the associate's name!");
       return;
@@ -85,7 +86,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e: any) => e.stopPropagation()} style={{ border: '2px solid var(--bby-blue)', maxWidth: '650px', width: '90%' }}>
+      <div className="modal-content" onClick={(e: React.MouseEvent) => e.stopPropagation()} style={{ border: '2px solid var(--bby-blue)', maxWidth: '650px', width: '90%' }}>
         <div className="modal-header">
           <h3 style={{ fontSize: '1.25rem', color: '#fff', fontFamily: 'var(--font-heading)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Users size={20} color="var(--bby-yellow)" /> Add New Associate to Roster
@@ -109,7 +110,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                 placeholder="e.g. Sarah Jennings"
                 style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                 value={form.name}
-                onChange={(e: any) => setForm({ ...form, name: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, name: e.target.value })}
               />
             </div>
 
@@ -121,7 +122,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                 placeholder="e.g. A1234567"
                 style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                 value={form.employeeNumber}
-                onChange={(e: any) => setForm({ ...form, employeeNumber: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, employeeNumber: e.target.value })}
               />
             </div>
             
@@ -131,7 +132,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                 className="form-control"
                 style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                 value={form.dept}
-                onChange={(e: any) => setForm({ ...form, dept: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, dept: e.target.value })}
               >
                 {DEPARTMENTS.map(d => (
                   <option key={d} value={d}>{d}</option>
@@ -148,7 +149,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                 placeholder="e.g. 45.5"
                 style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                 value={form.hours}
-                onChange={(e: any) => setForm({ ...form, hours: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, hours: e.target.value })}
               />
             </div>
             
@@ -160,7 +161,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                 placeholder="e.g. 6"
                 style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                 value={form.memberships}
-                onChange={(e: any) => setForm({ ...form, memberships: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, memberships: e.target.value })}
               />
             </div>
             
@@ -172,7 +173,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                 placeholder="e.g. 3"
                 style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                 value={form.creditCards}
-                onChange={(e: any) => setForm({ ...form, creditCards: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, creditCards: e.target.value })}
               />
             </div>
             
@@ -185,7 +186,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                 placeholder="e.g. 10.5"
                 style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                 value={form.warranty}
-                onChange={(e: any) => setForm({ ...form, warranty: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, warranty: e.target.value })}
               />
             </div>
             
@@ -197,7 +198,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                 placeholder="e.g. 4 or Failing"
                 style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                 value={form.surveys}
-                onChange={(e: any) => setForm({ ...form, surveys: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, surveys: e.target.value })}
               />
             </div>
             
@@ -209,7 +210,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                 placeholder="e.g. 950"
                 style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                 value={form.rph}
-                onChange={(e: any) => setForm({ ...form, rph: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, rph: e.target.value })}
               />
             </div>
 
@@ -224,7 +225,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                   placeholder="e.g. 165.50"
                   style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                   value={form.basket}
-                  onChange={(e: any) => setForm({ ...form, basket: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, basket: e.target.value })}
                 />
               </div>
             )}
@@ -239,7 +240,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                   placeholder="e.g. 62.5"
                   style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                   value={form.m365}
-                  onChange={(e: any) => setForm({ ...form, m365: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, m365: e.target.value })}
                 />
               </div>
             )}
@@ -254,7 +255,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                   placeholder="e.g. 38.0"
                   style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                   value={form.audio}
-                  onChange={(e: any) => setForm({ ...form, audio: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, audio: e.target.value })}
                 />
               </div>
             )}
@@ -268,7 +269,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
               placeholder="e.g. GSP Attach (4.0% vs 12.0%) or None"
               style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
               value={form.gap}
-              onChange={(e: any) => setForm({ ...form, gap: e.target.value })}
+              onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, gap: e.target.value })}
             />
           </div>
 
@@ -278,7 +279,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
               id="add-focus5"
               style={{ width: '16px', height: '16px', cursor: 'pointer' }}
               checked={form.focus5}
-              onChange={(e: any) => setForm({ ...form, focus5: e.target.checked })}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, focus5: e.target.checked })}
             />
             <label htmlFor="add-focus5" style={{ fontSize: '0.85rem', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>
               🔥 Add to Focus 5 List (Supervisor Observation Plan)

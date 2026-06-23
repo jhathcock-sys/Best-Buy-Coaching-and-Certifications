@@ -3,8 +3,11 @@ import { useState } from 'react';
 import { Users, Search } from 'lucide-react';
 import { useStore } from '../store/useStore';
 
+import { z } from 'zod';
+import { EmployeeSchema } from '../schemas';
+
 interface AdvisorLoginProps {
-  onLoginSuccess: (id: string, employeeData: any) => void;
+  onLoginSuccess: (id: string, employeeData: z.infer<typeof EmployeeSchema>) => void;
   dbConnected: boolean;
 }
 
@@ -12,7 +15,7 @@ export default function AdvisorLogin({ onLoginSuccess, dbConnected }: AdvisorLog
   const activePeriod = useStore(state => state.activePeriod);
   const rosterHistory = useStore(state => state.rosterHistory);
   const _rawroster = rosterHistory?.[activePeriod] || {};
-  const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
+  const roster = React.useMemo(() => (Object.values(_rawroster) as z.infer<typeof EmployeeSchema>[]).sort((a, b) => a.name.localeCompare(b.name)), [_rawroster]);
   const [employeeId, setEmployeeId] = useState('');
   const [storeId, setStoreId] = useState(() => localStorage.getItem('bby_last_store') || '');
   const [error, setError] = useState('');
@@ -24,8 +27,8 @@ export default function AdvisorLogin({ onLoginSuccess, dbConnected }: AdvisorLog
       return;
     }
 
-    const matchedEmployee = roster.find((emp: any) => 
-      emp.id === employeeId || emp.employeeId === employeeId
+    const matchedEmployee = roster.find((emp) => 
+      emp.id === employeeId || emp.employeeNumber === employeeId
     );
 
     if (matchedEmployee) {
@@ -126,6 +129,7 @@ export default function AdvisorLogin({ onLoginSuccess, dbConnected }: AdvisorLog
 
         <button
           type="submit"
+          data-testid="advisor-login-submit"
           style={{
             width: '100%',
             padding: '1rem',

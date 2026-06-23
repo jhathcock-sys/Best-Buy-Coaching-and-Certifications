@@ -25,7 +25,7 @@ export default function TrendReporting() {
     const sortedDates = Object.keys(dailySnapshots).sort();
     if (sortedDates.length === 0) return [];
 
-    const aggregated: Record<string, { key: string, revenue: number, apps: number, memberships: number }> = {}; // Key will be date/week/month string
+    const aggregated: Record<string, { key: string, revenue: number, apps: number, memberships: number, hours: number, surveys: number }> = {}; // Key will be date/week/month string
 
     sortedDates.forEach(dateStr => {
       const snapshotArray = dailySnapshots[dateStr];

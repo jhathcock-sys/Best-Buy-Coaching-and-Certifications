@@ -5,8 +5,9 @@ import { MANAGERS } from './constants';
 
 export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set, get) => {
   // Initial state logic specific to auth
-  const hasEnvKey = !!(import.meta.env.VITE_GEMINI_API_KEY && import.meta.env.VITE_GEMINI_API_KEY.trim().length > 10);
-  const initialApiKey = localStorage.getItem('bby_api_key') || (hasEnvKey ? import.meta.env.VITE_GEMINI_API_KEY : '');
+  const envKey = import.meta.env.VITE_GEMINI_API_KEY;
+  const hasEnvKey = !!(envKey && envKey.trim().length > 10);
+  const initialApiKey = hasEnvKey ? envKey : (localStorage.getItem('bby_api_key') || '');
   
   let initialActiveManager = null;
   try {

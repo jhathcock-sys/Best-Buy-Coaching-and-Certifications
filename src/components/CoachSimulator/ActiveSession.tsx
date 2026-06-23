@@ -80,7 +80,7 @@ export default function ActiveSession({
                     <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: 1.5 }}>{msg.text}</p>
                   </div>
                 ))}
-                {isThinking && (
+                {isThinking && messages[messages.length - 1]?.sender === 'coach' && (
                   <div style={{ alignSelf: 'flex-start', background: 'rgba(255,255,255,0.05)', padding: '1rem 1.5rem', borderRadius: '16px', borderBottomLeftRadius: '4px' }}>
                     <div className="skeleton-pulse" style={{ height: '12px', width: '120px', background: 'rgba(255,255,255,0.2)', borderRadius: '6px' }}></div>
                   </div>

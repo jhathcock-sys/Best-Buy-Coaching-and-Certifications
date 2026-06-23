@@ -77,16 +77,16 @@ export const getEmployeeGap = (emp, deptGoals) => {
   const gaps = [];
   
   if (getMetricClass(emp.memberships, 'memberships', emp.dept, emp, deptGoals) === 'text-danger') {
-    gaps.push('Memberships');
+    gaps.push('PMs');
   }
   if (getMetricClass(emp.creditCards, 'creditCards', emp.dept, emp, deptGoals) === 'text-danger') {
-    gaps.push('Credit Cards');
+    gaps.push('Apps');
   }
   if (getMetricClass(emp.warranty, 'warranty', emp.dept, emp, deptGoals) === 'text-danger') {
-    gaps.push('GSP Attach');
+    gaps.push('GSP');
   }
   if (getMetricClass(emp.surveys, 'surveys', emp.dept, emp, deptGoals) === 'text-danger') {
-    gaps.push('5 Star Surveys');
+    gaps.push('5*');
   }
   if (getMetricClass(emp.rph, 'rph', emp.dept, emp, deptGoals) === 'text-danger') {
     gaps.push('RPH');

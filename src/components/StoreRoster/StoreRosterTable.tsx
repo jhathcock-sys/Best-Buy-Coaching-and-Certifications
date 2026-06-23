@@ -21,11 +21,11 @@ export default function StoreRosterTable({
           <tr style={{ background: 'rgba(16, 24, 48, 0.7)', borderBottom: '1px solid var(--border-glass)', color: 'var(--text-secondary)' }}>
             <th style={{ padding: isDense ? '0.5rem 1rem' : '1rem 1rem', fontWeight: 600 }}>Associate</th>
             {visibleCols.hours && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}><Clock size={14} style={{ display: 'inline', marginRight: '0.25rem', verticalAlign: 'text-bottom' }} />Hours</th>}
-            {visibleCols.dept && <th style={{ padding: isDense ? '0.5rem 1rem' : '1rem 1rem', fontWeight: 600 }}>Department</th>}
-            {visibleCols.memberships && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>Memberships</th>}
-            {visibleCols.creditCards && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>BBY Cards</th>}
-            {visibleCols.warranty && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>Warranty/GSP</th>}
-            {visibleCols.surveys && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>5 Star</th>}
+            {visibleCols.dept && <th style={{ padding: isDense ? '0.5rem 1rem' : '1rem 1rem', fontWeight: 600 }}>Dept</th>}
+            {visibleCols.memberships && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>PMs</th>}
+            {visibleCols.creditCards && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>Apps</th>}
+            {visibleCols.warranty && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>GSP</th>}
+            {visibleCols.surveys && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>5*</th>}
             {visibleCols.rph && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>RPH</th>}
             {visibleCols.basket && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center', whiteSpace: 'nowrap' }}>Basket ($)</th>}
             {visibleCols.attach && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>Dept Attach</th>}

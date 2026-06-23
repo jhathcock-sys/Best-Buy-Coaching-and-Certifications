@@ -223,10 +223,10 @@ export default function StoreRosterMobileCard({
                 borderRadius: '12px',
                 border: '1px solid rgba(255,255,255,0.02)'
               }}>
-                {renderMobileMetricBadge(emp.memberships, 'memberships', emp.dept, emp, 'Membs', emp.memberships, deptGoals)}
-                {renderMobileMetricBadge(emp.creditCards, 'creditCards', emp.dept, emp, 'Cards', emp.creditCards, deptGoals)}
+                {renderMobileMetricBadge(emp.memberships, 'memberships', emp.dept, emp, 'PMs', emp.memberships, deptGoals)}
+                {renderMobileMetricBadge(emp.creditCards, 'creditCards', emp.dept, emp, 'Apps', emp.creditCards, deptGoals)}
                 {renderMobileMetricBadge(emp.warranty, 'warranty', emp.dept, emp, 'GSP', '%', deptGoals)}
-                {renderMobileMetricBadge(emp.surveys, 'surveys', emp.dept, emp, 'Surveys', emp.surveys === 0.2 ? 'Fail' : emp.surveys, deptGoals)}
+                {renderMobileMetricBadge(emp.surveys, 'surveys', emp.dept, emp, '5*', emp.surveys === 0.2 ? 'Fail' : emp.surveys, deptGoals)}
                 {renderMobileMetricBadge(emp.rph, 'rph', emp.dept, emp, 'RPH', '$', deptGoals)}
                 {emp.dept === 'Computing' ? (
                   renderMobileMetricBadge(emp.m365, 'm365', emp.dept, emp, 'M365', '%', deptGoals)

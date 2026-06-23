@@ -128,7 +128,7 @@ export const RosterMetricCell = React.memo(({
   displayValue, 
   deptGoals, 
   isDense 
-}) => {
+}: any) => {
   const isDeptMetric = (
     type !== 'basket' && type !== 'm365' && type !== 'audio'
   ) || (

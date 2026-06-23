@@ -13,7 +13,7 @@ export const StoreRosterTableRow = React.memo(({
   setSelectedProfileEmployee,
   handleStartEdit,
   onDeleteEmployee
-}) => {
+}: any) => {
   if (!emp) return null;
   const gap = getEmployeeGap(emp, deptGoals);
   const isExceeding = gap === 'None' || gap === '';

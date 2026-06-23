@@ -275,7 +275,7 @@ export default function StoreRoster({
               <AlertTriangle size={16} color="var(--bby-blue)" /> Department Standards
             </h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-              {Object.entries(deptGoals).map(([dept, targets]) => (
+              {Object.entries(deptGoals as Record<string, DeptGoal>).map(([dept, targets]) => (
                 <div 
                   key={dept} 
                   style={{ 

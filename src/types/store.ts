@@ -7,6 +7,7 @@ import {
   CoachingLog, 
   ShiftEvent 
 } from './index';
+import { UiSlice } from '../store/slices/uiSlice';
 
 export interface AuthSlice {
   activeView: string;

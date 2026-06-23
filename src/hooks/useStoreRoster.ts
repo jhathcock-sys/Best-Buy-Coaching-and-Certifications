@@ -49,7 +49,7 @@ export function useStoreRoster(roster) {
   const filteredRoster = useMemo(() => {
     return roster.filter(emp => {
       if (!emp) return false;
-      const matchesSearch = emp?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
+      const matchesSearch = emp?.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) || false;
       const matchesDept = activeDept === 'All' || emp?.dept === activeDept;
       return matchesSearch && matchesDept;
     });

@@ -4,8 +4,8 @@ import { getGeminiModel, isGeminiAvailable } from './core.js';
 export async function auditStoreFloorGemini(apiKey, base64Image, mimeType) {
   try {
     const aiInstance = new GoogleGenerativeAI(apiKey);
-    // Use gemini-1.5-pro for deep vision audits
-    const model = aiInstance.getGenerativeModel({ model: 'gemini-1.5-pro' });
+    // Use gemini-3.5-pro for deep vision audits
+    const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-pro' });
     
     const systemPrompt = `
       You are a Best Buy Store General Manager.
@@ -147,7 +147,7 @@ export async function auditFiveStarSurveyGemini(apiKey, base64Image, mimeType, t
 
     const aiInstance = new GoogleGenerativeAI(apiKey);
     const isProMode = playbookSettings?.aiMode === 'pro';
-    const modelName = isProMode ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
+    const modelName = isProMode ? 'gemini-3.5-pro' : 'gemini-3.5-flash';
     const model = aiInstance.getGenerativeModel({ model: modelName });
 
 

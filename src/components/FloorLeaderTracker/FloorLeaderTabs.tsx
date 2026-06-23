@@ -96,10 +96,10 @@ export default function FloorLeaderTabs({ leaderTab, setLeaderTab, handleEndShif
             </div>
             
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button className="btn btn-secondary" onClick={handleGenerateHandoff} style={{ padding: '0.5rem 1.25rem', height: '36px', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
+              <button className="btn btn-secondary" onClick={handleGenerateHandoff} style={{ padding: '0.5rem 1.25rem', height: '36px', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', cursor: 'pointer' }}>
                 <FileText size={16} color="var(--bby-blue)" /> Generate Handoff
               </button>
-              <button className="btn btn-accent" onClick={handleEndShift} style={{ padding: '0.5rem 1.25rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', color: 'var(--error)', height: '36px', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              <button className="btn btn-accent" onClick={handleEndShift} style={{ padding: '0.5rem 1.25rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', color: 'var(--error)', height: '36px', display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
                 <Power size={14} /> End Shift
               </button>
             </div>

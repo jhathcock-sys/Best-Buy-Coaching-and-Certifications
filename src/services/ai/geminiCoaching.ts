@@ -91,7 +91,7 @@ export const generateMonthlyOneOnOne = async (employeeData, logs, apiKey) => {
     }
 
     const aiInstance = new GoogleGenerativeAI(apiKey);
-    const model = aiInstance.getGenerativeModel({ model: 'gemini-1.5-pro' });
+    const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-pro' });
 
     const prompt = `
       You are an expert Best Buy Store Leader writing a formal 1-on-1 monthly performance appraisal for your associate.
@@ -165,7 +165,7 @@ export const generateActionPlan = async (employeeData, logs, apiKey) => {
     }
 
     const aiInstance = new GoogleGenerativeAI(apiKey);
-    const model = aiInstance.getGenerativeModel({ model: 'gemini-1.5-pro' });
+    const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-pro' });
 
     const prompt = `
       You are an expert Best Buy Store Manager tasked with creating a 30-Day Performance Improvement Plan (Action Plan) for an associate.

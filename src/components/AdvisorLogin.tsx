@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Users, Search } from 'lucide-react';
+import { useStore } from '../store/useStore';
 
 interface AdvisorLoginProps {
   onLoginSuccess: (id: string, employeeData: any) => void;
@@ -9,6 +10,7 @@ interface AdvisorLoginProps {
 
 export default function AdvisorLogin({ onLoginSuccess, roster = [], dbConnected }: AdvisorLoginProps) {
   const [employeeId, setEmployeeId] = useState('');
+  const [storeId, setStoreId] = useState(() => localStorage.getItem('bby_last_store') || '');
   const [error, setError] = useState('');
 
   const handleLogin = (e: React.FormEvent) => {
@@ -68,6 +70,32 @@ export default function AdvisorLogin({ onLoginSuccess, roster = [], dbConnected 
       </div>
 
       <form onSubmit={handleLogin} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div>
+          <input
+            type="text"
+            value={storeId}
+            onChange={(e) => setStoreId(e.target.value)}
+            placeholder="Store Number"
+            style={{
+              width: '100%',
+              padding: '1rem',
+              borderRadius: '12px',
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid var(--border-glass)',
+              color: '#fff',
+              fontSize: '1.1rem',
+              textAlign: 'center',
+              outline: 'none',
+              marginBottom: '1rem',
+              transition: 'all 0.3s ease'
+            }}
+            onFocus={(e) => e.target.style.borderColor = 'var(--bby-yellow)'}
+            onBlur={(e) => {
+              e.target.style.borderColor = 'var(--border-glass)';
+              useStore.getState().setStoreId(storeId);
+            }}
+          />
+        </div>
         <div>
           <input
             type="text"

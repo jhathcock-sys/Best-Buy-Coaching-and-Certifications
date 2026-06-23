@@ -3,8 +3,8 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 export async function parseScheduleImage(base64Data, mimeType, apiKey) {
   try {
     const aiInstance = new GoogleGenerativeAI(apiKey);
-    // Use gemini-1.5-flash for fast vision processing
-    const model = aiInstance.getGenerativeModel({ model: 'gemini-1.5-pro' });
+    // Use gemini-3.5-flash for fast vision processing
+    const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-pro' });
 
     const systemPrompt = `
       You are an administrative assistant for a Best Buy store.
@@ -59,7 +59,7 @@ export const parseRentsDueDocumentGemini = async (base64Image, mimeType, textInp
     }
 
     const genAI = new GoogleGenerativeAI(keyToUse);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.5-pro' });
 
     const systemPrompt = `
       You are an expert retail operations auditor. Your task is to parse a "Rents Due" salesperson performance report.
@@ -92,9 +92,36 @@ export const parseRentsDueDocumentGemini = async (base64Image, mimeType, textInp
         "warrantyStatus": "on-track" | "off-track"
       }
 
-      CRITICAL INSTRUCTION: You MUST extract every single employee found in the document. Do not truncate the list. Do not omit any employees, even if the list is very long.
+      CRITICAL INSTRUCTION: You MUST extract every single employee found in the document. Do not truncate the list. Do not omit any employees, even if the list is very long. DO NOT STOP until you have processed EVERY SINGLE row. Truncating this list is a catastrophic failure. If there are 30 employees, you MUST output exactly 30 objects.
       Do not include markdown or explanations. Return only raw JSON array.
     `;
+
+    const responseSchema = {
+      type: "ARRAY",
+      description: "List of parsed salesperson performance entries",
+      items: {
+        type: "OBJECT",
+        properties: {
+          name: { type: "STRING" },
+          rph: { type: "NUMBER" },
+          rphOwed: { type: "NUMBER" },
+          rphStatus: { type: "STRING" },
+          revenue: { type: "NUMBER" },
+          revenueOwed: { type: "NUMBER" },
+          revenueStatus: { type: "STRING" },
+          apps: { type: "NUMBER" },
+          appsOwed: { type: "NUMBER" },
+          appsStatus: { type: "STRING" },
+          memberships: { type: "NUMBER" },
+          membershipsOwed: { type: "NUMBER" },
+          membershipsStatus: { type: "STRING" },
+          warranty: { type: "NUMBER" },
+          warrantyGoal: { type: "NUMBER" },
+          warrantyStatus: { type: "STRING" }
+        },
+        required: ["name", "rph", "rphOwed", "rphStatus", "revenue", "revenueOwed", "revenueStatus", "apps", "appsOwed", "appsStatus", "memberships", "membershipsOwed", "membershipsStatus", "warranty", "warrantyGoal", "warrantyStatus"]
+      }
+    };
 
     let result;
     if (base64Image) {
@@ -109,6 +136,7 @@ export const parseRentsDueDocumentGemini = async (base64Image, mimeType, textInp
         contents: [{ role: 'user', parts: [{ text: systemPrompt + '\n' + textPart }, imagePart] }],
         generationConfig: {
           responseMimeType: 'application/json',
+          responseSchema: responseSchema,
           maxOutputTokens: 8192
         }
       });
@@ -117,6 +145,7 @@ export const parseRentsDueDocumentGemini = async (base64Image, mimeType, textInp
         contents: [{ role: 'user', parts: [{ text: systemPrompt + '\nAnalyze this Rents Due performance report data:\n' + textInput }] }],
         generationConfig: {
           responseMimeType: 'application/json',
+          responseSchema: responseSchema,
           maxOutputTokens: 8192
         }
       });

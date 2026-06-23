@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Shield, Users, ArrowLeft } from 'lucide-react';
 import Login from './Login';
 import AdvisorLogin from './AdvisorLogin';
+import { useStore } from '../store/useStore';
 
 interface LoginGateProps {
   correctPin?: string;
@@ -45,7 +46,7 @@ export default function LoginGate({ correctPin = '1234', onLoginSuccess, dbConne
           <span style={{ fontWeight: 600 }}>Back</span>
         </button>
         <AdvisorLogin 
-          onLoginSuccess={(id, data) => onLoginSuccess('', '1480', 'advisor', data)}
+          onLoginSuccess={(id, data) => onLoginSuccess('', useStore.getState().storeId || '1480', 'advisor', data)}
           roster={roster}
           dbConnected={dbConnected}
         />

@@ -170,7 +170,7 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
     let logText;
 
     try {
-      if (playbookSettings?.useGemini && apiKey?.trim().length > 10) {
+      if (playbookSettings?.useGemini && (apiKey?.trim()?.length || 0) > 10) {
         // Assemble checklist details for prompt context
         const discoverStrengths = [];
         const discoverGaps = [];

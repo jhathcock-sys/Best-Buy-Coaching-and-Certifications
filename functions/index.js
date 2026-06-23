@@ -25,8 +25,8 @@ exports.generateCoaching = functions.https.onRequest((req, res) => {
       const { name, gapType, gapDetails, positives, rawObservation, playbookSettings, selectedDiscSteps } = req.body;
       const aiInstance = getGeminiClient();
       
-      // Using gemini-1.5-pro flagship model
-      const model = aiInstance.getGenerativeModel({ model: 'gemini-1.5-pro' });
+      // Using gemini-3.5-pro flagship model
+      const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-pro' });
       
       const stepsText = Array.isArray(selectedDiscSteps) ? selectedDiscSteps.join(', ') : (selectedDiscSteps || 'Solve');
       
@@ -116,7 +116,7 @@ exports.auditDialogue = functions.https.onRequest((req, res) => {
 
       const { history, scenario, playbookSettings } = req.body;
       const aiInstance = getGeminiClient();
-      const model = aiInstance.getGenerativeModel({ model: 'gemini-1.5-pro' });
+      const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-pro' });
 
       const dialogueStr = history.messages.map(m => `${m.sender}: ${m.text}`).join('\n');
       

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Shield, Delete } from 'lucide-react';
 import { Manager } from '../types';
+import { useStore } from '../store/useStore';
 
 interface LoginProps {
   correctPin?: string;
@@ -131,7 +132,10 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
                 transition: 'all 0.3s ease'
               }}
               onFocus={(e) => e.target.style.borderColor = 'var(--bby-yellow)'}
-              onBlur={(e) => e.target.style.borderColor = 'var(--border-glass)'}
+              onBlur={(e) => {
+                e.target.style.borderColor = 'var(--border-glass)';
+                useStore.getState().setStoreId(storeId);
+              }}
             />
           )}
         </div>

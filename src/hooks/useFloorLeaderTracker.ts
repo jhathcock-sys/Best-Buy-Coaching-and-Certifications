@@ -1,6 +1,6 @@
+import { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { toast } from 'react-hot-toast';
-import { useFloorSetup } from './FloorLeader/useFloorSetup';
 import { useFloorLogging } from './FloorLeader/useFloorLogging';
 import { useFloorScheduling } from './FloorLeader/useFloorScheduling';
 
@@ -12,8 +12,11 @@ export function useFloorLeaderTracker(activeManager, roster, onSaveShift) {
   const editEmployee = useStore((state) => state.editEmployee);
   const logCoachingSession = useStore((state) => state.logCoachingSession);
 
+  // --- UI State ---
+  const [leaderTab, setLeaderTab] = useState('tracker');
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+
   // --- Domain Hooks ---
-  const floorSetup = useFloorSetup(activeManager, activeShift, setActiveShift);
   const floorLogging = useFloorLogging(roster, activeShift, setActiveShift, logCoachingSession, editEmployee);
   const floorScheduling = useFloorScheduling(roster, activeShift, setActiveShift);
 
@@ -149,10 +152,6 @@ export function useFloorLeaderTracker(activeManager, roster, onSaveShift) {
         console.error("Failed to archive floor leader shift:", e);
       } finally {
         setActiveShift(null);
-        floorSetup.setLeaderName('');
-        floorSetup.setPreExistingRevenue('0');
-        floorSetup.setPreExistingApps('0');
-        floorSetup.setPreExistingPms('0');
       }
     }
   };
@@ -189,7 +188,8 @@ export function useFloorLeaderTracker(activeManager, roster, onSaveShift) {
 
   // Compose all hooks and return the unified object
   return {
-    ...floorSetup,
+    leaderTab, setLeaderTab,
+    isImportModalOpen, setIsImportModalOpen,
     ...floorLogging,
     ...floorScheduling,
     

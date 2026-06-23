@@ -1,22 +1,56 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ShieldAlert, Plus, Edit2, Trash2, Check, Eye, EyeOff, Key, Users, UserPlus } from 'lucide-react';
 
 export default function SupervisorProfilesTab({ 
   managers, 
-  newManagerName, setNewManagerName,
-  newManagerRole, setNewManagerRole,
-  newManagerPin, setNewManagerPin,
-  editingManagerIndex, setEditingManagerIndex,
-  editingManagerName, setEditingManagerName,
-  editingManagerRole, setEditingManagerRole,
-  editingManagerPin, setEditingManagerPin,
-  visiblePins, togglePinVisibility,
-  handleAddManager,
-  startEditingManager,
-  saveEditingManager,
-  handleDeleteManager,
+  onSaveManagers,
   storePin, setStorePin
-}) {
+}: any) {
+  const [newManagerName, setNewManagerName] = useState('');
+  const [newManagerRole, setNewManagerRole] = useState('Experience Supervisor Sales');
+  const [newManagerPin, setNewManagerPin] = useState('');
+  const [editingManagerIndex, setEditingManagerIndex] = useState<number | null>(null);
+  const [editingManagerName, setEditingManagerName] = useState('');
+  const [editingManagerRole, setEditingManagerRole] = useState('');
+  const [editingManagerPin, setEditingManagerPin] = useState('');
+  const [visiblePins, setVisiblePins] = useState<Record<number, boolean>>({});
+
+  const handleAddManager = () => {
+    if (!newManagerName.trim() || !newManagerRole.trim() || !newManagerPin.trim()) {
+      alert("Error: All fields are required."); return;
+    }
+    const newMgr = { name: newManagerName.trim(), role: newManagerRole.trim(), pin: newManagerPin.trim() };
+    onSaveManagers([...managers, newMgr]);
+    setNewManagerName(''); setNewManagerRole('Experience Supervisor Sales'); setNewManagerPin('');
+  };
+
+  const startEditingManager = (idx: number, mgr: any) => {
+    setEditingManagerIndex(idx);
+    setEditingManagerName(mgr.name);
+    setEditingManagerRole(mgr.role || 'Experience Supervisor Sales');
+    setEditingManagerPin(mgr.pin);
+  };
+
+  const saveEditingManager = () => {
+    if (!editingManagerName.trim() || !editingManagerRole.trim() || !editingManagerPin.trim() || editingManagerIndex === null) return;
+    const updated = [...managers];
+    updated[editingManagerIndex] = { name: editingManagerName.trim(), role: editingManagerRole.trim(), pin: editingManagerPin.trim() };
+    onSaveManagers(updated);
+    setEditingManagerIndex(null);
+  };
+
+  const handleDeleteManager = (idx: number) => {
+    if (confirm("Remove this supervisor?")) {
+      const updated = [...managers];
+      updated.splice(idx, 1);
+      onSaveManagers(updated);
+    }
+  };
+
+  const togglePinVisibility = (idx: number) => {
+    setVisiblePins(prev => ({ ...prev, [idx]: !prev[idx] }));
+  };
+
   return (
     <>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem', alignItems: 'start' }}>

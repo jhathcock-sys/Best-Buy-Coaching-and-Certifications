@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, SchemaType, Schema } from '@google/generative-ai';
 
 export async function parseScheduleImage(base64Data, mimeType, apiKey) {
   try {
@@ -96,28 +96,28 @@ export const parseRentsDueDocumentGemini = async (base64Image, mimeType, textInp
       Do not include markdown or explanations. Return only raw JSON array.
     `;
 
-    const responseSchema = {
-      type: "ARRAY",
+    const responseSchema: Schema = {
+      type: SchemaType.ARRAY,
       description: "List of parsed salesperson performance entries",
       items: {
-        type: "OBJECT",
+        type: SchemaType.OBJECT,
         properties: {
-          name: { type: "STRING" },
-          rph: { type: "NUMBER" },
-          rphOwed: { type: "NUMBER" },
-          rphStatus: { type: "STRING" },
-          revenue: { type: "NUMBER" },
-          revenueOwed: { type: "NUMBER" },
-          revenueStatus: { type: "STRING" },
-          apps: { type: "NUMBER" },
-          appsOwed: { type: "NUMBER" },
-          appsStatus: { type: "STRING" },
-          memberships: { type: "NUMBER" },
-          membershipsOwed: { type: "NUMBER" },
-          membershipsStatus: { type: "STRING" },
-          warranty: { type: "NUMBER" },
-          warrantyGoal: { type: "NUMBER" },
-          warrantyStatus: { type: "STRING" }
+          name: { type: SchemaType.STRING },
+          rph: { type: SchemaType.NUMBER },
+          rphOwed: { type: SchemaType.NUMBER },
+          rphStatus: { type: SchemaType.STRING },
+          revenue: { type: SchemaType.NUMBER },
+          revenueOwed: { type: SchemaType.NUMBER },
+          revenueStatus: { type: SchemaType.STRING },
+          apps: { type: SchemaType.NUMBER },
+          appsOwed: { type: SchemaType.NUMBER },
+          appsStatus: { type: SchemaType.STRING },
+          memberships: { type: SchemaType.NUMBER },
+          membershipsOwed: { type: SchemaType.NUMBER },
+          membershipsStatus: { type: SchemaType.STRING },
+          warranty: { type: SchemaType.NUMBER },
+          warrantyGoal: { type: SchemaType.NUMBER },
+          warrantyStatus: { type: SchemaType.STRING }
         },
         required: ["name", "rph", "rphOwed", "rphStatus", "revenue", "revenueOwed", "revenueStatus", "apps", "appsOwed", "appsStatus", "memberships", "membershipsOwed", "membershipsStatus", "warranty", "warrantyGoal", "warrantyStatus"]
       }

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { ShieldAlert, Sparkles, Key, Check, Plus, Trash2, BookOpen, Compass, Users, UserPlus, Edit2, Eye, EyeOff, Cpu, RefreshCw } from 'lucide-react';
-import { testLatency } from '../services/firebase';
 
 import { useStore } from '../store/useStore';
 
@@ -33,52 +32,9 @@ export default function PlaybookStudio() {
   const onSaveManagers = useStore(state => state.saveManagers);
   const [activeTab, setActiveTab] = useState('engine');
   
-  const [diagnosticsLogs, setDiagnosticsLogs] = useState([]);
-  const [isRunningDiagnostics, setIsRunningDiagnostics] = useState(false);
   const [firebaseConfig, setFirebaseConfig] = useState({
     apiKey: '', authDomain: '', projectId: '', storageBucket: '', messagingSenderId: '', appId: ''
   });
-
-  const runDiagnostics = () => {
-    setIsRunningDiagnostics(true);
-    setDiagnosticsLogs([]);
-    
-    const addLog = (msg: string, delay = 0) => {
-      return new Promise<void>((resolve) => {
-        setTimeout(() => {
-          setDiagnosticsLogs(prev => [...prev, msg]);
-          resolve();
-        }, delay);
-      });
-    };
-
-    (async () => {
-      await addLog("⚡ Starting IndexedDB Cache & Sync Diagnostics...", 200);
-      await addLog(`📂 Auditing Roster Periods: ${Object.keys(rosterHistory).length} documents found in local cache.`, 300);
-      await addLog(`📝 Auditing Coaching Logs: ${coachingLogs.length} logs found in local cache.`, 200);
-      await addLog(`🤝 Auditing Commitments: ${followUpTasks.length} commitments (${followUpTasks.filter(t => !t.completed).length} pending) in local cache.`, 200);
-      await addLog(`⏰ Auditing Floor Leader Shifts: ${floorLeaderShifts.length} shifts in local cache.`, 200);
-      await addLog(`📡 Testing Firebase connection latency...`, 300);
-      
-      if (dbConnected) {
-        const latency = await testLatency(storeId);
-        if (latency !== -1) {
-          const rating = latency < 50 ? 'Excellent' : latency < 150 ? 'Good' : 'Fair';
-          await addLog(`✅ Firebase Connection: Connected. Latency: ${latency}ms (${rating}).`, 200);
-        } else {
-          await addLog(`⚠️ Firebase Connection: Connected but latency test failed.`, 200);
-        }
-        await addLog(`💾 Offline Persistence: Active (IndexedDB storage verified).`, 100);
-        await addLog(`🔄 Sync Status: Clean (0 pending local writes queued).`, 100);
-      } else {
-        await addLog(`ℹ️ Firebase Connection: Offline. Sandbox Mode active.`, 200);
-        await addLog(`💾 Offline Persistence: Active (Local Storage fallback verified).`, 100);
-      }
-      
-      await addLog(`🎉 Audit complete: Cache status is healthy!`, 200);
-      setIsRunningDiagnostics(false);
-    })();
-  };
   
   const [aiMode, setAiMode] = useState(playbookSettings.aiMode || (playbookSettings.useGemini ? 'flash' : 'local'));
   const [localApiKey, setLocalApiKey] = useState(apiKey || '');
@@ -94,51 +50,6 @@ export default function PlaybookStudio() {
   }
   
   const [selectedDept, setSelectedDept] = useState('Front End');
-
-  const [newManagerName, setNewManagerName] = useState('');
-  const [newManagerRole, setNewManagerRole] = useState('Experience Supervisor Sales');
-  const [newManagerPin, setNewManagerPin] = useState('');
-  const [editingManagerIndex, setEditingManagerIndex] = useState(null);
-  const [editingManagerName, setEditingManagerName] = useState('');
-  const [editingManagerRole, setEditingManagerRole] = useState('');
-  const [editingManagerPin, setEditingManagerPin] = useState('');
-  const [visiblePins, setVisiblePins] = useState({});
-
-  const handleAddManager = () => {
-    if (!newManagerName.trim() || !newManagerRole.trim() || !newManagerPin.trim()) {
-      alert("Error: All fields are required."); return;
-    }
-    const newMgr = { name: newManagerName.trim(), role: newManagerRole.trim(), pin: newManagerPin.trim() };
-    onSaveManagers([...managers, newMgr]);
-    setNewManagerName(''); setNewManagerRole('Experience Supervisor Sales'); setNewManagerPin('');
-  };
-
-  const startEditingManager = (idx, mgr) => {
-    setEditingManagerIndex(idx);
-    setEditingManagerName(mgr.name);
-    setEditingManagerRole(mgr.role || 'Experience Supervisor Sales');
-    setEditingManagerPin(mgr.pin);
-  };
-
-  const saveEditingManager = () => {
-    if (!editingManagerName.trim() || !editingManagerRole.trim() || !editingManagerPin.trim()) return;
-    const updated = [...managers];
-    updated[editingManagerIndex] = { name: editingManagerName.trim(), role: editingManagerRole.trim(), pin: editingManagerPin.trim() };
-    onSaveManagers(updated);
-    setEditingManagerIndex(null);
-  };
-
-  const handleDeleteManager = (idx) => {
-    if (confirm("Remove this supervisor?")) {
-      const updated = [...managers];
-      updated.splice(idx, 1);
-      onSaveManagers(updated);
-    }
-  };
-
-  const togglePinVisibility = (idx) => {
-    setVisiblePins(prev => ({ ...prev, [idx]: !prev[idx] }));
-  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -226,18 +137,7 @@ export default function PlaybookStudio() {
       {activeTab === 'supervisors' && (
         <SupervisorProfilesTab 
           managers={managers}
-          newManagerName={newManagerName} setNewManagerName={setNewManagerName}
-          newManagerRole={newManagerRole} setNewManagerRole={setNewManagerRole}
-          newManagerPin={newManagerPin} setNewManagerPin={setNewManagerPin}
-          editingManagerIndex={editingManagerIndex} setEditingManagerIndex={setEditingManagerIndex}
-          editingManagerName={editingManagerName} setEditingManagerName={setEditingManagerName}
-          editingManagerRole={editingManagerRole} setEditingManagerRole={setEditingManagerRole}
-          editingManagerPin={editingManagerPin} setEditingManagerPin={setEditingManagerPin}
-          visiblePins={visiblePins} togglePinVisibility={togglePinVisibility}
-          handleAddManager={handleAddManager}
-          startEditingManager={startEditingManager}
-          saveEditingManager={saveEditingManager}
-          handleDeleteManager={handleDeleteManager}
+          onSaveManagers={onSaveManagers}
           storePin={storePin}
           setStorePin={setStorePin}
         />
@@ -267,10 +167,8 @@ export default function PlaybookStudio() {
 
       {activeTab === 'sync' && (
         <SyncDiagnosticsTab 
-          runDiagnostics={runDiagnostics}
-          isRunningDiagnostics={isRunningDiagnostics}
-          diagnosticsLogs={diagnosticsLogs}
           dbConnected={dbConnected}
+          storeId={storeId}
           firebaseConfig={firebaseConfig}
           setFirebaseConfig={setFirebaseConfig}
           handleSaveFirebaseConfig={handleSaveFirebaseConfig}

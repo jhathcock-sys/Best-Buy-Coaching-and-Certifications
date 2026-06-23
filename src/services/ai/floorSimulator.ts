@@ -1,5 +1,5 @@
-// Floor Leader Shift Simulator (Gemini)
-import { getGeminiModel } from './core.js';
+import { SchemaType } from '@google/generative-ai';
+import { getGeminiModel, executeWithRetry } from './core.js';
 
 export async function runStoreShiftSimulationGemini(apiKey, rosterData, zoneAssignments, playbookSettings) {
   try {
@@ -42,12 +42,47 @@ export async function runStoreShiftSimulationGemini(apiKey, rosterData, zoneAssi
       Do not include markdown. Return only raw JSON.
     `;
 
-    const result = await model.generateContent({
+    const responseSchema: any = {
+      type: SchemaType.OBJECT,
+      properties: {
+        shiftLogs: {
+          type: SchemaType.ARRAY,
+          items: {
+            type: SchemaType.OBJECT,
+            properties: {
+              hour: { type: SchemaType.STRING },
+              zone: { type: SchemaType.STRING },
+              event: { type: SchemaType.STRING },
+              advisorResponse: { type: SchemaType.STRING },
+              impact: { type: SchemaType.STRING }
+            },
+            required: ["hour", "zone", "event", "advisorResponse", "impact"]
+          }
+        },
+        scorecard: {
+          type: SchemaType.OBJECT,
+          properties: {
+            revenue: { type: SchemaType.NUMBER },
+            revenueGoal: { type: SchemaType.NUMBER },
+            memberships: { type: SchemaType.NUMBER },
+            creditCards: { type: SchemaType.NUMBER },
+            csat: { type: SchemaType.NUMBER },
+            placementScore: { type: SchemaType.NUMBER },
+            placementReview: { type: SchemaType.STRING }
+          },
+          required: ["revenue", "revenueGoal", "memberships", "creditCards", "csat", "placementScore", "placementReview"]
+        }
+      },
+      required: ["shiftLogs", "scorecard"]
+    };
+
+    const result = await executeWithRetry(() => model.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
-        responseMimeType: 'application/json'
+        responseMimeType: 'application/json',
+        responseSchema: responseSchema
       }
-    });
+    }));
 
     return JSON.parse(result.response.text());
   } catch (error) {

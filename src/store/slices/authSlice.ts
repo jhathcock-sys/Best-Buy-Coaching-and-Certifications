@@ -1,6 +1,6 @@
 import { StateCreator } from 'zustand';
 import { StoreState, AuthSlice } from '../../types/store';
-import { initFirebase, isFirebaseConnected, saveManagersToCloud } from '../../services/firebase';
+import { initFirebase, isFirebaseConnected, saveManagersToCloud, getUserByPin } from '../../services/firebase';
 import { MANAGERS } from './constants';
 
 export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set, get) => {
@@ -70,8 +70,19 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
       sessionStorage.setItem('bby_authenticated', 'true');
       set({ isAuthenticated: true, activeAdvisor: advisor, activeManager: null });
     },
-    login: (pin, storeId) => {
-      const manager = get().managers.find(m => m.pin === pin);
+    login: async (pin, storeId) => {
+      let manager = null;
+      
+      // Try to fetch from cloud 'users' collection first
+      if (get().dbConnected) {
+        manager = await getUserByPin(storeId, pin);
+      }
+      
+      // Fallback to legacy local state if not found or offline
+      if (!manager) {
+        manager = get().managers.find(m => m.pin === pin) || null;
+      }
+
       if (manager) {
         sessionStorage.setItem('bby_authenticated', 'true');
         sessionStorage.setItem('bby_active_manager', JSON.stringify(manager));
@@ -79,6 +90,7 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
         set({ isAuthenticated: true, activeManager: manager, storeId });
         return true;
       }
+      
       if (pin === get().storePin) {
         const guestManager = { name: 'Default Supervisor', role: 'Store Leader' };
         sessionStorage.setItem('bby_authenticated', 'true');
@@ -94,7 +106,16 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
       sessionStorage.removeItem('bby_authenticated');
       sessionStorage.removeItem('bby_active_manager');
       sessionStorage.removeItem('bby_store_id');
-      set({ isAuthenticated: false, activeManager: null, activeAdvisor: null, storeId: null });
+      set({ 
+        isAuthenticated: false, 
+        activeManager: null, 
+        activeAdvisor: null, 
+        storeId: null,
+        // WIPE LEAKED TENANT DATA:
+        rosterHistory: {},
+        dailySnapshots: {},
+        metrics: { memberships: 0, creditCards: 0, warranty: 0, surveys: 0, rph: 0, totalRevenue: 0, totalHours: 0 }
+      });
     },
 
     handleSaveFirebaseConfig: (config) => {

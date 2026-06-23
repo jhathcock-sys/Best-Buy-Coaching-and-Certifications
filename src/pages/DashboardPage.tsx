@@ -2,6 +2,7 @@ import React from 'react';
 import { useMemo } from 'react';
 import { Employee } from '../types/index';
 import { useStore } from '../store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import DashboardHeader from '../components/Dashboard/DashboardHeader';
 import DashboardAlerts from '../components/Dashboard/DashboardAlerts';
 import DashboardSystemAlerts from '../components/Dashboard/DashboardSystemAlerts';
@@ -17,14 +18,25 @@ export default function Dashboard({
   onShadowEmployee
 }: any) {
   
-  const recentSessions = useStore((state) => state.recentSessions);
-  const followUpTasks = useStore((state) => state.followUpTasks);
-  const deptGoals = useStore((state) => state.deptGoals);
-  const floorLeaderShifts = useStore((state) => state.floorLeaderShifts);
-  const coachingLogs = useStore((state) => state.coachingLogs);
-  const activePeriod = useStore((state) => state.activePeriod);
-  const rosterHistory = useStore((state) => state.rosterHistory) || {};
-  const activeManager = useStore((state) => state.activeManager);
+  const {
+    recentSessions,
+    followUpTasks,
+    deptGoals,
+    floorLeaderShifts,
+    coachingLogs,
+    activePeriod,
+    rosterHistory,
+    activeManager
+  } = useStore(useShallow(state => ({
+    recentSessions: state.recentSessions,
+    followUpTasks: state.followUpTasks,
+    deptGoals: state.deptGoals,
+    floorLeaderShifts: state.floorLeaderShifts,
+    coachingLogs: state.coachingLogs,
+    activePeriod: state.activePeriod,
+    rosterHistory: state.rosterHistory,
+    activeManager: state.activeManager
+  })));
 
   const _rawroster = rosterHistory[activePeriod] || {};
   const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
@@ -68,7 +80,9 @@ export default function Dashboard({
       creditCards: totalCreditCards,
       warranty: Number(avgWarranty.toFixed(1)),
       surveys: sumSurveys,
-      rph: Math.round(avgRph)
+      rph: Math.round(avgRph),
+      totalRevenue: totalRev,
+      totalHours: totalHours
     };
   }, [roster]);
 

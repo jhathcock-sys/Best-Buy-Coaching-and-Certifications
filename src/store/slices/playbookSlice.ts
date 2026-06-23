@@ -226,7 +226,7 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
 
     completeRoleplay: async ({ category, customerName, avatar, score, passed, growReport, metrics: newMetrics }) => {
       const recentSessions = get().recentSessions || [];
-      const metrics = get().metrics || { memberships: 0, creditCards: 0, warranty: 0, surveys: 5.0, rph: 0 };
+      const metrics = get().metrics || { memberships: 0, creditCards: 0, warranty: 0, surveys: 0, rph: 0, totalRevenue: 0, totalHours: 0 };
       const dbConnected = get().dbConnected;
 
       const newSession = {
@@ -308,12 +308,21 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       }
 
       if (passed && newMetrics) {
+        const prevTotalRev = metrics.totalRevenue || (metrics.rph * 40); // fallback
+        const prevTotalHours = metrics.totalHours || 40;
+        const newTotalRev = prevTotalRev + (newMetrics.revenue || (newMetrics.rph * 8)); // simulated 8hr shift
+        const newTotalHours = prevTotalHours + 8;
+        const trueRph = newTotalHours > 0 ? Math.round(newTotalRev / newTotalHours) : 0;
+
         const averagedMetrics = {
+          ...metrics,
           memberships: metrics.memberships + newMetrics.memberships,
           creditCards: metrics.creditCards + newMetrics.creditCards,
           warranty: Math.round((metrics.warranty * 2 + newMetrics.warranty) / 3),
           surveys: metrics.surveys + newMetrics.surveys,
-          rph: Math.round((metrics.rph * 2 + newMetrics.rph) / 3)
+          rph: trueRph,
+          totalRevenue: newTotalRev,
+          totalHours: newTotalHours
         };
         set({ metrics: averagedMetrics });
         if (dbConnected) {

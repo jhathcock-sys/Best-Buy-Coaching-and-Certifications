@@ -1,14 +1,52 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Restrict access specifically to the 'stores' path
-    // Since the app uses client-side credentials verified by manager PINs locally,
-    // we allow read/write access to store collections to keep synchronization functional.
+    
+    // RBAC Concept for Firebase Custom Auth (Token Claims)
+    // request.auth.token.role is checked.
+
     match /stores/{storeId} {
-      allow read, write: if true;
       
-      match /{allSubPaths=**} {
-        allow read, write: if true;
+      allow read: if true;
+      
+      match /users/{userId} {
+        // Only GMs can create/delete user accounts
+        allow create, delete: if request.auth != null && request.auth.token.role == 'gm';
+        allow read: if true; 
+        allow update: if request.auth != null && (request.auth.uid == userId || request.auth.token.role == 'gm');
+      }
+
+      match /data/deptGoals {
+        allow read: if true;
+        // Strict RBAC: Advisors physically blocked from modifying goals
+        allow write: if request.auth != null && request.auth.token.role in ['gm', 'supervisor'];
+      }
+      
+      match /data/metrics {
+        allow read: if true;
+        allow write: if request.auth != null && request.auth.token.role in ['gm', 'supervisor'];
+      }
+      
+      match /data/playbookSettings {
+        allow read: if true;
+        allow write: if request.auth != null && request.auth.token.role in ['gm', 'supervisor'];
+      }
+      
+      // Subcollections
+      match /periods/{document=**} {
+        allow read: if true;
+        allow write: if request.auth != null && request.auth.token.role in ['gm', 'supervisor'];
+      }
+      
+      match /coachingLogs/{document=**} {
+        allow read: if true;
+        allow write: if request.auth != null && request.auth.token.role in ['gm', 'supervisor', 'advisor'];
+      }
+
+      match /data/{document=**} {
+        allow read: if true;
+        allow write: if true; 
       }
     }
   }

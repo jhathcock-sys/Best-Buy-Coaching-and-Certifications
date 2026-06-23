@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
+import DOMPurify from 'dompurify';
 import { Target, TrendingUp, Calendar, CheckCircle, Award, Trophy, Medal, Zap, Star } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import MetricCards from '../components/Dashboard/MetricCards';
+
 interface AdvisorDashboardProps {
   employee: any;
   onNavigate: (view: string) => void;
@@ -173,7 +175,7 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
                   </div>
                   <div 
                     style={{ fontSize: '0.9rem', color: '#fff', lineHeight: 1.5 }}
-                    dangerouslySetInnerHTML={{ __html: log.coachingPlanMd?.substring(0, 300) + '...' || 'Review completed.' }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(log.coachingPlanMd?.substring(0, 300) + '...' || 'Review completed.') }}
                   />
                 </div>
               ))}

@@ -15,17 +15,19 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
   const [storeId, setStoreId] = useState(() => localStorage.getItem('bby_last_store') || '');
   const [isShaking, setIsShaking] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleKeyPress = (num: string) => {
+  const handleKeyPress = async (num: string) => {
     if (pin.length < 4 && !isSuccess) {
       const newPin = pin + num;
       setPin(newPin);
       
       if (newPin.length === 4) {
-        const isManagerPin = managers.some(m => m.pin === newPin);
-        const isStorePin = newPin === correctPin;
+        setIsLoading(true);
+        const success = await useStore.getState().login(newPin, storeId || '1480');
+        setIsLoading(false);
         
-        if (isManagerPin || isStorePin) {
+        if (success) {
           setIsSuccess(true);
           localStorage.setItem('bby_last_store', storeId || '1480');
           setTimeout(() => {
@@ -195,6 +197,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
               key={num}
               type="button"
               className="keypad-btn"
+              disabled={isLoading}
               onClick={() => handleKeyPress(num.toString())}
               style={{
                 height: '64px',

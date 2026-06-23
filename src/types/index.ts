@@ -47,6 +47,8 @@ export interface MetricAverages {
   rph: number;
   revenue?: number;
   apps?: number;
+  totalRevenue?: number;
+  totalHours?: number;
 }
 
 export interface PlaybookSettings {

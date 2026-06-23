@@ -1,5 +1,5 @@
-// Customer Roleplay Simulator (Gemini + Offline Fallback)
-import { getGeminiModel } from './core.js';
+import { SchemaType } from '@google/generative-ai';
+import { getGeminiModel, executeWithRetry } from './core.js';
 import { OFFLINE_DIALOGUES } from './offlineSimulators.js';
 
 export function runOfflineSimulationStep(message, history, scenario) {
@@ -252,14 +252,35 @@ export async function runGeminiSimulationStep(apiKey, message, history, scenario
       Provide your JSON response matching the customer role:
     `;
 
-    const result = await model.generateContent({
+    const responseSchema: any = {
+      type: SchemaType.OBJECT,
+      properties: {
+        responseText: { type: SchemaType.STRING },
+        currentActiveStep: { type: SchemaType.STRING },
+        completedSteps: {
+          type: SchemaType.OBJECT,
+          properties: {
+            connect: { type: SchemaType.BOOLEAN },
+            discover: { type: SchemaType.BOOLEAN },
+            recommend: { type: SchemaType.BOOLEAN },
+            protect: { type: SchemaType.BOOLEAN },
+            close: { type: SchemaType.BOOLEAN }
+          },
+          required: ["connect", "discover", "recommend", "protect", "close"]
+        }
+      },
+      required: ["responseText", "currentActiveStep", "completedSteps"]
+    };
+
+    const result = await executeWithRetry(() => model.generateContent({
       contents: [
         { role: 'user', parts: [{ text: systemPrompt + '\n' + prompt }] }
       ],
       generationConfig: {
-        responseMimeType: 'application/json'
+        responseMimeType: 'application/json',
+        responseSchema: responseSchema
       }
-    });
+    }));
 
     const responseText = result.response.text();
     const data = JSON.parse(responseText);
@@ -354,7 +375,52 @@ export async function evaluateSessionGemini(apiKey, history, scenario, playbookS
       }
     `;
 
-    const result = await model.generateContent(evaluationPrompt);
+    const responseSchema: any = {
+      type: SchemaType.OBJECT,
+      properties: {
+        overallScore: { type: SchemaType.NUMBER },
+        passed: { type: SchemaType.BOOLEAN },
+        breakdown: {
+          type: SchemaType.OBJECT,
+          properties: {
+            connect: { type: SchemaType.NUMBER },
+            discover: { type: SchemaType.NUMBER },
+            recommend: { type: SchemaType.NUMBER },
+            protect: { type: SchemaType.NUMBER },
+            close: { type: SchemaType.NUMBER }
+          },
+          required: ["connect", "discover", "recommend", "protect", "close"]
+        },
+        values: {
+          type: SchemaType.OBJECT,
+          properties: {
+            beHuman: { type: SchemaType.NUMBER },
+            makeItEasy: { type: SchemaType.NUMBER },
+            showWhatPossible: { type: SchemaType.NUMBER }
+          },
+          required: ["beHuman", "makeItEasy", "showWhatPossible"]
+        },
+        growReport: {
+          type: SchemaType.OBJECT,
+          properties: {
+            goal: { type: SchemaType.STRING },
+            reality: { type: SchemaType.STRING },
+            options: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+            will: { type: SchemaType.STRING }
+          },
+          required: ["goal", "reality", "options", "will"]
+        }
+      },
+      required: ["overallScore", "passed", "breakdown", "values", "growReport"]
+    };
+
+    const result = await executeWithRetry(() => model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: evaluationPrompt }] }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema: responseSchema
+      }
+    }));
     return JSON.parse(result.response.text());
   } catch (error) {
     console.error('Gemini Evaluation Error:', error);

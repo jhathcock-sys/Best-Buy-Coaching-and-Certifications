@@ -1,5 +1,5 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { getGeminiModel, isGeminiAvailable } from './core.js';
+import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
+import { getGeminiModel, isGeminiAvailable, executeWithRetry } from './core.js';
 
 export async function generateCoachingLogGemini(apiKey, name, gapType, gapDetails, positives, rawObservation, playbookSettings, selectedDiscSteps) {
   try {
@@ -67,12 +67,28 @@ export async function generateCoachingLogGemini(apiKey, name, gapType, gapDetail
       }
     `;
     
-    const result = await model.generateContent({
+    const responseSchema: any = {
+      type: SchemaType.OBJECT,
+      properties: {
+        what: { type: SchemaType.STRING },
+        how: { type: SchemaType.STRING },
+        why: { type: SchemaType.STRING },
+        strengths: { type: SchemaType.STRING },
+        metricGap: { type: SchemaType.STRING },
+        expectation: { type: SchemaType.STRING },
+        validation: { type: SchemaType.STRING },
+        discStep: { type: SchemaType.STRING }
+      },
+      required: ["what", "how", "why", "strengths", "metricGap", "expectation", "validation", "discStep"]
+    };
+    
+    const result = await executeWithRetry(() => model.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
-        responseMimeType: 'application/json'
+        responseMimeType: 'application/json',
+        responseSchema: responseSchema
       }
-    });
+    }));
     
     return JSON.parse(result.response.text());
   } catch (e) {
@@ -191,12 +207,25 @@ export const generateActionPlan = async (employeeData, logs, apiKey) => {
       }
     `;
 
-    const result = await model.generateContent({
+    const responseSchema: any = {
+      type: SchemaType.OBJECT,
+      properties: {
+        type: { type: SchemaType.STRING },
+        status: { type: SchemaType.STRING },
+        reason: { type: SchemaType.STRING },
+        dateCreated: { type: SchemaType.STRING },
+        planText: { type: SchemaType.STRING }
+      },
+      required: ["type", "status", "reason", "dateCreated", "planText"]
+    };
+
+    const result = await executeWithRetry(() => model.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
-        responseMimeType: 'application/json'
+        responseMimeType: 'application/json',
+        responseSchema: responseSchema
       }
-    });
+    }));
     
     return JSON.parse(result.response.text());
   } catch (error) {

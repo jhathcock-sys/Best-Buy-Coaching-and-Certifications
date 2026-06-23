@@ -19,6 +19,7 @@ import { Compass, Users, BookOpen, LayoutDashboard, Sparkles, ShieldCheck, Clipb
 import { subscribeToActivePeriod } from './services/firebase';
 
 import { useStore } from './store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import ErrorBoundary from './components/ErrorBoundary';
 import Sidebar from './components/layout/Sidebar';
 import MobileNav from './components/layout/MobileNav';

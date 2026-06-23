@@ -1,4 +1,5 @@
 import React from 'react';
+import DOMPurify from 'dompurify';
 import { Award, Star, ShieldCheck, CreditCard, AlertTriangle, CheckCircle, FileText, Loader2, Sparkles } from 'lucide-react';
 import { renderMarkdown } from '../../utils/profileUtils';
 
@@ -106,7 +107,7 @@ export default function ProfileTrophiesTab({ employee, isGenerating, generatedPl
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem', fontStyle: 'italic' }}>
               {generatedPlan.reason}
             </p>
-            <div className="markdown-body" style={{ fontSize: '0.9rem', color: '#ddd' }} dangerouslySetInnerHTML={{ __html: renderMarkdown(generatedPlan.planText) }} />
+            <div className="markdown-body" style={{ fontSize: '0.9rem', color: '#ddd' }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(renderMarkdown(generatedPlan.planText)) }} />
             <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                <button className="btn btn-primary" style={{ fontSize: '0.8rem' }}>Save as Active PIP</button>
             </div>

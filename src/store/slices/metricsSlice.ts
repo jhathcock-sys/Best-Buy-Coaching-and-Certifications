@@ -23,7 +23,7 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
     rosterHistory: { [defaultPeriod]: INITIAL_ROSTER },
     activePeriod: initialActivePeriod,
     deptGoals: DEFAULT_DEPT_GOALS,
-    metrics: { memberships: 0, creditCards: 0, warranty: 0, surveys: 0, rph: 0 },
+    metrics: { memberships: 0, creditCards: 0, warranty: 0, surveys: 0, rph: 0, totalRevenue: 0, totalHours: 0 },
     dailySnapshots: {},
 
     setRosterHistory: (rosterHistory) => set({ rosterHistory }),

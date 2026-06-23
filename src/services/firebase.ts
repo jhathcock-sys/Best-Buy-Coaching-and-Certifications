@@ -1,6 +1,6 @@
 import { toast } from 'react-hot-toast';
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, onSnapshot, setDoc, getDoc, collection, addDoc, query, orderBy, limit, deleteDoc, getDocs } from 'firebase/firestore';
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, onSnapshot, setDoc, getDoc, collection, addDoc, query, orderBy, limit, deleteDoc, getDocs, where } from 'firebase/firestore';
 
 let app: any = null;
 let db: any = null;
@@ -133,7 +133,7 @@ export const subscribeToPlaybookSettings = (storeId: string, onUpdate: any) => {
   });
 };
 
-// Subscribe to Managers Settings
+// Subscribe to Managers Settings (Legacy)
 export const subscribeToManagers = (storeId: string, onUpdate: any) => {
   const ref = getStoreDocRef(storeId, 'managersSettings');
   if (!ref) return null;
@@ -142,6 +142,23 @@ export const subscribeToManagers = (storeId: string, onUpdate: any) => {
       onUpdate(snap.data().managers || []);
     }
   });
+};
+
+// Fetch User by PIN (New Auth Flow)
+export const getUserByPin = async (storeId: string, pin: string) => {
+  if (!db) return null;
+  try {
+    const usersRef = collection(db, 'stores', storeId, 'users');
+    const q = query(usersRef, where('pin', '==', pin), limit(1));
+    const snap = await getDocs(q);
+    if (!snap.empty) {
+      return { id: snap.docs[0].id, ...snap.docs[0].data() };
+    }
+    return null;
+  } catch (e) {
+    console.error('Failed to get user by PIN:', e);
+    return null;
+  }
 };
 
 // Subscribe to Department Goals

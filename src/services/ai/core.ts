@@ -14,3 +14,20 @@ export function getGeminiModel(apiKey, playbookSettings) {
   return aiInstance.getGenerativeModel({ model: modelName });
 }
 
+export async function executeWithRetry(apiCall, maxRetries = 3) {
+  let retries = 0;
+  while (true) {
+    try {
+      return await apiCall();
+    } catch (error: any) {
+      if (error.status === 429 && retries < maxRetries) {
+        const backoffMs = Math.pow(2, retries) * 1000 + Math.random() * 1000;
+        console.warn(`Rate limited (429). Retrying in ${backoffMs}ms...`);
+        await new Promise(res => setTimeout(res, backoffMs));
+        retries++;
+      } else {
+        throw error;
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
-// Employee Coaching Simulator (Gemini + Offline Fallback)
-import { getGeminiModel } from './core.js';
+import { SchemaType } from '@google/generative-ai';
+import { getGeminiModel, executeWithRetry } from './core.js';
 
 export function runOfflineEmployeeCoachingStep(message, history, scenario) {
   const lowercaseMsg = message.toLowerCase();
@@ -275,14 +275,34 @@ export async function runGeminiEmployeeCoachingStep(apiKey, message, history, em
       Provide your JSON response matching the employee role:
     `;
 
-    const result = await model.generateContent({
+    const responseSchema: any = {
+      type: SchemaType.OBJECT,
+      properties: {
+        responseText: { type: SchemaType.STRING },
+        currentCoachStep: { type: SchemaType.STRING },
+        completedCoachSteps: {
+          type: SchemaType.OBJECT,
+          properties: {
+            goal: { type: SchemaType.BOOLEAN },
+            reality: { type: SchemaType.BOOLEAN },
+            options: { type: SchemaType.BOOLEAN },
+            will: { type: SchemaType.BOOLEAN }
+          },
+          required: ["goal", "reality", "options", "will"]
+        }
+      },
+      required: ["responseText", "currentCoachStep", "completedCoachSteps"]
+    };
+
+    const result = await executeWithRetry(() => model.generateContent({
       contents: [
         { role: 'user', parts: [{ text: systemPrompt + '\n' + prompt }] }
       ],
       generationConfig: {
-        responseMimeType: 'application/json'
+        responseMimeType: 'application/json',
+        responseSchema: responseSchema
       }
-    });
+    }));
 
     const responseText = result.response.text();
     const data = JSON.parse(responseText);
@@ -346,7 +366,32 @@ export async function evaluateCoachingSessionGemini(apiKey, history, scenario, p
       }
     `;
 
-    const result = await model.generateContent(evaluationPrompt);
+    const responseSchema: any = {
+      type: SchemaType.OBJECT,
+      properties: {
+        score: { type: SchemaType.NUMBER },
+        passed: { type: SchemaType.BOOLEAN },
+        feedback: { type: SchemaType.STRING },
+        details: {
+          type: SchemaType.OBJECT,
+          properties: {
+            empathy: { type: SchemaType.NUMBER },
+            structure: { type: SchemaType.NUMBER },
+            actionable: { type: SchemaType.NUMBER }
+          },
+          required: ["empathy", "structure", "actionable"]
+        }
+      },
+      required: ["score", "passed", "feedback", "details"]
+    };
+
+    const result = await executeWithRetry(() => model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: evaluationPrompt }] }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema: responseSchema
+      }
+    }));
     return JSON.parse(result.response.text());
   } catch (error) {
     console.error('Gemini Coaching Evaluation Error:', error);

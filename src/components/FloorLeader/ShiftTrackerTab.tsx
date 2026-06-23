@@ -136,46 +136,27 @@ export default function ShiftTrackerTab({ activeShift, setActiveShift, roster = 
   handleUndoWin={handleUndoWin}
  />
           <ShiftTrackerSidebar 
-  activeSummary={activeSummary}
-  activeShift={activeShift}
-  setActiveShift={setActiveShift}
-  currentHourKey={currentHourKey}
-  selectedLog={selectedLog}
-  setSelectedLog={setSelectedLog}
-  newObservation={newObservation}
-  setNewObservation={setNewObservation}
-  newWinMsg={newWinMsg}
-  setNewWinMsg={setNewWinMsg}
-  winFeed={winFeed}
-  setWinFeed={setWinFeed}
-  handleSaveHourlyLog={handleSaveHourlyLog}
-  handleSaveObservation={handleSaveObservation}
-  handleLogWin={handleLogWin}
-  renderPaceIndicator={renderPaceIndicator}
-  handleUndoWin={handleUndoWin}
-  selectedEmpId={selectedEmpId}
-  setSelectedEmpId={setSelectedEmpId}
-  winType={winType}
-  setWinType={setWinType}
-  ocvEmpId={ocvEmpId}
-  setOcvEmpId={setOcvEmpId}
-  ocvConnect={ocvConnect}
-  setOcvConnect={setOcvConnect}
-  ocvRecommend={ocvRecommend}
-  setOcvRecommend={setOcvRecommend}
-  ocvProtect={ocvProtect}
-  setOcvProtect={setOcvProtect}
-  ocvClose={ocvClose}
-  setOcvClose={setOcvClose}
-  ocvNotes={ocvNotes}
-  setOcvNotes={setOcvNotes}
-  getEmployeesOnShift={getEmployeesOnShift}
-  handleLogFloorWin={handleLogFloorWin}
-  handleLogOcvObservation={handleLogOcvObservation}
-  ocvSuccessMsg={ocvSuccessMsg}
-  roster={roster}
-  getShiftLeaderboard={getShiftLeaderboard}
- />
+            activeShift={activeShift}
+            handleUndoWin={handleUndoWin}
+            getShiftLeaderboard={getShiftLeaderboard}
+            getEmployeesOnShift={getEmployeesOnShift}
+            roster={roster}
+            winConfig={{
+              selectedEmpId, setSelectedEmpId,
+              winType, setWinType,
+              handleLogFloorWin
+            }}
+            ocvConfig={{
+              ocvEmpId, setOcvEmpId,
+              ocvConnect, setOcvConnect,
+              ocvRecommend, setOcvRecommend,
+              ocvProtect, setOcvProtect,
+              ocvClose, setOcvClose,
+              ocvNotes, setOcvNotes,
+              handleLogOcvObservation,
+              ocvSuccessMsg
+            }}
+          />
           </div>
           
   );

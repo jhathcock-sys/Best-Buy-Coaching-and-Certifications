@@ -4,40 +4,13 @@ import QuickLogWinForm from './QuickLogWinForm';
 import OcvObservationForm from './OcvObservationForm';
 
 export default function ShiftTrackerSidebar({ 
-  activeSummary,
   activeShift,
-  setActiveShift,
-  currentHourKey,
-  selectedLog,
-  setSelectedLog,
-  newObservation,
-  setNewObservation,
-  newWinMsg,
-  setNewWinMsg,
-  winFeed,
-  setWinFeed,
-  handleSaveHourlyLog,
-  handleSaveObservation,
-  handleLogWin,
-  renderPaceIndicator,
   handleUndoWin,
-  selectedEmpId,
-  setSelectedEmpId,
-  winType,
-  setWinType,
-  ocvEmpId,
-  setOcvEmpId,
-  ocvConnect, setOcvConnect,
-  ocvRecommend, setOcvRecommend,
-  ocvProtect, setOcvProtect,
-  ocvClose, setOcvClose,
-  ocvNotes, setOcvNotes,
   getEmployeesOnShift,
-  handleLogFloorWin,
-  handleLogOcvObservation,
-  ocvSuccessMsg,
   roster,
-  getShiftLeaderboard
+  getShiftLeaderboard,
+  winConfig,
+  ocvConfig
  }: any) {
   return (
     <>
@@ -46,33 +19,16 @@ export default function ShiftTrackerSidebar({
         
         {/* Quick Log Floor Win */}
         <QuickLogWinForm
-          selectedEmpId={selectedEmpId}
-          setSelectedEmpId={setSelectedEmpId}
           getEmployeesOnShift={getEmployeesOnShift}
           roster={roster}
-          winType={winType}
-          setWinType={setWinType}
-          handleLogFloorWin={handleLogFloorWin}
+          {...winConfig}
         />
 
         {/* 30-Second OCV Floor Observation Card */}
         <OcvObservationForm
-          ocvEmpId={ocvEmpId}
-          setOcvEmpId={setOcvEmpId}
           getEmployeesOnShift={getEmployeesOnShift}
           roster={roster}
-          ocvConnect={ocvConnect}
-          setOcvConnect={setOcvConnect}
-          ocvRecommend={ocvRecommend}
-          setOcvRecommend={setOcvRecommend}
-          ocvProtect={ocvProtect}
-          setOcvProtect={setOcvProtect}
-          ocvClose={ocvClose}
-          setOcvClose={setOcvClose}
-          ocvNotes={ocvNotes}
-          setOcvNotes={setOcvNotes}
-          handleLogOcvObservation={handleLogOcvObservation}
-          ocvSuccessMsg={ocvSuccessMsg}
+          {...ocvConfig}
         />
 
         {/* Leaderboard: Hot on the Floor */}

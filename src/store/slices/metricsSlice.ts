@@ -23,7 +23,7 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
     rosterHistory: { [defaultPeriod]: INITIAL_ROSTER },
     activePeriod: initialActivePeriod,
     deptGoals: DEFAULT_DEPT_GOALS,
-    metrics: { memberships: 0, creditCards: 0, warranty: 0, surveys: 5.0, rph: 0 },
+    metrics: { memberships: 0, creditCards: 0, warranty: 0, surveys: 0, rph: 0 },
     dailySnapshots: {},
 
     setRosterHistory: (rosterHistory) => set({ rosterHistory }),
@@ -197,7 +197,7 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       if (copyOption === 'roster-only') {
         Object.values(currentRoster).forEach((emp: any) => {
           newRoster[emp.id] = {
-            ...emp, hours: 0, memberships: 0, creditCards: 0, warranty: 0, surveys: 5.0, rph: 0, basket: 0, m365: 0, audio: 0, gap: 'None', lastUpdated: now
+            ...emp, hours: 0, memberships: 0, creditCards: 0, warranty: 0, surveys: 0, rph: 0, basket: 0, m365: 0, audio: 0, gap: 'None', lastUpdated: now
           };
         });
       } else if (copyOption === 'roster-and-metrics') {

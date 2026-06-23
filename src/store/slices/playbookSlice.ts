@@ -312,7 +312,7 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
           memberships: metrics.memberships + newMetrics.memberships,
           creditCards: metrics.creditCards + newMetrics.creditCards,
           warranty: Math.round((metrics.warranty * 2 + newMetrics.warranty) / 3),
-          surveys: Math.round(((metrics.surveys * 2 + newMetrics.surveys) / 3) * 10) / 10,
+          surveys: metrics.surveys + newMetrics.surveys,
           rph: Math.round((metrics.rph * 2 + newMetrics.rph) / 3)
         };
         set({ metrics: averagedMetrics });

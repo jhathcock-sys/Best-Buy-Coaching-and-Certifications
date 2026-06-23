@@ -10,7 +10,7 @@ const PlaybookStudioPage = lazy(() => import('./pages/PlaybookStudioPage'));
 const CoachingHistoryPage = lazy(() => import('./pages/CoachingHistoryPage'));
 const LiveFloorShadowPage = lazy(() => import('./pages/LiveFloorShadowPage'));
 import LoginGate from './components/LoginGate';
-import AdvisorDashboardPage from './pages/AdvisorDashboardPage';
+const AdvisorDashboardPage = lazy(() => import('./pages/AdvisorDashboardPage'));
 const FloorLeaderTrackerPage = lazy(() => import('./pages/FloorLeaderTrackerPage'));
 const TrendReportingPage = lazy(() => import('./pages/TrendReportingPage'));
 const BreakroomTVPage = lazy(() => import('./pages/BreakroomTVPage'));
@@ -173,15 +173,23 @@ function AppContent() {
           </div>
         </div>
         <div style={{ flex: 1, overflow: 'hidden' }}>
-          <Routes>
-            <Route path="/roleplay" element={<RoleplayCenterPage />} />
-            <Route path="*" element={
-              <AdvisorDashboardPage 
-                employee={activeAdvisor}
-                onNavigate={setActiveView}
-              />
-            } />
-          </Routes>
+          <Suspense fallback={
+            <div className="flex-center flex-column w-full h-full gap-md">
+              <div style={{ width: '50px', height: '50px', border: '4px solid var(--white-alpha-10)', borderTopColor: 'var(--bby-yellow)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+              <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', animation: 'fadeIn 0.5s ease' }}>Loading Module...</span>
+              <style>{`@keyframes spin { to { transform: rotate(360deg); } } @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }`}</style>
+            </div>
+          }>
+            <Routes>
+              <Route path="/roleplay" element={<RoleplayCenterPage />} />
+              <Route path="*" element={
+                <AdvisorDashboardPage 
+                  employee={activeAdvisor}
+                  onNavigate={setActiveView}
+                />
+              } />
+            </Routes>
+          </Suspense>
         </div>
       </div>
     );

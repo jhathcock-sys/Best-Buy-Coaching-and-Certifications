@@ -168,6 +168,7 @@ function AppContent() {
             <button 
               onClick={() => useStore.getState().logout()} 
               className="btn btn-secondary"
+              data-testid="advisor-logout-btn"
             >
               Log Out
             </button>
@@ -312,6 +313,7 @@ function AppContent() {
           <div className="flex-center gap-sm">
             <button 
               className="btn btn-primary" 
+              data-testid="sw-update-reload-btn"
               style={{ flex: 1, padding: '0.45rem', fontSize: '0.75rem' }}
               onClick={() => window.location.reload()}
             >
@@ -319,6 +321,7 @@ function AppContent() {
             </button>
             <button 
               className="btn btn-secondary" 
+              data-testid="sw-update-dismiss-btn"
               style={{ padding: '0.45rem 0.75rem', fontSize: '0.75rem' }}
               onClick={() => setSwUpdateAvailable(false)}
             >

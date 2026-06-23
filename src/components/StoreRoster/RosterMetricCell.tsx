@@ -108,14 +108,14 @@ export const getEmployeeGap = (emp, deptGoals) => {
 export const StatusBadge = ({ gap }) => {
   if (gap === 'None' || !gap || gap.startsWith('None')) {
     return (
-      <span className="tag-pill" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', borderColor: 'rgba(16, 185, 129, 0.2)' }}>
-        <CheckCircle size={12} style={{ marginRight: '0.25rem' }} /> Hitting Target
+      <span className="tag-pill tag-pill-success">
+        <CheckCircle size={12} className="roster-icon-inline" /> Hitting Target
       </span>
     );
   }
   return (
-    <span className="tag-pill" style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
-      <AlertTriangle size={12} style={{ marginRight: '0.25rem' }} /> Gap: {gap}
+    <span className="tag-pill tag-pill-error">
+      <AlertTriangle size={12} className="roster-icon-inline" /> Gap: {gap}
     </span>
   );
 };

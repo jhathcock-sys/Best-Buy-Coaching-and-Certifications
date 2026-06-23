@@ -199,7 +199,7 @@ export default function Dashboard({
         recentSessions={recentSessions} 
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
+      <div className="dashboard-grid">
         <DashboardCoachingEngine 
           roster={roster} 
           recentSessions={recentSessions} 

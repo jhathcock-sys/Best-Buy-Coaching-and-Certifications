@@ -230,3 +230,53 @@ exports.verifyCertification = functions.https.onRequest((req, res) => {
     }
   });
 });
+
+// 4. Generic Callable AI generation function to replace client-side SDK usage
+exports.generateAIContent = functions.https.onCall(async (data, context) => {
+  try {
+    const { prompt, systemInstruction, modelConfig, isJSON, isVision, base64Image, mimeType, isProMode } = data;
+    const aiInstance = getGeminiClient();
+    
+    // Choose model
+    const modelName = isProMode ? 'gemini-3.5-pro' : 'gemini-3.5-flash';
+    const model = aiInstance.getGenerativeModel({ model: modelName });
+    
+    const generationConfig = {};
+    if (isJSON) {
+      generationConfig.responseMimeType = 'application/json';
+    }
+    if (modelConfig && modelConfig.responseSchema) {
+      generationConfig.responseSchema = modelConfig.responseSchema;
+    }
+    
+    const parts = [];
+    if (isVision && base64Image) {
+      parts.push({
+        inlineData: {
+          data: base64Image,
+          mimeType: mimeType || 'image/jpeg'
+        }
+      });
+    }
+    
+    // In Gemini API, systemInstruction is usually set during model instantiation, or as a combined prompt.
+    // If we have a systemInstruction, we'll append it to the text.
+    if (systemInstruction) {
+        parts.push({ text: `System Instruction: ${systemInstruction}\n\nUser Input: ${prompt}` });
+    } else {
+        parts.push({ text: prompt });
+    }
+    
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts }],
+      generationConfig
+    });
+    
+    return { text: result.response.text() };
+  } catch (error) {
+    console.error('generateAIContent error:', error);
+    // Throw a generic error for the client
+    throw new functions.https.HttpsError('internal', error.message || 'An error occurred while generating AI content.');
+  }
+});
+

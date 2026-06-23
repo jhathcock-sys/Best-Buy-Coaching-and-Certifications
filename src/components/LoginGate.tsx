@@ -98,6 +98,7 @@ export default function LoginGate({ correctPin = '1234', onLoginSuccess, dbConne
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%' }}>
             <button
               onClick={() => setSelectedPersona('supervisor')}
+              data-testid="persona-supervisor-btn"
             style={{
               width: '100%',
               background: 'rgba(0, 70, 190, 0.1)',
@@ -126,6 +127,7 @@ export default function LoginGate({ correctPin = '1234', onLoginSuccess, dbConne
 
           <button
             onClick={() => setSelectedPersona('advisor')}
+            data-testid="persona-advisor-btn"
             style={{
               width: '100%',
               background: 'rgba(16, 185, 129, 0.05)',

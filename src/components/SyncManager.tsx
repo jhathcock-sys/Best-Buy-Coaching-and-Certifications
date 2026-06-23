@@ -14,9 +14,17 @@ import {
   subscribeToDailySnapshots
 } from '../services/firebase';
 
+function debounce<T extends (...args: any[]) => void>(func: T, wait: number): T {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+  return ((...args: any[]) => {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  }) as T;
+}
+
 export default function SyncManager() {
   const dbConnected = useStore((state) => state.dbConnected);
-const isAuthenticated = useStore((state) => state.isAuthenticated);
+  const isAuthenticated = useStore((state) => state.isAuthenticated);
   const storeId = useStore((state) => state.storeId);
 
   const setActivePeriod = useStore((state) => state.setActivePeriod);
@@ -34,15 +42,15 @@ const isAuthenticated = useStore((state) => state.isAuthenticated);
   useEffect(() => {
     if (!dbConnected || !storeId) return;
 
-    const unsubPeriod = subscribeToActivePeriod(storeId, (p) => {
+    const unsubPeriod = subscribeToActivePeriod(storeId, debounce((p) => {
       if (p) setActivePeriod(p);
-    });
+    }, 100));
 
-    const unsubRoster = subscribeToRosterHistory(storeId, (h) => {
+    const unsubRoster = subscribeToRosterHistory(storeId, debounce((h) => {
       if (h) setRosterHistory(h);
-    });
+    }, 100));
 
-    const unsubPlaybook = subscribeToPlaybookSettings(storeId, (s) => {
+    const unsubPlaybook = subscribeToPlaybookSettings(storeId, debounce((s) => {
       if (s) {
         const hasEnvKey = !!(import.meta.env.VITE_GEMINI_API_KEY && import.meta.env.VITE_GEMINI_API_KEY.trim().length > 10);
         const savedKey = localStorage.getItem('bby_api_key');
@@ -54,43 +62,43 @@ const isAuthenticated = useStore((state) => state.isAuthenticated);
         }
         setPlaybookSettings(s);
       }
-    });
+    }, 100));
 
-    const unsubGoals = subscribeToDeptGoals(storeId, (g) => {
+    const unsubGoals = subscribeToDeptGoals(storeId, debounce((g) => {
       if (g) setDeptGoals(g);
-    });
+    }, 100));
 
-    const unsubSessions = subscribeToRecentSessions(storeId, (s) => {
+    const unsubSessions = subscribeToRecentSessions(storeId, debounce((s) => {
       if (s) setRecentSessions(s);
-    });
+    }, 100));
 
-    const unsubMetrics = subscribeToMetrics(storeId, (m) => {
+    const unsubMetrics = subscribeToMetrics(storeId, debounce((m) => {
       if (m) setMetrics(m);
-    });
+    }, 100));
 
-    const unsubFollowUp = subscribeToFollowUpTasks(storeId, (tasks) => {
+    const unsubFollowUp = subscribeToFollowUpTasks(storeId, debounce((tasks) => {
       if (tasks) setFollowUpTasks(tasks);
-    });
+    }, 100));
 
-    const unsubFloorLeader = subscribeToFloorLeaderShifts(storeId, (shifts) => {
+    const unsubFloorLeader = subscribeToFloorLeaderShifts(storeId, debounce((shifts) => {
       if (shifts) {
         setFloorLeaderShifts(shifts);
       }
-    });
+    }, 100));
 
-    const unsubCoachingLogs = subscribeToCoachingLogs(storeId, (logs) => {
+    const unsubCoachingLogs = subscribeToCoachingLogs(storeId, debounce((logs) => {
       if (logs) {
         setCoachingLogs(logs);
       }
-    });
+    }, 100));
 
-    const unsubManagers = subscribeToManagers(storeId, (m) => {
+    const unsubManagers = subscribeToManagers(storeId, debounce((m) => {
       if (m) setManagers(m);
-    });
+    }, 100));
 
-    const unsubDailySnapshots = subscribeToDailySnapshots(storeId, (s) => {
+    const unsubDailySnapshots = subscribeToDailySnapshots(storeId, debounce((s) => {
       if (s) setDailySnapshots(s);
-    });
+    }, 100));
 
     return () => {
       if (unsubPeriod) unsubPeriod();

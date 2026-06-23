@@ -75,7 +75,7 @@ export default function StoreRosterTable({
 
   return (
     <div className="roster-table-container">
-      <table className="roster-table" style={{ fontSize: isDense ? '0.75rem' : '0.85rem' }}>
+      <table className={`roster-table ${isDense ? 'roster-table-dense' : 'roster-table-standard'}`}>
         <thead>
           <tr>
             <th className={headerClass(false)} onClick={() => requestSort('name')}>Associate{getSortIcon('name')}</th>

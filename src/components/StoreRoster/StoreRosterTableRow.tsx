@@ -17,9 +17,6 @@ export const StoreRosterTableRow = React.memo(({
   if (!emp) return null;
   const gap = getEmployeeGap(emp, deptGoals);
   const isExceeding = gap === 'None' || gap === '';
-  const rowBg = isExceeding ? 'rgba(16, 185, 129, 0.018)' : emp.focus5 ? 'rgba(239, 68, 68, 0.018)' : 'rgba(255,255,255,0.005)';
-  const rowBorderLeft = isExceeding ? '4px solid var(--success)' : emp.focus5 ? '4px solid var(--error)' : '4px solid transparent';
-  const hoverBg = isExceeding ? 'rgba(16, 185, 129, 0.035)' : emp.focus5 ? 'rgba(239, 68, 68, 0.035)' : 'rgba(255,255,255,0.025)';
   
   const tdClass = (isCenter = false, isRight = false) => {
     return `roster-td ${isDense ? 'roster-td-dense' : 'roster-td-standard'} ${isCenter ? 'roster-td-center' : ''} ${isRight ? 'roster-td-right' : ''}`;
@@ -27,13 +24,7 @@ export const StoreRosterTableRow = React.memo(({
 
   return (
     <tr 
-      className="roster-row"
-      style={{ 
-        borderLeft: rowBorderLeft,
-        background: rowBg
-      }}
-      onMouseEnter={(e) => e.currentTarget.style.background = hoverBg}
-      onMouseLeave={(e) => e.currentTarget.style.background = rowBg}
+      className={`roster-row ${isExceeding ? 'roster-row-exceeding' : emp.focus5 ? 'roster-row-focus5' : ''}`}
     >
       <td className={tdClass(false)}>
         <div className="flex-column gap-sm align-start">
@@ -48,36 +39,24 @@ export const StoreRosterTableRow = React.memo(({
               ID: {emp.employeeNumber}
             </span>
           )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+          <div className="flex-row align-center gap-sm flex-wrap">
             {(() => {
               const cvi = calculateCVI(emp, rosterHistory, activePeriod);
-              let badgeBg = 'rgba(255, 255, 255, 0.04)';
-              let badgeColor = 'var(--text-secondary)';
-              let badgeBorder = 'rgba(255, 255, 255, 0.08)';
+              let badgeClass = 'cvi-badge-default';
               let cviIcon = '?';
               if (cvi.includes('Accelerating')) {
-                badgeBg = 'rgba(16, 185, 129, 0.1)';
-                badgeColor = 'var(--success)';
-                badgeBorder = 'rgba(16, 185, 129, 0.2)';
+                badgeClass = 'cvi-badge-accelerating';
                 cviIcon = '?';
               } else if (cvi.includes('Needs Review')) {
-                badgeBg = 'rgba(239, 68, 68, 0.15)';
-                badgeColor = 'var(--error)';
-                badgeBorder = 'rgba(239, 68, 68, 0.3)';
+                badgeClass = 'cvi-badge-review';
                 cviIcon = '?';
               } else if (cvi.includes('Neutral')) {
-                badgeBg = 'rgba(245, 158, 11, 0.1)';
-                badgeColor = 'var(--warning)';
-                badgeBorder = 'rgba(245, 158, 11, 0.2)';
+                badgeClass = 'cvi-badge-neutral';
                 cviIcon = '?';
               }
               return (
-                <span className="cvi-badge" style={{ 
-                  background: badgeBg,
-                  color: badgeColor,
-                  borderColor: badgeBorder
-                }}>
-                  <span style={{ fontSize: '0.55rem' }}>{cviIcon}</span> {cvi.replace(/CVI/g, '').trim()}
+                <span className={`cvi-badge ${badgeClass}`}>
+                  <span className="cvi-badge-icon">{cviIcon}</span> {cvi.replace(/CVI/g, '').trim()}
                 </span>
               );
             })()}
@@ -141,7 +120,7 @@ export const StoreRosterTableRow = React.memo(({
       )}
 
       <td className={tdClass(false, true)}>
-        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', flexWrap: 'nowrap' }}>
+        <div className="flex-end gap-sm">
           <button 
             className="btn btn-secondary action-btn-sm" 
             title="View Profile"

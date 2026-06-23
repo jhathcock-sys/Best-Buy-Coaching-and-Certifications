@@ -58,6 +58,7 @@ export default function Sidebar({
             <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff' }}>{activeManager.name}</span>
             <button 
               onClick={logout} 
+              data-testid="manager-logout-btn"
               style={{ 
                 background: 'transparent', 
                 border: 'none', 
@@ -86,6 +87,7 @@ export default function Sidebar({
             <li 
               className={`menu-item ${activeView === 'dashboard' ? 'active' : ''}`}
               onClick={() => setActiveView('dashboard')}
+              data-testid="nav-dashboard"
             >
               <LayoutDashboard className="menu-item-icon" /> Dashboard
             </li>
@@ -101,36 +103,42 @@ export default function Sidebar({
             <li 
               className={`menu-item ${activeView === 'roster' ? 'active' : ''}`}
               onClick={() => setActiveView('roster')}
+              data-testid="nav-roster"
             >
               <ClipboardList className="menu-item-icon" /> Store Roster
             </li>
             <li 
               className={`menu-item ${activeView === 'shadow' ? 'active' : ''}`}
               onClick={() => setActiveView('shadow')}
+              data-testid="nav-shadow"
             >
               <ShieldCheck className="menu-item-icon" /> Floor Shadowing
             </li>
             <li 
               className={`menu-item ${activeView === 'dailyLineup' ? 'active' : ''}`}
               onClick={() => setActiveView('dailyLineup')}
+              data-testid="nav-daily-lineup"
             >
               <CalendarDays className="menu-item-icon" /> Daily Lineup
             </li>
             <li 
               className={`menu-item ${activeView === 'floorLeader' ? 'active' : ''}`}
               onClick={() => setActiveView('floorLeader')}
+              data-testid="nav-floor-leader"
             >
               <Clock className="menu-item-icon" /> Floor Leader
             </li>
             <li 
               className={`menu-item ${activeView === 'trends' ? 'active' : ''}`}
               onClick={() => setActiveView('trends')}
+              data-testid="nav-trends"
             >
               <TrendingUp className="menu-item-icon" /> Trend Reporting
             </li>
             <li 
               className={`menu-item ${activeView === 'tv' ? 'active' : ''}`}
               onClick={() => setActiveView('tv')}
+              data-testid="nav-tv"
             >
               <MonitorPlay className="menu-item-icon" /> Breakroom TV (Kiosk)
             </li>
@@ -146,12 +154,14 @@ export default function Sidebar({
             <li 
               className={`menu-item ${activeView === 'roleplay' ? 'active' : ''}`}
               onClick={() => setActiveView('roleplay')}
+              data-testid="nav-roleplay"
             >
               <Compass className="menu-item-icon" /> Consult Arena
             </li>
             <li 
               className={`menu-item ${activeView === 'coach' ? 'active' : ''}`}
               onClick={() => setActiveView('coach')}
+              data-testid="nav-coach"
             >
               <Users className="menu-item-icon" /> Coach Simulator
             </li>
@@ -167,18 +177,21 @@ export default function Sidebar({
             <li 
               className={`menu-item ${activeView === 'builder' ? 'active' : ''}`}
               onClick={() => setActiveView('builder')}
+              data-testid="nav-builder"
             >
               <Sparkles className="menu-item-icon" /> Coaching Generator
             </li>
             <li 
               className={`menu-item ${activeView === 'history' ? 'active' : ''}`}
               onClick={() => setActiveView('history')}
+              data-testid="nav-history"
             >
               <Archive className="menu-item-icon" /> History Hub
             </li>
             <li 
               className={`menu-item ${activeView === 'playbook' ? 'active' : ''}`}
               onClick={() => setActiveView('playbook')}
+              data-testid="nav-playbook"
             >
               <BookOpen className="menu-item-icon" /> Playbook Studio
             </li>

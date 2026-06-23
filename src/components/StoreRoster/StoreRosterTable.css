@@ -6,7 +6,14 @@
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-size: 0.9rem;
+}
+
+.roster-table-dense {
+  font-size: 0.75rem;
+}
+
+.roster-table-standard {
+  font-size: 0.85rem;
 }
 
 .roster-table thead tr {
@@ -62,8 +69,32 @@
 }
 
 .roster-row {
+  background: rgba(255, 255, 255, 0.005);
+  border-left: 4px solid transparent;
   border-bottom: 1px solid var(--border-glass);
-  transition: background 0.25s ease;
+  transition: background var(--transition-normal);
+}
+
+.roster-row:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.roster-row-exceeding {
+  background: rgba(16, 185, 129, 0.018);
+  border-left-color: var(--success);
+}
+
+.roster-row-exceeding:hover {
+  background: rgba(16, 185, 129, 0.035);
+}
+
+.roster-row-focus5 {
+  background: rgba(239, 68, 68, 0.018);
+  border-left-color: var(--error);
+}
+
+.roster-row-focus5:hover {
+  background: rgba(239, 68, 68, 0.035);
 }
 
 .roster-td {
@@ -117,6 +148,34 @@
   gap: 0.2rem;
   letter-spacing: 0.02em;
   white-space: nowrap;
+}
+
+.cvi-badge-default {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cvi-badge-accelerating {
+  background: var(--success-alpha-15);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.cvi-badge-review {
+  background: var(--error-alpha-15);
+  color: var(--error);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.cvi-badge-neutral {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.cvi-badge-icon {
+  font-size: 0.55rem;
 }
 
 .focus5-badge {

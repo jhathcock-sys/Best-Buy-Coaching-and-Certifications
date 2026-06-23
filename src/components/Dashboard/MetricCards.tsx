@@ -14,7 +14,7 @@ export default function MetricCards({ calculatedMetrics, recentSessions }: Metri
                 label="Total Memberships" icon={Users} 
                 prefix=""
                 suffix=""
-                color="#0046be"
+                color="var(--bby-blue)"
                 description="Plus & Total Memberships"
             />
             <CircularGauge 
@@ -23,7 +23,7 @@ export default function MetricCards({ calculatedMetrics, recentSessions }: Metri
                 label="BBY Credit Cards" icon={CreditCard} 
                 prefix=""
                 suffix=""
-                color="#fdd835"
+                color="var(--bby-yellow)"
                 description="Submitted Applications"
             />
             <CircularGauge 
@@ -31,7 +31,7 @@ export default function MetricCards({ calculatedMetrics, recentSessions }: Metri
                 label="Protection Attach" icon={Shield} 
                 prefix=""
                 suffix="%"
-                color="#0046be"
+                color="var(--bby-blue)"
                 description="Geek Squad Protection"
             />
             <CircularGauge 
@@ -40,7 +40,7 @@ export default function MetricCards({ calculatedMetrics, recentSessions }: Metri
                 label="5-Star Surveys" icon={Star} 
                 prefix=""
                 suffix=""
-                color="#10b981"
+                color="var(--success)"
                 description="Total 5-Star Surveys"
             />
             <CircularGauge 
@@ -49,7 +49,7 @@ export default function MetricCards({ calculatedMetrics, recentSessions }: Metri
                 label="Store RPH" icon={TrendingUp} 
                 prefix="$"
                 suffix=""
-                color="#8b5cf6"
+                color="var(--info)"
                 description="Store Average Revenue Per Hour"
             />
             <CircularGauge 
@@ -58,7 +58,7 @@ export default function MetricCards({ calculatedMetrics, recentSessions }: Metri
                 label="Coaching Sessions" icon={ClipboardList} 
                 prefix=""
                 suffix=""
-                color="#ec4899"
+                color="var(--warning)"
                 description="Recorded Leadership Engagements"
             />
         </div>

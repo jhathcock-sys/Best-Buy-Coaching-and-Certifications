@@ -83,11 +83,13 @@ export default function DashboardSystemAlerts({
       });
     }
 
-    if (calculatedMetrics.surveys < 4.8) {
+    // Store goal is roughly 1 survey per employee per period. Alert if we're under 50% of that goal.
+    const surveyGoal = roster.length > 0 ? roster.length : 10;
+    if (calculatedMetrics.surveys < (surveyGoal * 0.5)) {
       list.push({
         id: 3,
         type: 'warning',
-        text: `Customer 5-Star Survey Index is ${calculatedMetrics.surveys === 0.2 ? '0' : calculatedMetrics.surveys}. Try building stronger rapport at the beginning of interactions.`,
+        text: `The store only has ${calculatedMetrics.surveys} 5-Star Surveys (Goal: ${surveyGoal}). Try building stronger rapport at the beginning of interactions.`,
         actionLabel: 'Connect Training',
         navTarget: 'roleplay'
       });

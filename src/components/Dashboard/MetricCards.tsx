@@ -36,12 +36,12 @@ export default function MetricCards({ calculatedMetrics, recentSessions }: Metri
             />
             <CircularGauge 
                 value={calculatedMetrics?.surveys || 0} 
-                max={100}
-                label="Customer Surveys" icon={Star} 
+                max={Math.max(10, (calculatedMetrics?.surveys || 0) + 5)}
+                label="5-Star Surveys" icon={Star} 
                 prefix=""
-                suffix="%"
+                suffix=""
                 color="#10b981"
-                description="Customer Survey Index"
+                description="Total 5-Star Surveys"
             />
             <CircularGauge 
                 value={calculatedMetrics?.rph || 0} 

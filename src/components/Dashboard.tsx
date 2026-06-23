@@ -48,10 +48,9 @@ export default function Dashboard({
         sumWarranty += (emp as any).warranty;
         countWarranty++;
       }
-      if ((emp as any).surveys > 0) {
-        sumSurveys += (emp as any).surveys;
-        countSurveys++;
-      }
+      let empSurveys = (emp as any).surveys || 0;
+      if (empSurveys === 0.2) empSurveys = 0; // 0.2 is used as a 'Failing' flag internally
+      sumSurveys += empSurveys;
       
       const hours = (emp as any).hours || 0;
       const rph = (emp as any).rph || 0;
@@ -60,14 +59,13 @@ export default function Dashboard({
     });
 
     const avgWarranty = countWarranty > 0 ? (sumWarranty / countWarranty) : 0;
-    const avgSurveys = countSurveys > 0 ? (sumSurveys / countSurveys) : 0;
     const avgRph = totalHours > 0 ? (totalRev / totalHours) : 0;
 
     return {
       memberships: totalMemberships,
       creditCards: totalCreditCards,
       warranty: Number(avgWarranty.toFixed(1)),
-      surveys: Number(avgSurveys.toFixed(1)),
+      surveys: sumSurveys,
       rph: Math.round(avgRph)
     };
   }, [roster]);

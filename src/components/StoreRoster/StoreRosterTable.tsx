@@ -17,16 +17,16 @@ export default function StoreRosterTable({
   const [sortConfig, setSortConfig] = React.useState({ key: null, direction: 'asc' });
 
   const sortedRoster = React.useMemo(() => {
-    let sortableItems = [...filteredRoster];
+    let sortableItems = [...(filteredRoster || [])];
     if (sortConfig !== null && sortConfig.key !== null) {
       sortableItems.sort((a, b) => {
-        let aVal = a[sortConfig.key] ?? '';
-        let bVal = b[sortConfig.key] ?? '';
+        let aVal = a?.[sortConfig.key] ?? '';
+        let bVal = b?.[sortConfig.key] ?? '';
         
         if (typeof aVal === 'string' && typeof bVal === 'string') {
           return sortConfig.direction === 'asc' 
-            ? aVal.localeCompare(bVal) 
-            : bVal.localeCompare(aVal);
+            ? aVal.localeCompare(bVal, undefined, { numeric: true }) 
+            : bVal.localeCompare(aVal, undefined, { numeric: true });
         }
         
         if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;

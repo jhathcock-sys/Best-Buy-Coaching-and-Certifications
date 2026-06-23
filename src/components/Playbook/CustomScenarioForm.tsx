@@ -117,6 +117,35 @@ export default function CustomScenarioForm({ onAddCustomScenario }: any) {
         <Sparkles size={20} color="var(--bby-yellow)" /> Create Custom Scenario
       </h3>
       
+      {/* AI Generator Box */}
+      <div style={{ background: 'rgba(253, 216, 53, 0.05)', border: '1px solid rgba(253, 216, 53, 0.2)', padding: '1.25rem', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <h4 style={{ margin: 0, fontSize: '0.9rem', color: 'var(--bby-yellow)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <Wand2 size={16} /> Auto-Generate with AI
+        </h4>
+        <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Describe a scenario and let Gemini build out the customer profile and objections.</p>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <input 
+            type="text" 
+            className="form-control" 
+            placeholder="e.g. An angry customer trying to return a laptop past policy..."
+            value={aiPrompt}
+            onChange={(e) => setAiPrompt(e.target.value)}
+            style={{ flex: 1 }}
+          />
+          <button 
+            type="button" 
+            className="btn btn-secondary" 
+            onClick={handleAiGenerate}
+            disabled={isGenerating || !aiPrompt.trim()}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap' }}
+          >
+            {isGenerating ? <Loader2 size={16} className="spin" /> : <Sparkles size={16} />}
+            Generate
+          </button>
+        </div>
+        {aiError && <span style={{ color: 'var(--error)', fontSize: '0.75rem' }}>{aiError}</span>}
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
         <div className="form-group">
           <label className="form-label">Scenario Title:</label>

@@ -176,7 +176,7 @@ export default function SupervisorProfilesTab({
                           <button 
                             className="btn btn-secondary" 
                             style={{ padding: '0.4rem', borderRadius: '8px' }} 
-                            onClick={() => startEditingManager(idx)}
+                            onClick={() => startEditingManager(idx, mgr)}
                             title="Edit Supervisor"
                           >
                             <Edit2 size={14} />

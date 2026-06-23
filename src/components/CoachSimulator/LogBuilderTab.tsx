@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { useCoachSimulator } from '../../context/CoachSimulatorContext';
+
 import LogBuilderFormFields from './LogBuilderFormFields';
 import LogPreview from './LogPreview';
 import { generateCoachingLogLocal, generateCoachingLogGemini } from '../../services/ai';

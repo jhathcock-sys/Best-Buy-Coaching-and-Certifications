@@ -84,7 +84,7 @@ export default function ShiftTrackerSidebar({
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '250px', overflowY: 'auto', paddingRight: '0.25rem' }}>
             {getShiftLeaderboard().map((emp: any, idx: number) => {
-              const totalWins = emp.shiftTotal || 0;
+              const totalWins = emp.total || 0;
               return (
                 <div 
                   key={emp.id} 
@@ -119,10 +119,10 @@ export default function ShiftTrackerSidebar({
                       </span>
                     )}
                     <span style={{ padding: '0.15rem 0.4rem', borderRadius: '4px', fontSize: '0.7rem', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', fontWeight: 600 }}>
-                      {emp.shiftPms || 0} PM
+                      {emp.pms || 0} PM
                     </span>
                     <span style={{ padding: '0.15rem 0.4rem', borderRadius: '4px', fontSize: '0.7rem', background: 'rgba(242, 169, 0, 0.1)', color: 'var(--bby-yellow)', fontWeight: 600 }}>
-                      {emp.shiftApps || 0} Card
+                      {emp.apps || 0} Card
                     </span>
                   </div>
                 </div>

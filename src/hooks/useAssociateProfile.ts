@@ -45,38 +45,6 @@ export function useAssociateProfile(isOpen, employee, rosterHistory, coachingLog
     window.speechSynthesis.speak(utterance);
   };
 
-  const handleGenerateReview = async () => {
-    setIsGeneratingReview(true);
-    setGeneratedReview(null);
-    try {
-      const apiKey = (useStore.getState().apiKey as any)?.gemini;
-      const reviewText = await generateMonthlyOneOnOne(employee, associateLogs, apiKey);
-      setGeneratedReview(reviewText);
-    } catch (err) {
-      console.error(err);
-      setGeneratedReview("Error generating review. Please check your API key.");
-    } finally {
-      setIsGeneratingReview(false);
-    }
-  };
-
-  const handleGenerateActionPlan = async () => {
-    setIsGeneratingActionPlan(true);
-    try {
-      const apiKey = (useStore.getState().apiKey as any)?.gemini;
-      const plan = await generateActionPlan(employee, associateLogs, apiKey);
-      if (plan) {
-        setGeneratedActionPlan(plan);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsGeneratingActionPlan(false);
-    }
-  };
-
-  
-
   if (!isOpen || !employee) return {
     activeTab, setActiveTab,
     playingLogId, setPlayingLogId,
@@ -86,8 +54,8 @@ export function useAssociateProfile(isOpen, employee, rosterHistory, coachingLog
     isGeneratingActionPlan, setIsGeneratingActionPlan,
     generatedActionPlan, setGeneratedActionPlan,
     handlePlayTTS,
-    handleGenerateReview,
-    handleGenerateActionPlan,
+    handleGenerateReview: async () => {},
+    handleGenerateActionPlan: async () => {},
     sortedPeriods: [],
     historyPoints: [],
     activeHistoryPoints: [],
@@ -97,6 +65,7 @@ export function useAssociateProfile(isOpen, employee, rosterHistory, coachingLog
   };
 
   // 1. Gather historical data for this associate
+
   const sortedPeriods = Object.keys(rosterHistory).sort((a, b) => {
     const parsePeriod = (p: any) => {
       const [month, year] = p.split(' ');
@@ -142,6 +111,35 @@ export function useAssociateProfile(isOpen, employee, rosterHistory, coachingLog
   // Active department goals
   const activeGoals = deptGoals[employee.dept] || { memberships: 8, creditCards: 12.5, warranty: 11, surveys: 1, rph: 640 };
 
+  const handleGenerateReview = async () => {
+    setIsGeneratingReview(true);
+    setGeneratedReview(null);
+    try {
+      const apiKey = (useStore.getState().apiKey as any)?.gemini;
+      const reviewText = await generateMonthlyOneOnOne(employee, associateLogs, apiKey);
+      setGeneratedReview(reviewText);
+    } catch (err) {
+      console.error(err);
+      setGeneratedReview("Error generating review. Please check your API key.");
+    } finally {
+      setIsGeneratingReview(false);
+    }
+  };
+
+  const handleGenerateActionPlan = async () => {
+    setIsGeneratingActionPlan(true);
+    try {
+      const apiKey = (useStore.getState().apiKey as any)?.gemini;
+      const plan = await generateActionPlan(employee, associateLogs, apiKey);
+      if (plan) {
+        setGeneratedActionPlan(plan);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsGeneratingActionPlan(false);
+    }
+  };
 
 
   // Helper to parse markdown-like bold items in log notes

@@ -140,18 +140,42 @@ export const parseRentsDueDocumentGemini = async (base64Image, mimeType, textInp
           maxOutputTokens: 8192
         }
       });
+      return JSON.parse(result.response.text());
     } else {
-      result = await model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: systemPrompt + '\nAnalyze this Rents Due performance report data:\n' + textInput }] }],
-        generationConfig: {
-          responseMimeType: 'application/json',
-          responseSchema: responseSchema,
-          maxOutputTokens: 8192
-        }
-      });
-    }
+      // Chunk unstructured text payloads to avoid token truncation
+      const lines = textInput ? textInput.split('\n') : [];
+      if (lines.length === 0) return [];
 
-    return JSON.parse(result.response.text());
+      const CHUNK_SIZE = 30;
+      const chunks = [];
+      for (let i = 0; i < lines.length; i += CHUNK_SIZE) {
+        chunks.push(lines.slice(i, i + CHUNK_SIZE).join('\n'));
+      }
+
+      let allParsedEmployees: any[] = [];
+      
+      // Process chunks in parallel
+      const chunkPromises = chunks.map(async (chunk) => {
+        if (!chunk.trim()) return [];
+        const res = await model.generateContent({
+          contents: [{ role: 'user', parts: [{ text: systemPrompt + '\nAnalyze this chunk of the Rents Due performance report:\n' + chunk }] }],
+          generationConfig: {
+            responseMimeType: 'application/json',
+            responseSchema: responseSchema,
+            maxOutputTokens: 8192
+          }
+        });
+        const parsed = JSON.parse(res.response.text());
+        return Array.isArray(parsed) ? parsed : [];
+      });
+
+      const chunkResults = await Promise.all(chunkPromises);
+      chunkResults.forEach(res => {
+        allParsedEmployees = [...allParsedEmployees, ...res];
+      });
+
+      return allParsedEmployees;
+    }
   } catch (error) {
     console.error('Rents Due Document Parsing Error:', error);
     // Offline Mock Fallback

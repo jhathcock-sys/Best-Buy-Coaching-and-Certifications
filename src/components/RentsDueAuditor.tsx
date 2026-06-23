@@ -5,8 +5,7 @@ import RentsDueLedger from './RentsDueAuditor/RentsDueLedger';
 import { parseRentsDueDocumentGemini } from '../services/ai';
 import { useStore } from '../store/useStore';
 import { mockRentsDuePayload } from '../data/mockRentsDue';
-import { mapParsedRentsToRoster } from '../utils/rentsDueUtils';
-
+import { mapParsedRentsToRoster, parseRentsDueCSVLocal } from '../utils/rentsDueUtils';
 export default function RentsDueAuditor({ roster = [], activePeriod, rosterHistory = {}, onBulkImportEmployees, apiKey }) {
   const [selectedPeriod, setSelectedPeriod] = useState(activePeriod);
   const [showNewPeriodInput, setShowNewPeriodInput] = useState(false);
@@ -53,6 +52,17 @@ export default function RentsDueAuditor({ roster = [], activePeriod, rosterHisto
     } else if (file.name.endsWith('.csv') || file.type === 'text/csv' || file.type === 'text/plain') {
       reader.onload = async (e) => {
         const text = e.target?.result?.toString() || '';
+        
+        try {
+          const localParsed = parseRentsDueCSVLocal(text);
+          if (localParsed && localParsed.length > 0) {
+            setParsedEmployees(localParsed);
+            return;
+          }
+        } catch (err) {
+          console.warn("Local parse failed, falling back to Gemini", err);
+        }
+
         runOcrParsing('', '', text);
       };
       reader.readAsText(file);
@@ -84,6 +94,17 @@ export default function RentsDueAuditor({ roster = [], activePeriod, rosterHisto
       alert("Please paste the spreadsheet text copy or CSV data first!");
       return;
     }
+    
+    try {
+      const localParsed = parseRentsDueCSVLocal(textInput);
+      if (localParsed && localParsed.length > 0) {
+        setParsedEmployees(localParsed);
+        return;
+      }
+    } catch (err) {
+      console.warn("Local parse failed, falling back to Gemini", err);
+    }
+    
     runOcrParsing('', '', textInput);
   };
 

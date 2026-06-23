@@ -185,6 +185,7 @@ export default function PerformanceWizardModal({
               editForm={editForm}
               setEditForm={setEditForm}
               departmentGoals={deptGoals}
+              employee={employee}
             />
           )}
           

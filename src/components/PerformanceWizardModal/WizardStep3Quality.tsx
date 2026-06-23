@@ -1,11 +1,44 @@
-import React from 'react';
-import { X } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Wand2, Loader2, Sparkles } from 'lucide-react';
+import { generatePerformanceGap } from '../../services/ai';
+import { useStore } from '../../store/useStore';
 
 export default function WizardStep3Quality({ 
   editForm,
   setEditForm,
-  departmentGoals
+  departmentGoals,
+  employee
  }) {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [aiError, setAiError] = useState('');
+  const apiKey = useStore((state: any) => state.apiKey);
+
+  const handleAiAnalyze = async () => {
+    if (!apiKey) {
+      setAiError("Please add your Gemini API Key in Playbook Studio.");
+      return;
+    }
+    setIsGenerating(true);
+    setAiError('');
+    
+    try {
+      const history = employee?.history || [];
+      const gapDesc = await generatePerformanceGap(
+        apiKey, 
+        employee?.name || 'Associate', 
+        editForm, 
+        history, 
+        departmentGoals
+      );
+      
+      setEditForm({ ...editForm, gap: gapDesc });
+    } catch (err: any) {
+      setAiError(err.message || 'Failed to auto-generate gap.');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.25s ease' }}>
@@ -66,14 +99,35 @@ export default function WizardStep3Quality({
                 </div>
               </div>
 
+              {/* AI Auto-Analyze Gap Box */}
+              <div style={{ background: 'rgba(253, 216, 53, 0.05)', border: '1px solid rgba(253, 216, 53, 0.2)', padding: '1rem', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h4 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--bby-yellow)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Wand2 size={16} /> AI Opportunity Analyzer
+                  </h4>
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary" 
+                    onClick={handleAiAnalyze}
+                    disabled={isGenerating}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}
+                  >
+                    {isGenerating ? <Loader2 size={14} className="spin" /> : <Sparkles size={14} />}
+                    Auto-Analyze Metrics
+                  </button>
+                </div>
+                <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Gemini will evaluate current & historical pacing against department targets.</p>
+                {aiError && <span style={{ color: 'var(--error)', fontSize: '0.75rem', marginTop: '0.25rem' }}>{aiError}</span>}
+              </div>
+
               <div className="form-group">
                 <label className="form-label" style={{ fontSize: '0.8rem' }}>Opportunity Gap Description:</label>
-                <input 
-                  type="text" 
+                <textarea 
                   className="form-control" 
-                  style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+                  style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', minHeight: '60px', resize: 'vertical' }}
                   value={editForm.gap}
                   onChange={(e) => setEditForm({ ...editForm, gap: e.target.value })}
+                  placeholder="e.g. Employee is struggling with Membership attach rate compared to target..."
                 />
               </div>
             </div>

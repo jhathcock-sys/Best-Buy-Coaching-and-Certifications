@@ -204,3 +204,38 @@ export const generateActionPlan = async (employeeData, logs, apiKey) => {
     return null;
   }
 };
+
+export const generatePerformanceGap = async (apiKey: string, employeeName: string, currentMetrics: any, historyMetrics: any[], departmentGoals: any) => {
+  try {
+    const isAvailable = isGeminiAvailable(apiKey);
+    if (!isAvailable) {
+      throw new Error("Gemini API Key is not available");
+    }
+
+    const aiInstance = new GoogleGenerativeAI(apiKey);
+    const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-flash' });
+
+    const prompt = `
+      You are an expert Best Buy Sales Manager analyzing an employee's weekly performance metrics.
+      
+      Employee Name: ${employeeName}
+      Department Goals: ${JSON.stringify(departmentGoals)}
+      
+      Current Week Metrics:
+      ${JSON.stringify(currentMetrics, null, 2)}
+      
+      Historical Performance Data (Previous Weeks):
+      ${JSON.stringify(historyMetrics, null, 2)}
+      
+      Compare the current metrics against the department goals. Look at the historical data to determine if the current performance is an anomaly or a downward trend.
+      
+      Write a highly concise, 1 to 2 sentence "Opportunity Gap Description" that identifies the primary metric falling short and suggests what specific behavior the employee needs to focus on fixing this week. Do not use pleasantries. Be direct and actionable.
+    `;
+
+    const result = await model.generateContent(prompt);
+    return result.response.text().trim();
+  } catch (error) {
+    console.error("Gap Generation Error:", error);
+    return "Failed to auto-generate gap. Please verify API key.";
+  }
+};

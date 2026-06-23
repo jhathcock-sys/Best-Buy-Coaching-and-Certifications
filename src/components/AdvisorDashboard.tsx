@@ -60,19 +60,19 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
   ];
 
   return (
-    <div style={{ padding: '2rem', height: '100%', overflowY: 'auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+    <div className="p-xl h-full" style={{ overflowY: 'auto' }}>
+      <div className="flex-between align-center mb-xl">
         <div>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 800, margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <h1 className="flex-center gap-md" style={{ fontSize: '2.5rem', fontWeight: 800, margin: '0 0 0.5rem 0', justifyContent: 'flex-start' }}>
             Welcome back, {employee.name.split(' ')[0]}!
-            <span style={{ fontSize: '1rem', background: 'var(--bby-yellow)', color: '#000', padding: '0.2rem 0.6rem', borderRadius: '12px', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <span className="flex-center gap-sm" style={{ fontSize: '1rem', background: 'var(--bby-yellow)', color: '#000', padding: '0.2rem 0.6rem', borderRadius: '12px', fontWeight: 900 }}>
               <Star size={16} /> Level {currentLevel}
             </span>
           </h1>
           <p style={{ color: 'var(--text-secondary)', margin: '0 0 1rem 0', fontSize: '1.1rem' }}>
             {employee.dept} Advisor • ID: {employee.id || employee.employeeId || 'N/A'}
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '20px', width: 'fit-content' }}>
+          <div className="flex-center gap-md" style={{ background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '20px', width: 'fit-content' }}>
             <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>XP: {totalXP}</span>
             <div style={{ width: '150px', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
               <div style={{ width: `${(xpProgress / 500) * 100}%`, height: '100%', background: 'var(--bby-blue)' }} />
@@ -82,10 +82,8 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
         </div>
         <button
           onClick={() => onNavigate('roleplay')}
+          className="flex-center gap-sm"
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
             background: 'var(--bby-blue)',
             color: '#fff',
             border: 'none',
@@ -101,7 +99,7 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
         </button>
       </div>
 
-      <div style={{ marginBottom: '2rem' }}>
+      <div className="mb-xl">
         <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <TrendingUp size={20} color="var(--bby-yellow)" />
           My Performance ({activePeriod})

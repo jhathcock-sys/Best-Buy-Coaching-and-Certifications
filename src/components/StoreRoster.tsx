@@ -86,12 +86,12 @@ export default function StoreRoster({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+    <div className="flex-column gap-xl">
       
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem', width: '100%' }}>
+      <div className="flex-between flex-wrap gap-lg w-full">
         <div>
-          <h1 style={{ fontSize: '2.25rem', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <h1 className="flex-center" style={{ fontSize: '2.25rem', marginBottom: '0.25rem', gap: '0.75rem', justifyContent: 'flex-start' }}>
             Store Performance Roster
           </h1>
           <p style={{ color: 'var(--text-secondary)' }}>
@@ -101,10 +101,7 @@ export default function StoreRoster({
 
         {/* Period Selector */}
         {rosterHistory && Object.keys(rosterHistory).length > 0 && (
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '0.75rem', 
+          <div className="flex-center gap-sm" style={{ 
             background: 'rgba(16, 24, 48, 0.4)', 
             border: '1px solid var(--border-glass)', 
             padding: '0.5rem 1.25rem', 

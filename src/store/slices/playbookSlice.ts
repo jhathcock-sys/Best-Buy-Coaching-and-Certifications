@@ -84,7 +84,8 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
         saveRecentSessionsToCloud(get().storeId, updatedSessions);
       }
 
-      const empId = session.employeeId || (rosterHistory[activePeriod] || []).find(e => e.name === session.customerName)?.id || `emp-${Date.now()}`;
+      const periodMap1 = rosterHistory[activePeriod] || {};
+      const empId = session.employeeId || Object.values(periodMap1).find((e: any) => e.name === session.customerName)?.id || `emp-${Date.now()}`;
       const newLog = {
         employeeId: empId,
         employeeName: session.customerName,
@@ -104,7 +105,8 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       }
 
       // Check for PIP generation (3 consecutive gaps/fails) or Perfect Score Trophies
-      const targetEmp = (rosterHistory[activePeriod] || []).find(e => e.id === empId);
+      const periodMap2 = rosterHistory[activePeriod] || {};
+      const targetEmp = periodMap2[empId];
       
       if (targetEmp) {
         if (newLog.score === 100 || session.rating === 'Exceptional') {
@@ -244,7 +246,8 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       // Check for PIP generation (3 consecutive fails) or Perfect Score Trophies
       const activePeriod = get().activePeriod;
       const rosterHistory = get().rosterHistory || {};
-      const targetEmp = (rosterHistory[activePeriod] || []).find(e => e.name === customerName);
+      const periodMap3 = rosterHistory[activePeriod] || {};
+      const targetEmp = Object.values(periodMap3).find((e: any) => e.name === customerName);
       
       if (targetEmp) {
         if (score === 100) {

@@ -1,3 +1,4 @@
+import React from 'react';
 import { useMemo } from 'react';
 import { Employee } from '../types/index';
 import { useStore } from '../store/useStore';
@@ -25,7 +26,8 @@ export default function Dashboard({
   const rosterHistory = useStore((state) => state.rosterHistory) || {};
   const activeManager = useStore((state) => state.activeManager);
 
-  const roster = rosterHistory[activePeriod] || [];
+  const _rawroster = rosterHistory[activePeriod] || {};
+  const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
   const calculatedMetrics = useMemo(() => {
     if (!roster || roster.length === 0) return { memberships: 0, creditCards: 0, warranty: 0, surveys: 0, rph: 0 };
     
@@ -127,7 +129,8 @@ export default function Dashboard({
         (counts as any)[dept]++;
       } else {
         for (const period of Object.keys(rosterHistory)) {
-          const histEmp = rosterHistory[period]?.find((e: any) => e.id === log.employeeId || e.name === log.employeeName);
+          const empMap = rosterHistory[period] || {};
+          const histEmp = empMap[log.employeeId] || Object.values(empMap).find((e: any) => e.name === log.employeeName);
           if (histEmp && histEmp.dept in counts) {
             (counts as any)[histEmp.dept]++;
             break;

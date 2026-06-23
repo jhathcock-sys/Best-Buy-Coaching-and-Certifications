@@ -52,13 +52,13 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       const activePeriod = get().activePeriod;
       const rosterHistory = get().rosterHistory || {};
       const dbConnected = get().dbConnected;
-      const currentRoster = Array.isArray(rosterHistory[activePeriod]) ? rosterHistory[activePeriod] : [];
+      const currentRoster = rosterHistory[activePeriod] || {};
       
       const empWithTimestamp = {
         ...newEmp,
         lastUpdated: Date.now()
       };
-      const updated = [...currentRoster, empWithTimestamp];
+      const updated = { ...currentRoster, [newEmp.id]: empWithTimestamp };
       const newHistory = { ...rosterHistory, [activePeriod]: updated };
       set({ rosterHistory: newHistory });
       if (dbConnected) {
@@ -70,13 +70,19 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       const activePeriod = get().activePeriod;
       const rosterHistory = get().rosterHistory || {};
       const dbConnected = get().dbConnected;
-      const currentRoster = Array.isArray(rosterHistory[activePeriod]) ? rosterHistory[activePeriod] : [];
-      const updated = currentRoster.map(emp => {
-        if (emp.id === empId) {
-          return { ...emp, ...updatedFields, lastUpdated: Date.now() };
+      const currentRoster = rosterHistory[activePeriod] || {};
+      
+      if (!currentRoster[empId]) return;
+
+      const updated = {
+        ...currentRoster,
+        [empId]: {
+          ...currentRoster[empId],
+          ...updatedFields,
+          lastUpdated: Date.now()
         }
-        return emp;
-      });
+      };
+      
       const newHistory = { ...rosterHistory, [activePeriod]: updated };
       set({ rosterHistory: newHistory });
       if (dbConnected) {
@@ -88,11 +94,13 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       const activePeriod = get().activePeriod;
       const rosterHistory = get().rosterHistory || {};
       const dbConnected = get().dbConnected;
-      const currentRoster = Array.isArray(rosterHistory[activePeriod]) ? rosterHistory[activePeriod] : [];
-      const targetEmp = currentRoster.find(emp => emp.id === empId);
-      if (!targetEmp) return;
+      const currentRoster = rosterHistory[activePeriod] || {};
       
-      const updated = currentRoster.filter(emp => emp.id !== empId);
+      if (!currentRoster[empId]) return;
+      
+      const updated = { ...currentRoster };
+      delete updated[empId];
+      
       const newHistory = { ...rosterHistory, [activePeriod]: updated };
       
       set({ rosterHistory: newHistory });
@@ -108,8 +116,8 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
     addTrophy: (empId, trophy) => {
       const activePeriod = get().activePeriod;
       const rosterHistory = get().rosterHistory || {};
-      const currentRoster = Array.isArray(rosterHistory[activePeriod]) ? rosterHistory[activePeriod] : [];
-      const targetEmp = currentRoster.find(emp => emp.id === empId);
+      const currentRoster = rosterHistory[activePeriod] || {};
+      const targetEmp = currentRoster[empId];
       if (!targetEmp) return;
 
       const currentTrophies = targetEmp.trophies || [];
@@ -121,8 +129,8 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
     addActionPlan: (empId, plan) => {
       const activePeriod = get().activePeriod;
       const rosterHistory = get().rosterHistory || {};
-      const currentRoster = Array.isArray(rosterHistory[activePeriod]) ? rosterHistory[activePeriod] : [];
-      const targetEmp = currentRoster.find(emp => emp.id === empId);
+      const currentRoster = rosterHistory[activePeriod] || {};
+      const targetEmp = currentRoster[empId];
       if (!targetEmp) return;
 
       const currentPlans = targetEmp.actionPlans || [];
@@ -135,12 +143,9 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       const activePeriod = targetPeriod || get().activePeriod;
       const rosterHistory = get().rosterHistory || {};
       const dbConnected = get().dbConnected;
-      const currentRoster = Array.isArray(rosterHistory[activePeriod]) ? rosterHistory[activePeriod] : [];
+      const currentRoster = rosterHistory[activePeriod] || {};
       
-      const rosterMap = {};
-      currentRoster.forEach(emp => {
-        rosterMap[emp.name.toLowerCase().trim()] = emp;
-      });
+      const rosterMap = { ...currentRoster };
 
       importedEmployees.forEach(newEmp => {
         if (!newEmp.name || newEmp.name.trim() === 'Unknown Name' || newEmp.name.trim() === '') {
@@ -149,26 +154,28 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
 
         const nameKey = newEmp.name.toLowerCase().trim();
         let candidateEmp;
+        
+        // Find existing emp by name or create new one
+        const existingEmp = Object.values(rosterMap).find((e: any) => e.name.toLowerCase().trim() === nameKey);
 
-        if (rosterMap[nameKey]) {
-          candidateEmp = { ...rosterMap[nameKey], ...newEmp, lastUpdated: Date.now() };
+        if (existingEmp) {
+          candidateEmp = { ...(existingEmp as any), ...newEmp, lastUpdated: Date.now() };
         } else {
           candidateEmp = { id: 'emp_' + Math.random().toString(36).substring(2, 11), ...newEmp, lastUpdated: Date.now() };
         }
 
         const parsed = EmployeeSchema.safeParse(candidateEmp);
         if (parsed.success) {
-          rosterMap[nameKey] = parsed.data;
+          rosterMap[parsed.data.id] = parsed.data;
         } else {
           console.error(`Validation failed for imported employee ${newEmp.name}:`, parsed.error);
         }
       });
 
-      const updated = Object.values(rosterMap) as Employee[];
-      const newHistory = { ...rosterHistory, [activePeriod]: updated };
+      const newHistory = { ...rosterHistory, [activePeriod]: rosterMap };
       set({ rosterHistory: newHistory });
       if (dbConnected) {
-        saveRosterHistoryToCloud(get().storeId, updated, activePeriod);
+        saveRosterHistoryToCloud(get().storeId, rosterMap, activePeriod);
       }
     },
 
@@ -183,18 +190,20 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       const rosterHistory = get().rosterHistory || {};
       const activePeriod = get().activePeriod;
       const dbConnected = get().dbConnected;
-      const currentRoster = Array.isArray(rosterHistory[activePeriod]) ? rosterHistory[activePeriod] : [];
-      let newRoster;
+      const currentRoster = rosterHistory[activePeriod] || {};
+      let newRoster: Record<string, Employee> = {};
       const now = Date.now();
       
       if (copyOption === 'roster-only') {
-        newRoster = currentRoster.map(emp => ({
-          ...emp, hours: 0, memberships: 0, creditCards: 0, warranty: 0, surveys: 5.0, rph: 0, basket: 0, m365: 0, audio: 0, gap: 'None', lastUpdated: now
-        }));
+        Object.values(currentRoster).forEach((emp: any) => {
+          newRoster[emp.id] = {
+            ...emp, hours: 0, memberships: 0, creditCards: 0, warranty: 0, surveys: 5.0, rph: 0, basket: 0, m365: 0, audio: 0, gap: 'None', lastUpdated: now
+          };
+        });
       } else if (copyOption === 'roster-and-metrics') {
-        newRoster = currentRoster.map(emp => ({ ...emp, lastUpdated: now }));
-      } else {
-        newRoster = [];
+        Object.values(currentRoster).forEach((emp: any) => {
+          newRoster[emp.id] = { ...emp, lastUpdated: now };
+        });
       }
       
       const newHistory = { ...rosterHistory, [newPeriodName]: newRoster };

@@ -5,7 +5,7 @@ import { calculateCVI } from '../../store/cviHelper';
 
 interface DashboardLeaderboardProps {
   roster: Employee[];
-  rosterHistory: Record<string, any[]>;
+  rosterHistory: Record<string, Record<string, any>>;
   activePeriod: string;
   onCoachEmployee: (emp: Employee) => void;
   onShadowEmployee: (emp: Employee) => void;

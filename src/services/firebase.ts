@@ -92,7 +92,27 @@ export const subscribeToRosterHistory = (storeId: string, onUpdate: any) => {
     return onSnapshot(colRef, (snap: any) => {
       const periods: any = {};
       snap.forEach((doc: any) => {
-        periods[doc.id as keyof typeof periods] = doc.data().roster || [];
+        const rawRoster = doc.data().roster;
+        
+        // Auto-migration from legacy Array to Dictionary
+        if (Array.isArray(rawRoster)) {
+          console.warn(`Migrating legacy array roster for period ${doc.id}`);
+          const migratedRoster: Record<string, any> = {};
+          rawRoster.forEach(emp => {
+            if (!emp.id) {
+               emp.id = 'emp_' + Math.random().toString(36).substring(2, 11);
+            }
+            migratedRoster[emp.id] = emp;
+          });
+          periods[doc.id] = migratedRoster;
+          
+          // Prevent local cache from overwriting live data; only migrate if online
+          if (typeof window !== 'undefined' && navigator.onLine) {
+            saveRosterHistoryToCloud(storeId, migratedRoster, doc.id);
+          }
+        } else {
+          periods[doc.id] = rawRoster || {};
+        }
       });
       onUpdate(periods);
     });

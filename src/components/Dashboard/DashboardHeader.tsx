@@ -5,7 +5,7 @@ import { Employee } from '../../types/index';
 interface DashboardHeaderProps {
   roster: Employee[];
   shadowingHeatmapData: Record<string, number>;
-  rosterHistory: Record<string, Employee[]>;
+  rosterHistory: Record<string, Record<string, Employee>>;
   activePeriod: string;
   activeManager?: any;
 }

@@ -83,7 +83,8 @@ export default function CoachSimulator({
   const rosterHistory = useStore((state) => state.rosterHistory) || {};
   const activePeriod = useStore((state) => state.activePeriod);
   
-  const roster = rosterHistory[activePeriod] || [];
+  const _rawroster = rosterHistory[activePeriod] || {};
+  const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
   const onImportScenario = importCustomScenario;
   const onLogCoachingSession = logCoachingSession;
 

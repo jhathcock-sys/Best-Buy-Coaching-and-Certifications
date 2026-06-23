@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState } from 'react';
 import { Users, Search } from 'lucide-react';
 import { useStore } from '../store/useStore';
@@ -9,7 +10,8 @@ interface AdvisorLoginProps {
 
 export default function AdvisorLogin({ onLoginSuccess, dbConnected }: AdvisorLoginProps) {
   const activePeriod = useStore(state => state.activePeriod);
-  const roster = useStore(state => state.rosterHistory[activePeriod] || []);
+  const _rawroster = useStore(state => state.rosterHistory[activePeriod] || {});
+  const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
   const [employeeId, setEmployeeId] = useState('');
   const [storeId, setStoreId] = useState(() => localStorage.getItem('bby_last_store') || '');
   const [error, setError] = useState('');

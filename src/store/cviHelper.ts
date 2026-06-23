@@ -2,7 +2,7 @@ import { Employee } from '../types';
 
 export function calculateCVI(
   employee: Employee | null | undefined, 
-  rosterHistory: Record<string, Employee[]> | null | undefined, 
+  rosterHistory: Record<string, Record<string, Employee>> | null | undefined, 
   activePeriod: string | null | undefined
 ): string {
   if (!employee || !rosterHistory || !activePeriod) return '0% (Neutral)';
@@ -26,7 +26,8 @@ export function calculateCVI(
   if (curIdx <= 0) return '0% (Neutral)';
   
   const prevPeriod = sortedPeriods[curIdx - 1];
-  const prevEmp = rosterHistory[prevPeriod]?.find(e => e.id === employee.id || e.name === employee.name);
+  const prevMap = rosterHistory[prevPeriod] || {};
+  const prevEmp = prevMap[employee.id] || Object.values(prevMap).find((e: any) => e.name === employee.name);
   if (!prevEmp) return '0% (Neutral)';
   
   // Compute deltas

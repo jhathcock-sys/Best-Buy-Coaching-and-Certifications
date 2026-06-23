@@ -77,7 +77,8 @@ export function useAssociateProfile(isOpen, employee, rosterHistory, coachingLog
   });
 
   const historyPoints = sortedPeriods.map((period: any) => {
-    const emp = rosterHistory[period]?.find((e: any) => e.id === employee.id || e.name === employee.name);
+    const empMap = rosterHistory[period] || {};
+    const emp = empMap[employee.id] || Object.values(empMap).find((e: any) => e.name === employee.name);
     return {
       period,
       found: !!emp,

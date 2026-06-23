@@ -6,7 +6,8 @@ import { useStore } from '../store/useStore';
 export default function DailyLineupBuilder() {
   const activePeriod = useStore((state) => state.activePeriod);
   const rosterHistory = useStore((state) => state.rosterHistory) || {};
-  const roster = rosterHistory[activePeriod] || [];
+  const _rawroster = rosterHistory[activePeriod] || {};
+  const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [searchTerm, setSearchTerm] = useState('');
   

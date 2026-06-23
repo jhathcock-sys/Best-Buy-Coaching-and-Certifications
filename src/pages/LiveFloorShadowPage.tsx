@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState } from 'react';
 import { ShieldCheck, ChevronLeft, ChevronRight, Check, Clipboard, Calendar, Users, AlertCircle } from 'lucide-react';
 import ShadowStep1Employee from '../components/LiveFloorShadow/ShadowStep1Employee';
@@ -19,7 +20,8 @@ export default function LiveFloorShadow({
   const playbookSettings = useStore((state) => state.playbookSettings);
   const activePeriod = useStore((state) => state.activePeriod);
   const rosterHistory = useStore((state) => state.rosterHistory) || {};
-  const roster = rosterHistory[activePeriod] || [];
+  const _rawroster = rosterHistory[activePeriod] || {};
+  const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
   
   const onLogCoachingSession = useStore((state) => state.logCoachingSession);
   const onAddFollowUpTask = useStore((state) => state.addFollowUpTask);

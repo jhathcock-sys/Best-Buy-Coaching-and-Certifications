@@ -16,7 +16,8 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
     log.employeeId === employee.id || log.employeeName === employee.name
   );
 
-  const activeRoster = useStore(state => state.rosterHistory?.[activePeriod] || []);
+  const _rawactiveRoster = useStore(state => state.rosterHistory?.[activePeriod] || {});
+  const activeRoster = React.useMemo(() => Object.values(_rawactiveRoster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawactiveRoster]);
   
   // Calculate Top 3 Roleplay Champions based on "Perfect Roleplay Score" trophies or general trophies
   const top3Champions = [...activeRoster]

@@ -27,7 +27,8 @@ export default function RentsDueAuditor({ roster = [], activePeriod, rosterHisto
 
   const comparisonRoster = React.useMemo(() => {
     if (selectedPeriod === activePeriod) return roster;
-    return Array.isArray(rosterHistory[selectedPeriod]) ? rosterHistory[selectedPeriod] : [];
+    const rawRoster = rosterHistory[selectedPeriod] || {};
+    return Object.values(rawRoster).sort((a: any, b: any) => a.name.localeCompare(b.name));
   }, [selectedPeriod, activePeriod, roster, rosterHistory]);
 
   // File drop/upload handlers

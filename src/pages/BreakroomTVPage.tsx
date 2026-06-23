@@ -6,7 +6,8 @@ import { useStore } from '../store/useStore';
 export default function BreakroomTV({ onClose }: any) {
   const activePeriod = useStore((state) => state.activePeriod) || "Active Period";
   const rosterHistory = useStore((state) => state.rosterHistory) || {};
-  const roster = rosterHistory[activePeriod] || [];
+  const _rawroster = rosterHistory[activePeriod] || {};
+  const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
   const recentSessions = useStore((state) => state.coachingLogs) || [];
   const deptGoals = useStore((state) => state.deptGoals) || {};
   const apiKey = useStore((state) => state.apiKey);

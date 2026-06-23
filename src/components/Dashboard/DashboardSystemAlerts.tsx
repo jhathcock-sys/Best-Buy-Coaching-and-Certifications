@@ -28,11 +28,11 @@ export default function DashboardSystemAlerts({
     const currentIndex = periods.indexOf(activePeriod);
     if (currentIndex >= 0 && currentIndex < periods.length - 1) {
       const pastPeriod = periods[currentIndex + 1];
-      const pastRoster = rosterHistory[pastPeriod];
+      const pastRosterMap = rosterHistory[pastPeriod];
       
-      if (pastRoster) {
+      if (pastRosterMap) {
         roster.forEach(emp => {
-          const pastEmp = pastRoster.find((e: any) => e.id === emp.id || e.name === emp.name);
+          const pastEmp = pastRosterMap[emp.id] || Object.values(pastRosterMap).find((e: any) => e.name === emp.name);
           if (!pastEmp) return;
 
           const checkDrop = (metricKey: string, label: string) => {

@@ -68,13 +68,13 @@ export interface PlaybookSlice {
 }
 
 export interface MetricsSlice {
-  rosterHistory: Record<string, Employee[]>;
+  rosterHistory: Record<string, Record<string, Employee>>;
   activePeriod: string;
   deptGoals: Record<string, DeptGoal>;
   metrics: MetricAverages;
   dailySnapshots: Record<string, Employee[]>;
 
-  setRosterHistory: (history: Record<string, Employee[]>) => void;
+  setRosterHistory: (history: Record<string, Record<string, Employee>>) => void;
   setActivePeriod: (period: string) => void;
   setDeptGoals: (goals: Record<string, DeptGoal>) => void;
   setMetrics: (metrics: MetricAverages) => void;

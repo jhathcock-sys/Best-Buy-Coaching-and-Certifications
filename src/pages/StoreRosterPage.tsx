@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Users, Search, AlertTriangle, CheckCircle, Clock, HelpCircle, Sliders } from 'lucide-react';
 import AddEmployeeModal from '../components/AddEmployeeModal';
 import PerformanceWizardModal from '../components/PerformanceWizardModal';
@@ -28,20 +28,12 @@ export default function StoreRoster({
   const coachingLogs = useStore((state) => state.coachingLogs) || [];
   const followUpTasks = useStore((state) => state.followUpTasks) || [];
   
-  const defaultDeptGoals: Record<string, DeptGoal> = {
-    'Front End': { memberships: 8.0, membershipsType: 'Hours', creditCards: 12.5, creditCardsType: 'Hours', warranty: 11.0, surveys: 1.0, rph: 640 },
-    'General Sales': { memberships: 5000, membershipsType: 'Dollars', creditCards: 8000, creditCardsType: 'Dollars', warranty: 11.0, surveys: 1.0, rph: 640 },
-    'Appliances': { memberships: 15000, membershipsType: 'Dollars', creditCards: 10000, creditCardsType: 'Dollars', warranty: 12.0, surveys: 1.0, rph: 1200 },
-    'Computing': { memberships: 8000, membershipsType: 'Dollars', creditCards: 10000, creditCardsType: 'Dollars', warranty: 11.0, surveys: 1.0, rph: 900, basket: 150, m365: 60.0 },
-    'Mobile': { memberships: 6000, membershipsType: 'Dollars', creditCards: 8000, creditCardsType: 'Dollars', warranty: 8.0, surveys: 1.0, rph: 700 },
-    'Home Theatre': { memberships: 10000, membershipsType: 'Dollars', creditCards: 12000, creditCardsType: 'Dollars', warranty: 11.0, surveys: 1.0, rph: 800, basket: 250, audio: 35.0 },
-    'Geek Squad': { memberships: 5000, membershipsType: 'Dollars', creditCards: 15000, creditCardsType: 'Dollars', warranty: 12.0, surveys: 1.0, rph: 500 }
-  };
+  const [showGoals, setShowGoals] = useState(false);
+  const [editingDept, setEditingDept] = useState<string | null>(null);
+  const deptGoals = useStore((state) => state.deptGoals);
   
-  const storeDeptGoals = useStore((state) => state.deptGoals);
-  const deptGoals = (storeDeptGoals && Object.keys(storeDeptGoals).length > 0) ? storeDeptGoals : defaultDeptGoals;
-  
-  const roster = rosterHistory[activePeriod] || [];
+  const _rawroster = rosterHistory[activePeriod] || {};
+  const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
 
   const updateEmployeeDept = useStore((state) => state.updateEmployeeDept);
   const addEmployee = useStore((state) => state.addEmployee);

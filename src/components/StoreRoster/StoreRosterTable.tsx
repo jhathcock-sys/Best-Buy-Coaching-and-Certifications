@@ -14,19 +14,70 @@ export default function StoreRosterTable({
   handleStartEdit,
   onDeleteEmployee
 }) {
+  const [sortConfig, setSortConfig] = React.useState({ key: null, direction: 'asc' });
+
+  const sortedRoster = React.useMemo(() => {
+    let sortableItems = [...filteredRoster];
+    if (sortConfig !== null && sortConfig.key !== null) {
+      sortableItems.sort((a, b) => {
+        let aVal = a[sortConfig.key] ?? '';
+        let bVal = b[sortConfig.key] ?? '';
+        
+        if (typeof aVal === 'string' && typeof bVal === 'string') {
+          return sortConfig.direction === 'asc' 
+            ? aVal.localeCompare(bVal) 
+            : bVal.localeCompare(aVal);
+        }
+        
+        if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    return sortableItems;
+  }, [filteredRoster, sortConfig]);
+
+  const requestSort = (key) => {
+    let direction = 'desc'; // Default to desc for metrics
+    if (key === 'name' || key === 'dept') direction = 'asc';
+    
+    if (sortConfig.key === key && sortConfig.direction === direction) {
+      direction = direction === 'asc' ? 'desc' : 'asc';
+    } else if (sortConfig.key === key) {
+      direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+    }
+    
+    setSortConfig({ key, direction });
+  };
+
+  const getSortIcon = (key) => {
+    if (sortConfig.key === key) {
+      return sortConfig.direction === 'asc' ? ' ↑' : ' ↓';
+    }
+    return '';
+  };
+
+  const headerStyle = (isCenter = false) => ({
+    padding: isDense ? '0.5rem 1rem' : '1rem 1rem', 
+    fontWeight: 600, 
+    textAlign: isCenter ? 'center' : 'left',
+    cursor: 'pointer',
+    userSelect: 'none'
+  } as React.CSSProperties);
+
   return (
     <div className="desktop-only" style={{ overflowX: 'auto' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
         <thead>
           <tr style={{ background: 'rgba(16, 24, 48, 0.7)', borderBottom: '1px solid var(--border-glass)', color: 'var(--text-secondary)' }}>
-            <th style={{ padding: isDense ? '0.5rem 1rem' : '1rem 1rem', fontWeight: 600 }}>Associate</th>
-            {visibleCols.hours && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}><Clock size={14} style={{ display: 'inline', marginRight: '0.25rem', verticalAlign: 'text-bottom' }} />Hours</th>}
-            {visibleCols.dept && <th style={{ padding: isDense ? '0.5rem 1rem' : '1rem 1rem', fontWeight: 600 }}>Dept</th>}
-            {visibleCols.memberships && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>PMs</th>}
-            {visibleCols.creditCards && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>Apps</th>}
-            {visibleCols.warranty && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>GSP</th>}
-            {visibleCols.surveys && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>5*</th>}
-            {visibleCols.rph && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>RPH</th>}
+            <th style={headerStyle(false)} onClick={() => requestSort('name')}>Associate{getSortIcon('name')}</th>
+            {visibleCols.hours && <th style={headerStyle(true)} onClick={() => requestSort('hours')}><Clock size={14} style={{ display: 'inline', marginRight: '0.25rem', verticalAlign: 'text-bottom' }} />Hours{getSortIcon('hours')}</th>}
+            {visibleCols.dept && <th style={headerStyle(false)} onClick={() => requestSort('dept')}>Dept{getSortIcon('dept')}</th>}
+            {visibleCols.memberships && <th style={headerStyle(true)} onClick={() => requestSort('memberships')}>PMs{getSortIcon('memberships')}</th>}
+            {visibleCols.creditCards && <th style={headerStyle(true)} onClick={() => requestSort('creditCards')}>Apps{getSortIcon('creditCards')}</th>}
+            {visibleCols.warranty && <th style={headerStyle(true)} onClick={() => requestSort('warranty')}>GSP{getSortIcon('warranty')}</th>}
+            {visibleCols.surveys && <th style={headerStyle(true)} onClick={() => requestSort('surveys')}>5*{getSortIcon('surveys')}</th>}
+            {visibleCols.rph && <th style={headerStyle(true)} onClick={() => requestSort('rph')}>RPH{getSortIcon('rph')}</th>}
             {visibleCols.basket && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center', whiteSpace: 'nowrap' }}>Basket ($)</th>}
             {visibleCols.attach && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>Dept Attach</th>}
             {visibleCols.status && <th style={{ padding: isDense ? '0.5rem 1rem' : '1rem 1rem', fontWeight: 600 }}>Status</th>}
@@ -42,7 +93,7 @@ export default function StoreRosterTable({
               </td>
             </tr>
           ) : (
-            filteredRoster.map(emp => {
+            sortedRoster.map(emp => {
               if (!emp) return null;
               const gap = getEmployeeGap(emp, deptGoals);
               const isExceeding = gap === 'None' || gap === '';

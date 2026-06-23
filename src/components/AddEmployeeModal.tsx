@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, Users } from 'lucide-react';
+import { EmployeeSchema } from '../schemas';
 
 
 export interface AddEmployeeModalProps {
@@ -37,24 +38,32 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
       alert("Please enter the associate's name!");
       return;
     }
-    const newEmp = {
-      id: `emp-${Date.now()}`,
-      name: form.name.trim(),
-      employeeNumber: form.employeeNumber.trim(),
-      dept: form.dept,
-      hours: parseFloat(form.hours) || 0,
-      memberships: parseInt(form.memberships) || 0,
-      creditCards: parseInt(form.creditCards) || 0,
-      warranty: parseFloat(form.warranty) || 0.0,
-      surveys: form.surveys === 'Failing' || form.surveys === 'failing' ? 0.2 : parseFloat(form.surveys) || 0.0,
-      rph: parseInt(form.rph) || 0,
-      basket: (form.dept === 'Computing' || form.dept === 'Home Theatre') ? (parseFloat(form.basket) || 0) : 0,
-      m365: form.dept === 'Computing' ? (parseFloat(form.m365) || 0) : 0,
-      audio: form.dept === 'Home Theatre' ? (parseFloat(form.audio) || 0) : 0,
-      focus5: form.focus5 || false,
-      gap: form.gap || 'None'
-    };
-    onAddEmployee(newEmp);
+
+    try {
+      const parsedEmp = EmployeeSchema.parse({
+        id: `emp-${Date.now()}`,
+        name: form.name.trim(),
+        employeeNumber: form.employeeNumber.trim(),
+        dept: form.dept,
+        hours: parseFloat(form.hours) || 0,
+        memberships: parseInt(form.memberships) || 0,
+        creditCards: parseInt(form.creditCards) || 0,
+        warranty: parseFloat(form.warranty) || 0.0,
+        surveys: form.surveys === 'Failing' || form.surveys === 'failing' ? 0.2 : parseFloat(form.surveys) || 0.0,
+        rph: parseInt(form.rph) || 0,
+        basket: (form.dept === 'Computing' || form.dept === 'Home Theatre') ? (parseFloat(form.basket) || 0) : 0,
+        m365: form.dept === 'Computing' ? (parseFloat(form.m365) || 0) : 0,
+        audio: form.dept === 'Home Theatre' ? (parseFloat(form.audio) || 0) : 0,
+        focus5: form.focus5 || false,
+        gap: form.gap || 'None'
+      });
+      onAddEmployee(parsedEmp);
+    } catch (err) {
+      console.error('Validation failed:', err);
+      alert('Invalid form data. Please check your inputs.');
+      return;
+    }
+    
     setForm({
       name: '',
       employeeNumber: '',

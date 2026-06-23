@@ -27,7 +27,7 @@ export interface AuthSlice {
   setStorePin: (pin: string) => void;
   loginAdvisor: (advisor: any) => void;
   login: (pin: string, storeId: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void> | void;
   handleSaveFirebaseConfig: (config: any) => void;
   setManagers: (managers: Manager[]) => void;
   saveManagers: (newManagers: Manager[]) => void;

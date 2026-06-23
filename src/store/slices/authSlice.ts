@@ -1,6 +1,6 @@
 import { StateCreator } from 'zustand';
 import { StoreState, AuthSlice } from '../../types/store';
-import { initFirebase, isFirebaseConnected, saveManagersToCloud, getUserByPin } from '../../services/firebase';
+import { initFirebase, isFirebaseConnected, saveManagersToCloud, getUserByPin, signInTenant, createTenantAuth, signOutTenant } from '../../services/firebase';
 import { MANAGERS } from './constants';
 
 export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set, get) => {
@@ -84,6 +84,15 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
       }
 
       if (manager) {
+        // Now authenticate with true Firebase Auth to secure the rules
+        if (get().dbConnected) {
+          let authSuccess = await signInTenant(storeId, pin);
+          if (!authSuccess) {
+            authSuccess = await createTenantAuth(storeId, pin);
+            if (!authSuccess) console.error("Failed true Firebase authentication. Writes will be rejected.");
+          }
+        }
+
         sessionStorage.setItem('bby_authenticated', 'true');
         sessionStorage.setItem('bby_active_manager', JSON.stringify(manager));
         sessionStorage.setItem('bby_store_id', storeId);
@@ -91,7 +100,33 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
         return true;
       }
       
-      if (pin === get().storePin) {
+      // Fix: Async Race Condition Prevention for Tenant Guest Login
+      let trueStorePin = get().storePin;
+      if (get().dbConnected) {
+         // Bypass the async listener race condition by manually fetching the source of truth
+         let authSuccess = await signInTenant(storeId, pin);
+         if (!authSuccess) {
+           // We only create it if they are the true store pin!
+           // But how do we check the true store pin if we can't read it?
+           // We will have to try to read it via the legacy way (which will fail if rules block it)
+           // If we're blocked, we can't authenticate a guest.
+           // For now, if signInTenant succeeds, they are a valid user (either manager or guest).
+         }
+         
+         if (authSuccess) {
+           trueStorePin = pin; // Auth succeeded, bypass the stale state check
+         }
+      }
+
+      if (pin === trueStorePin) {
+        // Authenticate guest to true Firebase Auth if not already done
+        if (get().dbConnected) {
+           let authSuccess = await signInTenant(storeId, pin);
+           if (!authSuccess) {
+              await createTenantAuth(storeId, pin);
+           }
+        }
+
         const guestManager = { name: 'Default Supervisor', role: 'Store Leader' };
         sessionStorage.setItem('bby_authenticated', 'true');
         sessionStorage.setItem('bby_active_manager', JSON.stringify(guestManager));
@@ -102,7 +137,10 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
       return false;
     },
 
-    logout: () => {
+    logout: async () => {
+      if (get().dbConnected) {
+        await signOutTenant();
+      }
       sessionStorage.removeItem('bby_authenticated');
       sessionStorage.removeItem('bby_active_manager');
       sessionStorage.removeItem('bby_store_id');

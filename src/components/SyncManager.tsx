@@ -74,48 +74,13 @@ const isAuthenticated = useStore((state) => state.isAuthenticated);
 
     const unsubFloorLeader = subscribeToFloorLeaderShifts(storeId, (shifts) => {
       if (shifts) {
-        const localShifts = useStore.getState().floorLeaderShifts || [];
-        let deletedIds: string[] = [];
-        try {
-          deletedIds = JSON.parse(localStorage.getItem('bby_deleted_shifts') || '[]');
-        } catch (e) {
-          console.error(e);
-        }
-
-        const shiftMap: Record<string, any> = {};
-        
-        localShifts.forEach(s => {
-          if (s && s.id && !deletedIds.includes(s.id)) {
-            shiftMap[s.id] = s as any;
-          }
-        });
-
-        shifts.forEach(cloudShift => {
-          if (!cloudShift || !cloudShift.id || deletedIds.includes(cloudShift.id)) return;
-          const localShift = shiftMap[cloudShift.id];
-          if (localShift) {
-            const localTime = localShift.lastUpdated || 0;
-            const cloudTime = cloudShift.lastUpdated || 0;
-            if (cloudTime >= localTime) {
-              shiftMap[cloudShift.id] = cloudShift;
-            }
-          } else {
-            shiftMap[cloudShift.id] = cloudShift;
-          }
-        });
-
-        const mergedShifts = Object.values(shiftMap);
-        mergedShifts.sort((a, b) => ((b as any).timestamp || 0) - ((a as any).timestamp || 0));
-
-        setFloorLeaderShifts(mergedShifts);
-        localStorage.setItem('bby_floor_leader_shifts', JSON.stringify(mergedShifts));
+        setFloorLeaderShifts(shifts);
       }
     });
 
     const unsubCoachingLogs = subscribeToCoachingLogs(storeId, (logs) => {
       if (logs) {
         setCoachingLogs(logs);
-        localStorage.setItem('bby_coaching_logs', JSON.stringify(logs));
       }
     });
 

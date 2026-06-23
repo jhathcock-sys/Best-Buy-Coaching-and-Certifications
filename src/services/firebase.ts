@@ -1,9 +1,11 @@
 import { toast } from 'react-hot-toast';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, onSnapshot, setDoc, getDoc, collection, addDoc, query, orderBy, limit, deleteDoc, getDocs, getDocsFromCache, where } from 'firebase/firestore';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 
 let app: any = null;
 let db: any = null;
+let auth: any = null;
 
 // Get config from localStorage or env variables
 export const getSavedFirebaseConfig = () => {
@@ -45,6 +47,8 @@ export const initFirebase = (customConfig = null) => {
       app = getApp();
     }
     
+    auth = getAuth(app);
+
     // Enable offline local database caching and synchronization with the modern API
     db = initializeFirestore(app, {
       localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
@@ -55,6 +59,7 @@ export const initFirebase = (customConfig = null) => {
     console.error('Firebase initialization failed:', e);
     app = null;
     db = null;
+    auth = null;
     return null;
   }
 };
@@ -64,6 +69,45 @@ initFirebase();
 
 export const isFirebaseConnected = () => {
   return db !== null;
+};
+
+// True Firebase Authentication
+export const signInTenant = async (storeId: string, pin: string) => {
+  if (!auth) return false;
+  const email = `s${storeId}_p${pin}@bby.app`;
+  const password = `BBY_${storeId}_${pin}_secret!`;
+  
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    return true;
+  } catch (error: any) {
+    console.error('Firebase Auth Sign In Failed:', error);
+    return false;
+  }
+};
+
+// Only call this when we have VERIFIED the PIN matches a manager or the storePin
+export const createTenantAuth = async (storeId: string, pin: string) => {
+  if (!auth) return false;
+  const email = `s${storeId}_p${pin}@bby.app`;
+  const password = `BBY_${storeId}_${pin}_secret!`;
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+    return true;
+  } catch (error) {
+    console.error('Failed to create tenant auth:', error);
+    return false;
+  }
+};
+
+export const signOutTenant = async () => {
+  if (auth) {
+    try {
+      await signOut(auth);
+    } catch(e) {
+      console.error(e);
+    }
+  }
 };
 
 // Helper: Get document reference for store-1

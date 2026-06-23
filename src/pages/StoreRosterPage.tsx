@@ -16,6 +16,10 @@ import { useMediaQuery } from '../hooks/useMediaQuery';
 
 import { useStore } from '../store/useStore';
 import { DeptGoal } from '../types';
+import { StoreRosterProvider } from '../contexts/StoreRosterContext';
+
+const EMPTY_OBJ = {};
+const EMPTY_ARR = [];
 
 export default function StoreRoster({ 
   onCoachEmployee, 
@@ -23,16 +27,16 @@ export default function StoreRoster({
 }: any) {
   const apiKey = useStore((state) => state.apiKey);
 
-  const rosterHistory = useStore((state) => state.rosterHistory) || {};
+  const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
   const activePeriod = useStore((state) => state.activePeriod);
-  const coachingLogs = useStore((state) => state.coachingLogs) || [];
-  const followUpTasks = useStore((state) => state.followUpTasks) || [];
+  const coachingLogs = useStore((state) => state.coachingLogs) || EMPTY_ARR;
+  const followUpTasks = useStore((state) => state.followUpTasks) || EMPTY_ARR;
   
   const [showGoals, setShowGoals] = useState(false);
   const [editingDept, setEditingDept] = useState<string | null>(null);
   const deptGoals = useStore((state) => state.deptGoals);
   
-  const _rawroster = rosterHistory[activePeriod] || {};
+  const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
   const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
 
   const updateEmployeeDept = useStore((state) => state.updateEmployeeDept);
@@ -234,30 +238,41 @@ export default function StoreRoster({
           {/* Roster Table Card */}
           <div className="glass-card" style={{ padding: '0', overflow: 'hidden' }}>
             {isDesktop ? (
-              <StoreRosterTable 
-                filteredRoster={filteredRoster}
-                visibleCols={visibleCols}
-                isDense={isDense}
-                deptGoals={deptGoals}
-                rosterHistory={rosterHistory}
-                activePeriod={activePeriod}
-                setSelectedProfileEmployee={setSelectedProfileEmployee}
-                handleStartEdit={handleStartEdit}
-                onDeleteEmployee={onDeleteEmployee}
-              />
+              <StoreRosterProvider value={{
+                filteredRoster,
+                visibleCols,
+                isDense,
+                deptGoals,
+                rosterHistory,
+                activePeriod,
+                setSelectedProfileEmployee,
+                handleStartEdit,
+                onDeleteEmployee,
+                DEPARTMENTS,
+                onUpdateEmployeeDept,
+                onCoachEmployee,
+                onCreateLog
+              }}>
+                <StoreRosterTable />
+              </StoreRosterProvider>
             ) : (
-              <StoreRosterMobileCard 
-                filteredRoster={filteredRoster}
-                deptGoals={deptGoals}
-                rosterHistory={rosterHistory}
-                activePeriod={activePeriod}
-                DEPARTMENTS={DEPARTMENTS}
-                onUpdateEmployeeDept={onUpdateEmployeeDept}
-                handleStartEdit={handleStartEdit}
-                onCoachEmployee={onCoachEmployee}
-                onCreateLog={onCreateLog}
-                onDeleteEmployee={onDeleteEmployee}
-              />
+              <StoreRosterProvider value={{
+                filteredRoster,
+                visibleCols,
+                isDense,
+                deptGoals,
+                rosterHistory,
+                activePeriod,
+                setSelectedProfileEmployee,
+                handleStartEdit,
+                onDeleteEmployee,
+                DEPARTMENTS,
+                onUpdateEmployeeDept,
+                onCoachEmployee,
+                onCreateLog
+              }}>
+                <StoreRosterMobileCard />
+              </StoreRosterProvider>
             )}
           </div>
 
@@ -308,11 +323,7 @@ export default function StoreRoster({
 
       {activeSubView === 'rentsDue' && (
         <RentsDueAuditor 
-          roster={roster} 
-          activePeriod={activePeriod}
-          rosterHistory={rosterHistory}
           onBulkImportEmployees={onBulkImportEmployees}
-          apiKey={apiKey}
         />
       )}
 

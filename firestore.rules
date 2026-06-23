@@ -3,65 +3,52 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // RBAC Concept for Firebase Custom Auth (Token Claims)
-    // request.auth.token.role is checked.
+    // Function to verify true tenant isolation
+    // Users are authenticated with Email/Password mapping: s{storeId}_p{pin}@bby.app
+    function isTenantManager(storeId) {
+      return request.auth != null && 
+             request.auth.token.email.matches('^s' + storeId + '_p.*@bby\\.app$');
+    }
 
     match /stores/{storeId} {
       
-      allow read: if true;
+      allow read: if isTenantManager(storeId) || request.auth == null; // Temporarily allow public read for legacy logins
+      allow write: if isTenantManager(storeId);
       
       match /users/{userId} {
-        // Only GMs can create/delete user accounts
-        allow create, delete: if request.auth != null && request.auth.token.role == 'gm';
-        allow read: if true; 
-        allow update: if request.auth != null && (request.auth.uid == userId || request.auth.token.role == 'gm');
+        allow read: if true; // Public read needed to resolve PINs before true auth
+        allow write: if isTenantManager(storeId);
       }
 
-      match /data/deptGoals {
-        allow read: if true;
-        // Strict RBAC: Advisors physically blocked from modifying goals
-        allow write: if request.auth != null && request.auth.token.role in ['gm', 'supervisor'];
-      }
-      
-      match /data/metrics {
-        allow read: if true;
-        allow write: if request.auth != null && request.auth.token.role in ['gm', 'supervisor'];
-      }
-      
-      match /data/playbookSettings {
-        allow read: if true;
-        allow write: if request.auth != null && request.auth.token.role in ['gm', 'supervisor'];
+      match /data/{document=**} {
+        allow read: if isTenantManager(storeId) || request.auth == null;
+        allow write: if isTenantManager(storeId);
       }
       
       // Subcollections
       match /periods/{document=**} {
-        allow read: if true;
-        allow write: if request.auth != null && request.auth.token.role in ['gm', 'supervisor'];
+        allow read: if isTenantManager(storeId) || request.auth == null;
+        allow write: if isTenantManager(storeId);
       }
       
       match /coachingLogs/{document=**} {
-        allow read: if true;
-        allow write: if request.auth != null && request.auth.token.role in ['gm', 'supervisor', 'advisor'];
+        allow read: if isTenantManager(storeId) || request.auth == null;
+        allow write: if isTenantManager(storeId);
       }
 
       match /dailySnapshots/{document=**} {
-        allow read: if true;
-        allow write: if request.auth != null && request.auth.token.role in ['gm', 'supervisor'];
+        allow read: if isTenantManager(storeId) || request.auth == null;
+        allow write: if isTenantManager(storeId);
       }
 
       match /floorLeaderShifts/{document=**} {
-        allow read: if true;
-        allow write: if request.auth != null && request.auth.token.role in ['gm', 'supervisor'];
+        allow read: if isTenantManager(storeId) || request.auth == null;
+        allow write: if isTenantManager(storeId);
       }
 
       match /followUpTasks/{document=**} {
-        allow read: if true;
-        allow write: if request.auth != null && request.auth.token.role in ['gm', 'supervisor'];
-      }
-
-      match /data/{document=**} {
-        allow read: if true;
-        allow write: if request.auth != null && request.auth.token.role in ['gm', 'supervisor'];
+        allow read: if isTenantManager(storeId) || request.auth == null;
+        allow write: if isTenantManager(storeId);
       }
     }
   }

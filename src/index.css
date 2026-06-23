@@ -64,6 +64,10 @@ body {
   position: relative;
 }
 
+button, .clickable {
+  cursor: pointer;
+}
+
 body::before {
   content: "";
   position: fixed;

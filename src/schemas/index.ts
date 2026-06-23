@@ -53,15 +53,18 @@ export const ShiftSchema = z.object({
 }).passthrough();
 
 export const CoachingLogSchema = z.object({
-  id: z.string(),
+  id: z.string().optional(),
   date: z.string(),
   employeeId: z.string(),
+  employeeName: z.string().optional(),
   customerName: z.string(),
   category: z.string(),
   score: z.number(),
   notes: z.string(),
-  avatar: z.string().optional()
-});
+  avatar: z.string().optional(),
+  timestamp: z.number().optional(),
+  coachName: z.string().optional()
+}).passthrough();
 
 export const RosterSchema = z.array(EmployeeSchema);
 

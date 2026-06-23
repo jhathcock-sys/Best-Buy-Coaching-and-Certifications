@@ -116,7 +116,7 @@ export function useAssociateProfile(isOpen, employee, rosterHistory, coachingLog
     setIsGeneratingReview(true);
     setGeneratedReview(null);
     try {
-      const apiKey = (useStore.getState().apiKey as any)?.gemini;
+      const apiKey = useStore.getState().apiKey;
       const reviewText = await generateMonthlyOneOnOne(employee, associateLogs, apiKey);
       setGeneratedReview(reviewText);
     } catch (err) {
@@ -130,7 +130,7 @@ export function useAssociateProfile(isOpen, employee, rosterHistory, coachingLog
   const handleGenerateActionPlan = async () => {
     setIsGeneratingActionPlan(true);
     try {
-      const apiKey = (useStore.getState().apiKey as any)?.gemini;
+      const apiKey = useStore.getState().apiKey;
       const plan = await generateActionPlan(employee, associateLogs, apiKey);
       if (plan) {
         setGeneratedActionPlan(plan);

@@ -2,6 +2,7 @@ import React from 'react';
 import { Users } from 'lucide-react';
 import { getEmployeeGap, getMetricClass, getPaceText, StatusBadge } from './RosterMetricCell';
 import { calculateCVI } from '../../store/cviHelper';
+import { useStoreRosterContext } from '../../contexts/StoreRosterContext';
 
 const renderMobileMetricBadge = (val, type, dept, emp, label, displayValue, deptGoals) => {
   const isDeptMetric = (
@@ -62,18 +63,19 @@ const renderMobileMetricBadge = (val, type, dept, emp, label, displayValue, dept
   );
 };
 
-export default function StoreRosterMobileCard({
-  filteredRoster,
-  deptGoals,
-  rosterHistory,
-  activePeriod,
-  DEPARTMENTS,
-  onUpdateEmployeeDept,
-  handleStartEdit,
-  onCoachEmployee,
-  onCreateLog,
-  onDeleteEmployee
-}) {
+export default function StoreRosterMobileCard() {
+  const {
+    filteredRoster,
+    deptGoals,
+    rosterHistory,
+    activePeriod,
+    DEPARTMENTS,
+    onUpdateEmployeeDept,
+    handleStartEdit,
+    onCoachEmployee,
+    onCreateLog,
+    onDeleteEmployee
+  } = useStoreRosterContext();
 
   const getDeptStyle = (deptName) => {
     switch(deptName) {

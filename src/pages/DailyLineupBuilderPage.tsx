@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CalendarDays, Users, MapPin, Search, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { CalendarDays, Users, MapPin, Search, AlertTriangle, CheckCircle, Clock, Wand2 } from 'lucide-react';
 
 import { useStore } from '../store/useStore';
 
@@ -15,7 +15,7 @@ export default function DailyLineupBuilder() {
   const zones = ['Mobile', 'Computing', 'Home Theater', 'Connected Home', 'Front End', 'Geek Squad'];
   
   // State to hold assignments: { zoneName: [employeeId, ...] }
-  const [assignments, setAssignments] = useState({
+  const [assignments, setAssignments] = useState<Record<string, string[]>>({
     'Mobile': [],
     'Computing': [],
     'Home Theater': [],
@@ -23,6 +23,33 @@ export default function DailyLineupBuilder() {
     'Front End': [],
     'Geek Squad': []
   });
+  const [isSmartAssigning, setIsSmartAssigning] = useState(false);
+  const apiKey = useStore((state) => state.playbookSettings?.geminiApiKey);
+
+  const handleSmartAssign = async () => {
+    if (!apiKey) {
+      alert("Please configure your Gemini API key in Settings first.");
+      return;
+    }
+    setIsSmartAssigning(true);
+    try {
+      const { generateSmartZoning } = await import('../services/ai/geminiSmartZoning');
+      const newAssignments = await generateSmartZoning(roster, zones, apiKey);
+      
+      // Ensure all zones exist in the result, even if empty
+      const normalizedAssignments: Record<string, string[]> = {};
+      zones.forEach(z => {
+        normalizedAssignments[z] = newAssignments[z] || [];
+      });
+      
+      setAssignments(normalizedAssignments);
+    } catch (err) {
+      console.error(err);
+      alert("Smart Assign failed. Check console for details.");
+    } finally {
+      setIsSmartAssigning(false);
+    }
+  };
 
   const availableRoster = roster.filter(emp => {
     // Filter out employees already assigned
@@ -83,6 +110,15 @@ export default function DailyLineupBuilder() {
             onChange={(e) => setDate(e.target.value)}
             style={{ width: 'auto' }}
           />
+          <button 
+            className="btn btn-secondary" 
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.2)' }}
+            onClick={handleSmartAssign}
+            disabled={isSmartAssigning}
+          >
+            <Wand2 size={16} />
+            {isSmartAssigning ? 'Thinking...' : 'AI Smart Assign'}
+          </button>
           <button className="btn btn-primary">Save Lineup</button>
         </div>
       </div>

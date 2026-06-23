@@ -9,6 +9,7 @@ import {
   saveFollowUpTaskToCloud,
   saveMetricsToCloud
 } from '../../services/firebase';
+import { CoachingLogSchema } from '../../schemas';
 
 export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice> = (set, get) => {
   let initialPlaybookSettings = DEFAULT_PLAYBOOK_SETTINGS;
@@ -86,17 +87,26 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
 
       const periodMap1 = rosterHistory[activePeriod] || {};
       const empId = session.employeeId || Object.values(periodMap1).find((e: any) => e.name === session.customerName)?.id || `emp-${Date.now()}`;
-      const newLog = {
-        employeeId: empId,
-        employeeName: session.customerName,
-        category: session.category || 'Coaching',
-        avatar: session.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-        score: session.score || 100,
-        date: newSession.date,
-        notes: session.notes || '',
-        timestamp: Date.now(),
-        coachName: get().activeManager?.name || 'Supervisor'
-      };
+      
+      let newLog: any;
+      try {
+        newLog = CoachingLogSchema.parse({
+          id: `log-${Date.now()}`,
+          employeeId: empId,
+          employeeName: session.customerName,
+          customerName: session.customerName,
+          category: session.category || 'Coaching',
+          avatar: session.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+          score: session.score || 100,
+          date: newSession.date,
+          notes: session.notes || '',
+          timestamp: Date.now(),
+          coachName: get().activeManager?.name || 'Supervisor'
+        });
+      } catch (err) {
+        console.error('Coaching log validation failed:', err);
+        return;
+      }
       
       const updatedLogs = [newLog, ...(Array.isArray(coachingLogs) ? coachingLogs : [])];
       set({ coachingLogs: updatedLogs });

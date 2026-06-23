@@ -18,7 +18,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
   const [isLoading, setIsLoading] = useState(false);
 
   const handleKeyPress = async (num: string) => {
-    if (pin.length < 4 && !isSuccess) {
+    if (pin.length < 4 && !isSuccess && !isLoading) {
       const newPin = pin + num;
       setPin(newPin);
       

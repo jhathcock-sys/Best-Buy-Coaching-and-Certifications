@@ -10,6 +10,10 @@ import DashboardCoachingEngine from '../components/Dashboard/DashboardCoachingEn
 import DashboardTrendChart from '../components/Dashboard/DashboardTrendChart';
 import DashboardLeaderboard from '../components/Dashboard/DashboardLeaderboard';
 import MetricCards from '../components/Dashboard/MetricCards';
+import SyncManager from '../components/SyncManager';
+
+const EMPTY_OBJ = {};
+const EMPTY_ARR = [];
 
 export default function Dashboard({ 
   onNavigate, 
@@ -38,7 +42,7 @@ export default function Dashboard({
     activeManager: state.activeManager
   })));
 
-  const _rawroster = rosterHistory[activePeriod] || {};
+  const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
   const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
   const calculatedMetrics = useMemo(() => {
     if (!roster || roster.length === 0) return { memberships: 0, creditCards: 0, warranty: 0, surveys: 0, rph: 0 };
@@ -121,12 +125,12 @@ export default function Dashboard({
   }, [floorLeaderShifts, coachingLogs, roster]);
 
   const activePeriodLogs = useMemo(() => {
-    if (!activePeriod) return coachingLogs || [];
+    if (!activePeriod) return coachingLogs || EMPTY_ARR;
     const [activeMonthStr, activeYearStr] = (activePeriod || "").split(' ');
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const activeMonthIdx = months.findIndex(m => activeMonthStr.startsWith(m));
     
-    return (coachingLogs || []).filter((log: any) => {
+    return (coachingLogs || EMPTY_ARR).filter((log: any) => {
       const logDate = log.timestamp ? new Date(log.timestamp) : new Date(log.date);
       if (isNaN(logDate.getTime())) return true;
       return logDate.getMonth() === activeMonthIdx && logDate.getFullYear() === parseInt(activeYearStr);
@@ -143,7 +147,7 @@ export default function Dashboard({
         (counts as any)[dept]++;
       } else {
         for (const period of Object.keys(rosterHistory)) {
-          const empMap = rosterHistory[period] || {};
+          const empMap = rosterHistory[period] || EMPTY_OBJ;
           const histEmp = empMap[log.employeeId] || Object.values(empMap).find((e: any) => e.name === log.employeeName);
           if (histEmp && histEmp.dept in counts) {
             (counts as any)[histEmp.dept]++;

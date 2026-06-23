@@ -6,7 +6,16 @@ import { parseRentsDueDocumentGemini } from '../services/ai';
 import { useStore } from '../store/useStore';
 import { mockRentsDuePayload } from '../data/mockRentsDue';
 import { mapParsedRentsToRoster, parseRentsDueCSVLocal } from '../utils/rentsDueUtils';
-export default function RentsDueAuditor({ roster = [], activePeriod, rosterHistory = {}, onBulkImportEmployees, apiKey }) {
+const EMPTY_OBJ = {};
+
+export default function RentsDueAuditor({ onBulkImportEmployees }: { onBulkImportEmployees: any }) {
+  const apiKey = useStore((state) => state.apiKey);
+  const activePeriod = useStore((state) => state.activePeriod);
+  const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
+  
+  const rawRoster = rosterHistory[activePeriod];
+  const roster = React.useMemo(() => rawRoster ? Object.values(rawRoster).sort((a: any, b: any) => a.name.localeCompare(b.name)) : [], [rawRoster]);
+
   const [selectedPeriod, setSelectedPeriod] = useState(activePeriod);
   const [showNewPeriodInput, setShowNewPeriodInput] = useState(false);
   const [customPeriodName, setCustomPeriodName] = useState('');
@@ -26,7 +35,7 @@ export default function RentsDueAuditor({ roster = [], activePeriod, rosterHisto
 
   const comparisonRoster = React.useMemo(() => {
     if (selectedPeriod === activePeriod) return roster;
-    const rawRoster = rosterHistory[selectedPeriod] || {};
+    const rawRoster = rosterHistory[selectedPeriod] || EMPTY_OBJ;
     return Object.values(rawRoster).sort((a: any, b: any) => a.name.localeCompare(b.name));
   }, [selectedPeriod, activePeriod, roster, rosterHistory]);
 

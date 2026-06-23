@@ -12,8 +12,9 @@ You must maintain a "single source of truth" memory log of all actions taken and
 
 Example entry:
 ### [14:30:00] Refactored Navigation Component
-- **Actions Taken**: Extracted `Sidebar` from `App.jsx`, created `Navigation.css`.
-- **Completed**: The main app layout is now modular.
+- **Actions Taken**: Extracted `Sidebar` from `App.jsx`, applied premium glassmorphism tokens.
+- **Debate/Consensus**: `ux_designer` vetoed original layout due to padding asymmetry; resolved by wrapping metrics in a custom `--border-glass` grid.
+- **Completed**: The main app layout is now modular and meets aesthetic guidelines.
 
 Ensure you update the memory log before ending your turn on major tasks.
 
@@ -31,8 +32,12 @@ After every significant upgrade, change, or feature completion, you must:
 3. Deploy the updated application to the hosting environment (e.g., via `npm run build` and `firebase deploy`, or the appropriate deployment commands for this project).
 4. Log these deployment actions in the daily memory log.
 
+## Multi-Agent Debate & Consensus Gates
+1. **Honor the Veto**: If another sub-agent has issued an explicit `VETO` on a proposed change or architecture in the current thread, you are FORBIDDEN from executing any write or edit tools on that file until you have explicitly addressed their critique and proposed a compromise.
+2. **Contextual Awareness**: Before executing a tool, read the last 3-4 agent turns to see if your peer (e.g., the BI Analyst on math, or the QA Tester on null-safety) has raised a blocker.
+3. **Consensus Logging**: When writing code after a debate, include a brief 1-line comment above the refactored block noting the compromise (e.g., `// Consolidated per QA Veto on sync lifecycle`).
+
 ## Refactoring & Component Extraction Safeguards
-When extracting components, splitting large files, or refactoring state logic:
 1. **Verify Hook Signatures**: Always double-check the interface of custom hooks (e.g., `useApp()` vs `useStore()`) before destructing variables from them. Do not assume all global variables reside in the same hook.
 2. **Variable Scope & References**: Identify all variables, functions, and state referenced in the extracted block. Ensure every single one is explicitly passed as a prop, re-imported, or redefined in the new component to prevent `ReferenceError`s.
 3. **Props Verification**: Double-check that the parent component actually passes every prop that the new child component expects. Watch out for prop name mismatches.
@@ -47,7 +52,11 @@ When extracting components, splitting large files, or refactoring state logic:
 4. **Storage Hierarchy**: Prioritize Environment Variables (`.env`) for critical configuration and API keys. When hydrating state from `localStorage` on startup, implement explicit checks to ensure stale local data does not silently override `.env` values or required application defaults.
 5. **Mobile/Tablet Touch Event Recognition**: Always include `cursor: 'pointer'` in the CSS styles or class list for `<button>` elements or clickable `<div>`s that use an `onClick` handler. This ensures that iOS Safari and other tablet browsers correctly recognize and bind touch events to the element.
 6. **Gemini API Versioning**: Never hardcode deprecated AI models (like `gemini-1.5-pro`). Always use the most up-to-date stable model identifiers (e.g. `gemini-3.5-pro` or `gemini-3.5-flash`) across backend functions and frontend services to prevent 400 Invalid Model API rejections.
-7. **Utility-First Styling vs. Inline Styles**: Avoid sprawling `style={{...}}` blocks in React components. Always prefer adding and reusing utility classes (e.g., `.flex-between`, `.gap-md`, `.flex-column`) in `index.css`. This prevents the React components from becoming cluttered with visual configuration.
+7. **Premium Design Tokens vs. Raw Tailwind/Inline Styles**: Avoid sprawling `style={{...}}` blocks. Furthermore, do not use generic Tailwind color utilities when custom tokens exist. All agents must strictly utilize the CSS theme variables defined in `src/index.css` via utility classes or arbitrary values matching:
+   - Backgrounds: `--bg-space`, `--bg-obsidian`, `--border-glass`
+   - Accents/States: `--success-glow`, `--bby-yellow`, `--bby-blue`
+   - Typography & Motion: Font families `Outfit` (headings) / `Inter` (body), and `--transition-normal`.
+   Incrementally refactor legacy inline styles to use these tokens whenever a file is opened.
 8. **Aggregated Metric Calculations**: Be highly cautious of how raw counts (like 5-Star Surveys, Applications, or Memberships) are aggregated. Do not inadvertently calculate an *average* of a count metric across the roster when evaluating total store-wide performance; you must sum the counts instead to get an accurate total.
 9. **PowerShell Compatibility**: The user's terminal environment uses Windows PowerShell. Use semicolons (`;`) instead of double ampersands (`&&`) when chaining terminal commands (e.g., `npm run build ; git add .`).
 10. **The Boy Scout Rule (CSS Utilities)**: Do not perform global, app-wide eradications of inline `style={{...}}` blocks, as this introduces high risk of visual regressions. Instead, whenever you open a component to add a feature or fix a bug, incrementally refactor its inline styles to use `index.css` utility classes (e.g. `className="flex-center p-md"`). Leave the file cleaner than you found it.

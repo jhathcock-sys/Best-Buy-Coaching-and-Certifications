@@ -10,44 +10,49 @@ service cloud.firestore {
              request.auth.token.email.matches('^s' + storeId + '_p.*@bby\\.app$');
     }
 
+    // Function to verify if user has manager role
+    function isRoleManager() {
+      return request.auth != null && request.auth.token.role == 'manager';
+    }
+
     match /stores/{storeId} {
       
-      allow read: if isTenantManager(storeId) || request.auth == null; // Temporarily allow public read for legacy logins
+      allow read: if isTenantManager(storeId);
       allow write: if isTenantManager(storeId);
       
       match /users/{userId} {
-        allow read: if true; // Public read needed to resolve PINs before true auth
+        allow read: if isTenantManager(storeId);
         allow write: if isTenantManager(storeId);
       }
 
       match /data/{document=**} {
-        allow read: if isTenantManager(storeId) || request.auth == null;
+        allow read: if isTenantManager(storeId);
         allow write: if isTenantManager(storeId);
       }
       
       // Subcollections
       match /periods/{document=**} {
-        allow read: if isTenantManager(storeId) || request.auth == null;
+        allow read: if isTenantManager(storeId);
         allow write: if isTenantManager(storeId);
       }
       
       match /coachingLogs/{document=**} {
-        allow read: if isTenantManager(storeId) || request.auth == null;
-        allow write: if isTenantManager(storeId);
+        allow read: if isTenantManager(storeId);
+        allow write: if isTenantManager(storeId) && isRoleManager();
       }
 
       match /dailySnapshots/{document=**} {
-        allow read: if isTenantManager(storeId) || request.auth == null;
+        allow read: if isTenantManager(storeId);
         allow write: if isTenantManager(storeId);
       }
 
       match /floorLeaderShifts/{document=**} {
-        allow read: if isTenantManager(storeId) || request.auth == null;
-        allow write: if isTenantManager(storeId);
+        allow read: if isTenantManager(storeId);
+        allow write: if isTenantManager(storeId) && isRoleManager();
       }
 
       match /followUpTasks/{document=**} {
-        allow read: if isTenantManager(storeId) || request.auth == null;
+        allow read: if isTenantManager(storeId);
         allow write: if isTenantManager(storeId);
       }
     }

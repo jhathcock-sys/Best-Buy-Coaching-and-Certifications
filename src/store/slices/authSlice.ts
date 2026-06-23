@@ -61,21 +61,27 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
     },
     login: async (pin, storeId) => {
       let manager = null;
-      
-      // Try to fetch from cloud 'users' collection first
+      let authSuccess = false;
+
+      // 1. Try to authenticate first so we can bypass secured read rules
       if (get().dbConnected) {
+        authSuccess = await signInTenant(storeId, pin);
+      }
+      
+      // 2. Fetch from cloud 'users' collection if authenticated
+      if (get().dbConnected && authSuccess) {
         manager = await getUserByPin(storeId, pin);
       }
       
-      // Fallback to legacy local state if not found or offline
+      // 3. Fallback to legacy local state if not found or offline/not auth'd yet
       if (!manager) {
         manager = get().managers.find(m => m.pin === pin) || null;
       }
 
       if (manager) {
-        // Now authenticate with true Firebase Auth to secure the rules
-        if (get().dbConnected) {
-          let authSuccess = await signInTenant(storeId, pin);
+        // 4. Authenticate/Create if we bypassed step 1 because they were in local state
+        if (get().dbConnected && !authSuccess) {
+          authSuccess = await signInTenant(storeId, pin);
           if (!authSuccess) {
             authSuccess = await createTenantAuth(storeId, pin);
             if (!authSuccess) console.error("Failed true Firebase authentication. Writes will be rejected.");

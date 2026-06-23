@@ -17,7 +17,7 @@ const BreakroomTV = lazy(() => import('./components/BreakroomTV'));
 const DailyLineupBuilder = lazy(() => import('./components/DailyLineupBuilder'));
 import { Compass, Users, BookOpen, LayoutDashboard, Sparkles, ShieldCheck, ClipboardList, Archive, Clock, ChevronDown, ChevronRight, TrendingUp } from 'lucide-react';
 import { subscribeToActivePeriod } from './services/firebase';
-import { AppProvider, useApp } from './context/AppContext';
+
 import { useStore } from './store/useStore';
 import ErrorBoundary from './components/ErrorBoundary';
 import Sidebar from './components/layout/Sidebar';
@@ -39,20 +39,18 @@ const safeJsonParse = (str, fallback) => {
 export default function App() {
   return (
     <ErrorBoundary>
-      <AppProvider>
-        <Toaster position="top-right" />
-        <AppContent />
-      </AppProvider>
+      <Toaster position="top-right" />
+      <AppContent />
     </ErrorBoundary>
   );
 }
 
 
 function AppContent() {
-  const { 
-    activeView, 
-    setActiveView 
-  } = useApp();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const activeView = location.pathname === '/' ? 'dashboard' : location.pathname.substring(1);
+  const setActiveView = (view: string) => navigate(view === 'dashboard' ? '/' : `/${view}`);
   
   // Zustand Store Selectors
   const rosterHistory = useStore((state) => state.rosterHistory);

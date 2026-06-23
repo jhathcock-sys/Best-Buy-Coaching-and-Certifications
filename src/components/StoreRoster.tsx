@@ -11,7 +11,6 @@ import StoreRosterMobileCard from './StoreRoster/StoreRosterMobileCard';
 import RosterAuditor from './RosterAuditor';
 import RentsDueAuditor from './RentsDueAuditor';
 
-import { useApp } from '../context/AppContext';
 import { useStore } from '../store/useStore';
 import { DeptGoal } from '../types';
 

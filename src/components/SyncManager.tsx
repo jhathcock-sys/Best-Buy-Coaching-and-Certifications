@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { useApp } from '../context/AppContext';
 import { 
   subscribeToActivePeriod, 
   subscribeToRosterHistory, 

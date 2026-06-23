@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { STANDARD_SCENARIOS, runOfflineSimulationStep, runGeminiSimulationStep, evaluateSessionOffline, evaluateSessionGemini } from '../services/ai';
-import { ArrowLeft, RefreshCw, Send, CheckCircle, Sparkles, BookOpen } from 'lucide-react';
-import { useApp } from '../context/AppContext';
+import { ShieldAlert, Sparkles, Key, Check, Plus, Trash2, BookOpen, Compass, Users, UserPlus, Edit2, Eye, EyeOff, Cpu, RefreshCw, ArrowLeft, Send, CheckCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import RoleplayConfiguration from './RoleplayCenter/RoleplayConfiguration';
 import RoleplayActiveSession from './RoleplayCenter/RoleplayActiveSession';
 import RoleplayResults from './RoleplayCenter/RoleplayResults';
 
 export default function RoleplayCenter() {
-  const { setActiveView } = useApp();
+  const navigate = useNavigate();
+  const setActiveView = (view: string) => navigate(view === 'dashboard' ? '/' : `/${view}`);
 const apiKey = useStore((state) => state.apiKey);
   const customScenarios = useStore((state) => state.customScenarios) || [];
   const playbookSettings = useStore((state) => state.playbookSettings);

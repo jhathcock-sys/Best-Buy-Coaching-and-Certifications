@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useApp } from '../context/AppContext';
 import { useStore } from '../store/useStore';
 import { EMPLOYEE_SCENARIOS } from '../services/ai';
 

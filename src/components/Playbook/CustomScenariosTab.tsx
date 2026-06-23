@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Trash2, Sparkles, Compass, Wand2, Loader2 } from 'lucide-react';
 import { generateCustomScenario } from '../../services/ai';
-import { useApp } from '../../context/AppContext';
 import { useStore } from '../../store/useStore';
 
 export default function CustomScenariosTab({ customScenarios = [], onAddCustomScenario, onDeleteCustomScenario }) {

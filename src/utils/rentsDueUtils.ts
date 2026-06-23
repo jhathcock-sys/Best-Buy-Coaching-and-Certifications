@@ -27,6 +27,9 @@ export const mapParsedRentsToRoster = (parsedEmployees: any[], comparisonRoster:
       hours: calculatedHours,
       rph: parsedRPH,
       rphTarget: rphTarget,
+      creditCards: parsedEmp.apps || 0,
+      memberships: parsedEmp.memberships || 0,
+      warranty: parsedEmp.warranty || 0,
       metrics: {
         ...(existing ? existing.metrics : { rev: 0, bp: 0, pm: 0, bby: 0 }),
         rev: parsedRev,

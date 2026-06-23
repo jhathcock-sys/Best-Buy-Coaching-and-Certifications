@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Award, Trophy, Target, Star, Flame, MonitorPlay, TrendingUp, X } from 'lucide-react';
 
-import { useApp } from '../context/AppContext';
 import { useStore } from '../store/useStore';
 
 export default function BreakroomTV({ onClose }: any) {

@@ -7,7 +7,6 @@ import { useLiveFloorShadow } from '../hooks/useLiveFloorShadow';
 import { generateCoachingLogGemini } from '../services/ai';
 
 
-import { useApp } from '../context/AppContext';
 import { useStore } from '../store/useStore';
 
 export default function LiveFloorShadow({ 

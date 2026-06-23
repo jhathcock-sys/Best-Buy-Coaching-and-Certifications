@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { ShieldAlert, Sparkles, Key, Check, Plus, Trash2, BookOpen, Compass, Users, UserPlus, Edit2, Eye, EyeOff, Cpu, RefreshCw } from 'lucide-react';
-import { useApp } from '../context/AppContext';
 import { testLatency } from '../services/firebase';
 
 import { useStore } from '../store/useStore';

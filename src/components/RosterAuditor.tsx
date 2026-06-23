@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Sparkles, FileText, BarChart3, AlertCircle, RefreshCw } from 'lucide-react';
-import { useApp } from '../context/AppContext';
 import { useStore } from '../store/useStore';
 import { auditPerformanceWorkbookGemini } from '../services/ai';
 

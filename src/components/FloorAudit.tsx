@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Camera, CheckCircle, AlertCircle, RefreshCw, Sparkles, FileText, ClipboardCopy } from 'lucide-react';
-import { useApp } from '../context/AppContext';
 import { useStore } from '../store/useStore';
 import { auditStoreFloorGemini } from '../services/ai';
 

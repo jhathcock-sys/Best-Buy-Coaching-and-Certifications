@@ -33,10 +33,15 @@ export default function DailyLineupBuilder() {
     return true;
   });
 
-  const handleAssign = (empId, zone) => {
+  const handleAssign = (empId, targetZone) => {
     setAssignments(prev => {
       const newAssignments = { ...prev };
-      newAssignments[zone] = [...newAssignments[zone], empId];
+      // Remove from any existing zone first to support moving between zones
+      Object.keys(newAssignments).forEach(z => {
+        newAssignments[z] = newAssignments[z].filter(id => id !== empId);
+      });
+      // Add to target zone
+      newAssignments[targetZone] = [...newAssignments[targetZone], empId];
       return newAssignments;
     });
   };
@@ -98,7 +103,17 @@ export default function DailyLineupBuilder() {
                   </span>
                 </div>
                 
-                <div style={{ minHeight: '100px', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div 
+                  style={{ minHeight: '100px', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const empId = e.dataTransfer.getData('text/plain');
+                    if (empId) {
+                      handleAssign(empId, zone);
+                    }
+                  }}
+                >
                   {assignments[zone].length === 0 ? (
                     <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'center', margin: 'auto' }}>
                       Drag here or click assign
@@ -108,7 +123,12 @@ export default function DailyLineupBuilder() {
                       const emp = roster.find(e => e.id === empId);
                       if (!emp) return null;
                       return (
-                        <div key={empId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 0.75rem', borderRadius: '6px' }}>
+                        <div 
+                          key={empId} 
+                          draggable
+                          onDragStart={(e) => e.dataTransfer.setData('text/plain', empId)}
+                          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 0.75rem', borderRadius: '6px', cursor: 'grab' }}
+                        >
                           <span style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 600 }}>{emp.name}</span>
                           <button 
                             onClick={() => handleUnassign(empId, zone)}
@@ -147,7 +167,12 @@ export default function DailyLineupBuilder() {
               <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'center' }}>No available associates</p>
             ) : (
               availableRoster.map(emp => (
-                <div key={emp.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-glass)', borderRadius: '8px', padding: '0.75rem' }}>
+                <div 
+                  key={emp.id} 
+                  draggable
+                  onDragStart={(e) => e.dataTransfer.setData('text/plain', emp.id)}
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-glass)', borderRadius: '8px', padding: '0.75rem', cursor: 'grab' }}
+                >
                   <div style={{ fontWeight: 600, color: '#fff', fontSize: '0.9rem', marginBottom: '0.25rem' }}>{emp.name}</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>{emp.dept}</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>

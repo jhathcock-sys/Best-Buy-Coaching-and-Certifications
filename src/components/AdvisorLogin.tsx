@@ -4,11 +4,12 @@ import { useStore } from '../store/useStore';
 
 interface AdvisorLoginProps {
   onLoginSuccess: (id: string, employeeData: any) => void;
-  roster?: any[];
   dbConnected: boolean;
 }
 
-export default function AdvisorLogin({ onLoginSuccess, roster = [], dbConnected }: AdvisorLoginProps) {
+export default function AdvisorLogin({ onLoginSuccess, dbConnected }: AdvisorLoginProps) {
+  const activePeriod = useStore(state => state.activePeriod);
+  const roster = useStore(state => state.rosterHistory[activePeriod] || []);
   const [employeeId, setEmployeeId] = useState('');
   const [storeId, setStoreId] = useState(() => localStorage.getItem('bby_last_store') || '');
   const [error, setError] = useState('');

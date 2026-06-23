@@ -7,10 +7,10 @@ interface LoginProps {
   correctPin?: string;
   onLoginSuccess: (pin: string, storeId: string) => void;
   dbConnected: boolean;
-  managers?: Manager[];
 }
 
-export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected, managers = [] }: LoginProps) {
+export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected }: LoginProps) {
+  const managers = useStore((state) => state.managers) || [];
   const [pin, setPin] = useState('');
   const [storeId, setStoreId] = useState(() => localStorage.getItem('bby_last_store') || '');
   const [isShaking, setIsShaking] = useState(false);

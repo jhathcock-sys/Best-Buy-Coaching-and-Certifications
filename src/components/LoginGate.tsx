@@ -8,11 +8,9 @@ interface LoginGateProps {
   correctPin?: string;
   onLoginSuccess: (pin: string, storeId: string, type: 'supervisor' | 'advisor', advisorData?: any) => void;
   dbConnected: boolean;
-  managers?: any[];
-  roster?: any[];
 }
 
-export default function LoginGate({ correctPin = '1234', onLoginSuccess, dbConnected, managers = [], roster = [] }: LoginGateProps) {
+export default function LoginGate({ correctPin = '1234', onLoginSuccess, dbConnected }: LoginGateProps) {
   const [selectedPersona, setSelectedPersona] = useState<'none' | 'supervisor' | 'advisor'>('none');
 
   if (selectedPersona === 'supervisor') {
@@ -29,7 +27,6 @@ export default function LoginGate({ correctPin = '1234', onLoginSuccess, dbConne
           correctPin={correctPin}
           onLoginSuccess={(pin, storeId) => onLoginSuccess(pin, storeId, 'supervisor')}
           dbConnected={dbConnected}
-          managers={managers}
         />
       </div>
     );
@@ -47,7 +44,6 @@ export default function LoginGate({ correctPin = '1234', onLoginSuccess, dbConne
         </button>
         <AdvisorLogin 
           onLoginSuccess={(id, data) => onLoginSuccess('', useStore.getState().storeId || '1480', 'advisor', data)}
-          roster={roster}
           dbConnected={dbConnected}
         />
       </div>

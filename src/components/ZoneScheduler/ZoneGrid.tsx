@@ -1,4 +1,5 @@
 import React from 'react';
+import './ZoneGrid.css';
 
 export default function ZoneGrid({
   zones,
@@ -11,33 +12,21 @@ export default function ZoneGrid({
   onToggleBreakState
 }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+    <div className="zone-grid-container">
       {zones.map(zone => {
         const zoneEmps = zoneAssignments[zone] || [];
 
         return (
-          <div 
-            key={zone} 
-            style={{ 
-              padding: '1.25rem', 
-              background: 'rgba(255, 255, 255, 0.01)', 
-              border: '1px solid var(--border-glass)', 
-              borderRadius: '16px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '1rem'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '0.5rem' }}>
-              <h4 style={{ fontWeight: 700, color: '#fff', fontSize: '0.9rem' }}>{zone}</h4>
-              <span className="tag-pill" style={{ fontSize: '0.65rem' }}>{zoneEmps.length} active</span>
+          <div key={zone} className="zone-card">
+            <div className="zone-card-header">
+              <h4 className="zone-card-title">{zone}</h4>
+              <span className="tag-pill zone-tag">{zoneEmps.length} active</span>
             </div>
 
             {/* Assign Select */}
             <div className="form-group" style={{ margin: 0 }}>
               <select 
-                className="form-control"
-                style={{ fontSize: '0.75rem', height: '32px', padding: '0.2rem 0.5rem', background: '#0e1220' }}
+                className="form-control zone-select"
                 value=""
                 onChange={(e) => onAssignZone(zone, e.target.value)}
               >
@@ -49,9 +38,9 @@ export default function ZoneGrid({
             </div>
 
             {/* Assigned List */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', minHeight: '80px' }}>
+            <div className="zone-emp-list">
               {zoneEmps.length === 0 ? (
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed rgba(255,255,255,0.04)', borderRadius: '8px', color: 'var(--text-muted)', fontSize: '0.75rem', textAlign: 'center', padding: '1rem' }}>
+                <div className="zone-unstaffed">
                   Zone unstaffed
                 </div>
               ) : (
@@ -64,125 +53,65 @@ export default function ZoneGrid({
                   return (
                     <div 
                       key={empId} 
-                      style={{ 
-                        padding: '0.75rem', 
-                        background: isOnBreak ? 'rgba(0, 70, 190, 0.05)' : 'rgba(255,255,255,0.02)', 
-                        border: `1px solid ${isOnBreak ? 'rgba(0, 70, 190, 0.25)' : 'var(--border-glass)'}`, 
-                        borderRadius: '10px',
-                        fontSize: '0.8rem',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.35rem',
-                        opacity: isOnBreak ? 0.7 : 1,
-                        transition: 'all 0.2s ease'
-                      }}
+                      className={`zone-emp-card ${isOnBreak ? 'zone-emp-card-break' : 'zone-emp-card-active'}`}
                     >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontWeight: 600, color: '#fff', textDecoration: isOnBreak ? 'line-through' : 'none' }}>{emp.name}</span>
+                      <div className="zone-emp-header">
+                        <span className={`zone-emp-name ${isOnBreak ? 'zone-emp-name-break' : ''}`}>{emp.name}</span>
                         <button 
-                          style={{ background: 'transparent', border: 'none', color: 'var(--error)', fontSize: '0.7rem', cursor: 'pointer', padding: 0 }}
+                          className="zone-emp-remove"
                           onClick={() => onUnassignZone(zone, empId)}
                         >
                           Remove
                         </button>
                       </div>
                       
-                      <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontSize: '0.7rem' }}>
+                      <div className="zone-emp-metrics">
                         <span>Membs: {emp.memberships}</span>
                         <span>CCs: {emp.creditCards}</span>
                         <span>GSP: {emp.warranty}%</span>
                       </div>
 
-                      <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap', marginTop: '0.15rem' }}>
+                      <div className="zone-emp-tags">
                         {emp.focus5 && (
-                          <span style={{ fontSize: '0.6rem', color: 'var(--error)', fontWeight: 700 }}>
+                          <span className="zone-emp-focus">
                             🔥 FOCUS 5
                           </span>
                         )}
                         {emp.gap && emp.gap !== 'None' && (
-                          <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>
+                          <span className="zone-emp-gap">
                             ⚠️ Gap: {emp.gap.split(' & ')[0]}
                           </span>
                         )}
                       </div>
 
                       {/* Manual Break Controls */}
-                      <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center', 
-                        marginTop: '0.45rem', 
-                        paddingTop: '0.45rem', 
-                        borderTop: '1px solid rgba(255,255,255,0.03)' 
-                      }}>
+                      <div className="zone-break-controls">
                         {isOnBreak ? (
-                          <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.7rem', color: 'var(--bby-yellow)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}>
+                          <div className="zone-break-active">
+                            <span className="zone-break-text">
                               {isOnBreak === '15m' ? '☕ On 15m Break' : '🍔 On 30m Lunch'}
                             </span>
                             <button
-                              style={{ 
-                                background: 'rgba(255,255,255,0.05)', 
-                                border: '1px solid var(--border-glass)', 
-                                borderRadius: '6px', 
-                                fontSize: '0.65rem', 
-                                color: '#fff', 
-                                padding: '0.15rem 0.4rem', 
-                                cursor: 'pointer' 
-                              }}
+                              className="zone-break-end-btn"
                               onClick={() => onToggleBreakState(empId, null)}
                             >
                               End Break
                             </button>
                           </div>
                         ) : (
-                          <div style={{ display: 'flex', justifyContent: 'center', textAlign: 'center', alignContent: 'center', alignItems: 'center', gap: '0.5rem', width: '100%' }}>
-                            <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>Send on:</span>
-                            <div style={{ display: 'flex', gap: '0.25rem', marginLeft: 'auto' }}>
+                          <div className="zone-break-inactive">
+                            <span className="zone-break-label">Send on:</span>
+                            <div className="zone-break-btns">
                               <button
                                 type="button"
-                                style={{
-                                  background: 'rgba(255,255,255,0.02)',
-                                  border: '1px solid var(--border-glass)',
-                                  borderRadius: '4px',
-                                  fontSize: '0.65rem',
-                                  color: 'var(--text-secondary)',
-                                  padding: '0.15rem 0.35rem',
-                                  cursor: 'pointer',
-                                  transition: 'all 0.15s ease'
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.background = 'rgba(0, 70, 190, 0.15)';
-                                  e.currentTarget.style.color = '#fff';
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
-                                  e.currentTarget.style.color = 'var(--text-secondary)';
-                                }}
+                                className="zone-break-btn"
                                 onClick={() => onToggleBreakState(empId, '15m')}
                               >
                                 ☕ 15m
                               </button>
                               <button
                                 type="button"
-                                style={{
-                                  background: 'rgba(255,255,255,0.02)',
-                                  border: '1px solid var(--border-glass)',
-                                  borderRadius: '4px',
-                                  fontSize: '0.65rem',
-                                  color: 'var(--text-secondary)',
-                                  padding: '0.15rem 0.35rem',
-                                  cursor: 'pointer',
-                                  transition: 'all 0.15s ease'
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.background = 'rgba(0, 70, 190, 0.15)';
-                                  e.currentTarget.style.color = '#fff';
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
-                                  e.currentTarget.style.color = 'var(--text-secondary)';
-                                }}
+                                className="zone-break-btn"
                                 onClick={() => onToggleBreakState(empId, '30m')}
                               >
                                 🍔 30m

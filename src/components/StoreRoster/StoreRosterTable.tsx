@@ -2,6 +2,7 @@ import React from 'react';
 import { Users, Clock, Trash2, User, Wand2 } from 'lucide-react';
 import { RosterMetricCell, getEmployeeGap, getMetricClass } from './RosterMetricCell';
 import { calculateCVI } from '../../store/cviHelper';
+import './StoreRosterTable.css';
 
 export default function StoreRosterTable({
   filteredRoster,
@@ -57,38 +58,38 @@ export default function StoreRosterTable({
     return '';
   };
 
-  const headerStyle = (isCenter = false) => ({
-    padding: isDense ? '0.5rem 1rem' : '1rem 1rem', 
-    fontWeight: 600, 
-    textAlign: isCenter ? 'center' : 'left',
-    cursor: 'pointer',
-    userSelect: 'none'
-  } as React.CSSProperties);
+  const headerClass = (isCenter = false) => {
+    return `roster-th ${isDense ? 'roster-th-dense' : 'roster-th-standard'} ${isCenter ? 'roster-th-center' : ''}`;
+  };
+
+  const tdClass = (isCenter = false, isRight = false) => {
+    return `roster-td ${isDense ? 'roster-td-dense' : 'roster-td-standard'} ${isCenter ? 'roster-td-center' : ''} ${isRight ? 'roster-td-right' : ''}`;
+  };
 
   return (
-    <div className="desktop-only" style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
+    <div className="desktop-only roster-table-container">
+      <table className="roster-table">
         <thead>
-          <tr style={{ background: 'rgba(16, 24, 48, 0.7)', borderBottom: '1px solid var(--border-glass)', color: 'var(--text-secondary)' }}>
-            <th style={headerStyle(false)} onClick={() => requestSort('name')}>Associate{getSortIcon('name')}</th>
-            {visibleCols.hours && <th style={headerStyle(true)} onClick={() => requestSort('hours')}><Clock size={14} style={{ display: 'inline', marginRight: '0.25rem', verticalAlign: 'text-bottom' }} />Hours{getSortIcon('hours')}</th>}
-            {visibleCols.dept && <th style={headerStyle(false)} onClick={() => requestSort('dept')}>Dept{getSortIcon('dept')}</th>}
-            {visibleCols.memberships && <th style={headerStyle(true)} onClick={() => requestSort('memberships')}>PMs{getSortIcon('memberships')}</th>}
-            {visibleCols.creditCards && <th style={headerStyle(true)} onClick={() => requestSort('creditCards')}>Apps{getSortIcon('creditCards')}</th>}
-            {visibleCols.warranty && <th style={headerStyle(true)} onClick={() => requestSort('warranty')}>GSP{getSortIcon('warranty')}</th>}
-            {visibleCols.surveys && <th style={headerStyle(true)} onClick={() => requestSort('surveys')}>5*{getSortIcon('surveys')}</th>}
-            {visibleCols.rph && <th style={headerStyle(true)} onClick={() => requestSort('rph')}>RPH{getSortIcon('rph')}</th>}
-            {visibleCols.basket && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center', whiteSpace: 'nowrap' }}>Basket ($)</th>}
-            {visibleCols.attach && <th style={{ padding: isDense ? '0.5rem 0.75rem' : '1rem 0.75rem', fontWeight: 600, textAlign: 'center' }}>Dept Attach</th>}
-            {visibleCols.status && <th style={{ padding: isDense ? '0.5rem 1rem' : '1rem 1rem', fontWeight: 600 }}>Status</th>}
-            <th style={{ padding: isDense ? '0.5rem 1rem' : '1rem 1rem', fontWeight: 600, textAlign: 'right', whiteSpace: 'nowrap', width: '140px' }}>Actions</th>
+          <tr>
+            <th className={headerClass(false)} onClick={() => requestSort('name')}>Associate{getSortIcon('name')}</th>
+            {visibleCols.hours && <th className={headerClass(true)} onClick={() => requestSort('hours')}><Clock size={14} className="roster-icon-inline" />Hours{getSortIcon('hours')}</th>}
+            {visibleCols.dept && <th className={headerClass(false)} onClick={() => requestSort('dept')}>Dept{getSortIcon('dept')}</th>}
+            {visibleCols.memberships && <th className={headerClass(true)} onClick={() => requestSort('memberships')}>PMs{getSortIcon('memberships')}</th>}
+            {visibleCols.creditCards && <th className={headerClass(true)} onClick={() => requestSort('creditCards')}>Apps{getSortIcon('creditCards')}</th>}
+            {visibleCols.warranty && <th className={headerClass(true)} onClick={() => requestSort('warranty')}>GSP{getSortIcon('warranty')}</th>}
+            {visibleCols.surveys && <th className={headerClass(true)} onClick={() => requestSort('surveys')}>5*{getSortIcon('surveys')}</th>}
+            {visibleCols.rph && <th className={headerClass(true)} onClick={() => requestSort('rph')}>RPH{getSortIcon('rph')}</th>}
+            {visibleCols.basket && <th className={`${headerClass(true)} roster-th-nowrap`}>Basket ($)</th>}
+            {visibleCols.attach && <th className={headerClass(true)}>Dept Attach</th>}
+            {visibleCols.status && <th className={headerClass(false)}>Status</th>}
+            <th className={`${headerClass(false)} roster-th-right roster-th-nowrap roster-th-actions`}>Actions</th>
           </tr>
         </thead>
         <tbody>
           {filteredRoster.length === 0 ? (
             <tr>
-              <td colSpan={2 + Object.values(visibleCols).filter(Boolean).length} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                <Users size={32} color="var(--text-muted)" style={{ marginBottom: '0.75rem', opacity: 0.5 }} />
+              <td colSpan={2 + Object.values(visibleCols).filter(Boolean).length} className="roster-empty-cell">
+                <Users size={32} className="roster-empty-icon" />
                 <p>No associates match your active filters.</p>
               </td>
             </tr>
@@ -104,27 +105,24 @@ export default function StoreRosterTable({
               return (
                 <tr 
                   key={emp.id} 
+                  className="roster-row"
                   style={{ 
-                    borderBottom: '1px solid var(--border-glass)',
                     borderLeft: rowBorderLeft,
-                    background: rowBg,
-                    transition: 'background 0.25s ease'
+                    background: rowBg
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.background = hoverBg}
                   onMouseLeave={(e) => e.currentTarget.style.background = rowBg}
                 >
-                  <td style={{ padding: isDense ? '0.45rem 1rem' : '0.85rem 1rem', fontWeight: 600, color: '#fff' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', alignItems: 'flex-start' }}>
+                  <td className={tdClass(false)}>
+                    <div className="flex-column gap-sm align-start">
                       <span 
-                        style={{ cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'rgba(255,255,255,0.3)', fontSize: '0.925rem', fontWeight: 700 }}
+                        className="roster-name-link"
                         onClick={() => setSelectedProfileEmployee(emp)}
-                        onMouseEnter={(e) => e.currentTarget.style.color = 'var(--bby-blue)'}
-                        onMouseLeave={(e) => e.currentTarget.style.color = '#fff'}
                       >
                         {emp.name}
                       </span>
                       {emp.employeeNumber && (
-                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'monospace', marginTop: '-0.15rem' }}>
+                        <span className="roster-emp-id">
                           ID: {emp.employeeNumber}
                         </span>
                       )}
@@ -152,37 +150,17 @@ export default function StoreRosterTable({
                             cviIcon = '?';
                           }
                           return (
-                            <span style={{ 
-                              fontSize: '0.65rem', 
-                              fontWeight: 700, 
+                            <span className="cvi-badge" style={{ 
                               background: badgeBg,
                               color: badgeColor,
-                              border: `1px solid ${badgeBorder}`,
-                              padding: '0.15rem 0.4rem', 
-                              borderRadius: '4px',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '0.2rem',
-                              letterSpacing: '0.02em',
-                              whiteSpace: 'nowrap'
+                              borderColor: badgeBorder
                             }}>
                               <span style={{ fontSize: '0.55rem' }}>{cviIcon}</span> {cvi.replace(/CVI/g, '').trim()}
                             </span>
                           );
                         })()}
                         {emp.focus5 && (
-                          <span style={{ 
-                            fontSize: '0.65rem', 
-                            fontWeight: 700, 
-                            background: 'rgba(239, 68, 68, 0.15)',
-                            color: 'var(--error)',
-                            border: '1px solid rgba(239, 68, 68, 0.3)',
-                            padding: '0.15rem 0.4rem', 
-                            borderRadius: '4px',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            whiteSpace: 'nowrap'
-                          }}>
+                          <span className="focus5-badge">
                             ? Focus 5
                           </span>
                         )}
@@ -191,18 +169,14 @@ export default function StoreRosterTable({
                   </td>
                   
                   {visibleCols.hours && (
-                    <td style={{ padding: isDense ? '0.45rem 0.5rem' : '0.85rem 0.75rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                    <td className={`${tdClass(true)} text-secondary`}>
                       {emp.hours}
                     </td>
                   )}
 
                   {visibleCols.dept && (
-                    <td style={{ padding: isDense ? '0.45rem 1rem' : '0.85rem 1rem' }}>
-                      <span className="tag-pill" style={{ 
-                        background: 'rgba(255,255,255,0.05)',
-                        color: 'var(--text-secondary)',
-                        fontSize: '0.75rem'
-                      }}>
+                    <td className={tdClass(false)}>
+                      <span className="tag-pill tag-pill-dept">
                         {emp.dept}
                       </span>
                     </td>
@@ -225,16 +199,16 @@ export default function StoreRosterTable({
                   )}
 
                   {visibleCols.status && (
-                    <td style={{ padding: isDense ? '0.45rem 1rem' : '0.85rem 1rem' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', alignItems: 'flex-start' }}>
+                    <td className={tdClass(false)}>
+                      <div className="flex-column align-start gap-sm">
                         {gap.split(' & ').map((g, i) => (
                           <div key={i}>
                             {g === 'None' || !g || g.startsWith('None') ? (
-                              <span className="tag-pill" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', borderColor: 'rgba(16, 185, 129, 0.2)' }}>
+                              <span className="tag-pill tag-pill-success">
                                 Hitting Target
                               </span>
                             ) : (
-                              <span className="tag-pill" style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
+                              <span className="tag-pill tag-pill-error">
                                 Gap: {g}
                               </span>
                             )}
@@ -244,33 +218,30 @@ export default function StoreRosterTable({
                     </td>
                   )}
 
-                  <td style={{ padding: isDense ? '0.45rem 1rem' : '0.85rem 1rem', textAlign: 'right' }}>
+                  <td className={tdClass(false, true)}>
                     <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', flexWrap: 'nowrap' }}>
                       <button 
-                        className="btn btn-secondary" 
+                        className="btn btn-secondary action-btn-sm" 
                         title="View Profile"
                         onClick={() => setSelectedProfileEmployee(emp)}
-                        style={{ padding: '0.4rem 0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                       >
                         <User size={16} />
                       </button>
                       <button 
-                        className="btn btn-secondary" 
+                        className="btn btn-secondary action-btn-sm action-btn-wizard" 
                         title="Performance Wizard"
                         onClick={() => handleStartEdit(emp)}
-                        style={{ padding: '0.4rem 0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--bby-yellow)' }}
                       >
                         <Wand2 size={16} />
                       </button>
                       <button 
-                        className="btn btn-secondary" 
+                        className="btn btn-secondary action-btn-sm action-btn-delete" 
                         title="Delete Employee"
                         onClick={() => {
                           if (window.confirm(`Are you sure you want to delete ${emp.name}?`)) {
                             onDeleteEmployee(emp.id);
                           }
                         }}
-                        style={{ padding: '0.4rem 0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--error)', borderColor: 'rgba(239, 68, 68, 0.3)' }}
                       >
                         <Trash2 size={16} />
                       </button>

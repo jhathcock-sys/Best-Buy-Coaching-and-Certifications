@@ -24,10 +24,6 @@ export default function PlaybookStudio() {
   const customScenarios = useStore(state => state.customScenarios) || [];
   const onAddCustomScenario = useStore(state => state.importCustomScenario);
   const onDeleteCustomScenario = useStore(state => state.deleteCustomScenario);
-  const rosterHistory = useStore(state => state.rosterHistory) || {};
-  const coachingLogs = useStore(state => state.coachingLogs) || [];
-  const followUpTasks = useStore(state => state.followUpTasks) || [];
-  const floorLeaderShifts = useStore(state => state.floorLeaderShifts) || [];
   const managers = useStore(state => state.managers) || [];
   const onSaveManagers = useStore(state => state.saveManagers);
   const [activeTab, setActiveTab] = useState('engine');
@@ -172,10 +168,6 @@ export default function PlaybookStudio() {
           firebaseConfig={firebaseConfig}
           setFirebaseConfig={setFirebaseConfig}
           handleSaveFirebaseConfig={handleSaveFirebaseConfig}
-          rosterHistory={rosterHistory}
-          coachingLogs={coachingLogs}
-          followUpTasks={followUpTasks}
-          floorLeaderShifts={floorLeaderShifts}
         />
       )}
 

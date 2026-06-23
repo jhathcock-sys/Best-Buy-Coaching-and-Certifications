@@ -139,62 +139,33 @@ export const RosterMetricCell = ({
   
   if (!isDeptMetric) {
     return (
-      <td style={{ padding: isDense ? '0.45rem 0.5rem' : '0.85rem 0.75rem', textAlign: 'center', opacity: 0.15 }}>
-        <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>—</span>
+      <td className={`roster-td ${isDense ? 'roster-td-dense' : 'roster-td-standard'} metric-empty-cell`}>
+        <span className="metric-empty">—</span>
       </td>
     );
   }
   
   const metricClass = getMetricClass(val, type, dept, emp, deptGoals);
-  let pillBg = 'transparent';
-  let pillColor = 'var(--text-secondary)';
-  let pillBorder = 'transparent';
-  let hasPill = false;
-  
+  let pillClass = 'metric-pill';
   if (metricClass === 'text-success') {
-    pillBg = 'rgba(16, 185, 129, 0.08)';
-    pillColor = 'var(--success)';
-    pillBorder = 'rgba(16, 185, 129, 0.2)';
-    hasPill = true;
+    pillClass += ' metric-pill-styled metric-pill-success';
   } else if (metricClass === 'text-warning') {
-    pillBg = 'rgba(245, 158, 11, 0.08)';
-    pillColor = 'var(--warning)';
-    pillBorder = 'rgba(245, 158, 11, 0.2)';
-    hasPill = true;
+    pillClass += ' metric-pill-styled metric-pill-warning';
   } else if (metricClass === 'text-danger') {
-    pillBg = 'rgba(239, 68, 68, 0.08)';
-    pillColor = 'var(--error)';
-    pillBorder = 'rgba(239, 68, 68, 0.2)';
-    hasPill = true;
+    pillClass += ' metric-pill-styled metric-pill-danger';
   }
   
   const paceText = (type === 'memberships' || type === 'creditCards') ? getPaceText(val, type, dept, emp, deptGoals) : '';
   const showPace = val > 0 && paceText && paceText !== 'No pace';
 
   return (
-    <td style={{ padding: isDense ? '0.45rem 0.5rem' : '0.85rem 0.75rem', textAlign: 'center' }}>
-      <div style={{ 
-        display: 'inline-flex', 
-        flexDirection: 'column', 
-        alignItems: 'center', 
-        justifyContent: 'center'
-      }}>
-        <span style={{ 
-          fontSize: '0.85rem', 
-          fontWeight: 700, 
-          background: pillBg, 
-          border: `1px solid ${pillBorder}`, 
-          color: pillColor, 
-          padding: hasPill ? '0.25rem 0.65rem' : '0rem', 
-          borderRadius: '8px',
-          minWidth: hasPill ? '64px' : 'auto',
-          textAlign: 'center',
-          display: 'inline-block'
-        }}>
+    <td className={`roster-td ${isDense ? 'roster-td-dense' : 'roster-td-standard'} roster-td-center`}>
+      <div className="metric-cell-container">
+        <span className={pillClass}>
           {displayValue}
         </span>
         {showPace && (
-          <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '0.15rem', fontWeight: 500 }}>
+          <span className="metric-pace">
             {paceText}
           </span>
         )}

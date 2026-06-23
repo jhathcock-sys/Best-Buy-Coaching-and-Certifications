@@ -22,7 +22,7 @@ export default function Dashboard({
   const floorLeaderShifts = useStore((state) => state.floorLeaderShifts);
   const coachingLogs = useStore((state) => state.coachingLogs);
   const activePeriod = useStore((state) => state.activePeriod);
-  const rosterHistory = useStore((state) => state.rosterHistory);
+  const rosterHistory = useStore((state) => state.rosterHistory) || {};
   const activeManager = useStore((state) => state.activeManager);
 
   const roster = rosterHistory[activePeriod] || [];

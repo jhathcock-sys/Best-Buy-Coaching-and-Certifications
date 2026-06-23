@@ -53,12 +53,9 @@ function AppContent() {
   const setActiveView = (view: string) => navigate(view === 'dashboard' ? '/' : `/${view}`);
   
   // Zustand Store Selectors
-  const rosterHistory = useStore((state) => state.rosterHistory);
-  const activePeriod = useStore((state) => state.activePeriod);
   const playbookSettings = useStore((state) => state.playbookSettings);
   const activeManager = useStore((state) => state.activeManager);
   const activeAdvisor = useStore((state) => state.activeAdvisor);
-  const managers = useStore((state) => state.managers);
 
   // Zustand Store Actions
   const dbConnected = useStore((state) => state.dbConnected);
@@ -143,8 +140,6 @@ function AppContent() {
           }
         }}
         dbConnected={dbConnected}
-        managers={managers}
-        roster={rosterHistory[activePeriod] || []}
       />
       </>
     );

@@ -87,7 +87,7 @@ export default function ShiftSetupForm({ activeManager }) {
           </label>
           <input 
             type="text" 
-            className="form-control"
+            className="form-control form-control-sm"
             placeholder="Enter your name (e.g. Coach Jordan)"
             value={leaderName}
             onChange={(e) => setLeaderName(e.target.value)}
@@ -148,7 +148,7 @@ export default function ShiftSetupForm({ activeManager }) {
               <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Revenue Goal ($)</label>
               <input 
                 type="number" 
-                className="form-control" 
+                className="form-control form-control-sm" 
                 placeholder="e.g. 10000"
                 value={dailyRevenueGoal}
                 onChange={(e) => setDailyRevenueGoal(e.target.value)}
@@ -158,7 +158,7 @@ export default function ShiftSetupForm({ activeManager }) {
               <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Credit Cards (Apps)</label>
               <input 
                 type="number" 
-                className="form-control" 
+                className="form-control form-control-sm" 
                 placeholder="e.g. 10"
                 value={dailyAppsGoal}
                 onChange={(e) => setDailyAppsGoal(e.target.value)}
@@ -168,7 +168,7 @@ export default function ShiftSetupForm({ activeManager }) {
               <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>PMs (Memberships)</label>
               <input 
                 type="number" 
-                className="form-control" 
+                className="form-control form-control-sm" 
                 placeholder="e.g. 15"
                 value={dailyPmsGoal}
                 onChange={(e) => setDailyPmsGoal(e.target.value)}
@@ -186,7 +186,7 @@ export default function ShiftSetupForm({ activeManager }) {
               <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Pre-existing Rev ($)</label>
               <input 
                 type="number" 
-                className="form-control" 
+                className="form-control form-control-sm" 
                 placeholder="e.g. 1500"
                 value={preExistingRevenue}
                 onChange={(e) => setPreExistingRevenue(e.target.value)}
@@ -196,7 +196,7 @@ export default function ShiftSetupForm({ activeManager }) {
               <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Pre-existing CC Apps</label>
               <input 
                 type="number" 
-                className="form-control" 
+                className="form-control form-control-sm" 
                 placeholder="e.g. 2"
                 value={preExistingApps}
                 onChange={(e) => setPreExistingApps(e.target.value)}
@@ -206,7 +206,7 @@ export default function ShiftSetupForm({ activeManager }) {
               <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Pre-existing PMs</label>
               <input 
                 type="number" 
-                className="form-control" 
+                className="form-control form-control-sm" 
                 placeholder="e.g. 3"
                 value={preExistingPms}
                 onChange={(e) => setPreExistingPms(e.target.value)}

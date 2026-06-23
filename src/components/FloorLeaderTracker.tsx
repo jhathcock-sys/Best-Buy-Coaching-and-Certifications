@@ -56,7 +56,7 @@ export default function FloorLeaderTracker() {
   } = useFloorLeaderTracker(activeManager, roster, onSaveShift);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+    <div className="flex-column gap-xl">
       {/* Header Panel */}
       <div>
         <h1 style={{ fontSize: '2.25rem', marginBottom: '0.5rem' }}>Floor Leader Tracker</h1>
@@ -69,7 +69,7 @@ export default function FloorLeaderTracker() {
         <ShiftSetupForm activeManager={activeManager} />
       ) : (
         /* ACTIVE MONITORING VIEW */
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        <div className="flex-column gap-xl">
           
           {/* Top Shift Controls & Gauges */}
           <FloorLeaderHeader 
@@ -104,11 +104,10 @@ export default function FloorLeaderTracker() {
 
           {leaderTab === 'scheduler' && (
             /* Interactive Floor Zone & Break Scheduler Tab content */
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-1rem' }}>
+            <div className="flex-column gap-xl">
+              <div className="flex-end" style={{ marginBottom: '-1rem' }}>
                 <button 
-                  className="btn btn-primary"
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1.2rem', fontSize: '0.825rem' }}
+                  className="btn btn-primary flex-center gap-sm"
                   onClick={() => setIsImportModalOpen(true)}
                 >
                   <Upload size={15} /> Import Floor Schedule

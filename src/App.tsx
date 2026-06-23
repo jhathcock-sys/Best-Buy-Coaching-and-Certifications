@@ -152,29 +152,29 @@ function AppContent() {
 
   if (activeAdvisor && !activeManager) {
     return (
-      <div className="layout-container dark-theme" style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
-        <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div style={{ background: 'var(--bby-blue)', padding: '0.4rem', borderRadius: '8px' }}>
+      <div className="layout-container dark-theme flex-column h-full" style={{ overflow: 'hidden' }}>
+        <div className="flex-between p-md" style={{ background: 'var(--white-alpha-05)', borderBottom: '1px solid var(--border-glass)' }}>
+          <div className="flex-center gap-sm">
+            <div className="p-sm" style={{ background: 'var(--bby-blue)', borderRadius: '8px' }}>
               <Sparkles size={18} color="#fff" />
             </div>
             <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>FloorVision</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div className="flex-center gap-md">
             {dbConnected ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.3rem 0.6rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '12px' }}>
-                <span style={{ width: '6px', height: '6px', background: 'var(--success)', borderRadius: '50%', boxShadow: '0 0 6px var(--success)' }} />
-                <span style={{ fontSize: '0.75rem', color: 'var(--success)', fontWeight: 600 }}>Cloud Sync</span>
+              <div className="badge-sync">
+                <span className="badge-sync-dot" />
+                <span className="badge-sync-text">Cloud Sync</span>
               </div>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.3rem 0.6rem', background: 'rgba(249, 115, 22, 0.1)', border: '1px solid rgba(249, 115, 22, 0.2)', borderRadius: '12px' }}>
-                <span style={{ width: '6px', height: '6px', background: 'var(--bby-yellow)', borderRadius: '50%', boxShadow: '0 0 6px var(--bby-yellow)' }} />
-                <span style={{ fontSize: '0.75rem', color: 'var(--bby-yellow)', fontWeight: 600 }}>Local Sandbox</span>
+              <div className="badge-sandbox">
+                <span className="badge-sandbox-dot" />
+                <span className="badge-sandbox-text">Local Sandbox</span>
               </div>
             )}
             <button 
               onClick={() => useStore.getState().logout()} 
-              style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '0.5rem 1rem', borderRadius: '12px', cursor: 'pointer', fontWeight: 600 }}
+              className="btn btn-secondary"
             >
               Log Out
             </button>
@@ -212,10 +212,10 @@ function AppContent() {
       {/* Main View Display Port */}
       <main className="main-content">
         <Suspense fallback={
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ width: '50px', height: '50px', border: '4px solid rgba(255,255,255,0.1)', borderTopColor: 'var(--bby-yellow)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-            <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Loading Module...</span>
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          <div className="flex-center flex-column w-full h-full gap-md">
+            <div style={{ width: '50px', height: '50px', border: '4px solid var(--white-alpha-10)', borderTopColor: 'var(--bby-yellow)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', animation: 'fadeIn 0.5s ease' }}>Loading Module...</span>
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } } @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }`}</style>
           </div>
         }>
           <Routes>
@@ -290,15 +290,11 @@ function AppContent() {
       />
       {/* Service Worker Update Toast Banner */}
       {swUpdateAvailable && (
-        <div style={{
+        <div className="glass-card" style={{
           position: 'fixed',
           bottom: '24px',
           right: '24px',
-          background: '#111625',
-          border: '1.5px solid var(--bby-blue)',
-          borderRadius: '16px',
           padding: '1.25rem',
-          boxShadow: '0 8px 32px rgba(0, 70, 190, 0.25)',
           zIndex: 9999,
           display: 'flex',
           flexDirection: 'column',
@@ -312,7 +308,7 @@ function AppContent() {
               A new version of FloorVision is available. Refresh to load new sales tools and metrics.
             </p>
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div className="flex-center gap-sm">
             <button 
               className="btn btn-primary" 
               style={{ flex: 1, padding: '0.45rem', fontSize: '0.75rem' }}

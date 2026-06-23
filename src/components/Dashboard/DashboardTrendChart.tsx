@@ -44,17 +44,17 @@ export default function DashboardTrendChart({ calculatedMetrics }: DashboardTren
 
   return (
     <div className="glass-card" style={{ padding: '1.75rem', width: '100%', position: 'relative' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+      <div className="flex-between flex-wrap gap-sm mb-lg">
         <div>
           <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: '0 0 0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', letterSpacing: '-0.02em', color: '#fff' }}>
-            <TrendingUp size={20} color="var(--bby-yellow)" />
+            <TrendingUp size={20} color="var(--warning)" />
             30-Day Trend Analysis
           </h2>
           <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
             Comparing current trajectory vs store targets.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.02)', padding: '0.25rem', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
+        <div className="flex-center gap-sm p-sm" style={{ background: 'var(--white-alpha-05)', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
           <button 
             className={`metric-toggle-btn ${chartMetric === 'memberships' ? 'active' : ''}`}
             onClick={() => setChartMetric('memberships')}
@@ -71,7 +71,7 @@ export default function DashboardTrendChart({ calculatedMetrics }: DashboardTren
             onClick={() => setChartMetric('cards')}
             style={{ 
               display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600, border: 'none', cursor: 'pointer',
-              background: chartMetric === 'cards' ? 'var(--bby-yellow)' : 'transparent',
+              background: chartMetric === 'cards' ? 'var(--warning)' : 'transparent',
               color: chartMetric === 'cards' ? '#000' : 'var(--text-secondary)'
             }}
           >
@@ -80,16 +80,16 @@ export default function DashboardTrendChart({ calculatedMetrics }: DashboardTren
         </div>
       </div>
 
-      <div style={{ width: '100%', height: '220px', background: 'rgba(11, 15, 25, 0.2)', border: '1px solid var(--border-glass)', borderRadius: '14px', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="flex-center p-md" style={{ width: '100%', height: '220px', background: 'var(--black-alpha-20)', border: '1px solid var(--border-glass)', borderRadius: '14px' }}>
         <svg width="100%" height="100%" viewBox="0 0 500 200" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
           <defs>
             <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={chartMetric === 'memberships' ? 'rgba(0, 70, 190, 0.4)' : 'rgba(253, 216, 53, 0.4)'} />
+              <stop offset="0%" stopColor={chartMetric === 'memberships' ? 'var(--bby-blue-alpha-20)' : 'var(--warning-glow)'} />
               <stop offset="100%" stopColor={chartMetric === 'memberships' ? 'rgba(0, 70, 190, 0)' : 'rgba(253, 216, 53, 0)'} />
             </linearGradient>
             <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor={chartMetric === 'memberships' ? '#3b82f6' : '#fef08a'} />
-              <stop offset="100%" stopColor={chartMetric === 'memberships' ? '#0046be' : '#fdd835'} />
+              <stop offset="0%" stopColor={chartMetric === 'memberships' ? '#3b82f6' : 'var(--warning)'} />
+              <stop offset="100%" stopColor={chartMetric === 'memberships' ? 'var(--bby-blue)' : 'var(--warning)'} />
             </linearGradient>
             <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
               <feGaussianBlur stdDeviation="4" result="blur" />
@@ -98,7 +98,7 @@ export default function DashboardTrendChart({ calculatedMetrics }: DashboardTren
           </defs>
 
           {[40, 80, 120, 160].map((y, i) => (
-            <line key={`grid-${i}`} x1="40" y1={y} x2="480" y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" strokeDasharray="4 4" />
+            <line key={`grid-${i}`} x1="40" y1={y} x2="480" y2={y} stroke="var(--white-alpha-05)" strokeWidth="1" strokeDasharray="4 4" />
           ))}
 
           <path d={areaPath} fill="url(#trendGradient)" />
@@ -119,7 +119,7 @@ export default function DashboardTrendChart({ calculatedMetrics }: DashboardTren
 
           {points.map((p, idx) => (
             <g key={`point-${idx}`} style={{ animation: `fadeInPoint 0.5s ease forwards`, animationDelay: `${0.2 + idx * 0.15}s`, opacity: 0 }}>
-              <circle cx={p.x} cy={p.y} r="5" fill="#111827" stroke={chartMetric === 'memberships' ? '#60a5fa' : '#fef08a'} strokeWidth="2.5" />
+              <circle cx={p.x} cy={p.y} r="5" fill="var(--bg-obsidian)" stroke={chartMetric === 'memberships' ? '#60a5fa' : 'var(--warning)'} strokeWidth="2.5" />
               <text x={p.x} y={p.y - 15} fill="#fff" fontSize="12" fontWeight="700" textAnchor="middle">{p.value}</text>
               <text x={p.x} y="190" fill="var(--text-secondary)" fontSize="11" fontWeight="600" textAnchor="middle">{p.label}</text>
             </g>
@@ -127,10 +127,6 @@ export default function DashboardTrendChart({ calculatedMetrics }: DashboardTren
         </svg>
       </div>
 
-      <style>{`
-        @keyframes dashDraw { from { stroke-dashoffset: 2000; } to { stroke-dashoffset: 0; } }
-        @keyframes fadeInPoint { to { opacity: 1; transform: translateY(0); } }
-      `}</style>
     </div>
   );
 }

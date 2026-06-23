@@ -145,7 +145,7 @@ export default function Dashboard({
   }, [followUpTasks]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+    <div className="flex-column gap-xl">
       <DashboardHeader 
         roster={roster} 
         shadowingHeatmapData={shadowingHeatmapData} 

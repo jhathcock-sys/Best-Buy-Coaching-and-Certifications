@@ -20,17 +20,6 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
   }
 
   let initialManagers = MANAGERS;
-  const savedManagers = localStorage.getItem('bby_managers');
-  if (savedManagers) {
-    try {
-      const parsed = JSON.parse(savedManagers);
-      if (parsed && Array.isArray(parsed)) {
-        initialManagers = parsed;
-      }
-    } catch (e) {
-      console.error('Failed to parse managers from localStorage', e);
-    }
-  }
 
   const initialDbConnected = isFirebaseConnected();
 
@@ -162,7 +151,24 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
         const database = initFirebase(config);
         set({ dbConnected: !!database });
         if (database) {
-          alert("Connected to Firebase Cloud Database! Roster data, department targets, and exemplar templates are now synchronized in real-time.");
+          import('../../services/firebase').then(({ pushOfflineDataToCloud }) => {
+            const state = get();
+            const offlineData = {
+              activePeriod: state.activePeriod,
+              rosterHistory: state.rosterHistory,
+              playbookSettings: state.playbookSettings,
+              deptGoals: state.deptGoals,
+              recentSessions: state.recentSessions,
+              metrics: state.metrics,
+              followUpTasks: state.followUpTasks,
+              floorLeaderShifts: state.floorLeaderShifts,
+              coachingLogs: state.coachingLogs,
+              managers: state.managers
+            };
+            pushOfflineDataToCloud(state.storeId, offlineData).then(() => {
+              alert("Connected to Firebase Cloud Database! Roster data, department targets, and local sandbox data are now synchronized in real-time.");
+            });
+          });
         }
       } else {
         localStorage.removeItem('bby_firebase_config');
@@ -175,7 +181,6 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
     setManagers: (managers) => set({ managers }),
     saveManagers: (newManagers) => {
       set({ managers: newManagers });
-      localStorage.setItem('bby_managers', JSON.stringify(newManagers));
       if (get().dbConnected) {
         saveManagersToCloud(get().storeId, newManagers);
       }

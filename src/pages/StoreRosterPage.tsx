@@ -16,7 +16,6 @@ import { useMediaQuery } from '../hooks/useMediaQuery';
 
 import { useStore } from '../store/useStore';
 import { DeptGoal } from '../types';
-import { StoreRosterProvider } from '../contexts/StoreRosterContext';
 
 const EMPTY_OBJ = {};
 const EMPTY_ARR = [];
@@ -236,43 +235,31 @@ export default function StoreRoster({
           />
 
           {/* Roster Table Card */}
-          <div className="glass-card" style={{ padding: '0', overflow: 'hidden' }}>
+          <div className="glass-card p-0" style={{ overflow: 'hidden' }}>
             {isDesktop ? (
-              <StoreRosterProvider value={{
-                filteredRoster,
-                visibleCols,
-                isDense,
-                deptGoals,
-                rosterHistory,
-                activePeriod,
-                setSelectedProfileEmployee,
-                handleStartEdit,
-                onDeleteEmployee,
-                DEPARTMENTS,
-                onUpdateEmployeeDept,
-                onCoachEmployee,
-                onCreateLog
-              }}>
-                <StoreRosterTable />
-              </StoreRosterProvider>
+                <StoreRosterTable
+                  filteredRoster={filteredRoster}
+                  visibleCols={visibleCols}
+                  isDense={isDense}
+                  setSelectedProfileEmployee={setSelectedProfileEmployee}
+                  handleStartEdit={handleStartEdit}
+                  DEPARTMENTS={DEPARTMENTS}
+                  onUpdateEmployeeDept={onUpdateEmployeeDept}
+                  onCoachEmployee={onCoachEmployee}
+                  onCreateLog={onCreateLog}
+                />
             ) : (
-              <StoreRosterProvider value={{
-                filteredRoster,
-                visibleCols,
-                isDense,
-                deptGoals,
-                rosterHistory,
-                activePeriod,
-                setSelectedProfileEmployee,
-                handleStartEdit,
-                onDeleteEmployee,
-                DEPARTMENTS,
-                onUpdateEmployeeDept,
-                onCoachEmployee,
-                onCreateLog
-              }}>
-                <StoreRosterMobileCard />
-              </StoreRosterProvider>
+                <StoreRosterMobileCard 
+                  filteredRoster={filteredRoster}
+                  visibleCols={visibleCols}
+                  isDense={isDense}
+                  setSelectedProfileEmployee={setSelectedProfileEmployee}
+                  handleStartEdit={handleStartEdit}
+                  DEPARTMENTS={DEPARTMENTS}
+                  onUpdateEmployeeDept={onUpdateEmployeeDept}
+                  onCoachEmployee={onCoachEmployee}
+                  onCreateLog={onCreateLog}
+                />
             )}
           </div>
 

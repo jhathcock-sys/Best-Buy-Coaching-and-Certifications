@@ -6,15 +6,6 @@ import { safeJsonParse } from './constants';
 
 export const createShiftSlice: StateCreator<StoreState, [], [], ShiftSlice> = (set, get) => {
   let initialActiveShift = null;
-  const rawActiveShift = safeJsonParse(localStorage.getItem('bby_active_shift'), null);
-  if (rawActiveShift) {
-    const result = ShiftSchema.safeParse(rawActiveShift);
-    if (result.success) {
-      initialActiveShift = result.data;
-    } else {
-      console.error('Failed to validate active shift from localStorage:', result.error);
-    }
-  }
 
   return {
     floorLeaderShifts: [],
@@ -24,11 +15,6 @@ export const createShiftSlice: StateCreator<StoreState, [], [], ShiftSlice> = (s
     
     setActiveShift: (activeShift) => {
       set({ activeShift });
-      if (activeShift) {
-        localStorage.setItem('bby_active_shift', JSON.stringify(activeShift));
-      } else {
-        localStorage.removeItem('bby_active_shift');
-      }
     },
 
     saveFloorLeaderShift: (newShift) => {

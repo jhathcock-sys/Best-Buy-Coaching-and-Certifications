@@ -3,21 +3,24 @@ import { Users, Clock, Trash2, User, Wand2 } from 'lucide-react';
 import { RosterMetricCell, getEmployeeGap, getMetricClass } from './RosterMetricCell';
 import { StoreRosterTableRow } from './StoreRosterTableRow';
 import { calculateCVI } from '../../store/cviHelper';
-import { useStoreRosterContext } from '../../contexts/StoreRosterContext';
+import { useStore } from '../../store/useStore';
 import './StoreRosterTable.css';
 
-export default function StoreRosterTable() {
-  const {
-    filteredRoster,
-    visibleCols,
-    isDense,
-    deptGoals,
-    rosterHistory,
-    activePeriod,
-    setSelectedProfileEmployee,
-    handleStartEdit,
-    onDeleteEmployee
-  } = useStoreRosterContext();
+export default function StoreRosterTable({
+  filteredRoster,
+  visibleCols,
+  isDense,
+  setSelectedProfileEmployee,
+  handleStartEdit,
+  DEPARTMENTS,
+  onUpdateEmployeeDept,
+  onCoachEmployee,
+  onCreateLog
+}: any) {
+  const deptGoals = useStore((state) => state.deptGoals);
+  const rosterHistory = useStore((state) => state.rosterHistory);
+  const activePeriod = useStore((state) => state.activePeriod);
+  const onDeleteEmployee = useStore((state) => state.deleteEmployee);
 
   const [sortConfig, setSortConfig] = React.useState({ key: null, direction: 'asc' });
 

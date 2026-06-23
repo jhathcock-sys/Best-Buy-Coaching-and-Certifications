@@ -46,15 +46,17 @@ export default function TrendReporting() {
       }
 
       if (!aggregated[groupKey]) {
-        aggregated[groupKey] = { key: groupKey, revenue: 0, apps: 0, memberships: 0 };
+        aggregated[groupKey] = { key: groupKey, revenue: 0, apps: 0, memberships: 0, hours: 0, surveys: 0 };
       }
 
       // Sum up the data for the target entity
       snapshotArray.forEach(emp => {
         if (targetEntity === 'Store Total' || emp.name === targetEntity) {
           aggregated[groupKey].revenue += (emp.rph * emp.hours || 0);
+          aggregated[groupKey].hours += (emp.hours || 0);
           aggregated[groupKey].apps += (emp.creditCards || 0);
           aggregated[groupKey].memberships += (emp.memberships || 0);
+          aggregated[groupKey].surveys += (emp.surveys || 0);
         }
       });
     });
@@ -66,6 +68,8 @@ export default function TrendReporting() {
   const maxRev = Math.max(1, ...chartData.map(d => d.revenue));
   const maxApps = Math.max(1, ...chartData.map(d => d.apps));
   const maxPms = Math.max(1, ...chartData.map(d => d.memberships));
+  const maxRph = Math.max(1, ...chartData.map(d => d.hours > 0 ? (d.revenue / d.hours) : 0));
+  const maxSurveys = Math.max(1, ...chartData.map(d => d.surveys));
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '3rem' }}>
@@ -230,6 +234,39 @@ export default function TrendReporting() {
                       />
                       <span style={{ position: 'absolute', top: `calc(${100 - heightPct}% - 1.5rem)`, fontSize: '0.75rem', fontWeight: 'bold', color: '#fff' }}>
                         {data.apps}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* RPH TREND */}
+          <div className="glass-card" style={{ padding: '1.5rem' }}>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: '#fff', fontSize: '1.25rem' }}>
+              <TrendingUp size={20} color="#8b5cf6" /> Revenue Per Hour (RPH) Trend
+            </h3>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', height: '200px', paddingTop: '2rem' }}>
+              {chartData.map(data => {
+                const rph = data.hours > 0 ? (data.revenue / data.hours) : 0;
+                const heightPct = Math.max(5, (rph / maxRph) * 100);
+                return (
+                  <div key={data.key} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', height: '100%' }}>
+                    <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+                      <div 
+                        style={{ 
+                          width: '100%', 
+                          maxWidth: '60px', 
+                          height: `${heightPct}%`, 
+                          background: 'linear-gradient(to top, rgba(139, 92, 246, 0.4), #8b5cf6)',
+                          borderRadius: '4px 4px 0 0',
+                          transition: 'height 0.5s ease'
+                        }} 
+                        title={`$${Math.round(rph)}/hr`}
+                      />
+                      <span style={{ position: 'absolute', top: `calc(${100 - heightPct}% - 1.5rem)`, fontSize: '0.75rem', fontWeight: 'bold', color: '#fff' }}>
+                        ${Math.round(rph)}
                       </span>
                     </div>
                   </div>

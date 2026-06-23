@@ -124,6 +124,8 @@ export const subscribeToActivePeriod = (storeId: string, onUpdate: any) => {
   return onSnapshot(ref, (snap: any) => {
     if (snap.exists()) {
       onUpdate(snap.data().activePeriod);
+    } else {
+      onUpdate(null);
     }
   });
 };
@@ -173,6 +175,8 @@ export const subscribeToPlaybookSettings = (storeId: string, onUpdate: any) => {
   return onSnapshot(ref, (snap: any) => {
     if (snap.exists()) {
       onUpdate(snap.data().settings);
+    } else {
+      onUpdate({ useGemini: false, storePin: '1234' });
     }
   });
 };
@@ -184,6 +188,8 @@ export const subscribeToManagers = (storeId: string, onUpdate: any) => {
   return onSnapshot(ref, (snap: any) => {
     if (snap.exists()) {
       onUpdate(snap.data().managers || []);
+    } else {
+      onUpdate([]);
     }
   });
 };
@@ -262,6 +268,8 @@ export const subscribeToDeptGoals = (storeId: string, onUpdate: any) => {
   return onSnapshot(ref, (snap: any) => {
     if (snap.exists()) {
       onUpdate(snap.data().goals);
+    } else {
+      onUpdate({});
     }
   });
 };
@@ -401,6 +409,8 @@ export const subscribeToRecentSessions = (storeId: string, onUpdate: any) => {
   return onSnapshot(ref, (snap: any) => {
     if (snap.exists()) {
       onUpdate(snap.data().sessions || []);
+    } else {
+      onUpdate([]);
     }
   });
 };
@@ -426,6 +436,8 @@ export const subscribeToMetrics = (storeId: string, onUpdate: any) => {
   return onSnapshot(ref, (snap: any) => {
     if (snap.exists()) {
       onUpdate(snap.data().metrics);
+    } else {
+      onUpdate({ memberships: 0, creditCards: 0, warranty: 0, surveys: 0, rph: 0, totalRevenue: 0, totalHours: 0 });
     }
   });
 };

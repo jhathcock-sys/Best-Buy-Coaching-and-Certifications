@@ -4,13 +4,13 @@ import { useStore } from '../store/useStore';
 import { auditPerformanceWorkbookGemini } from '../services/ai';
 
 // Mock performance CSV data
-const MOCK_METRICS_CSV = `Employee,RPH,Memberships,CreditCards,WarrantyAttach,CSAT
-Jordan,1120,4.2%,6,14.5%,4.8
-Victor,1420,12.5%,11,5.2%,4.1
-Daniel,1350,2.1%,8,7.5%,4.7
-Marcus,980,5.0%,9,11.5%,4.6
-Taylor,880,1.8%,3,6.2%,4.5
-Corey,740,4.5%,5,12.2%,4.8`;
+const MOCK_METRICS_CSV = `Employee,RPH,Memberships,CreditCards,WarrantyAttach,Surveys
+Jordan,1120,4.2%,6,14.5%,12
+Victor,1420,12.5%,11,5.2%,4
+Daniel,1350,2.1%,8,7.5%,8
+Marcus,980,5.0%,9,11.5%,6
+Taylor,880,1.8%,3,6.2%,3
+Corey,740,4.5%,5,12.2%,15`;
 
 export default function RosterAuditor({ roster }) {
   const apiKey = useStore((state) => state.apiKey);
@@ -22,7 +22,7 @@ const playbookSettings = useStore((state) => state.playbookSettings);
   const handleLoadDemo = () => {
     // Generate simple CSV from active roster if available, otherwise fallback to mock CSV
     if (roster && roster.length > 0) {
-      let csv = "Employee,RPH,Memberships,CreditCards,WarrantyAttach,CSAT\n";
+      let csv = "Employee,RPH,Memberships,CreditCards,WarrantyAttach,Surveys\n";
       roster.forEach(emp => {
         csv += `${emp.name},${emp.rph || 0},${emp.memberships || 0}%,${emp.creditCards || 0},${emp.warranty || 0}%,${emp.surveys || 0}\n`;
       });
@@ -83,7 +83,7 @@ const playbookSettings = useStore((state) => state.playbookSettings);
               resize: 'none',
               background: 'rgba(0,0,0,0.2)' 
             }}
-            placeholder={`Example:\nEmployee,RPH,Memberships,CreditCards,WarrantyAttach,CSAT\nJordan,1120,4.2%,6,14.5%,4.8\nVictor,1420,12.5%,11,5.2%,4.1`}
+            placeholder={`Example:\nEmployee,RPH,Memberships,CreditCards,WarrantyAttach,Surveys\nJordan,1120,4.2%,6,14.5%,12\nVictor,1420,12.5%,11,5.2%,4`}
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
           />

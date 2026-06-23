@@ -118,7 +118,7 @@ export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAd
           return;
         }
         
-        const lines = results.data;
+        const lines = results.data as any[][];
         if (lines.length < 2) {
           setErrorMsg('Error: CSV file must contain a header row and at least one data row.');
           return;

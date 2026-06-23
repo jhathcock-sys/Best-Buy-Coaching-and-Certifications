@@ -13,15 +13,6 @@ import { CoachingLogSchema } from '../../schemas';
 
 export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice> = (set, get) => {
   let initialPlaybookSettings = DEFAULT_PLAYBOOK_SETTINGS;
-  try {
-    const savedSettings = localStorage.getItem('bby_playbook_settings');
-    if (savedSettings) {
-      const parsed = JSON.parse(savedSettings);
-      initialPlaybookSettings = { ...DEFAULT_PLAYBOOK_SETTINGS, ...parsed };
-    }
-  } catch (e) {
-    console.error('Failed to parse playbook settings', e);
-  }
 
   return {
     recentSessions: [],
@@ -45,7 +36,6 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
     saveSettings: ({ apiKey: newKey, playbookSettings: newSettings }) => {
       set({ apiKey: newKey, playbookSettings: newSettings });
       localStorage.setItem('bby_api_key', newKey);
-      localStorage.setItem('bby_playbook_settings', JSON.stringify(newSettings));
       if (get().dbConnected) {
         savePlaybookSettingsToCloud(get().storeId, newSettings);
       }

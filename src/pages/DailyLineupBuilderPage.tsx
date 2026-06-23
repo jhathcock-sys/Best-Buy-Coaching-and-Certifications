@@ -24,7 +24,7 @@ export default function DailyLineupBuilder() {
     'Geek Squad': []
   });
   const [isSmartAssigning, setIsSmartAssigning] = useState(false);
-  const apiKey = useStore((state) => state.playbookSettings?.geminiApiKey);
+  const apiKey = useStore((state) => state.apiKey);
 
   const handleSmartAssign = async () => {
     if (!apiKey) {

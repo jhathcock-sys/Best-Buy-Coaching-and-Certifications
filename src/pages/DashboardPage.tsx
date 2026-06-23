@@ -43,7 +43,7 @@ export default function Dashboard({
   })));
 
   const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
-  const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
+  const roster = React.useMemo(() => (Object.values(_rawroster) as Employee[]).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
   const calculatedMetrics = useMemo(() => {
     if (!roster || roster.length === 0) return { memberships: 0, creditCards: 0, warranty: 0, surveys: 0, rph: 0 };
     
@@ -113,7 +113,7 @@ export default function Dashboard({
       empIds.forEach((empId: string) => {
         const emp = roster.find((e: any) => e.id === empId);
         if (emp && (emp as any).focus5) {
-          const hasLogToday = todayLogs.some((log: any) => log.employeeId === empId || log.employeeName === emp.name);
+          const hasLogToday = todayLogs.some((log: any) => log.employeeId === empId || log.employeeName === (emp as any).name);
           if (!hasLogToday) {
             alerts.push({ employee: emp, zone: zone });
           }

@@ -1,11 +1,9 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { getGeminiModel, isGeminiAvailable } from './core.js';
+import { GoogleGenerativeAI, SchemaType, Schema } from '@google/generative-ai';
+import { getGeminiModel, isGeminiAvailable, executeWithRetry } from './core.js';
 
 export async function auditStoreFloorGemini(apiKey, base64Image, mimeType) {
   try {
-    const aiInstance = new GoogleGenerativeAI(apiKey);
-    // Use gemini-3.5-pro for deep vision audits
-    const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-pro' });
+    const model = getGeminiModel(apiKey, { aiMode: 'pro' });
     
     const systemPrompt = `
       You are a Best Buy Store General Manager.
@@ -14,21 +12,18 @@ export async function auditStoreFloorGemini(apiKey, base64Image, mimeType) {
       2. Code 1 Risks (register lines backing up beyond 3 customers).
       3. Visual Merchandising standards (cleanliness, stocked endcaps, display setups).
       4. Staffing levels and zone coverage.
-      
-      Respond strictly in a structured JSON format.
-      JSON Format:
-      {
-        "status": "Green" | "Yellow" | "Red",
-        "statusDetails": "A single sentence summarizing the overall floor state.",
-        "observations": [
-          "List 3-4 bullet points detailing specific things you see in the photo."
-        ],
-        "actionPlan": [
-          "List 2-3 immediate action items for the Floor Leader to address."
-        ]
-      }
-      Do not include any markdown fences or explanation outside the JSON block. Return only raw JSON.
     `;
+
+    const responseSchema: Schema = {
+      type: SchemaType.OBJECT,
+      properties: {
+        status: { type: SchemaType.STRING },
+        statusDetails: { type: SchemaType.STRING },
+        observations: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+        actionPlan: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
+      },
+      required: ["status", "statusDetails", "observations", "actionPlan"]
+    };
 
     const imagePart = {
       inlineData: {
@@ -37,14 +32,15 @@ export async function auditStoreFloorGemini(apiKey, base64Image, mimeType) {
       }
     };
 
-    const result = await model.generateContent({
+    const result = await executeWithRetry(() => model.generateContent({
       contents: [
         { role: 'user', parts: [{ text: systemPrompt }, imagePart] }
       ],
       generationConfig: {
-        responseMimeType: 'application/json'
+        responseMimeType: 'application/json',
+        responseSchema: responseSchema
       }
-    });
+    }));
 
     return JSON.parse(result.response.text());
   } catch (error) {
@@ -80,33 +76,38 @@ export async function auditPerformanceWorkbookGemini(apiKey, workbookText, playb
       1. Overall store performance trends.
       2. Groupings of employees sharing similar performance gaps (e.g., 'Membership Attachment opportunities', 'Low Credit Card attachment', 'CSAT/Survey struggles').
       3. Concrete floor actions and scripts to help each group.
-      
-      Respond strictly in a structured JSON format.
-      JSON Format:
-      {
-        "overallSummary": "A concise paragraph summarizing store performance based on metrics.",
-        "topPerformers": [
-          "Name - Callout strength (e.g. Victor leading in Credit Cards)"
-        ],
-        "gapClusters": [
-          {
-            "name": "Cluster name (e.g. GSP / Protection Gaps)",
-            "employees": ["Name 1", "Name 2"],
-            "focusBehavior": "What behavior needs to change (e.g., pitching earlier in discovery).",
-            "coachingTip": "Actionable script or floor exercise for this group."
-          }
-        ],
-        "recommendedActionTimeline": "A timeline/plan for the leadership team this week."
-      }
-      Do not include markdown or explanations. Return only raw JSON.
     `;
 
-    const result = await model.generateContent({
+    const responseSchema: Schema = {
+      type: SchemaType.OBJECT,
+      properties: {
+        overallSummary: { type: SchemaType.STRING },
+        topPerformers: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+        gapClusters: {
+          type: SchemaType.ARRAY,
+          items: {
+            type: SchemaType.OBJECT,
+            properties: {
+              name: { type: SchemaType.STRING },
+              employees: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+              focusBehavior: { type: SchemaType.STRING },
+              coachingTip: { type: SchemaType.STRING }
+            },
+            required: ["name", "employees", "focusBehavior", "coachingTip"]
+          }
+        },
+        recommendedActionTimeline: { type: SchemaType.STRING }
+      },
+      required: ["overallSummary", "topPerformers", "gapClusters", "recommendedActionTimeline"]
+    };
+
+    const result = await executeWithRetry(() => model.generateContent({
       contents: [{ role: 'user', parts: [{ text: systemPrompt + '\n\nData:\n' + workbookText }] }],
       generationConfig: {
-        responseMimeType: 'application/json'
+        responseMimeType: 'application/json',
+        responseSchema: responseSchema
       }
-    });
+    }));
 
     return JSON.parse(result.response.text());
   } catch (error) {
@@ -145,11 +146,7 @@ export async function auditFiveStarSurveyGemini(apiKey, base64Image, mimeType, t
       throw new Error("Gemini API Key is not available");
     }
 
-    const aiInstance = new GoogleGenerativeAI(apiKey);
-    const isProMode = playbookSettings?.aiMode === 'pro';
-    const modelName = isProMode ? 'gemini-3.5-pro' : 'gemini-3.5-flash';
-    const model = aiInstance.getGenerativeModel({ model: modelName });
-
+    const model = getGeminiModel(apiKey, playbookSettings);
 
     const systemPrompt = `
       You are a Best Buy Store General Manager auditing a 5-Star customer survey (ratings 1 to 5, where 1-3 are detractors, 4 is passive, 5 is promoter).
@@ -163,24 +160,21 @@ export async function auditFiveStarSurveyGemini(apiKey, base64Image, mimeType, t
       5. Perform a root-cause analysis of why this rating was given.
       6. Draft a 1-on-1 coaching script for the supervisor to coach this associate using open-ended questions (GROW framework).
       7. List 2-3 specific floor action steps for the supervisor to validate.
-
-      Respond strictly in a structured JSON format.
-      JSON Format:
-      {
-        "rating": 2,
-        "comment": "The checkout line was extremely long and the cashier Jordan didn't even ask if I had a membership or thank me.",
-        "associateName": "Jordan",
-        "department": "Front End",
-        "rootCause": "Operational queue bottleneck at checkout combined with transaction-focused cashier behavior (skipping customer greeting, membership inquiry, and closing appreciation).",
-        "coachingScript": "Hey Jordan, I noticed we got some survey feedback about checkout speed and membership check-ins yesterday. How did you feel the checkout flow was during the afternoon rush? What do you think we could do to make sure we're acknowledging memberships even when there's a queue? Let's align on greeting every customer and handing out the receipt sleeve as our standard checkout process.",
-        "checkItems": [
-          "Observe Jordan's checkout flow during the next afternoon rush to check queue management.",
-          "Validate that Jordan is actively using the receipt sleeve to frame survey and membership benefits.",
-          "Ensure secondary support cashiers are called promptly when checkout line exceeds 3 customers."
-        ]
-      }
-      Do not include markdown or explanations. Return only raw JSON.
     `;
+
+    const responseSchema: Schema = {
+      type: SchemaType.OBJECT,
+      properties: {
+        rating: { type: SchemaType.NUMBER },
+        comment: { type: SchemaType.STRING },
+        associateName: { type: SchemaType.STRING },
+        department: { type: SchemaType.STRING },
+        rootCause: { type: SchemaType.STRING },
+        coachingScript: { type: SchemaType.STRING },
+        checkItems: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
+      },
+      required: ["rating", "comment", "associateName", "department", "rootCause", "coachingScript", "checkItems"]
+    };
 
     let result;
     if (base64Image) {
@@ -191,19 +185,21 @@ export async function auditFiveStarSurveyGemini(apiKey, base64Image, mimeType, t
         }
       };
       const textPart = textInput ? `User supplied text context: "${textInput}"` : "Please audit the image.";
-      result = await model.generateContent({
+      result = await executeWithRetry(() => model.generateContent({
         contents: [{ role: 'user', parts: [{ text: systemPrompt + '\n' + textPart }, imagePart] }],
         generationConfig: {
-          responseMimeType: 'application/json'
+          responseMimeType: 'application/json',
+          responseSchema: responseSchema
         }
-      });
+      }));
     } else {
-      result = await model.generateContent({
+      result = await executeWithRetry(() => model.generateContent({
         contents: [{ role: 'user', parts: [{ text: systemPrompt + '\nAnalyze this customer survey feedback: "' + textInput + '"' }] }],
         generationConfig: {
-          responseMimeType: 'application/json'
+          responseMimeType: 'application/json',
+          responseSchema: responseSchema
         }
-      });
+      }));
     }
 
     return JSON.parse(result.response.text());

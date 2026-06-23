@@ -251,7 +251,7 @@ export default function StoreRosterMobileCard() {
                 <button 
                   className="btn btn-secondary" 
                   style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.02)', textAlign: 'center' }}
-                  onClick={() => handleStartEdit(emp)}
+                  onClick={() => handleStartEdit(emp, emp.dept)}
                 >
                   Edit
                 </button>

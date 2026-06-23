@@ -11,7 +11,7 @@ export async function generateCoachingLogGemini(apiKey, name, gapType, gapDetail
         MATCH THESE EXEMPLARY COACHING LOGS EXACTLY:
         Below are actual examples of high-quality coaching logs previously written by this store's leadership. You must replicate their exact tone of voice, formatting structures, depth of explanation, Best Buy terminology (like "human" and "make it easy"), and overall layout:
         
-        ${playbookSettings.trainingLogs.map((log, idx) => `EXEMPLAR LOG #${idx + 1}:\n${log}`).join('\n\n')}
+        ${playbookSettings.trainingLogs.slice(0, 3).map((log, idx) => `EXEMPLAR LOG #${idx + 1}:\n${log}`).join('\n\n')}
       `;
     }
     
@@ -106,8 +106,7 @@ export const generateMonthlyOneOnOne = async (employeeData, logs, apiKey) => {
       throw new Error("Gemini API Key is not available");
     }
 
-    const aiInstance = new GoogleGenerativeAI(apiKey);
-    const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-pro' });
+    const model = getGeminiModel(apiKey, { aiMode: 'pro' });
 
     const prompt = `
       You are an expert Best Buy Store Leader writing a formal 1-on-1 monthly performance appraisal for your associate.
@@ -150,7 +149,7 @@ export const generateMonthlyOneOnOne = async (employeeData, logs, apiKey) => {
       Use professional retail leadership language. Be concise and actionable.
     `;
 
-    const result = await model.generateContent(prompt);
+    const result = await executeWithRetry(() => model.generateContent(prompt));
     return result.response.text();
 
   } catch (error) {
@@ -241,8 +240,7 @@ export const generatePerformanceGap = async (apiKey: string, employeeName: strin
       throw new Error("Gemini API Key is not available");
     }
 
-    const aiInstance = new GoogleGenerativeAI(apiKey);
-    const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-flash' });
+    const model = getGeminiModel(apiKey, { aiMode: 'flash' });
 
     const prompt = `
       You are an expert Best Buy Sales Manager analyzing an employee's weekly performance metrics.
@@ -261,7 +259,7 @@ export const generatePerformanceGap = async (apiKey: string, employeeName: strin
       Write a highly concise, 1 to 2 sentence "Opportunity Gap Description" that identifies the primary metric falling short and suggests what specific behavior the employee needs to focus on fixing this week. Do not use pleasantries. Be direct and actionable.
     `;
 
-    const result = await model.generateContent(prompt);
+    const result = await executeWithRetry(() => model.generateContent(prompt));
     return result.response.text().trim();
   } catch (error) {
     console.error("Gap Generation Error:", error);

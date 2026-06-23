@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react';
 import { normalizeZone, fuzzyMatchName, parseShiftHours, generateBreaks, WEEKDAY_KEYS } from '../utils/scheduleParserUtils';
+import Papa from 'papaparse';
+import DOMPurify from 'dompurify';
 import { parseScheduleImage } from '../services/ai';
-
 export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAddEmployee, isOpen) {
   const [activeTab, setActiveTab] = useState('image'); // 'image' | 'csv'
   const [isParsing, setIsParsing] = useState(false);
@@ -109,36 +110,25 @@ export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAd
   };
 
   const parseCSVText = (text) => {
-    const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
-    if (lines.length < 2) {
-      setErrorMsg('Error: CSV file must contain a header row and at least one data row.');
-      return;
-    }
-
-    const parseCSVLine = (line) => {
-      const result = [];
-      let current = '';
-      let inQuotes = false;
-      for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-        if (char === '"') {
-          inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) {
-          result.push(current.trim());
-          current = '';
-        } else {
-          current += char;
+    Papa.parse(text, {
+      skipEmptyLines: true,
+      complete: (results) => {
+        if (results.errors.length > 0 && results.data.length === 0) {
+          setErrorMsg('Error: Invalid CSV format.');
+          return;
         }
-      }
-      result.push(current.trim());
-      return result;
-    };
+        
+        const lines = results.data;
+        if (lines.length < 2) {
+          setErrorMsg('Error: CSV file must contain a header row and at least one data row.');
+          return;
+        }
 
-    const headers = parseCSVLine(lines[0]);
-    const dataRows = lines.slice(1).map(line => parseCSVLine(line));
+        const headers = lines[0].map(h => DOMPurify.sanitize(String(h).trim()));
+        const dataRows = lines.slice(1).map(row => row.map(cell => DOMPurify.sanitize(String(cell).trim())));
 
-    setCsvHeaders(headers);
-    setCsvDataRows(dataRows);
+        setCsvHeaders(headers);
+        setCsvDataRows(dataRows);
 
     // Check if it is a weekly CSV sheet (with day headers)
     const dayCols = headers.filter(h => WEEKDAY_KEYS.includes(h.toLowerCase()));
@@ -164,6 +154,8 @@ export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAd
         zone: zoneIdx !== -1 ? zoneIdx : 2
       });
     }
+      }
+    });
   };
 
   // Convert CSV parsed data rows to list of review records
@@ -311,8 +303,8 @@ export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAd
         const newId = `emp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
         const newEmp = {
           id: newId,
-          name: rev.originalName.trim(),
-          dept: rev.assignedZone,
+          name: DOMPurify.sanitize(rev.originalName.trim()),
+          dept: DOMPurify.sanitize(rev.assignedZone),
           hours: parseFloat(rev.durationHours) || 8.0,
           memberships: 0,
           creditCards: 0,

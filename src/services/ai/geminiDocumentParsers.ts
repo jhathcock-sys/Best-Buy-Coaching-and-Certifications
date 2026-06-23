@@ -1,10 +1,9 @@
 import { GoogleGenerativeAI, SchemaType, Schema } from '@google/generative-ai';
+import { getGeminiModel, executeWithRetry } from './core.js';
 
 export async function parseScheduleImage(base64Data, mimeType, apiKey) {
   try {
-    const aiInstance = new GoogleGenerativeAI(apiKey);
-    // Use gemini-3.5-flash for fast vision processing
-    const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-pro' });
+    const model = getGeminiModel(apiKey, { aiMode: 'flash' });
 
     const systemPrompt = `
       You are an administrative assistant for a Best Buy store.
@@ -14,16 +13,21 @@ export async function parseScheduleImage(base64Data, mimeType, apiKey) {
       1. Their Name (e.g. "Julianna", "Ricky", "Corey T.", "Joey Z").
       2. Their scheduled Shift Time Range (e.g. "9:00 AM - 5:30 PM", "12:00 PM - 8:30 PM", or similar format). Ensure you capture the start and end times clearly with AM/PM or in a 24-hour format if printed that way.
       3. Their assigned Department or Zone (e.g. "Computing", "Mobile", "Home Theatre", "Front End", "Geek Squad", "Appliances", "Customer Service", "Warehouse"). If not printed or clear, make an educated guess or leave it as "General Sales".
-      
-      You must reply strictly in a structured JSON format.
-      The output must be a JSON array of objects, where each object matches this schema:
-      {
-        "name": "string",
-        "shift": "string",
-        "zone": "string"
-      }
-      Do not include any explanation or markdown formatting outside of the JSON block. Return only the raw JSON.
     `;
+
+    const responseSchema: Schema = {
+      type: SchemaType.ARRAY,
+      description: "List of scheduled employees",
+      items: {
+        type: SchemaType.OBJECT,
+        properties: {
+          name: { type: SchemaType.STRING },
+          shift: { type: SchemaType.STRING },
+          zone: { type: SchemaType.STRING }
+        },
+        required: ["name", "shift", "zone"]
+      }
+    };
 
     const imagePart = {
       inlineData: {
@@ -32,14 +36,15 @@ export async function parseScheduleImage(base64Data, mimeType, apiKey) {
       }
     };
 
-    const result = await model.generateContent({
+    const result = await executeWithRetry(() => model.generateContent({
       contents: [
         { role: 'user', parts: [{ text: systemPrompt }, imagePart] }
       ],
       generationConfig: {
-        responseMimeType: 'application/json'
+        responseMimeType: 'application/json',
+        responseSchema: responseSchema
       }
-    });
+    }));
 
     const responseText = result.response.text();
     return JSON.parse(responseText);
@@ -58,8 +63,8 @@ export const parseRentsDueDocumentGemini = async (base64Image, mimeType, textInp
       throw new Error("No Gemini API key available.");
     }
 
-    const genAI = new GoogleGenerativeAI(keyToUse);
-    const model = genAI.getGenerativeModel({ model: 'gemini-3.5-pro' });
+    const isProMode = !!base64Image;
+    const model = getGeminiModel(keyToUse, { aiMode: isProMode ? 'pro' : 'flash' });
 
     const systemPrompt = `
       You are an expert retail operations auditor. Your task is to parse a "Rents Due" salesperson performance report.
@@ -132,14 +137,14 @@ export const parseRentsDueDocumentGemini = async (base64Image, mimeType, textInp
         }
       };
       const textPart = textInput ? `User supplied text context: "${textInput}"` : "Please audit the image.";
-      result = await model.generateContent({
+      result = await executeWithRetry(() => model.generateContent({
         contents: [{ role: 'user', parts: [{ text: systemPrompt + '\n' + textPart }, imagePart] }],
         generationConfig: {
           responseMimeType: 'application/json',
           responseSchema: responseSchema,
           maxOutputTokens: 8192
         }
-      });
+      }));
       return JSON.parse(result.response.text());
     } else {
       // Chunk unstructured text payloads to avoid token truncation
@@ -154,25 +159,22 @@ export const parseRentsDueDocumentGemini = async (base64Image, mimeType, textInp
 
       let allParsedEmployees: any[] = [];
       
-      // Process chunks in parallel
-      const chunkPromises = chunks.map(async (chunk) => {
-        if (!chunk.trim()) return [];
-        const res = await model.generateContent({
+      // Process chunks sequentially to respect rate limits
+      for (const chunk of chunks) {
+        if (!chunk.trim()) continue;
+        const res = await executeWithRetry(() => model.generateContent({
           contents: [{ role: 'user', parts: [{ text: systemPrompt + '\nAnalyze this chunk of the Rents Due performance report:\n' + chunk }] }],
           generationConfig: {
             responseMimeType: 'application/json',
             responseSchema: responseSchema,
             maxOutputTokens: 8192
           }
-        });
+        }));
         const parsed = JSON.parse(res.response.text());
-        return Array.isArray(parsed) ? parsed : [];
-      });
-
-      const chunkResults = await Promise.all(chunkPromises);
-      chunkResults.forEach(res => {
-        allParsedEmployees = [...allParsedEmployees, ...res];
-      });
+        if (Array.isArray(parsed)) {
+          allParsedEmployees = [...allParsedEmployees, ...parsed];
+        }
+      }
 
       return allParsedEmployees;
     }

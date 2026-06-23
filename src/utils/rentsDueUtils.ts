@@ -1,4 +1,5 @@
 import Papa from 'papaparse';
+import DOMPurify from 'dompurify';
 
 export const parseRentsDueCSVLocal = (text: string): any[] | null => {
   if (!text || (!text.includes(',') && !text.includes('\t'))) return null;
@@ -41,7 +42,8 @@ export const parseRentsDueCSVLocal = (text: string): any[] | null => {
       };
 
       const nameKey = Object.keys(row).find(k => k.toLowerCase().includes('name') || k.toLowerCase().includes('employee') || k.toLowerCase().includes('advisor'));
-      const name = nameKey ? row[nameKey] : "Unknown";
+      let name = nameKey ? row[nameKey] : "Unknown";
+      name = DOMPurify.sanitize(String(name).trim());
 
       const rph = getVal(['rph', 'rev/hr', 'revenue per hour']);
       const rphOwed = getVal(['rph goal', 'rph owed', 'rph target'], 640);
@@ -64,7 +66,7 @@ export const parseRentsDueCSVLocal = (text: string): any[] | null => {
       const warrantyStatus = warranty >= warrantyGoal ? 'on-track' : 'off-track';
 
       return {
-        name: String(name).trim(),
+        name,
         rph, rphOwed, rphStatus,
         revenue, revenueOwed, revenueStatus,
         apps, appsOwed, appsStatus,

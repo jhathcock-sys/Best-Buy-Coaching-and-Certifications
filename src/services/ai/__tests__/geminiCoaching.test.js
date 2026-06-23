@@ -12,6 +12,14 @@ vi.mock('@google/generative-ai', () => {
         };
       }
     },
+    SchemaType: {
+      STRING: 'STRING',
+      NUMBER: 'NUMBER',
+      INTEGER: 'INTEGER',
+      BOOLEAN: 'BOOLEAN',
+      ARRAY: 'ARRAY',
+      OBJECT: 'OBJECT'
+    },
     mockGenerateContent
   };
 });

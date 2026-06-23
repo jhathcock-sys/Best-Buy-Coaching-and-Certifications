@@ -3,7 +3,8 @@ import { TrendingUp, Calendar, DollarSign, Award, CreditCard, ChevronDown } from
 import { useStore } from '../store/useStore';
 
 export default function TrendReporting() {
-  const dailySnapshots = useStore(state => state.dailySnapshots || {});
+  const dailySnapshotsRaw = useStore(state => state.dailySnapshots);
+  const dailySnapshots = dailySnapshotsRaw || {};
   
   const [viewLevel, setViewLevel] = useState('daily'); // daily, weekly, monthly
   const [targetEntity, setTargetEntity] = useState('Store Total'); // 'Store Total' or Employee Name

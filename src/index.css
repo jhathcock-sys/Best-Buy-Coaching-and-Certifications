@@ -1400,4 +1400,198 @@ input[type="checkbox"]:hover {
 }
 
 
+/* Login Component Styles */
+.login-container {
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at center, #0a0e17 0%, #03050a 100%);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
 
+.login-glow-blue {
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 40vw;
+  height: 40vw;
+  background: radial-gradient(circle, rgba(0, 70, 190, 0.08) 0%, transparent 60%);
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+.login-glow-yellow {
+  position: absolute;
+  bottom: 10%;
+  right: 10%;
+  width: 40vw;
+  height: 40vw;
+  background: radial-gradient(circle, rgba(253, 216, 53, 0.03) 0%, transparent 60%);
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+.login-card {
+  width: 420px;
+  background: rgba(255, 255, 255, 0.01);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  border-radius: 30px;
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  transition: all 0.4s ease;
+}
+
+.login-card.success {
+  border-color: var(--success);
+  box-shadow: 0 8px 32px var(--success-glow);
+  transform: scale(1.02);
+}
+
+.login-logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: var(--bby-blue-alpha-10);
+  border: 1px solid rgba(0,70,190,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem auto;
+  box-shadow: 0 0 15px var(--bby-blue-alpha-10);
+  transition: all 0.4s ease;
+}
+
+.login-logo.success {
+  background: var(--success-alpha-15);
+  border-color: rgba(16,185,129,0.3);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+}
+
+.login-input {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-glass);
+  color: var(--text-primary);
+  font-size: 1rem;
+  text-align: center;
+  outline: none;
+  margin-bottom: 0.5rem;
+  transition: var(--transition-normal);
+}
+
+.login-input:focus {
+  border-color: var(--bby-yellow);
+}
+
+.pin-dots-container {
+  display: flex;
+  gap: 1.25rem;
+  justify-content: center;
+  margin: 0.5rem 0;
+}
+
+.pin-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.15);
+  transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.pin-dot.filled {
+  background: var(--bby-yellow);
+  border: none;
+  box-shadow: 0 0 8px var(--bby-yellow);
+  transform: scale(1.1);
+}
+
+.pin-dot.success {
+  background: var(--success);
+  border: none;
+  box-shadow: 0 0 10px var(--success);
+}
+
+.keypad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  width: 100%;
+  max-width: 280px;
+}
+
+.keypad-btn {
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-glass);
+  color: var(--text-primary);
+  font-size: 1.4rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.keypad-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.05);
+  transform: scale(1.05);
+}
+
+.keypad-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.keypad-action-btn {
+  height: 64px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.keypad-action-btn:hover:not(:disabled) {
+  color: var(--text-primary);
+}
+
+.keypad-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.db-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border-glass);
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+}

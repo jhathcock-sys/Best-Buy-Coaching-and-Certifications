@@ -1,6 +1,6 @@
 import { toast } from 'react-hot-toast';
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, onSnapshot, setDoc, getDoc, collection, addDoc, query, orderBy, limit, deleteDoc, getDocs, where } from 'firebase/firestore';
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, onSnapshot, setDoc, getDoc, collection, addDoc, query, orderBy, limit, deleteDoc, getDocs, getDocsFromCache, where } from 'firebase/firestore';
 
 let app: any = null;
 let db: any = null;
@@ -147,13 +147,63 @@ export const subscribeToManagers = (storeId: string, onUpdate: any) => {
 // Fetch User by PIN (New Auth Flow)
 export const getUserByPin = async (storeId: string, pin: string) => {
   if (!db) return null;
+  
+  const withTimeout = <T>(promise: Promise<T>, ms = 4000): Promise<T> => {
+    return Promise.race([
+      promise,
+      new Promise<T>((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))
+    ]);
+  };
+
   try {
     const usersRef = collection(db, 'stores', storeId, 'users');
     const q = query(usersRef, where('pin', '==', pin), limit(1));
-    const snap = await getDocs(q);
+    
+    let snap: any;
+    try {
+      snap = await withTimeout(getDocs(q));
+    } catch (err: any) {
+      if (err.message === 'timeout' || err.code === 'unavailable') {
+        console.warn('Network timeout fetching users by PIN, falling back to cache.');
+        snap = await getDocsFromCache(q);
+      } else {
+        throw err;
+      }
+    }
+
     if (!snap.empty) {
       return { id: snap.docs[0].id, ...snap.docs[0].data() };
     }
+    
+    // Phase 1 Auth Lazy Migration: check legacy managersSettings if not found
+    const legacyRef = getStoreDocRef(storeId, 'managersSettings');
+    let legacySnap: any;
+    try {
+      legacySnap = await withTimeout(getDoc(legacyRef));
+    } catch (err: any) {
+      // If we timeout checking legacy, just return null and fallback to local state array
+      return null;
+    }
+    
+    if (legacySnap && legacySnap.exists()) {
+      const legacyManagers = legacySnap.data().managers || [];
+      const legacyUser = legacyManagers.find((m: any) => m.pin === pin);
+      
+      if (legacyUser) {
+        // Migrate to users collection
+        const docId = legacyUser.id || `user_${legacyUser.pin}`;
+        const userDocRef = doc(usersRef, docId);
+        await setDoc(userDocRef, {
+          ...legacyUser,
+          status: 'active',
+          migratedAt: new Date().getTime()
+        }, { merge: true });
+        
+        console.log(`Lazy migrated user ${legacyUser.name} to users collection.`);
+        return { id: docId, ...legacyUser };
+      }
+    }
+    
     return null;
   } catch (e) {
     console.error('Failed to get user by PIN:', e);
@@ -252,6 +302,32 @@ export const saveManagersToCloud = async (storeId: string, managers: any) => {
   if (!ref) return false;
   try {
     await setDoc(ref, { managers }, { merge: true });
+    
+    // Phase 1 Auth Migration: Keep 'users' collection in sync with managers array
+    const usersColRef = collection(db, 'stores', storeId, 'users');
+    const activeIds: string[] = [];
+    
+    for (const manager of managers) {
+      if (!manager.pin) continue;
+      const docId = manager.id || `user_${manager.pin}`;
+      activeIds.push(docId);
+      
+      const userDocRef = doc(usersColRef, docId);
+      await setDoc(userDocRef, {
+        ...manager,
+        status: 'active',
+        updatedAt: new Date().getTime()
+      }, { merge: true });
+    }
+    
+    // Remove users that were deleted from the managers array
+    const usersSnap = await getDocs(usersColRef);
+    for (const userDoc of usersSnap.docs) {
+      if (!activeIds.includes(userDoc.id)) {
+        await deleteDoc(userDoc.ref);
+      }
+    }
+    
     return true;
   } catch (e) {
     console.error('Failed to save managers to cloud:', e);

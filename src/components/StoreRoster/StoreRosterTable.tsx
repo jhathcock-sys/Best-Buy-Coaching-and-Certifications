@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, Clock } from 'lucide-react';
+import { Users, Clock, Trash2, User, Wand2 } from 'lucide-react';
 import { RosterMetricCell, getEmployeeGap, getMetricClass } from './RosterMetricCell';
 import { calculateCVI } from '../../store/cviHelper';
 
@@ -11,7 +11,8 @@ export default function StoreRosterTable({
   rosterHistory,
   activePeriod,
   setSelectedProfileEmployee,
-  handleStartEdit
+  handleStartEdit,
+  onDeleteEmployee
 }) {
   return (
     <div className="desktop-only" style={{ overflowX: 'auto' }}>
@@ -193,9 +194,34 @@ export default function StoreRosterTable({
                   )}
 
                   <td style={{ padding: isDense ? '0.45rem 1rem' : '0.85rem 1rem', textAlign: 'right' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.75rem', fontSize: '0.75rem' }} onClick={() => handleStartEdit(emp)}>
-                        Edit Pulse
+                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', flexWrap: 'nowrap' }}>
+                      <button 
+                        className="btn btn-secondary" 
+                        title="View Profile"
+                        onClick={() => setSelectedProfileEmployee(emp)}
+                        style={{ padding: '0.4rem 0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      >
+                        <User size={16} />
+                      </button>
+                      <button 
+                        className="btn btn-secondary" 
+                        title="Performance Wizard"
+                        onClick={() => handleStartEdit(emp)}
+                        style={{ padding: '0.4rem 0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--bby-yellow)' }}
+                      >
+                        <Wand2 size={16} />
+                      </button>
+                      <button 
+                        className="btn btn-secondary" 
+                        title="Delete Employee"
+                        onClick={() => {
+                          if (window.confirm(`Are you sure you want to delete ${emp.name}?`)) {
+                            onDeleteEmployee(emp.id);
+                          }
+                        }}
+                        style={{ padding: '0.4rem 0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--error)', borderColor: 'rgba(239, 68, 68, 0.3)' }}
+                      >
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </td>

@@ -250,6 +250,7 @@ export default function StoreRoster({
               activePeriod={activePeriod}
               setSelectedProfileEmployee={setSelectedProfileEmployee}
               handleStartEdit={handleStartEdit}
+              onDeleteEmployee={onDeleteEmployee}
             />
 
             <StoreRosterMobileCard 

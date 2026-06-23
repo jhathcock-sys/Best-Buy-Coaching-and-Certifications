@@ -119,55 +119,47 @@ export default function DashboardCoachingEngine({
 
   return (
     <div className="glass-card">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-        <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+      <div className="flex-between flex-wrap gap-sm mb-lg">
+        <h3 className="m-0 flex-center gap-sm text-xl">
           <TrendingUp size={20} color="var(--error)" /> Daily Coaching Priorities
         </h3>
         <span 
+          className="bg-error-alpha text-error font-bold flex-center gap-sm"
           style={{ 
             fontSize: '0.65rem', 
-            background: 'rgba(239, 68, 68, 0.1)', 
             border: '1px solid rgba(239, 68, 68, 0.3)', 
-            color: 'var(--error)', 
             padding: '0.2rem 0.5rem', 
             borderRadius: '20px', 
-            fontWeight: 700,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.25rem',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
             animation: 'skeletonPulse 2s ease-in-out infinite'
           }}
         >
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--error)', display: 'inline-block' }}></span>
+          <span className="bg-error rounded-full" style={{ width: 6, height: 6 }}></span>
           Priority Engine Active
         </span>
       </div>
-      <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '1.25rem', marginTop: '-0.75rem' }}>
+      <p className="text-secondary text-sm mb-lg mt-0" style={{ marginTop: '-0.75rem' }}>
         Roster scan updates: priorities based on metric gaps, scheduled hours, Focus 5 status, and coaching recency.
       </p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div className="flex-column gap-md">
         {coachingRecommendations.length === 0 ? (
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textAlign: 'center', padding: '1rem' }}>
+          <p className="text-muted text-sm text-center p-md">
             No coaching priorities flagged at this time.
           </p>
         ) : (
           coachingRecommendations.map(({ employee, gaps, lastCoachedDaysAgo, focus5 }) => (
             <div 
               key={employee.id} 
+              className="flex-column gap-md p-md"
               style={{ 
-                padding: '1.25rem', 
                 borderRadius: '12px', 
                 background: focus5 ? 'rgba(239, 68, 68, 0.05)' : 'rgba(255, 255, 255, 0.02)', 
                 border: `1.5px solid ${focus5 ? 'rgba(239, 68, 68, 0.3)' : 'var(--border-glass)'}`,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.75rem'
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                <span style={{ fontWeight: 700, color: '#fff', fontSize: '0.95rem' }}>
+              <div className="flex-between flex-wrap gap-sm">
+                <span className="font-bold text-white" style={{ fontSize: '0.95rem' }}>
                   {employee.name}
                 </span>
                 <span className="tag-pill tag-pill-active" style={{ fontSize: '0.7rem' }}>
@@ -176,12 +168,12 @@ export default function DashboardCoachingEngine({
               </div>
 
               {focus5 && (
-                <div style={{ fontSize: '0.75rem', color: 'var(--error)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                <div className="text-error font-bold flex-center justify-start gap-sm" style={{ fontSize: '0.75rem' }}>
                   🔥 FOCUS 5 PRIORITY - COACH EVERY SHIFT
                 </div>
               )}
 
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+              <p className="text-secondary text-sm m-0" style={{ lineHeight: 1.4 }}>
                 {gaps.length > 0 ? (
                   <span>
                     Failing target in: <strong>{gaps.join(', ')}</strong>.
@@ -197,24 +189,21 @@ export default function DashboardCoachingEngine({
                 )}
               </p>
 
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+              <div className="flex-center flex-wrap gap-sm" style={{ marginTop: '0.25rem' }}>
                 <button 
-                  className="btn btn-secondary" 
-                  style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem', flex: 1 }}
+                  className="btn btn-secondary flex-1 btn-sm" 
                   onClick={() => onShadowEmployee && onShadowEmployee(employee)}
                 >
                   Observe Shadow 🕵️
                 </button>
                 <button 
-                  className="btn btn-secondary" 
-                  style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem', flex: 1 }}
+                  className="btn btn-secondary flex-1 btn-sm" 
                   onClick={() => onCoachEmployee && onCoachEmployee(employee)}
                 >
                   GROW Coach 🧠
                 </button>
                 <button 
-                  className="btn btn-accent" 
-                  style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem', color: '#000', flex: 1.2 }}
+                  className="btn btn-accent flex-1 btn-sm" 
                   onClick={() => onCreateLog ? onCreateLog(employee) : onCoachEmployee(employee)}
                 >
                   Log Builder 📝

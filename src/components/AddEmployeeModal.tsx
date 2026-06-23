@@ -22,6 +22,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
     warranty: '',
     surveys: '',
     rph: '',
+    transactions: '',
     basket: '',
     m365: '',
     audio: '',
@@ -52,6 +53,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
         warranty: parseFloat(form.warranty) || 0.0,
         surveys: form.surveys === 'Failing' || form.surveys === 'failing' ? 0.2 : parseFloat(form.surveys) || 0.0,
         rph: parseInt(form.rph) || 0,
+        transactions: parseInt(form.transactions) || 0,
         basket: (form.dept === 'Computing' || form.dept === 'Home Theatre') ? (parseFloat(form.basket) || 0) : 0,
         m365: form.dept === 'Computing' ? (parseFloat(form.m365) || 0) : 0,
         audio: form.dept === 'Home Theatre' ? (parseFloat(form.audio) || 0) : 0,
@@ -75,6 +77,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
       warranty: '',
       surveys: '',
       rph: '',
+      transactions: '',
       basket: '',
       m365: '',
       audio: '',
@@ -211,6 +214,18 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                 style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                 value={form.rph}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, rph: e.target.value })}
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" style={{ fontSize: '0.8rem' }}>Total Transactions:</label>
+              <input 
+                type="number" 
+                className="form-control" 
+                placeholder="e.g. 150"
+                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+                value={form.transactions}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, transactions: e.target.value })}
               />
             </div>
 

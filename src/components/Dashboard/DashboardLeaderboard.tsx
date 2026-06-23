@@ -32,22 +32,22 @@ export default function DashboardLeaderboard({
   }, [roster, rankMetric]);
 
   return (
-    <div className="glass-card" style={{ padding: '1.75rem', width: '100%' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+    <div className="glass-card w-full p-xl">
+      <div className="flex-between flex-wrap gap-sm mb-lg">
         <div>
-          <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: '0 0 0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff' }}>
+          <h2 className="m-0 mb-xs text-xl font-bold flex-center gap-sm text-white justify-start">
             <ArrowUpRight size={20} color="var(--bby-blue)" />
             Roster Leaderboard
           </h2>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+          <p className="m-0 text-sm text-secondary">
             Stack rank your top performing advisors to identify coaching opportunities.
           </p>
         </div>
         <select 
-          className="bby-select"
+          className="bby-select p-sm border-glass text-white text-sm"
           value={rankMetric}
           onChange={(e) => setRankMetric(e.target.value)}
-          style={{ padding: '0.5rem 1rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-glass)', borderRadius: '8px', color: '#fff', fontSize: '0.85rem' }}
+          style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}
         >
           <option value="memberships">Rank by Plus & Total</option>
           <option value="creditCards">Rank by BBY Cards</option>
@@ -57,15 +57,15 @@ export default function DashboardLeaderboard({
         </select>
       </div>
 
-      <div style={{ overflowX: 'auto', background: 'rgba(11, 15, 25, 0.4)', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '700px' }}>
+      <div className="overflow-x-auto rounded-xl border-glass" style={{ background: 'rgba(11, 15, 25, 0.4)' }}>
+        <table className="w-full min-w-md" style={{ borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
-            <tr style={{ borderBottom: '1px solid var(--border-glass)', background: 'rgba(255,255,255,0.02)' }}>
-              <th style={{ padding: '1rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Advisor</th>
-              <th style={{ padding: '1rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Department</th>
-              <th style={{ padding: '1rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>{rankMetric === 'memberships' ? 'PMs' : rankMetric === 'creditCards' ? 'Cards' : rankMetric === 'warranty' ? 'GSP' : rankMetric === 'rph' ? 'RPH' : 'CSAT'}</th>
-              <th style={{ padding: '1rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status (CVI)</th>
-              <th style={{ padding: '1rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>Actions</th>
+            <tr className="border-glass" style={{ background: 'rgba(255,255,255,0.02)', borderLeft: 'none', borderRight: 'none', borderTop: 'none' }}>
+              <th className="p-md text-xs font-semibold text-secondary uppercase tracking-wide">Advisor</th>
+              <th className="p-md text-xs font-semibold text-secondary uppercase tracking-wide">Department</th>
+              <th className="p-md text-xs font-semibold text-secondary uppercase tracking-wide text-center">{rankMetric === 'memberships' ? 'PMs' : rankMetric === 'creditCards' ? 'Cards' : rankMetric === 'warranty' ? 'GSP' : rankMetric === 'rph' ? 'RPH' : 'CSAT'}</th>
+              <th className="p-md text-xs font-semibold text-secondary uppercase tracking-wide">Status (CVI)</th>
+              <th className="p-md text-xs font-semibold text-secondary uppercase tracking-wide text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -79,33 +79,35 @@ export default function DashboardLeaderboard({
               if (isReview) statusColor = '#ef4444'; // Red
 
               return (
-                <tr key={emp.id} style={{ borderBottom: '1px solid var(--border-glass)', transition: 'background 0.2s' }}>
-                  <td style={{ padding: '1rem', fontWeight: 600, color: '#fff' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', width: '1rem', textAlign: 'right' }}>#{idx + 1}</span>
+                <tr key={emp.id} className="border-glass" style={{ transition: 'background 0.2s', borderLeft: 'none', borderRight: 'none' }}>
+                  <td className="p-md font-semibold text-white">
+                    <div className="flex-center justify-start gap-sm">
+                      <span className="text-xs text-secondary text-right" style={{ width: '1rem' }}>#{idx + 1}</span>
                       {emp.name}
-                      {emp.focus5 && <span style={{ background: 'var(--error)', color: '#fff', fontSize: '0.6rem', padding: '0.15rem 0.35rem', borderRadius: '4px', fontWeight: 800 }}>F5</span>}
+                      {emp.focus5 && <span className="bg-error text-white font-bold" style={{ fontSize: '0.6rem', padding: '0.15rem 0.35rem', borderRadius: '4px' }}>F5</span>}
                     </div>
                   </td>
-                  <td style={{ padding: '1rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{emp.dept}</td>
-                  <td style={{ padding: '1rem', fontWeight: 700, fontSize: '1.05rem', textAlign: 'center', color: rankMetric === 'memberships' ? '#60a5fa' : rankMetric === 'creditCards' ? '#fef08a' : '#fff' }}>
+                  <td className="p-md text-secondary text-sm">{emp.dept}</td>
+                  <td className="p-md font-bold text-lg text-center" style={{ color: rankMetric === 'memberships' ? '#60a5fa' : rankMetric === 'creditCards' ? '#fef08a' : '#fff' }}>
                     {rankMetric === 'surveys' && emp.surveys === 0.2 ? 'Fail' : rankMetric === 'rph' ? `$${emp.rph}` : rankMetric === 'warranty' ? `${emp.warranty}%` : String(emp[rankMetric as keyof Employee] || '')}
                   </td>
-                  <td style={{ padding: '1rem' }}>
-                    <span style={{ 
-                      fontSize: '0.75rem', fontWeight: 600, padding: '0.35rem 0.65rem', borderRadius: '20px',
+                  <td className="p-md">
+                    <span className="font-semibold" style={{ 
+                      fontSize: '0.75rem', padding: '0.35rem 0.65rem', borderRadius: '20px',
                       background: `${statusColor}15`, color: statusColor, border: `1px solid ${statusColor}30`
                     }}>
                       {cviString}
                     </span>
                   </td>
-                  <td style={{ padding: '1rem', textAlign: 'right' }}>
-                    <button className="btn btn-secondary" onClick={() => onShadowEmployee && onShadowEmployee(emp)} style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem', marginRight: '0.5rem' }}>
-                      Shadow
-                    </button>
-                    <button className="btn btn-primary" onClick={() => onCoachEmployee(emp)} style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}>
-                      Log
-                    </button>
+                  <td className="p-md text-right">
+                    <div className="flex-end gap-sm">
+                      <button className="btn btn-secondary btn-sm" onClick={() => onShadowEmployee && onShadowEmployee(emp)}>
+                        Shadow
+                      </button>
+                      <button className="btn btn-primary btn-sm" onClick={() => onCoachEmployee(emp)}>
+                        Log
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );
@@ -113,7 +115,7 @@ export default function DashboardLeaderboard({
           </tbody>
         </table>
         {leaderboardData.length === 0 && (
-          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+          <div className="p-xl text-center text-secondary">
             No roster data available.
           </div>
         )}

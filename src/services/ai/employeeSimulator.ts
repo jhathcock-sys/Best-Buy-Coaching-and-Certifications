@@ -207,7 +207,7 @@ export function generateCoachingLogLocal(name, gapType, gapDetails, positives, r
 
 // Audit store floor layout and queue metrics using Gemini Vision
 
-export async function runGeminiEmployeeCoachingStep(apiKey, message, history, employeeScenario, playbookSettings, pastCoachingSummary) {
+export async function runGeminiEmployeeCoachingStep(apiKey, message, history, employeeScenario, playbookSettings, pastCoachingSummary, onStream?: (text: string) => void) {
   try {
     const model = getGeminiModel(apiKey, playbookSettings);
     
@@ -294,18 +294,103 @@ export async function runGeminiEmployeeCoachingStep(apiKey, message, history, em
       required: ["responseText", "currentCoachStep", "completedCoachSteps"]
     };
 
-    const result = await executeWithRetry(() => model.generateContent({
-      contents: [
-        { role: 'user', parts: [{ text: systemPrompt + '\n' + prompt }] }
-      ],
-      generationConfig: {
-        responseMimeType: 'application/json',
-        responseSchema: responseSchema
+    let finalResponseText = '';
+    
+    if (onStream) {
+      const result = await model.generateContentStream({
+        contents: [
+          { role: 'user', parts: [{ text: systemPrompt + '\n' + prompt }] }
+        ],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseSchema: responseSchema
+        }
+      });
+      
+      let fullJson = '';
+      for await (const chunk of result.stream) {
+        fullJson += chunk.text();
+        
+        // Extract partial responseText for streaming
+        const startIndex = fullJson.indexOf('"responseText"');
+        if (startIndex !== -1) {
+          const colonIndex = fullJson.indexOf(':', startIndex);
+          if (colonIndex !== -1) {
+            const quoteIndex = fullJson.indexOf('"', colonIndex);
+            if (quoteIndex !== -1) {
+              const contentStart = quoteIndex + 1;
+              let inEscape = false;
+              let i = contentStart;
+              for (; i < fullJson.length; i++) {
+                const char = fullJson[i];
+                if (inEscape) {
+                  inEscape = false;
+                } else {
+                  if (char === '\\') inEscape = true;
+                  else if (char === '"') break;
+                }
+              }
+              const rawString = fullJson.substring(contentStart, i);
+              const unescaped = rawString.replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+              if (unescaped.trim().length > 0) {
+                onStream(unescaped);
+              }
+            }
+          }
+        }
       }
-    }));
+      finalResponseText = fullJson;
+    } else {
+      const result = await executeWithRetry(() => model.generateContent({
+        contents: [
+          { role: 'user', parts: [{ text: systemPrompt + '\n' + prompt }] }
+        ],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseSchema: responseSchema
+        }
+      }));
+      finalResponseText = result.response.text();
+    }
 
-    const responseText = result.response.text();
-    const data = JSON.parse(responseText);
+    let data;
+    try {
+      data = JSON.parse(finalResponseText);
+    } catch (parseError) {
+      console.warn("Incomplete or invalid JSON from stream, falling back to manual extraction", parseError);
+      
+      let extractedText = "I'm not sure how to answer that.";
+      const textMatch = finalResponseText.match(/"responseText"\s*:\s*"([^]*?)"(?:,|\s*\})/);
+      if (textMatch) {
+        extractedText = textMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+      } else {
+         const partialMatch = finalResponseText.match(/"responseText"\s*:\s*"([^]*)/);
+         if (partialMatch) {
+           extractedText = partialMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+         }
+      }
+      
+      data = {
+        responseText: extractedText,
+        currentCoachStep: history.currentCoachStep || 'goal',
+        completedCoachSteps: { ...(history.completedCoachSteps || {}) }
+      };
+      
+      const stepMatch = finalResponseText.match(/"currentCoachStep"\s*:\s*"([^"]+)"/);
+      if (stepMatch) data.currentCoachStep = stepMatch[1];
+      
+      const goalMatch = finalResponseText.match(/"goal"\s*:\s*(true|false)/);
+      if (goalMatch) data.completedCoachSteps.goal = goalMatch[1] === 'true';
+      
+      const realityMatch = finalResponseText.match(/"reality"\s*:\s*(true|false)/);
+      if (realityMatch) data.completedCoachSteps.reality = realityMatch[1] === 'true';
+      
+      const optionsMatch = finalResponseText.match(/"options"\s*:\s*(true|false)/);
+      if (optionsMatch) data.completedCoachSteps.options = optionsMatch[1] === 'true';
+      
+      const willMatch = finalResponseText.match(/"will"\s*:\s*(true|false)/);
+      if (willMatch) data.completedCoachSteps.will = willMatch[1] === 'true';
+    }
     
     const updatedMessages = [
       ...history.messages,

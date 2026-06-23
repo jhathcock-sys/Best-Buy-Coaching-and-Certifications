@@ -111,35 +111,30 @@ export default function DashboardSystemAlerts({
   if (systemAlerts.length === 0) return null;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '0.5rem' }}>
+    <div className="flex-column gap-md mb-sm">
       {systemAlerts.map(alert => (
         <div 
           key={alert.id}
-          className="glass-card" 
-          style={{ 
-            padding: '1.25rem 1.5rem', 
-            border: `1px solid ${alert.type === 'success' ? 'rgba(16, 185, 129, 0.3)' : alert.type === 'warning' ? 'rgba(253, 216, 53, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`, 
-            background: `linear-gradient(90deg, ${alert.type === 'success' ? 'rgba(16, 185, 129, 0.05)' : alert.type === 'warning' ? 'rgba(253, 216, 53, 0.05)' : 'rgba(239, 68, 68, 0.05)'} 0%, rgba(11, 15, 25, 0.5) 100%)`,
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '1rem'
-          }}
+          className={`glass-card flex-between flex-wrap gap-md p-lg alert-card-${alert.type}`} 
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: alert.type === 'success' ? 'var(--success)' : alert.type === 'warning' ? 'var(--bby-yellow)' : 'var(--error)', boxShadow: `0 0 10px ${alert.type === 'success' ? 'var(--success)' : alert.type === 'warning' ? 'var(--bby-yellow)' : 'var(--error)'}` }} />
-            <span style={{ fontSize: '0.9rem', color: '#fff', fontWeight: 500, lineHeight: 1.4 }}>
+          <div className="flex-center justify-start gap-sm">
+            <div 
+              className="rounded-full" 
+              style={{ 
+                width: 8, height: 8, 
+                background: alert.type === 'success' ? 'var(--success)' : alert.type === 'warning' ? 'var(--warning)' : 'var(--error)', 
+                boxShadow: `0 0 10px ${alert.type === 'success' ? 'var(--success)' : alert.type === 'warning' ? 'var(--warning)' : 'var(--error)'}` 
+              }} 
+            />
+            <span className="text-white font-semibold" style={{ fontSize: '0.9rem', lineHeight: 1.4 }}>
               {alert.text}
             </span>
           </div>
           <button 
-            className={`btn ${alert.type === 'success' ? 'btn-primary' : 'btn-secondary'}`}
+            className={`btn btn-sm ${alert.type === 'success' ? 'btn-primary bg-success text-white' : 'btn-secondary'}`}
             onClick={() => onNavigate(alert.navTarget)}
             style={{ 
-              padding: '0.4rem 1rem', 
-              fontSize: '0.8rem',
-              ...(alert.type === 'success' && { background: 'var(--success)', color: '#000', border: 'none' })
+              ...(alert.type === 'success' && { border: 'none', color: '#000' })
             }}
           >
             {alert.actionLabel}

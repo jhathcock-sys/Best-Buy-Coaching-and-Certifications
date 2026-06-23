@@ -1,83 +1,23 @@
-import Papa from 'papaparse';
-import DOMPurify from 'dompurify';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { app } from '../services/firebase';
 
-export const parseRentsDueCSVLocal = (text: string): any[] | null => {
+export const parseRentsDueCSVCloud = async (text: string): Promise<any[] | null> => {
   if (!text || (!text.includes(',') && !text.includes('\t'))) return null;
 
   try {
-    const result = Papa.parse(text.trim(), {
-      header: true,
-      skipEmptyLines: true,
-      dynamicTyping: true
-    });
-
-    if (result.errors.length > 0 && result.data.length === 0) {
-      return null;
-    }
-
-    const rows = result.data as any[];
-    if (rows.length === 0) return null;
-
-    const firstRow = rows[0];
-    const keys = Object.keys(firstRow).map(k => k.toLowerCase());
+    const functions = getFunctions(app);
+    const parseCSV = httpsCallable(functions, 'parseRentsDueCSV');
+    const result = await parseCSV({ csvText: text });
     
-    const hasName = keys.some(k => k.includes('name') || k.includes('employee') || k.includes('advisor'));
-    if (!hasName) return null;
-
-    const parsedData = rows.map((row) => {
-      const getVal = (possibleKeys: string[], defaultVal: any = 0) => {
-        for (const pk of possibleKeys) {
-          const matchingKey = Object.keys(row).find(k => k.toLowerCase().includes(pk));
-          if (matchingKey && row[matchingKey] !== undefined && row[matchingKey] !== null) {
-            let val = row[matchingKey];
-            if (typeof val === 'string') {
-              val = val.replace(/[^0-9.-]+/g, '');
-              val = parseFloat(val);
-              if (isNaN(val)) continue;
-            }
-            return val;
-          }
-        }
-        return defaultVal;
-      };
-
-      const nameKey = Object.keys(row).find(k => k.toLowerCase().includes('name') || k.toLowerCase().includes('employee') || k.toLowerCase().includes('advisor'));
-      let name = nameKey ? row[nameKey] : "Unknown";
-      name = DOMPurify.sanitize(String(name).trim());
-
-      const rph = getVal(['rph', 'rev/hr', 'revenue per hour']);
-      const rphOwed = getVal(['rph goal', 'rph owed', 'rph target'], 640);
-      const rphStatus = rph >= rphOwed ? 'on-track' : 'off-track';
-
-      const revenue = getVal(['revenue', 'rev', 'total rev']);
-      const revenueOwed = getVal(['rev goal', 'rev owed', 'revenue target'], 0);
-      const revenueStatus = revenue >= revenueOwed ? 'on-track' : 'off-track';
-
-      const apps = getVal(['apps', 'bps', 'credit', 'bp']);
-      const appsOwed = getVal(['apps goal', 'apps owed', 'app target'], 0);
-      const appsStatus = apps >= appsOwed ? 'on-track' : 'off-track';
-
-      const memberships = getVal(['memberships', 'plus', 'total members', 'bby+']);
-      const membershipsOwed = getVal(['member goal', 'memberships owed'], 0);
-      const membershipsStatus = memberships >= membershipsOwed ? 'on-track' : 'off-track';
-
-      const warranty = getVal(['warranty', 'gsp', 'attach']);
-      const warrantyGoal = getVal(['warranty goal', 'gsp target'], 11.0);
-      const warrantyStatus = warranty >= warrantyGoal ? 'on-track' : 'off-track';
-
-      return {
-        name,
-        rph, rphOwed, rphStatus,
-        revenue, revenueOwed, revenueStatus,
-        apps, appsOwed, appsStatus,
-        memberships, membershipsOwed, membershipsStatus,
-        warranty, warrantyGoal, warrantyStatus
-      };
-    });
-
-    return parsedData;
+    // @ts-ignore
+    if (result.data && result.data.parsedData) {
+      // @ts-ignore
+      return result.data.parsedData;
+    }
+    
+    return null;
   } catch (e) {
-    console.error("Local CSV parsing failed", e);
+    console.error("Cloud CSV parsing failed", e);
     return null;
   }
 };

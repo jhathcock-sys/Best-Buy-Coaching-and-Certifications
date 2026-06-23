@@ -99,6 +99,21 @@ export default function WizardStep3Quality({
                 </div>
               </div>
 
+              <div className="form-group">
+                <label className="form-label" style={{ fontSize: '0.8rem' }}>Total Transactions:</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, transactions: Math.max(0, parseInt(prev.transactions) - 10) }))}>-10</button>
+                  <input 
+                    type="number" 
+                    className="form-control" 
+                    style={{ padding: '0.55rem 1rem', fontSize: '0.85rem', textAlign: 'center' }}
+                    value={editForm.transactions}
+                    onChange={(e) => setEditForm({ ...editForm, transactions: e.target.value })}
+                  />
+                  <button type="button" className="stepper-btn" onClick={() => setEditForm(prev => ({ ...prev, transactions: parseInt(prev.transactions) + 10 }))}>+10</button>
+                </div>
+              </div>
+
               {/* AI Auto-Analyze Gap Box */}
               <div style={{ background: 'rgba(253, 216, 53, 0.05)', border: '1px solid rgba(253, 216, 53, 0.2)', padding: '1rem', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

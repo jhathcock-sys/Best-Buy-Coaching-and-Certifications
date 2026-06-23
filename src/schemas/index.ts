@@ -11,6 +11,7 @@ export const EmployeeSchema = z.object({
   warranty: z.number().optional().default(0),
   surveys: z.number().optional().default(0),
   rph: z.number().optional().default(0),
+  transactions: z.number().optional().default(0),
   gap: z.string().optional(),
   basket: z.number().optional().default(0),
   m365: z.number().optional().default(0),

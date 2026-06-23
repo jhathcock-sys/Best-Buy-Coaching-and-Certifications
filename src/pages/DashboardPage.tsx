@@ -56,7 +56,7 @@ export default function Dashboard({
     
     // For weighting percentages
     let weightedWarrantySum = 0;
-    let totalHoursForWarranty = 0;
+    let totalTransactionsForWarranty = 0;
 
     roster.forEach((emp: Employee) => {
       totalMemberships += ((emp as any).memberships || 0);
@@ -64,10 +64,11 @@ export default function Dashboard({
       
       const hours = (emp as any).hours || 0;
       const rph = (emp as any).rph || 0;
+      const transactions = (emp as any).transactions || 0;
       
       if ((emp as any).warranty > 0) {
-        weightedWarrantySum += ((emp as any).warranty * hours);
-        totalHoursForWarranty += hours;
+        weightedWarrantySum += ((emp as any).warranty * transactions);
+        totalTransactionsForWarranty += transactions;
       }
 
       let empSurveys = (emp as any).surveys || 0;
@@ -78,7 +79,7 @@ export default function Dashboard({
       totalRev += (hours * rph);
     });
 
-    const avgWarranty = totalHoursForWarranty > 0 ? (weightedWarrantySum / totalHoursForWarranty) : 0;
+    const avgWarranty = totalTransactionsForWarranty > 0 ? (weightedWarrantySum / totalTransactionsForWarranty) : 0;
     const avgRph = totalHours > 0 ? (totalRev / totalHours) : 0;
 
     return {

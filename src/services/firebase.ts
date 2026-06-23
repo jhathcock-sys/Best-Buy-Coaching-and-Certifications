@@ -1,7 +1,9 @@
 import { toast } from 'react-hot-toast';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, onSnapshot, setDoc, getDoc, collection, addDoc, query, orderBy, limit, deleteDoc, getDocs, getDocsFromCache, where } from 'firebase/firestore';
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import bcrypt from 'bcryptjs';
 
 export let app: any = null;
 let db: any = null;
@@ -88,14 +90,14 @@ export const signInTenant = async (storeId: string, pin: string) => {
 
 // Only call this when we have VERIFIED the PIN matches a manager or the storePin
 export const createTenantAuth = async (storeId: string, pin: string) => {
-  if (!auth) return false;
-  const email = `s${storeId}_p${pin}@bby.app`;
-  const password = `BBY_${storeId}_${pin}_secret!`;
+  if (!app) return false;
   try {
-    await createUserWithEmailAndPassword(auth, email, password);
+    const functionsInstance = getFunctions(app);
+    const provisionTenantAccount = httpsCallable(functionsInstance, 'provisionTenantAccount');
+    await provisionTenantAccount({ storeId, pin });
     return true;
   } catch (error) {
-    console.error('Failed to create tenant auth:', error);
+    console.error('Failed to create tenant auth via Cloud Function:', error);
     return false;
   }
 };
@@ -207,22 +209,37 @@ export const getUserByPin = async (storeId: string, pin: string) => {
 
   try {
     const usersRef = collection(db, 'stores', storeId, 'users');
-    const q = query(usersRef, where('pin', '==', pin), limit(1));
     
     let snap: any;
     try {
-      snap = await withTimeout(getDocs(q));
+      snap = await withTimeout(getDocs(usersRef));
     } catch (err: any) {
       if (err.message === 'timeout' || err.code === 'unavailable') {
         console.warn('Network timeout fetching users by PIN, falling back to cache.');
-        snap = await getDocsFromCache(q);
+        snap = await getDocsFromCache(usersRef);
       } else {
         throw err;
       }
     }
 
     if (!snap.empty) {
-      return { id: snap.docs[0].id, ...snap.docs[0].data() };
+      for (const d of snap.docs) {
+        const data = d.data();
+        if (data.pin) {
+          // Check if it's already a bcrypt hash (starts with $2a$ or $2b$) or plain text
+          const isHashed = data.pin.startsWith('$2a$') || data.pin.startsWith('$2b$');
+          if (isHashed) {
+            if (bcrypt.compareSync(pin, data.pin)) {
+              return { id: d.id, ...data };
+            }
+          } else {
+            // Legacy plaintext fallback
+            if (data.pin === pin) {
+              return { id: d.id, ...data };
+            }
+          }
+        }
+      }
     }
     
     // Phase 1 Auth Lazy Migration: check legacy managersSettings if not found
@@ -237,7 +254,14 @@ export const getUserByPin = async (storeId: string, pin: string) => {
     
     if (legacySnap && legacySnap.exists()) {
       const legacyManagers = legacySnap.data().managers || [];
-      const legacyUser = legacyManagers.find((m: any) => m.pin === pin);
+      const legacyUser = legacyManagers.find((m: any) => {
+        if (!m.pin) return false;
+        const isHashed = m.pin.startsWith('$2a$') || m.pin.startsWith('$2b$');
+        if (isHashed) {
+          return bcrypt.compareSync(pin, m.pin);
+        }
+        return m.pin === pin;
+      });
       
       if (legacyUser) {
         // Migrate to users collection
@@ -353,15 +377,31 @@ export const saveManagersToCloud = async (storeId: string, managers: any) => {
   const ref = getStoreDocRef(storeId, 'managersSettings');
   if (!ref) return false;
   try {
-    await setDoc(ref, { managers }, { merge: true });
+    // Hash PINs securely using bcrypt before saving
+    const hashedManagers = managers.map((m: any) => {
+      let securePin = m.pin;
+      // Only hash if it exists and isn't already hashed
+      if (securePin && !(securePin.startsWith('$2a$') || securePin.startsWith('$2b$'))) {
+        securePin = bcrypt.hashSync(securePin, 10);
+      }
+      return { ...m, pin: securePin };
+    });
+
+    await setDoc(ref, { managers: hashedManagers }, { merge: true });
     
     // Phase 1 Auth Migration: Keep 'users' collection in sync with managers array
     const usersColRef = collection(db, 'stores', storeId, 'users');
     const activeIds: string[] = [];
     
-    for (const manager of managers) {
+    for (const manager of hashedManagers) {
       if (!manager.pin) continue;
-      const docId = manager.id || `user_${manager.pin}`;
+      // If we don't have the original plaintext PIN, the ID generation below is flawed since it uses the hashed PIN if m.id is missing.
+      // But the UI generates an ID when adding a manager. Let's make sure docId is stable.
+      // The original code used `manager.id || user_${manager.pin}`.
+      // We will preserve this but warn that using a hashed PIN as an ID is not ideal, but it's what was there.
+      // Actually, since hashedManagers contains the HASHED pin, we'll try to find the plaintext pin from the original array for the ID fallback.
+      const originalManager = managers.find((om: any) => om.name === manager.name);
+      const docId = manager.id || `user_${originalManager?.pin || manager.pin}`;
       activeIds.push(docId);
       
       const userDocRef = doc(usersColRef, docId);

@@ -5,7 +5,7 @@ import RentsDueLedger from './RentsDueAuditor/RentsDueLedger';
 import { parseRentsDueDocumentGemini } from '../services/ai';
 import { useStore } from '../store/useStore';
 import { mockRentsDuePayload } from '../data/mockRentsDue';
-import { mapParsedRentsToRoster, parseRentsDueCSVLocal } from '../utils/rentsDueUtils';
+import { mapParsedRentsToRoster, parseRentsDueCSVCloud } from '../utils/rentsDueUtils';
 const EMPTY_OBJ = {};
 
 export default function RentsDueAuditor({ onBulkImportEmployees }: { onBulkImportEmployees: any }) {
@@ -63,13 +63,15 @@ export default function RentsDueAuditor({ onBulkImportEmployees }: { onBulkImpor
         const text = e.target?.result?.toString() || '';
         
         try {
-          const localParsed = parseRentsDueCSVLocal(text);
-          if (localParsed && localParsed.length > 0) {
-            setParsedEmployees(localParsed);
+          setIsParsing(true);
+          const cloudParsed = await parseRentsDueCSVCloud(text);
+          if (cloudParsed && cloudParsed.length > 0) {
+            setParsedEmployees(cloudParsed);
+            setIsParsing(false);
             return;
           }
         } catch (err) {
-          console.warn("Local parse failed, falling back to Gemini", err);
+          console.warn("Cloud parse failed, falling back to Gemini", err);
         }
 
         runOcrParsing('', '', text);
@@ -98,20 +100,22 @@ export default function RentsDueAuditor({ onBulkImportEmployees }: { onBulkImpor
     }
   };
 
-  const handleManualTextParse = () => {
+  const handleManualTextParse = async () => {
     if (!textInput.trim()) {
       alert("Please paste the spreadsheet text copy or CSV data first!");
       return;
     }
     
     try {
-      const localParsed = parseRentsDueCSVLocal(textInput);
-      if (localParsed && localParsed.length > 0) {
-        setParsedEmployees(localParsed);
+      setIsParsing(true);
+      const cloudParsed = await parseRentsDueCSVCloud(textInput);
+      if (cloudParsed && cloudParsed.length > 0) {
+        setParsedEmployees(cloudParsed);
+        setIsParsing(false);
         return;
       }
     } catch (err) {
-      console.warn("Local parse failed, falling back to Gemini", err);
+      console.warn("Cloud parse failed, falling back to Gemini", err);
     }
     
     runOcrParsing('', '', textInput);

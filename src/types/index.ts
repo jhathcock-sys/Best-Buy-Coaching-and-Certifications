@@ -8,6 +8,7 @@ export interface Employee {
   warranty: number;
   surveys: number;
   rph: number;
+  transactions?: number;
   gap?: string;
   lastUpdated?: number;
   basket?: number;

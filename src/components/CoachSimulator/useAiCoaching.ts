@@ -65,7 +65,27 @@ export function useAiCoaching(apiKey, playbookSettings, coachingLogs, onLogCoach
           .map(log => `- Date: ${log.date}, Score: ${log.score}%, Notes: ${log.notes}`)
           .join('\n');
         
-        nextState = await runGeminiEmployeeCoachingStep(apiKey, currentMsg, historyObj, selectedEmployee, playbookSettings, pastLogs);
+        nextState = await runGeminiEmployeeCoachingStep(
+          apiKey, 
+          currentMsg, 
+          historyObj, 
+          selectedEmployee, 
+          playbookSettings, 
+          pastLogs,
+          (partialText) => {
+            setMessages(prev => {
+              const newMsgs = [...prev];
+              // If the last message is from 'coach', it means the employee hasn't replied yet in the UI state
+              if (newMsgs.length > 0 && newMsgs[newMsgs.length - 1].sender === 'coach') {
+                newMsgs.push({ sender: 'employee', text: partialText });
+              } else if (newMsgs.length > 0 && newMsgs[newMsgs.length - 1].sender === 'employee') {
+                // We are progressively building the employee's response
+                newMsgs[newMsgs.length - 1] = { ...newMsgs[newMsgs.length - 1], text: partialText };
+              }
+              return newMsgs;
+            });
+          }
+        );
       } else {
         await new Promise(resolve => setTimeout(resolve, 800));
         nextState = runOfflineEmployeeCoachingStep(currentMsg, historyObj, selectedEmployee);

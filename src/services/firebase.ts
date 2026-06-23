@@ -292,7 +292,7 @@ export const subscribeToFollowUpTasks = (storeId: string, onUpdate: any) => {
   if (!db) return null;
   try {
     const colRef = collection(db, 'stores', storeId, 'followUpTasks');
-    const q = query(colRef, orderBy('timestamp', 'desc'));
+    const q = query(colRef, orderBy('timestamp', 'desc'), limit(50));
     return onSnapshot(q, (snap: any) => {
       const tasks: any[] = [];
       snap.forEach((doc: any) => {
@@ -342,7 +342,7 @@ export const subscribeToFloorLeaderShifts = (storeId: string, onUpdate: any) => 
   if (!db) return null;
   try {
     const colRef = collection(db, 'stores', storeId, 'floorLeaderShifts');
-    const q = query(colRef, orderBy('timestamp', 'desc'));
+    const q = query(colRef, orderBy('timestamp', 'desc'), limit(50));
     return onSnapshot(q, (snap: any) => {
       const shifts: any[] = [];
       snap.forEach((doc: any) => {
@@ -490,7 +490,7 @@ export const subscribeToCoachingLogs = (storeId: string, onUpdate: any) => {
   if (!db) return null;
   try {
     const colRef = collection(db, 'stores', storeId, 'coachingLogs');
-    const q = query(colRef, orderBy('timestamp', 'desc'));
+    const q = query(colRef, orderBy('timestamp', 'desc'), limit(50));
     return onSnapshot(q, (snap: any) => {
       const logs: any[] = [];
       snap.forEach((doc: any) => {

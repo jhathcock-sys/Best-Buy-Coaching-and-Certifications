@@ -120,7 +120,7 @@ export const StatusBadge = ({ gap }) => {
   );
 };
 
-export const RosterMetricCell = ({ 
+export const RosterMetricCell = React.memo(({ 
   val, 
   type, 
   dept, 
@@ -172,4 +172,4 @@ export const RosterMetricCell = ({
       </div>
     </td>
   );
-};
+});

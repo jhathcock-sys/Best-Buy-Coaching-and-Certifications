@@ -8,9 +8,10 @@ interface LoginGateProps {
   correctPin?: string;
   onLoginSuccess: (pin: string, storeId: string, type: 'supervisor' | 'advisor', advisorData?: any) => void;
   dbConnected: boolean;
+  isHydrating?: boolean;
 }
 
-export default function LoginGate({ correctPin = '1234', onLoginSuccess, dbConnected }: LoginGateProps) {
+export default function LoginGate({ correctPin = '1234', onLoginSuccess, dbConnected, isHydrating = false }: LoginGateProps) {
   const [selectedPersona, setSelectedPersona] = useState<'none' | 'supervisor' | 'advisor'>('none');
 
   if (selectedPersona === 'supervisor') {
@@ -87,9 +88,16 @@ export default function LoginGate({ correctPin = '1234', onLoginSuccess, dbConne
           <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Select your access level</p>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%' }}>
-          <button
-            onClick={() => setSelectedPersona('supervisor')}
+        {isHydrating ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', padding: '2rem' }}>
+            <div style={{ width: '40px', height: '40px', border: '3px solid var(--white-alpha-10)', borderTopColor: 'var(--bby-yellow)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 600 }}>Syncing Store Configuration...</span>
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%' }}>
+            <button
+              onClick={() => setSelectedPersona('supervisor')}
             style={{
               width: '100%',
               background: 'rgba(0, 70, 190, 0.1)',
@@ -144,6 +152,7 @@ export default function LoginGate({ correctPin = '1234', onLoginSuccess, dbConne
             </div>
           </button>
         </div>
+        )}
       </div>
     </div>
   );

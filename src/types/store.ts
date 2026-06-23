@@ -91,5 +91,4 @@ export interface MetricsSlice {
   addActionPlan: (empId: string, plan: any) => void;
 }
 
-export type StoreState = AuthSlice & ShiftSlice & PlaybookSlice & MetricsSlice;
-
+export type StoreState = AuthSlice & ShiftSlice & PlaybookSlice & MetricsSlice & UiSlice;

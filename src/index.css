@@ -1118,23 +1118,7 @@ textarea:focus-visible,
   outline-offset: 2.5px !important;
 }
 
-/* Responsive visibility utilities */
-.desktop-only {
-  display: block !important;
-}
-.mobile-only {
-  display: none !important;
-}
-
-@media (max-width: 768px) {
-  .desktop-only {
-    display: none !important;
-  }
-  .mobile-only {
-    display: flex !important; /* flex matches the card list layout */
-    flex-direction: column;
-  }
-}
+/* Responsive visibility utilities removed in favor of useMediaQuery */
 
 /* Pulsing Skeleton Loader Animation */
 @keyframes skeletonPulse {

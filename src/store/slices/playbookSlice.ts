@@ -306,7 +306,7 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
 
       if (passed && newMetrics) {
         const averagedMetrics = {
-          memberships: Math.round((metrics.memberships * 2 + newMetrics.memberships) / 3),
+          memberships: metrics.memberships + newMetrics.memberships,
           creditCards: metrics.creditCards + newMetrics.creditCards,
           warranty: Math.round((metrics.warranty * 2 + newMetrics.warranty) / 3),
           surveys: Math.round(((metrics.surveys * 2 + newMetrics.surveys) / 3) * 10) / 10,

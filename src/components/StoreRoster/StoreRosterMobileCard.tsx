@@ -89,7 +89,7 @@ export default function StoreRosterMobileCard({
   };
 
   return (
-    <div className="mobile-only" style={{ padding: '1rem', gap: '1rem' }}>
+    <div style={{ padding: '1rem', gap: '1rem', display: 'flex', flexDirection: 'column' }}>
       {filteredRoster.length === 0 ? (
         <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
           <Users size={32} color="var(--text-muted)" style={{ marginBottom: '0.75rem', opacity: 0.5 }} />

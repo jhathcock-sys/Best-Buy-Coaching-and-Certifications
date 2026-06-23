@@ -1,5 +1,5 @@
 
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { Toaster, toast } from 'react-hot-toast';
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
@@ -50,7 +50,7 @@ function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
   const activeView = location.pathname === '/' ? 'dashboard' : location.pathname.substring(1);
-  const setActiveView = (view: string) => navigate(view === 'dashboard' ? '/' : `/${view}`);
+  const setActiveView = useCallback((view: string) => navigate(view === 'dashboard' ? '/' : `/${view}`), [navigate]);
   
   // Zustand Store Selectors
   const playbookSettings = useStore((state) => state.playbookSettings);
@@ -66,23 +66,19 @@ function AppContent() {
   const logout = useStore((state) => state.logout);
   const apiKey = useStore((state) => state.apiKey);
 
-  // Local UI-only state
-  const [selectedCoachingRosterEmployee, setSelectedCoachingRosterEmployee] = useState(null);
-  const [prefillBuilderData, setPrefillBuilderData] = useState(null);
-  const [prefillShadowEmployee, setPrefillShadowEmployee] = useState(null);
-  const [collapsedCategories, setCollapsedCategories] = useState({
-    overview: false,
-    floorOps: false,
-    coachingPractice: false,
-    recordsSetup: false
-  });
-
-  const toggleCategory = (cat) => {
-    setCollapsedCategories(prev => ({
-      ...prev,
-      [cat]: !prev[cat]
-    }));
-  };
+  // Zustand UI State
+  const selectedCoachingRosterEmployee = useStore((state) => state.selectedCoachingRosterEmployee);
+  const setSelectedCoachingRosterEmployee = useStore((state) => state.setSelectedCoachingRosterEmployee);
+  
+  const prefillBuilderData = useStore((state) => state.prefillBuilderData);
+  const setPrefillBuilderData = useStore((state) => state.setPrefillBuilderData);
+  
+  const prefillShadowEmployee = useStore((state) => state.prefillShadowEmployee);
+  const setPrefillShadowEmployee = useStore((state) => state.setPrefillShadowEmployee);
+  
+  const collapsedCategories = useStore((state) => state.collapsedCategories);
+  const setCollapsedCategories = useStore((state) => state.setCollapsedCategories);
+  const toggleCategory = useStore((state) => state.toggleCategory);
 
   const [swUpdateAvailable, setSwUpdateAvailable] = useState(false);
 
@@ -106,25 +102,25 @@ function AppContent() {
         setCollapsedCategories(prev => ({ ...prev, recordsSetup: false }));
       }
     }, 0);
-  }, [activeView]);
+  }, [activeView, setCollapsedCategories]);
 
 
 
   // Roster Interactions
-  const handleCoachEmployeeFromRoster = (emp) => {
+  const handleCoachEmployeeFromRoster = useCallback((emp) => {
     setSelectedCoachingRosterEmployee(emp);
     setActiveView('coach');
-  };
+  }, [setSelectedCoachingRosterEmployee, setActiveView]);
 
-  const handleCreateLogFromRoster = (emp) => {
+  const handleCreateLogFromRoster = useCallback((emp) => {
     setPrefillBuilderData(emp);
     setActiveView('builder');
-  };
+  }, [setPrefillBuilderData, setActiveView]);
 
-  const handleShadowEmployeeFromRoster = (emp) => {
+  const handleShadowEmployeeFromRoster = useCallback((emp) => {
     setPrefillShadowEmployee(emp);
     setActiveView('shadow');
-  };
+  }, [setPrefillShadowEmployee, setActiveView]);
 
   if (!isAuthenticated) {
     return (
@@ -132,6 +128,7 @@ function AppContent() {
         <SyncManager />
         <LoginGate 
         correctPin={playbookSettings?.storePin || storePin}
+        isHydrating={dbConnected && !playbookSettings}
         onLoginSuccess={(enteredPin, storeId, type, advisorData) => {
           if (type === 'supervisor') {
             login(enteredPin, storeId);

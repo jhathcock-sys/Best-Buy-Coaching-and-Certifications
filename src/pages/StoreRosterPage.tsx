@@ -12,6 +12,7 @@ import StartNewPeriodForm from '../components/StoreRoster/StartNewPeriodForm';
 import RosterDisplaySettings from '../components/StoreRoster/RosterDisplaySettings';
 import RosterAuditor from '../components/RosterAuditor';
 import RentsDueAuditor from '../components/RentsDueAuditor';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 
 import { useStore } from '../store/useStore';
 import { DeptGoal } from '../types';
@@ -84,6 +85,8 @@ export default function StoreRoster({
     }
     setEditingEmployee(null);
   };
+
+  const isDesktop = useMediaQuery('(min-width: 768px)');
 
   return (
     <div className="flex-column gap-xl">
@@ -238,30 +241,32 @@ export default function StoreRoster({
 
           {/* Roster Table Card */}
           <div className="glass-card" style={{ padding: '0', overflow: 'hidden' }}>
-            <StoreRosterTable 
-              filteredRoster={filteredRoster}
-              visibleCols={visibleCols}
-              isDense={isDense}
-              deptGoals={deptGoals}
-              rosterHistory={rosterHistory}
-              activePeriod={activePeriod}
-              setSelectedProfileEmployee={setSelectedProfileEmployee}
-              handleStartEdit={handleStartEdit}
-              onDeleteEmployee={onDeleteEmployee}
-            />
-
-            <StoreRosterMobileCard 
-              filteredRoster={filteredRoster}
-              deptGoals={deptGoals}
-              rosterHistory={rosterHistory}
-              activePeriod={activePeriod}
-              DEPARTMENTS={DEPARTMENTS}
-              onUpdateEmployeeDept={onUpdateEmployeeDept}
-              handleStartEdit={handleStartEdit}
-              onCoachEmployee={onCoachEmployee}
-              onCreateLog={onCreateLog}
-              onDeleteEmployee={onDeleteEmployee}
-            />
+            {isDesktop ? (
+              <StoreRosterTable 
+                filteredRoster={filteredRoster}
+                visibleCols={visibleCols}
+                isDense={isDense}
+                deptGoals={deptGoals}
+                rosterHistory={rosterHistory}
+                activePeriod={activePeriod}
+                setSelectedProfileEmployee={setSelectedProfileEmployee}
+                handleStartEdit={handleStartEdit}
+                onDeleteEmployee={onDeleteEmployee}
+              />
+            ) : (
+              <StoreRosterMobileCard 
+                filteredRoster={filteredRoster}
+                deptGoals={deptGoals}
+                rosterHistory={rosterHistory}
+                activePeriod={activePeriod}
+                DEPARTMENTS={DEPARTMENTS}
+                onUpdateEmployeeDept={onUpdateEmployeeDept}
+                handleStartEdit={handleStartEdit}
+                onCoachEmployee={onCoachEmployee}
+                onCreateLog={onCreateLog}
+                onDeleteEmployee={onDeleteEmployee}
+              />
+            )}
           </div>
 
           {/* Department Targets Legend */}

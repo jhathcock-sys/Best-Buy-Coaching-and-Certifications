@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import fs from 'fs';
 
 test('Autonomous QA Crawler', async ({ page }) => {
@@ -20,42 +20,51 @@ test('Autonomous QA Crawler', async ({ page }) => {
   // Navigate to root
   await page.goto('/');
 
-  // Bypass authentication if present
-  await page.evaluate(() => {
-    sessionStorage.setItem('bby_authenticated', 'true');
-    localStorage.setItem('bby_api_key', 'test_key');
-  });
-  await page.reload();
+  // Real authentication using data-testids
+  await page.getByTestId('persona-supervisor-btn').click();
+  
+  // Wait for keypad and enter PIN 1234
+  await page.locator('button.keypad-btn', { hasText: /^1$/ }).click();
+  await page.locator('button.keypad-btn', { hasText: /^2$/ }).click();
+  await page.locator('button.keypad-btn', { hasText: /^3$/ }).click();
+  await page.locator('button.keypad-btn', { hasText: /^4$/ }).click();
 
-  // Wait for the app to settle
-  await page.waitForTimeout(2000);
+  // Wait for the app to settle by asserting the dashboard nav item is visible
+  const dashboardNav = page.getByTestId('nav-dashboard');
+  await expect(dashboardNav).toBeVisible({ timeout: 10000 });
+  await expect(dashboardNav).toHaveClass(/active/, { timeout: 10000 });
 
   // Take screenshot of Dashboard
+  fs.mkdirSync('test-results', { recursive: true });
   await page.screenshot({ path: 'test-results/dashboard.png', fullPage: true });
 
-  // Map of routes to visit
+  // Map of routes to visit with their corresponding sidebar testids
   const routesToTest = [
-    { path: '/roster', name: 'Roster' },
-    { path: '/shadow', name: 'Shadow' },
-    { path: '/floorLeader', name: 'FloorLeader' },
-    { path: '/roleplay', name: 'Arena' },
-    { path: '/coach', name: 'Coach' },
-    { path: '/builder', name: 'LogBuilder' },
-    { path: '/history', name: 'History' },
-    { path: '/playbook', name: 'Playbook' }
+    { path: '/roster', name: 'Roster', testId: 'nav-roster' },
+    { path: '/shadow', name: 'Shadow', testId: 'nav-shadow' },
+    { path: '/floorLeader', name: 'FloorLeader', testId: 'nav-floor-leader' },
+    { path: '/roleplay', name: 'Arena', testId: 'nav-roleplay' },
+    { path: '/coach', name: 'Coach', testId: 'nav-coach' },
+    { path: '/builder', name: 'LogBuilder', testId: 'nav-builder' },
+    { path: '/history', name: 'History', testId: 'nav-history' },
+    { path: '/playbook', name: 'Playbook', testId: 'nav-playbook' }
   ];
 
   for (const route of routesToTest) {
+    // Navigate to the route directly
     await page.goto(route.path);
-    await page.waitForTimeout(1500); // Wait for animations
+    
+    // Assert that the view has settled by checking the active class on the corresponding nav item
+    const navLink = page.getByTestId(route.testId);
+    await expect(navLink).toHaveClass(/active/, { timeout: 5000 });
+    
     await page.screenshot({ path: `test-results/${route.name.toLowerCase()}.png`, fullPage: true });
     
-    // Simulate generic interactions: try clicking the first button we find on the page
-    const buttons = page.locator('button');
+    // Simulate generic interactions: try hovering the first main content button we find
+    const buttons = page.locator('main button');
     if (await buttons.count() > 0) {
       try {
         await buttons.first().hover();
-        // We do not click blindly because it might submit forms or navigate away and break the loop
       } catch (e) {
         errors.push(`[Interaction Error] on ${route.name}: ${e.message}`);
       }
@@ -63,6 +72,5 @@ test('Autonomous QA Crawler', async ({ page }) => {
   }
 
   // Write collected errors to log
-  fs.mkdirSync('test-results', { recursive: true });
   fs.writeFileSync('test-results/console-errors.log', errors.join('\n'));
 });

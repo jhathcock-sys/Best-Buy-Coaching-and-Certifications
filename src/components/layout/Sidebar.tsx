@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   Compass, Users, BookOpen, LayoutDashboard, Sparkles, 
   ShieldCheck, ClipboardList, Archive, Clock, 
-  ChevronDown, ChevronRight, TrendingUp, MonitorPlay, CalendarDays
+  ChevronDown, ChevronRight, TrendingUp, MonitorPlay, CalendarDays, Radar
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -113,6 +113,13 @@ export default function Sidebar({
               data-testid="nav-shadow"
             >
               <ShieldCheck className="menu-item-icon" /> Floor Shadowing
+            </li>
+            <li 
+              className={`menu-item ${activeView === 'aura' ? 'active' : ''}`}
+              onClick={() => setActiveView('aura')}
+              data-testid="nav-aura"
+            >
+              <Radar className="menu-item-icon" style={{ color: 'var(--bby-yellow)' }} /> Aura Radar
             </li>
             <li 
               className={`menu-item ${activeView === 'dailyLineup' ? 'active' : ''}`}

@@ -9,6 +9,7 @@ const CoachSimulatorPage = lazy(() => import('./pages/CoachSimulatorPage'));
 const PlaybookStudioPage = lazy(() => import('./pages/PlaybookStudioPage'));
 const CoachingHistoryPage = lazy(() => import('./pages/CoachingHistoryPage'));
 const LiveFloorShadowPage = lazy(() => import('./pages/LiveFloorShadowPage'));
+const AuraHUDPage = lazy(() => import('./pages/AuraHUDPage'));
 import LoginGate from './components/LoginGate';
 const AdvisorDashboardPage = lazy(() => import('./pages/AdvisorDashboardPage'));
 const FloorLeaderTrackerPage = lazy(() => import('./pages/FloorLeaderTrackerPage'));
@@ -246,6 +247,11 @@ function AppContent() {
                 onNavigate={setActiveView}
                 preselectedEmployee={prefillShadowEmployee}
                 clearPreselectedEmployee={() => setPrefillShadowEmployee(null)}
+              />
+            } />
+            <Route path="/aura" element={
+              <AuraHUDPage 
+                onCoachEmployee={handleCoachEmployeeFromRoster}
               />
             } />
             <Route path="/dailyLineup" element={<DailyLineupBuilderPage />} />

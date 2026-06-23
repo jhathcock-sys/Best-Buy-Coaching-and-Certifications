@@ -2,19 +2,19 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { Toaster, toast } from 'react-hot-toast';
-const Dashboard = lazy(() => import('./components/Dashboard'));
-const StoreRoster = lazy(() => import('./components/StoreRoster'));
-const RoleplayCenter = lazy(() => import('./components/RoleplayCenter'));
-const CoachSimulator = lazy(() => import('./components/CoachSimulator'));
-const PlaybookStudio = lazy(() => import('./components/PlaybookStudio'));
-const CoachingHistory = lazy(() => import('./components/CoachingHistory'));
-const LiveFloorShadow = lazy(() => import('./components/LiveFloorShadow'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const StoreRosterPage = lazy(() => import('./pages/StoreRosterPage'));
+const RoleplayCenterPage = lazy(() => import('./pages/RoleplayCenterPage'));
+const CoachSimulatorPage = lazy(() => import('./pages/CoachSimulatorPage'));
+const PlaybookStudioPage = lazy(() => import('./pages/PlaybookStudioPage'));
+const CoachingHistoryPage = lazy(() => import('./pages/CoachingHistoryPage'));
+const LiveFloorShadowPage = lazy(() => import('./pages/LiveFloorShadowPage'));
 import LoginGate from './components/LoginGate';
-import AdvisorDashboard from './components/AdvisorDashboard';
-const FloorLeaderTracker = lazy(() => import('./components/FloorLeaderTracker'));
-const TrendReporting = lazy(() => import('./components/TrendReporting'));
-const BreakroomTV = lazy(() => import('./components/BreakroomTV'));
-const DailyLineupBuilder = lazy(() => import('./components/DailyLineupBuilder'));
+import AdvisorDashboardPage from './pages/AdvisorDashboardPage';
+const FloorLeaderTrackerPage = lazy(() => import('./pages/FloorLeaderTrackerPage'));
+const TrendReportingPage = lazy(() => import('./pages/TrendReportingPage'));
+const BreakroomTVPage = lazy(() => import('./pages/BreakroomTVPage'));
+const DailyLineupBuilderPage = lazy(() => import('./pages/DailyLineupBuilderPage'));
 import { Compass, Users, BookOpen, LayoutDashboard, Sparkles, ShieldCheck, ClipboardList, Archive, Clock, ChevronDown, ChevronRight, TrendingUp } from 'lucide-react';
 import { subscribeToActivePeriod } from './services/firebase';
 
@@ -182,9 +182,9 @@ function AppContent() {
         </div>
         <div style={{ flex: 1, overflow: 'hidden' }}>
           <Routes>
-            <Route path="/roleplay" element={<RoleplayCenter />} />
+            <Route path="/roleplay" element={<RoleplayCenterPage />} />
             <Route path="*" element={
-              <AdvisorDashboard 
+              <AdvisorDashboardPage 
                 employee={activeAdvisor}
                 onNavigate={setActiveView}
               />
@@ -220,41 +220,41 @@ function AppContent() {
         }>
           <Routes>
             <Route path="/" element={
-              <Dashboard 
+              <DashboardPage 
                 onNavigate={setActiveView}
                 onCoachEmployee={handleCoachEmployeeFromRoster}
                 onShadowEmployee={handleShadowEmployeeFromRoster}
               />
             } />
             <Route path="/dashboard" element={
-              <Dashboard 
+              <DashboardPage 
                 onNavigate={setActiveView}
                 onCoachEmployee={handleCoachEmployeeFromRoster}
                 onShadowEmployee={handleShadowEmployeeFromRoster}
               />
             } />
             <Route path="/roster" element={
-              <StoreRoster 
+              <StoreRosterPage 
                 onCoachEmployee={handleCoachEmployeeFromRoster}
                 onCreateLog={handleCreateLogFromRoster}
               />
             } />
             <Route path="/shadow" element={
-              <LiveFloorShadow 
+              <LiveFloorShadowPage 
                 onNavigate={setActiveView}
                 preselectedEmployee={prefillShadowEmployee}
                 clearPreselectedEmployee={() => setPrefillShadowEmployee(null)}
               />
             } />
-            <Route path="/dailyLineup" element={<DailyLineupBuilder />} />
-            <Route path="/floorLeader" element={<FloorLeaderTracker />} />
-            <Route path="/trends" element={<TrendReporting />} />
+            <Route path="/dailyLineup" element={<DailyLineupBuilderPage />} />
+            <Route path="/floorLeader" element={<FloorLeaderTrackerPage />} />
+            <Route path="/trends" element={<TrendReportingPage />} />
             <Route path="/tv" element={
-              <BreakroomTV onClose={() => setActiveView('dashboard')} />
+              <BreakroomTVPage onClose={() => setActiveView('dashboard')} />
             } />
-            <Route path="/roleplay" element={<RoleplayCenter />} />
+            <Route path="/roleplay" element={<RoleplayCenterPage />} />
             <Route path="/coach" element={
-              <CoachSimulator 
+              <CoachSimulatorPage 
                 preselectedEmployee={selectedCoachingRosterEmployee}
                 clearPreselectedEmployee={() => setSelectedCoachingRosterEmployee(null)}
                 prefillBuilderData={prefillBuilderData}
@@ -263,7 +263,7 @@ function AppContent() {
               />
             } />
             <Route path="/builder" element={
-              <CoachSimulator 
+              <CoachSimulatorPage 
                 preselectedEmployee={selectedCoachingRosterEmployee}
                 clearPreselectedEmployee={() => setSelectedCoachingRosterEmployee(null)}
                 prefillBuilderData={prefillBuilderData}
@@ -271,10 +271,10 @@ function AppContent() {
                 initialTab="builder"
               />
             } />
-            <Route path="/history" element={<CoachingHistory />} />
-            <Route path="/playbook" element={<PlaybookStudio />} />
+            <Route path="/history" element={<CoachingHistoryPage />} />
+            <Route path="/playbook" element={<PlaybookStudioPage />} />
             <Route path="*" element={
-              <Dashboard 
+              <DashboardPage 
                 onNavigate={setActiveView}
                 onCoachEmployee={handleCoachEmployeeFromRoster}
                 onShadowEmployee={handleShadowEmployeeFromRoster}

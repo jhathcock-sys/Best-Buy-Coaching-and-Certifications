@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
 import { Employee } from '../types/index';
 import { useStore } from '../store/useStore';
-import DashboardHeader from './Dashboard/DashboardHeader';
-import DashboardAlerts from './Dashboard/DashboardAlerts';
-import DashboardSystemAlerts from './Dashboard/DashboardSystemAlerts';
-import DashboardCoachingEngine from './Dashboard/DashboardCoachingEngine';
-import DashboardTrendChart from './Dashboard/DashboardTrendChart';
-import DashboardLeaderboard from './Dashboard/DashboardLeaderboard';
-import MetricCards from './Dashboard/MetricCards';
+import DashboardHeader from '../components/Dashboard/DashboardHeader';
+import DashboardAlerts from '../components/Dashboard/DashboardAlerts';
+import DashboardSystemAlerts from '../components/Dashboard/DashboardSystemAlerts';
+import DashboardCoachingEngine from '../components/Dashboard/DashboardCoachingEngine';
+import DashboardTrendChart from '../components/Dashboard/DashboardTrendChart';
+import DashboardLeaderboard from '../components/Dashboard/DashboardLeaderboard';
+import MetricCards from '../components/Dashboard/MetricCards';
 
 export default function Dashboard({ 
   onNavigate, 

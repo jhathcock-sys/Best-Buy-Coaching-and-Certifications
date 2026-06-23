@@ -3,13 +3,13 @@ import { ShieldAlert, Sparkles, Key, Check, Plus, Trash2, BookOpen, Compass, Use
 
 import { useStore } from '../store/useStore';
 
-import AiEngineTab from './PlaybookStudio/AiEngineTab';
-import SystemPromptsTab from './PlaybookStudio/SystemPromptsTab';
-import SupervisorProfilesTab from './PlaybookStudio/SupervisorProfilesTab';
-import BbyVocabTab from './PlaybookStudio/BbyVocabTab';
-import DepartmentTargetsTab from './PlaybookStudio/DepartmentTargetsTab';
-import SyncDiagnosticsTab from './PlaybookStudio/SyncDiagnosticsTab';
-import CustomScenariosTab from './Playbook/CustomScenariosTab';
+import AiEngineTab from '../components/PlaybookStudio/AiEngineTab';
+import SystemPromptsTab from '../components/PlaybookStudio/SystemPromptsTab';
+import SupervisorProfilesTab from '../components/PlaybookStudio/SupervisorProfilesTab';
+import BbyVocabTab from '../components/PlaybookStudio/BbyVocabTab';
+import DepartmentTargetsTab from '../components/PlaybookStudio/DepartmentTargetsTab';
+import SyncDiagnosticsTab from '../components/PlaybookStudio/SyncDiagnosticsTab';
+import CustomScenariosTab from '../components/Playbook/CustomScenariosTab';
 
 export default function PlaybookStudio() {
   const storeId = useStore((state) => state.storeId);

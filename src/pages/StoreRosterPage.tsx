@@ -1,17 +1,17 @@
 import React from 'react';
 import { Users, Search, AlertTriangle, CheckCircle, Clock, HelpCircle, Sliders } from 'lucide-react';
-import AddEmployeeModal from './AddEmployeeModal';
-import PerformanceWizardModal from './PerformanceWizardModal';
-import RosterImporterModal from './RosterImporterModal';
-import AssociateProfileModal from './AssociateProfileModal';
+import AddEmployeeModal from '../components/AddEmployeeModal';
+import PerformanceWizardModal from '../components/PerformanceWizardModal';
+import RosterImporterModal from '../components/RosterImporterModal';
+import AssociateProfileModal from '../components/AssociateProfileModal';
 import { useStoreRoster } from '../hooks/useStoreRoster';
-import StoreRosterHeader from './StoreRoster/StoreRosterHeader';
-import StoreRosterTable from './StoreRoster/StoreRosterTable';
-import StoreRosterMobileCard from './StoreRoster/StoreRosterMobileCard';
-import StartNewPeriodForm from './StoreRoster/StartNewPeriodForm';
-import RosterDisplaySettings from './StoreRoster/RosterDisplaySettings';
-import RosterAuditor from './RosterAuditor';
-import RentsDueAuditor from './RentsDueAuditor';
+import StoreRosterHeader from '../components/StoreRoster/StoreRosterHeader';
+import StoreRosterTable from '../components/StoreRoster/StoreRosterTable';
+import StoreRosterMobileCard from '../components/StoreRoster/StoreRosterMobileCard';
+import StartNewPeriodForm from '../components/StoreRoster/StartNewPeriodForm';
+import RosterDisplaySettings from '../components/StoreRoster/RosterDisplaySettings';
+import RosterAuditor from '../components/RosterAuditor';
+import RentsDueAuditor from '../components/RentsDueAuditor';
 
 import { useStore } from '../store/useStore';
 import { DeptGoal } from '../types';

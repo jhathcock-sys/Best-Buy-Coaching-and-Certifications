@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Target, TrendingUp, Calendar, CheckCircle, Award, Trophy, Medal, Zap, Star } from 'lucide-react';
 import { useStore } from '../store/useStore';
-import MetricCards from './Dashboard/MetricCards';
-import CoachingHistory from './CoachingHistory';
+import MetricCards from '../components/Dashboard/MetricCards';
+import CoachingHistory from '../components/CoachingHistory';
 
 interface AdvisorDashboardProps {
   employee: any;

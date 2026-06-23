@@ -3,9 +3,9 @@ import { STANDARD_SCENARIOS, runOfflineSimulationStep, runGeminiSimulationStep, 
 import { ShieldAlert, Sparkles, Key, Check, Plus, Trash2, BookOpen, Compass, Users, UserPlus, Edit2, Eye, EyeOff, Cpu, RefreshCw, ArrowLeft, Send, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
-import RoleplayConfiguration from './RoleplayCenter/RoleplayConfiguration';
-import RoleplayActiveSession from './RoleplayCenter/RoleplayActiveSession';
-import RoleplayResults from './RoleplayCenter/RoleplayResults';
+import RoleplayConfiguration from '../components/RoleplayCenter/RoleplayConfiguration';
+import RoleplayActiveSession from '../components/RoleplayCenter/RoleplayActiveSession';
+import RoleplayResults from '../components/RoleplayCenter/RoleplayResults';
 
 export default function RoleplayCenter() {
   const navigate = useNavigate();

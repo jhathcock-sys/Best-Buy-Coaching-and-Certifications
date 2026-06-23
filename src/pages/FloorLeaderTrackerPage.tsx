@@ -2,19 +2,19 @@ import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { Clock, Plus, Minus, Power, Trash2, Calendar, User, CheckCircle2, XCircle, Upload, Flame, Trophy, Undo } from 'lucide-react';
 import { useFloorLeaderTracker } from '../hooks/useFloorLeaderTracker';
-import FloorLeaderHeader from './FloorLeaderTracker/FloorLeaderHeader';
-import FloorLeaderTabs from './FloorLeaderTracker/FloorLeaderTabs';
-import HistoricalShiftsArchive from './FloorLeaderTracker/HistoricalShiftsArchive';
+import FloorLeaderHeader from '../components/FloorLeaderTracker/FloorLeaderHeader';
+import FloorLeaderTabs from '../components/FloorLeaderTracker/FloorLeaderTabs';
+import HistoricalShiftsArchive from '../components/FloorLeaderTracker/HistoricalShiftsArchive';
 import { useStore } from '../store/useStore';
-import ZoneScheduler from './ZoneScheduler';
-import BreakRunSheet from './BreakRunSheet';
-import ImportScheduleModal from './ImportScheduleModal';
-import FloorAudit from './FloorAudit';
-import ShiftSimulator from './ShiftSimulator';
-import FiveStarAuditor from './FiveStarAuditor';
-import ShiftSetupForm from './FloorLeader/ShiftSetupForm';
-import ShiftTrackerTab from './FloorLeader/ShiftTrackerTab';
-import HandoffReportModal from './FloorLeaderTracker/HandoffReportModal';
+import ZoneScheduler from '../components/ZoneScheduler';
+import BreakRunSheet from '../components/BreakRunSheet';
+import ImportScheduleModal from '../components/ImportScheduleModal';
+import FloorAudit from '../components/FloorAudit';
+import ShiftSimulator from '../components/ShiftSimulator';
+import FiveStarAuditor from '../components/FiveStarAuditor';
+import ShiftSetupForm from '../components/FloorLeader/ShiftSetupForm';
+import ShiftTrackerTab from '../components/FloorLeader/ShiftTrackerTab';
+import HandoffReportModal from '../components/FloorLeaderTracker/HandoffReportModal';
 
 
 export default function FloorLeaderTracker() {

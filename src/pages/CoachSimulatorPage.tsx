@@ -3,13 +3,13 @@ import { useStore } from '../store/useStore';
 import { EMPLOYEE_SCENARIOS } from '../services/ai';
 
 // Custom Hooks
-import { useAudioEngine } from './CoachSimulator/useAudioEngine';
-import { useAiCoaching } from './CoachSimulator/useAiCoaching';
+import { useAudioEngine } from '../components/CoachSimulator/useAudioEngine';
+import { useAiCoaching } from '../components/CoachSimulator/useAiCoaching';
 
 // Subcomponents
-import LogBuilderTab from './CoachSimulator/LogBuilderTab';
-import GrowSimulatorTab from './CoachSimulator/GrowSimulatorTab';
-import ActiveSession from './CoachSimulator/ActiveSession';
+import LogBuilderTab from '../components/CoachSimulator/LogBuilderTab';
+import GrowSimulatorTab from '../components/CoachSimulator/GrowSimulatorTab';
+import ActiveSession from '../components/CoachSimulator/ActiveSession';
 
 const TEMPLATES = {
   memberships: {

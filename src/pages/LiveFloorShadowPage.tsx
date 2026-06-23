@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { ShieldCheck, ChevronLeft, ChevronRight, Check, Clipboard, Calendar, Users, AlertCircle } from 'lucide-react';
-import ShadowStep1Employee from './LiveFloorShadow/ShadowStep1Employee';
-import ShadowStep2Observation from './LiveFloorShadow/ShadowStep2Observation';
-import ShadowStep3Coaching from './LiveFloorShadow/ShadowStep3Coaching';
+import ShadowStep1Employee from '../components/LiveFloorShadow/ShadowStep1Employee';
+import ShadowStep2Observation from '../components/LiveFloorShadow/ShadowStep2Observation';
+import ShadowStep3Coaching from '../components/LiveFloorShadow/ShadowStep3Coaching';
 import { useLiveFloorShadow } from '../hooks/useLiveFloorShadow';
 import { generateCoachingLogGemini } from '../services/ai';
 

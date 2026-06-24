@@ -62,14 +62,14 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
 
       <div className={`login-card ${isSuccess ? 'success' : ''}`}>
         {/* Logo and Icon Header */}
-        <div style={{ textAlign: 'center' }}>
+        <div className="text-center">
           <div className={`login-logo ${isSuccess ? 'success' : ''}`}>
             <Shield size={32} color={isSuccess ? 'var(--success)' : 'var(--bby-yellow)'} />
           </div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.35rem 0', letterSpacing: '-0.02em' }}>
+          <h2 className="text-2xl font-bold m-0 mb-xs tracking-tight">
             {isSuccess ? 'Access Granted' : 'FloorVision Login'}
           </h2>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0 0 1rem 0' }}>
+          <p className="text-sm text-secondary m-0 mb-md">
             {isSuccess ? 'Initializing leadership hub...' : 'Enter your store number and passcode PIN'}
           </p>
 
@@ -146,12 +146,12 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
         <div className="db-indicator">
           {dbConnected ? (
             <>
-              <span className="indicator-dot active" style={{ width: '6px', height: '6px', background: 'var(--success)' }} />
+              <span className="indicator-dot active bg-success w-1.5 h-1.5" />
               <span>Cloud Database Sync Active</span>
             </>
           ) : (
             <>
-              <span className="indicator-dot active" style={{ width: '6px', height: '6px', background: 'var(--bby-yellow)' }} />
+              <span className="indicator-dot active bg-bby-yellow w-1.5 h-1.5" />
               <span>Offline Local Sandbox Mode</span>
             </>
           )}

@@ -17,7 +17,7 @@ export default function LoginGate({ correctPin = '1234', onLoginSuccess, dbConne
 
   if (selectedPersona === 'supervisor') {
     return (
-      <div style={{ position: 'relative' }}>
+      <div className="relative">
         <button 
           onClick={() => setSelectedPersona('none')}
           className="login-gate-back-btn"
@@ -36,7 +36,7 @@ export default function LoginGate({ correctPin = '1234', onLoginSuccess, dbConne
 
   if (selectedPersona === 'advisor') {
     return (
-      <div style={{ position: 'relative' }}>
+      <div className="relative">
         <button 
           onClick={() => setSelectedPersona('none')}
           className="login-gate-back-btn"
@@ -58,18 +58,18 @@ export default function LoginGate({ correctPin = '1234', onLoginSuccess, dbConne
       <div className="login-gate-bg-glow-2" />
 
       <div className="login-gate-card">
-        <div style={{ textAlign: 'center' }}>
-          <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: '0 0 0.5rem 0' }}>FloorVision Portal</h2>
-          <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Select your access level</p>
+        <div className="text-center">
+          <h2 className="text-3xl font-bold m-0 mb-sm tracking-tight">FloorVision Portal</h2>
+          <p className="text-secondary m-0">Select your access level</p>
         </div>
 
         {isHydrating ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', padding: '2rem' }}>
+          <div className="flex-column flex-center gap-md p-xl">
             <div className="login-gate-loader"></div>
-            <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 600 }}>Syncing Store Configuration...</span>
+            <span className="text-secondary text-sm font-semibold">Syncing Store Configuration...</span>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%' }}>
+          <div className="flex-column gap-xl w-full">
             <button
               onClick={() => setSelectedPersona('supervisor')}
               data-testid="persona-supervisor-btn"

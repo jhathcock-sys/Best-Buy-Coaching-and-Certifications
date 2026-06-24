@@ -14,18 +14,7 @@ function DashboardContent({
   onCoachEmployee, 
   onShadowEmployee
 }: any) {
-  const {
-    roster,
-    calculatedMetrics,
-    activeFocus5Alerts,
-    pendingTasks,
-    recentSessions,
-    deptGoals,
-    activePeriod,
-    rosterHistory,
-    activeManager,
-    shadowingHeatmapData
-  } = useDashboardContext();
+  // Child components will pull data from useDashboardContext directly
 
   return (
     <div className="flex-column gap-xl">

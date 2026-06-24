@@ -90,7 +90,17 @@ export async function generateCoachingLogGemini(apiKey, name, gapType, gapDetail
       }
     }));
     
-    return JSON.parse(result.response.text());
+    const parsed = JSON.parse(result.response.text());
+    return {
+      what: parsed.what || "Provide a complete solution.",
+      how: parsed.how || "Follow the appropriate framework.",
+      why: parsed.why || "To ensure a quality customer experience.",
+      strengths: parsed.strengths || positives || "Demonstrates good core competencies.",
+      metricGap: parsed.metricGap || gapDetails || gapType || "Needs focused development.",
+      expectation: parsed.expectation || "Improve performance in the focus area.",
+      validation: parsed.validation || "Leader will follow up next week.",
+      discStep: parsed.discStep || stepsText || "Solve"
+    };
   } catch (e) {
     console.error('Gemini Coaching Log generation error:', e);
     return null;

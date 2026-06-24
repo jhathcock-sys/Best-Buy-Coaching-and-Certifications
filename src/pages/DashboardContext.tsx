@@ -56,8 +56,9 @@ export const DashboardProvider = ({ children }: { children: React.ReactNode }) =
       const rph = (emp as any).rph || 0;
       const transactions = (emp as any).transactions || 0;
       
-      if ((emp as any).warranty > 0) {
-        weightedWarrantySum += ((emp as any).warranty * transactions);
+      const warranty = (emp as any).warranty || 0;
+      if (transactions > 0) {
+        weightedWarrantySum += (warranty * transactions);
         totalTransactionsForWarranty += transactions;
       }
 

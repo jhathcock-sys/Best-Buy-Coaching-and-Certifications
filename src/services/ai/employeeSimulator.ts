@@ -355,7 +355,17 @@ export async function runGeminiEmployeeCoachingStep(apiKey, message, history, em
 
     let data;
     try {
-      data = JSON.parse(finalResponseText);
+      const parsedData = JSON.parse(finalResponseText);
+      data = {
+        responseText: parsedData.responseText || "I'm not sure what to say to that.",
+        currentCoachStep: parsedData.currentCoachStep || history.currentCoachStep || 'goal',
+        completedCoachSteps: {
+          goal: parsedData.completedCoachSteps?.goal ?? !!history.completedCoachSteps?.goal,
+          reality: parsedData.completedCoachSteps?.reality ?? !!history.completedCoachSteps?.reality,
+          options: parsedData.completedCoachSteps?.options ?? !!history.completedCoachSteps?.options,
+          will: parsedData.completedCoachSteps?.will ?? !!history.completedCoachSteps?.will
+        }
+      };
     } catch (parseError) {
       console.warn("Incomplete or invalid JSON from stream, falling back to manual extraction", parseError);
       
@@ -477,7 +487,17 @@ export async function evaluateCoachingSessionGemini(apiKey, history, scenario, p
         responseSchema: responseSchema
       }
     }));
-    return JSON.parse(result.response.text());
+    const parsed = JSON.parse(result.response.text());
+    return {
+      score: parsed.score || 0,
+      passed: parsed.passed ?? false,
+      feedback: parsed.feedback || "Feedback could not be generated.",
+      details: {
+        empathy: parsed.details?.empathy || 0,
+        structure: parsed.details?.structure || 0,
+        actionable: parsed.details?.actionable || 0
+      }
+    };
   } catch (error) {
     console.error('Gemini Coaching Evaluation Error:', error);
     return evaluateCoachingSession(history);

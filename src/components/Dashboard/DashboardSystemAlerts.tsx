@@ -113,23 +113,19 @@ export default function DashboardSystemAlerts({
         >
           <div className="flex-center justify-start gap-sm">
             <div 
-              className="rounded-full" 
-              style={{ 
-                width: 8, height: 8, 
-                background: alert.type === 'success' ? 'var(--success)' : alert.type === 'warning' ? 'var(--warning)' : 'var(--error)', 
-                boxShadow: `0 0 10px ${alert.type === 'success' ? 'var(--success)' : alert.type === 'warning' ? 'var(--warning)' : 'var(--error)'}` 
-              }} 
+              className={`rounded-full w-2 h-2 ${
+                alert.type === 'success' ? 'bg-success shadow-success-glow' : 
+                alert.type === 'warning' ? 'bg-warning shadow-warning-glow' : 
+                'bg-error shadow-error-glow'
+              }`} 
             />
-            <span className="text-white font-semibold" style={{ fontSize: '0.9rem', lineHeight: 1.4 }}>
+            <span className="text-white font-semibold text-sm leading-relaxed">
               {alert.text}
             </span>
           </div>
           <button 
-            className={`btn btn-sm ${alert.type === 'success' ? 'btn-primary bg-success text-white' : 'btn-secondary'}`}
+            className={`btn btn-sm ${alert.type === 'success' ? 'btn-primary bg-success text-black border-none' : 'btn-secondary'}`}
             onClick={() => onNavigate(alert.navTarget)}
-            style={{ 
-              ...(alert.type === 'success' && { border: 'none', color: '#000' })
-            }}
           >
             {alert.actionLabel}
           </button>

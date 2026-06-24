@@ -165,6 +165,14 @@ h1, h2, h3, h4, h5, h6 {
   align-items: flex-start;
 }
 
+.align-end {
+  align-items: flex-end;
+}
+
+.items-baseline {
+  align-items: baseline;
+}
+
 .gap-sm { gap: 0.5rem; }
 .gap-md { gap: 1rem; }
 .gap-lg { gap: 1.5rem; }
@@ -222,10 +230,14 @@ h1, h2, h3, h4, h5, h6 {
 .border-glass { border: 1px solid var(--border-glass); }
 .rounded-xl { border-radius: 12px; }
 
+.transition-normal { transition: var(--transition-normal); }
 .animate-fade-in { animation: fadeIn 0.4s ease; }
 
 .w-full { width: 100%; }
 .h-full { height: 100%; }
+
+.w-6 { width: 1.5rem; }
+.min-w-60 { min-width: 60px; }
 
 .overflow-x-auto { overflow-x: auto; }
 .min-w-md { min-width: 700px; }

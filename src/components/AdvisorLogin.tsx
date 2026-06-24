@@ -5,6 +5,7 @@ import { useStore } from '../store/useStore';
 
 import { z } from 'zod';
 import { EmployeeSchema } from '../schemas';
+import './AdvisorLogin.css';
 
 interface AdvisorLoginProps {
   onLoginSuccess: (id: string, employeeData: z.infer<typeof EmployeeSchema>) => void;
@@ -40,65 +41,28 @@ export default function AdvisorLogin({ onLoginSuccess, dbConnected }: AdvisorLog
   };
 
   return (
-    <div style={{
-      width: '420px',
-      background: 'rgba(255, 255, 255, 0.01)',
-      backdropFilter: 'blur(20px)',
-      border: '1px solid var(--border-glass)',
-      boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
-      borderRadius: '30px',
-      padding: '2.5rem',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '2rem'
-    }}>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{
-          width: '64px',
-          height: '64px',
-          borderRadius: '20px',
-          background: 'rgba(16, 185, 129, 0.1)',
-          border: '1px solid rgba(16,185,129,0.3)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          margin: '0 auto 1rem auto',
-          boxShadow: '0 0 15px rgba(16, 185, 129, 0.1)'
-        }}>
+    <div className="advisor-login-container">
+      <div className="text-center">
+        <div className="advisor-login-icon-wrapper">
           <Users size={32} color="#10b981" />
         </div>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.35rem 0' }}>
+        <h2 className="text-2xl font-bold m-0 mb-xs tracking-tight">
           Advisor Portal
         </h2>
-        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 1rem 0' }}>
+        <p className="text-sm text-secondary m-0 mb-md">
           Enter your Employee ID to view your metrics
         </p>
       </div>
 
-      <form onSubmit={handleLogin} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <form onSubmit={handleLogin} className="w-full flex-column gap-md">
         <div>
           <input
             type="text"
             value={storeId}
             onChange={(e) => setStoreId(e.target.value)}
             placeholder="Store Number"
-            style={{
-              width: '100%',
-              padding: '1rem',
-              borderRadius: '12px',
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid var(--border-glass)',
-              color: '#fff',
-              fontSize: '1.1rem',
-              textAlign: 'center',
-              outline: 'none',
-              marginBottom: '1rem',
-              transition: 'all 0.3s ease'
-            }}
-            onFocus={(e) => e.target.style.borderColor = 'var(--bby-yellow)'}
+            className="advisor-login-input store-input"
             onBlur={(e) => {
-              e.target.style.borderColor = 'var(--border-glass)';
               useStore.getState().setStoreId(storeId);
             }}
           />
@@ -109,42 +73,15 @@ export default function AdvisorLogin({ onLoginSuccess, dbConnected }: AdvisorLog
             value={employeeId}
             onChange={(e) => setEmployeeId(e.target.value)}
             placeholder="Employee ID"
-            style={{
-              width: '100%',
-              padding: '1rem',
-              borderRadius: '12px',
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid var(--border-glass)',
-              color: '#fff',
-              fontSize: '1.1rem',
-              textAlign: 'center',
-              outline: 'none',
-              transition: 'all 0.3s ease'
-            }}
-            onFocus={(e) => e.target.style.borderColor = '#10b981'}
-            onBlur={(e) => e.target.style.borderColor = 'var(--border-glass)'}
+            className="advisor-login-input"
           />
-          {error && <div style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '0.5rem', textAlign: 'center' }}>{error}</div>}
+          {error && <div className="text-error text-sm text-center mt-sm">{error}</div>}
         </div>
 
         <button
           type="submit"
           data-testid="advisor-login-submit"
-          style={{
-            width: '100%',
-            padding: '1rem',
-            background: '#10b981',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '12px',
-            fontSize: '1rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)',
-            transition: 'all 0.2s ease'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+          className="advisor-login-submit"
         >
           Access Portal
         </button>

@@ -12,8 +12,10 @@ let auth: any = null;
 // Get config from localStorage or env variables
 export const getSavedFirebaseConfig = () => {
   try {
-    const saved = localStorage.getItem('bby_firebase_config');
-    if (saved) return JSON.parse(saved);
+    if (typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem('bby_firebase_config');
+      if (saved) return JSON.parse(saved);
+    }
   } catch (e) {
     console.error('Failed to parse saved firebase config', e);
   }

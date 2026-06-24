@@ -3,14 +3,17 @@ import { RefreshCw, CheckCircle, AlertTriangle, Compass, ShieldAlert } from 'luc
 import { testLatency } from '../../services/firebase';
 import { useStore } from '../../store/useStore';
 
+const EMPTY_OBJ = {};
+const EMPTY_ARR: any[] = [];
+
 export default function SyncDiagnosticsTab({
   dbConnected, storeId,
   firebaseConfig, setFirebaseConfig, handleSaveFirebaseConfig
 }: any) {
-  const rosterHistory = useStore(state => state.rosterHistory) || {};
-  const coachingLogs = useStore(state => state.coachingLogs) || [];
-  const followUpTasks = useStore(state => state.followUpTasks) || [];
-  const floorLeaderShifts = useStore(state => state.floorLeaderShifts) || [];
+  const rosterHistory = useStore(state => state.rosterHistory) || EMPTY_OBJ;
+  const coachingLogs = useStore(state => state.coachingLogs) || EMPTY_ARR;
+  const followUpTasks = useStore(state => state.followUpTasks) || EMPTY_ARR;
+  const floorLeaderShifts = useStore(state => state.floorLeaderShifts) || EMPTY_ARR;
   const [diagnosticsLogs, setDiagnosticsLogs] = useState<string[]>([]);
   const [isRunningDiagnostics, setIsRunningDiagnostics] = useState(false);
 

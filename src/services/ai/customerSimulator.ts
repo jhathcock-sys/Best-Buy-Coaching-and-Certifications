@@ -283,7 +283,19 @@ export async function runGeminiSimulationStep(apiKey, message, history, scenario
     }));
 
     const responseText = result.response.text();
-    const data = JSON.parse(responseText);
+    const parsedData = JSON.parse(responseText);
+    
+    const data = {
+      responseText: parsedData.responseText || "I'm not sure.",
+      currentActiveStep: parsedData.currentActiveStep || history.currentActiveStep || 'connect',
+      completedSteps: {
+        connect: parsedData.completedSteps?.connect ?? !!history.completedSteps?.connect,
+        discover: parsedData.completedSteps?.discover ?? !!history.completedSteps?.discover,
+        recommend: parsedData.completedSteps?.recommend ?? !!history.completedSteps?.recommend,
+        protect: parsedData.completedSteps?.protect ?? !!history.completedSteps?.protect,
+        close: parsedData.completedSteps?.close ?? !!history.completedSteps?.close
+      }
+    };
     
     // Update simulated metrics based on steps completed
     const currentMetrics = { ...history.metrics };
@@ -421,7 +433,29 @@ export async function evaluateSessionGemini(apiKey, history, scenario, playbookS
         responseSchema: responseSchema
       }
     }));
-    return JSON.parse(result.response.text());
+    const parsed = JSON.parse(result.response.text());
+    return {
+      overallScore: parsed.overallScore || 0,
+      passed: parsed.passed ?? false,
+      breakdown: {
+        connect: parsed.breakdown?.connect || 0,
+        discover: parsed.breakdown?.discover || 0,
+        recommend: parsed.breakdown?.recommend || 0,
+        protect: parsed.breakdown?.protect || 0,
+        close: parsed.breakdown?.close || 0
+      },
+      values: {
+        beHuman: parsed.values?.beHuman || 0,
+        makeItEasy: parsed.values?.makeItEasy || 0,
+        showWhatPossible: parsed.values?.showWhatPossible || 0
+      },
+      growReport: {
+        goal: parsed.growReport?.goal || "Goal not generated.",
+        reality: parsed.growReport?.reality || "Reality not generated.",
+        options: Array.isArray(parsed.growReport?.options) ? parsed.growReport.options : ["Review Playbook", "Practice Roleplay", "Shadow peer"],
+        will: parsed.growReport?.will || "Commitment not generated."
+      }
+    };
   } catch (error) {
     console.error('Gemini Evaluation Error:', error);
     return evaluateSessionOffline(history);

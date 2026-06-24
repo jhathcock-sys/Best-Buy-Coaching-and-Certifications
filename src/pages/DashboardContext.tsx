@@ -31,7 +31,7 @@ export const DashboardProvider = ({ children }: { children: React.ReactNode }) =
     activeManager: state.activeManager
   })));
 
-  const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
+  const _rawroster = (rosterHistory || {})[activePeriod as string] || EMPTY_OBJ;
   const roster = useMemo(() => (Object.values(_rawroster) as Employee[]).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
   
   const calculatedMetrics = useMemo(() => {
@@ -57,8 +57,11 @@ export const DashboardProvider = ({ children }: { children: React.ReactNode }) =
       const transactions = (emp as any).transactions || 0;
       
       const warranty = (emp as any).warranty || 0;
+      if ((emp as any).warranty > 0) {
+        weightedWarrantySum += ((emp as any).warranty * transactions);
+      }
+      
       if (transactions > 0) {
-        weightedWarrantySum += (warranty * transactions);
         totalTransactionsForWarranty += transactions;
       }
 

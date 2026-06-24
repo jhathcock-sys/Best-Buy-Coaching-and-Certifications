@@ -9,8 +9,10 @@ interface LoginProps {
   dbConnected: boolean;
 }
 
+const EMPTY_ARR: any[] = [];
+
 export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected }: LoginProps) {
-  const managers = useStore((state) => state.managers) || [];
+  const managers = useStore((state) => state.managers) || EMPTY_ARR;
   const [pin, setPin] = useState('');
   const [storeId, setStoreId] = useState(() => localStorage.getItem('bby_last_store') || '');
   const [isShaking, setIsShaking] = useState(false);
@@ -77,11 +79,13 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
             <input
               type="text"
               value={storeId}
-              onChange={(e) => setStoreId(e.target.value)}
+              onChange={(e) => {
+                setStoreId(e.target.value);
+                useStore.getState().setStoreId(e.target.value);
+              }}
               placeholder="Store Number"
               className="login-input"
               disabled={isLoading}
-              onBlur={() => useStore.getState().setStoreId(storeId)}
             />
           )}
         </div>
@@ -106,6 +110,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
               key={num}
               type="button"
               className="keypad-btn"
+              data-testid={`keypad-${num}`}
               disabled={isLoading}
               onClick={() => handleKeyPress(num.toString())}
             >
@@ -117,6 +122,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
           <button
             type="button"
             className="keypad-action-btn"
+            data-testid="keypad-clear"
             onClick={handleClear}
             disabled={isLoading}
           >
@@ -126,6 +132,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
           <button
             type="button"
             className="keypad-btn"
+            data-testid="keypad-0"
             onClick={() => handleKeyPress('0')}
             disabled={isLoading}
           >
@@ -135,6 +142,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
           <button
             type="button"
             className="keypad-action-btn"
+            data-testid="keypad-backspace"
             onClick={handleBackspace}
             disabled={isLoading}
           >

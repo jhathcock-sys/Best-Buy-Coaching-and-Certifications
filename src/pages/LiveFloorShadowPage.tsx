@@ -10,6 +10,8 @@ import { generateCoachingLogGemini } from '../services/ai';
 
 import { useStore } from '../store/useStore';
 
+const EMPTY_OBJ = {};
+
 export default function LiveFloorShadow({ 
   onNavigate, 
   preselectedEmployee, 
@@ -19,8 +21,8 @@ export default function LiveFloorShadow({
   
   const playbookSettings = useStore((state) => state.playbookSettings);
   const activePeriod = useStore((state) => state.activePeriod);
-  const rosterHistory = useStore((state) => state.rosterHistory) || {};
-  const _rawroster = rosterHistory[activePeriod] || {};
+  const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
+  const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
   const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
   
   const onLogCoachingSession = useStore((state) => state.logCoachingSession);

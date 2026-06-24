@@ -236,7 +236,14 @@ export const generateActionPlan = async (employeeData, logs, apiKey) => {
       }
     }));
     
-    return JSON.parse(result.response.text());
+    const parsed = JSON.parse(result.response.text());
+    return {
+      type: parsed.type || "30-Day Action Plan: Focus Area",
+      status: parsed.status || "Active",
+      reason: parsed.reason || "Action plan generated based on metrics",
+      dateCreated: parsed.dateCreated || new Date().toLocaleDateString(),
+      planText: parsed.planText || "Plan details could not be generated."
+    };
   } catch (error) {
     console.error("Action Plan Generation Error:", error);
     return null;

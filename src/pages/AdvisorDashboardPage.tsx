@@ -9,8 +9,10 @@ interface AdvisorDashboardProps {
   onNavigate: (view: string) => void;
 }
 
+const EMPTY_ARR: any[] = [];
+
 export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashboardProps) {
-  const coachingLogs = useStore(state => state.coachingLogs) || [];
+  const coachingLogs = useStore(state => state.coachingLogs) || EMPTY_ARR;
   const activePeriod = useStore(state => state.activePeriod);
   const storeDeptGoals = useStore(state => state.deptGoals);
   // Filter coaching logs specifically for this employee

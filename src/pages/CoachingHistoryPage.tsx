@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { Search, Trash2, Volume2, BookOpen, Clock } from 'lucide-react';
 import { useStore } from '../store/useStore';
 
+const EMPTY_ARR: any[] = [];
+
 export default function CoachingHistory() {
-  const coachingLogs = useStore(state => state.coachingLogs) || [];
+  const coachingLogs = useStore(state => state.coachingLogs) || EMPTY_ARR;
   const onDeleteLog = useStore(state => state.deleteCoachingLog);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');

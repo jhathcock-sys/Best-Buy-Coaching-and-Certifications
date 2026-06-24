@@ -1,5 +1,4 @@
-import { useState, useMemo } from 'react';
-import { TrendingUp } from 'lucide-react';
+
 
 // Circular Gauge Helper
 const CircularGauge = ({ value, max = 100, label, prefix = "", suffix = "%", color, icon: Icon, description }) => {

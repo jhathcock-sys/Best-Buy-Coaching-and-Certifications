@@ -30,7 +30,7 @@ export default function DashboardCoachingEngine({
         const pace = rev / (emp.memberships || 0.001);
         if (pace > goals.memberships) gaps.push('Memberships');
       } else {
-        if (emp.memberships < (goals.memberships || 0)) gaps.push('Memberships');
+        if ((emp.memberships || 0) < (goals.memberships || 0)) gaps.push('Memberships');
       }
 
       if (goals.creditCardsType === 'Hours') {
@@ -41,25 +41,25 @@ export default function DashboardCoachingEngine({
         const pace = rev / (emp.creditCards || 0.001);
         if (pace > goals.creditCards) gaps.push('Credit Cards');
       } else {
-        if (emp.creditCards < (goals.creditCards || 0)) gaps.push('Credit Cards');
+        if ((emp.creditCards || 0) < (goals.creditCards || 0)) gaps.push('Credit Cards');
       }
 
-      if (emp.warranty < (goals.warranty || 0)) gaps.push('GSP Attach');
+      if ((emp.warranty || 0) < (goals.warranty || 0)) gaps.push('GSP Attach');
 
       const surveyVal = emp.surveys === 0.2 ? 0 : parseFloat(emp.surveys) || 0;
       if (surveyVal < (goals.surveys || 0)) gaps.push('Surveys');
 
-      if (emp.rph < (goals.rph || 0)) gaps.push('RPH');
+      if ((emp.rph || 0) < (goals.rph || 0)) gaps.push('RPH');
 
-      if ((emp.dept === 'Computing' || emp.dept === 'Home Theatre') && emp.basket < (goals.basket || 150)) {
+      if ((emp.dept === 'Computing' || emp.dept === 'Home Theatre') && (emp.basket || 0) < (goals.basket || 150)) {
         gaps.push('Basket');
       }
 
-      if (emp.dept === 'Computing' && emp.m365 < (goals.m365 || 60)) {
+      if (emp.dept === 'Computing' && (emp.m365 || 0) < (goals.m365 || 60)) {
         gaps.push('M365 Attach');
       }
 
-      if (emp.dept === 'Home Theatre' && emp.audio < (goals.audio || 35)) {
+      if (emp.dept === 'Home Theatre' && (emp.audio || 0) < (goals.audio || 35)) {
         gaps.push('Audio Attach');
       }
 

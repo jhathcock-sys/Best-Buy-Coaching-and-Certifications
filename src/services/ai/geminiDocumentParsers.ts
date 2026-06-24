@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI, SchemaType, Schema } from '@google/generative-ai';
 import { getGeminiModel, executeWithRetry } from './core.js';
+import DOMPurify from 'dompurify';
 
 export async function parseScheduleImage(base64Data, mimeType, apiKey) {
   try {
@@ -47,7 +48,17 @@ export async function parseScheduleImage(base64Data, mimeType, apiKey) {
     }));
 
     const responseText = result.response.text();
-    return JSON.parse(responseText);
+    const parsedData = JSON.parse(responseText);
+    
+    if (Array.isArray(parsedData)) {
+      return parsedData.map((item: any) => ({
+        ...item,
+        name: DOMPurify.sanitize(String(item.name || 'Unknown')),
+        shift: DOMPurify.sanitize(String(item.shift || 'Unknown')),
+        zone: DOMPurify.sanitize(String(item.zone || 'General Sales'))
+      }));
+    }
+    return [];
   } catch (error) {
     console.error('Gemini Vision Parse Error:', error);
     throw error;
@@ -128,6 +139,26 @@ export const parseRentsDueDocumentGemini = async (base64Image, mimeType, textInp
       }
     };
 
+    const sanitizeRentsDueObj = (obj: any) => ({
+      ...obj,
+      name: DOMPurify.sanitize(String(obj.name || 'Unknown')),
+      rph: obj.rph || 0,
+      rphOwed: obj.rphOwed || 0,
+      rphStatus: DOMPurify.sanitize(String(obj.rphStatus || 'off-track')),
+      revenue: obj.revenue || 0,
+      revenueOwed: obj.revenueOwed || 0,
+      revenueStatus: DOMPurify.sanitize(String(obj.revenueStatus || 'off-track')),
+      apps: obj.apps || 0,
+      appsOwed: obj.appsOwed || 0,
+      appsStatus: DOMPurify.sanitize(String(obj.appsStatus || 'off-track')),
+      memberships: obj.memberships || 0,
+      membershipsOwed: obj.membershipsOwed || 0,
+      membershipsStatus: DOMPurify.sanitize(String(obj.membershipsStatus || 'off-track')),
+      warranty: obj.warranty || 0,
+      warrantyGoal: obj.warrantyGoal || 0,
+      warrantyStatus: DOMPurify.sanitize(String(obj.warrantyStatus || 'off-track'))
+    });
+
     let result;
     if (base64Image) {
       const imagePart = {
@@ -145,7 +176,8 @@ export const parseRentsDueDocumentGemini = async (base64Image, mimeType, textInp
           maxOutputTokens: 8192
         }
       }));
-      return JSON.parse(result.response.text());
+      const parsedData = JSON.parse(result.response.text());
+      return Array.isArray(parsedData) ? parsedData.map(sanitizeRentsDueObj) : [];
     } else {
       // Chunk unstructured text payloads to avoid token truncation
       const lines = textInput ? textInput.split('\n') : [];
@@ -172,7 +204,7 @@ export const parseRentsDueDocumentGemini = async (base64Image, mimeType, textInp
         }));
         const parsed = JSON.parse(res.response.text());
         if (Array.isArray(parsed)) {
-          allParsedEmployees = [...allParsedEmployees, ...parsed];
+          allParsedEmployees = [...allParsedEmployees, ...parsed.map(sanitizeRentsDueObj)];
         }
       }
 

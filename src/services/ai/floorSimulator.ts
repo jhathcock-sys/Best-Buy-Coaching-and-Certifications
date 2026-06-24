@@ -84,7 +84,19 @@ export async function runStoreShiftSimulationGemini(apiKey, rosterData, zoneAssi
       }
     }));
 
-    return JSON.parse(result.response.text());
+    const parsed = JSON.parse(result.response.text());
+    return {
+      shiftLogs: Array.isArray(parsed.shiftLogs) ? parsed.shiftLogs : [],
+      scorecard: {
+        revenue: parsed.scorecard?.revenue || 0,
+        revenueGoal: parsed.scorecard?.revenueGoal || 0,
+        memberships: parsed.scorecard?.memberships || 0,
+        creditCards: parsed.scorecard?.creditCards || 0,
+        csat: parsed.scorecard?.csat || 0,
+        placementScore: parsed.scorecard?.placementScore || 0,
+        placementReview: parsed.scorecard?.placementReview || "No review provided."
+      }
+    };
   } catch (error) {
     console.error('Shift Simulation Error:', error);
     // Offline Mock Fallback

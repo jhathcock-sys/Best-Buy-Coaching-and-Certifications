@@ -303,8 +303,8 @@ export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAd
         const newId = `emp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
         const newEmp = {
           id: newId,
-          name: DOMPurify.sanitize(rev.originalName.trim()),
-          dept: DOMPurify.sanitize(rev.assignedZone),
+          name: DOMPurify.sanitize(String(rev.originalName || '').trim()),
+          dept: DOMPurify.sanitize(String(rev.assignedZone || '').trim()),
           hours: parseFloat(rev.durationHours) || 8.0,
           memberships: 0,
           creditCards: 0,

@@ -10,7 +10,7 @@ export default function BreakroomTV({ onClose }: any) {
   const activePeriod = useStore((state) => state.activePeriod) || "Active Period";
   const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
   const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
-  const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
+  const roster: any[] = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
   const recentSessions = useStore((state) => state.coachingLogs) || EMPTY_ARR;
   const deptGoals = useStore((state) => state.deptGoals) || EMPTY_OBJ;
   const apiKey = useStore((state) => state.apiKey);

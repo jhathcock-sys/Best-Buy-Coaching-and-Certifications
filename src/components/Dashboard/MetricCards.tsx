@@ -2,8 +2,15 @@ import { Users, CreditCard, Shield, Star, TrendingUp, ClipboardList } from 'luci
 import CircularGauge from './CircularGauge';
 import { useDashboardContext } from '../../pages/DashboardContext';
 
-export default function MetricCards() {
-    const { calculatedMetrics, recentSessions } = useDashboardContext();
+interface MetricCardsProps {
+    calculatedMetrics?: any;
+    recentSessions?: any[];
+}
+
+export default function MetricCards({ calculatedMetrics: propMetrics, recentSessions: propSessions }: MetricCardsProps = {}) {
+    const context = useDashboardContext() || {};
+    const calculatedMetrics = propMetrics || context.calculatedMetrics;
+    const recentSessions = propSessions || context.recentSessions;
     return (
         <div className="metrics-grid">
             <CircularGauge 

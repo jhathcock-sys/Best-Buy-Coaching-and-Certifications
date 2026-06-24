@@ -28,7 +28,8 @@ export async function generateSmartZoning(roster: any[], zones: string[], apiKey
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text().replace(/```json/g, '').replace(/```/g, '').trim();
-    return JSON.parse(text);
+    const parsed = JSON.parse(text);
+    return typeof parsed === 'object' && parsed !== null ? parsed : {};
   } catch (err) {
     console.error("Smart Zoning AI Error:", err);
     throw err;

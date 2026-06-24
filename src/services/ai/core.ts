@@ -63,6 +63,14 @@ export function getGeminiModel(apiKey: any, playbookSettings: any) {
         console.error("Firebase AI Callable Error:", error);
         throw error;
       }
+    },
+    generateContentStream: async function(request: any) {
+      const result = await this.generateContent(request);
+      return {
+        stream: [
+          { text: () => result.response.text() }
+        ]
+      };
     }
   };
 }

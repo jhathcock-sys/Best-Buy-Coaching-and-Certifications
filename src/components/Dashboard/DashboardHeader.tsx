@@ -26,15 +26,15 @@ export default function DashboardHeader() {
       </div>
 
       <div className="flex-center gap-md">
-        <div className="flex-column bg-surface p-md rounded-xl border-glass" style={{ alignItems: 'flex-end' }}>
+        <div className="flex-column bg-surface p-md rounded-xl border-glass align-end">
           <div className="text-xs text-secondary font-semibold uppercase tracking-wide mb-xs">Store Health</div>
-          <div className="flex-center gap-sm" style={{ alignItems: 'baseline' }}>
-            <span className="text-2xl font-bold" style={{ color: acceleratingPct >= 50 ? '#10b981' : '#fef08a' }}>{acceleratingPct}%</span>
+          <div className="flex-center gap-sm items-baseline">
+            <span className={`text-2xl font-bold ${acceleratingPct >= 50 ? 'text-success' : 'text-warning'}`}>{acceleratingPct}%</span>
             <span className="text-sm text-secondary">Accelerating</span>
           </div>
         </div>
 
-        <div className="flex-column bg-surface p-md rounded-xl border-glass" style={{ alignItems: 'flex-end' }}>
+        <div className="flex-column bg-surface p-md rounded-xl border-glass align-end">
           <div className="text-xs text-secondary font-semibold uppercase tracking-wide mb-xs">Most Shadowed Dept</div>
           <div className="flex-center gap-sm">
             <Compass size={18} color="var(--bby-blue)" />

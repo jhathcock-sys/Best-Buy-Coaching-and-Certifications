@@ -42,7 +42,13 @@ export async function auditStoreFloorGemini(apiKey, base64Image, mimeType) {
       }
     }));
 
-    return JSON.parse(result.response.text());
+    const parsed = JSON.parse(result.response.text());
+    return {
+      status: parsed.status || "Unknown",
+      statusDetails: parsed.statusDetails || "No details generated.",
+      observations: Array.isArray(parsed.observations) ? parsed.observations : [],
+      actionPlan: Array.isArray(parsed.actionPlan) ? parsed.actionPlan : []
+    };
   } catch (error) {
     console.error('Vision Store Floor Audit Error:', error);
     // Local offline mock fallback
@@ -109,7 +115,13 @@ export async function auditPerformanceWorkbookGemini(apiKey, workbookText, playb
       }
     }));
 
-    return JSON.parse(result.response.text());
+    const parsed = JSON.parse(result.response.text());
+    return {
+      overallSummary: parsed.overallSummary || "No summary provided.",
+      topPerformers: Array.isArray(parsed.topPerformers) ? parsed.topPerformers : [],
+      gapClusters: Array.isArray(parsed.gapClusters) ? parsed.gapClusters : [],
+      recommendedActionTimeline: parsed.recommendedActionTimeline || "No timeline provided."
+    };
   } catch (error) {
     console.error('Workbook Audit Error:', error);
     return {
@@ -202,7 +214,16 @@ export async function auditFiveStarSurveyGemini(apiKey, base64Image, mimeType, t
       }));
     }
 
-    return JSON.parse(result.response.text());
+    const parsed = JSON.parse(result.response.text());
+    return {
+      rating: parsed.rating || 0,
+      comment: parsed.comment || "No comment provided.",
+      associateName: parsed.associateName || "Unknown",
+      department: parsed.department || "General Sales",
+      rootCause: parsed.rootCause || "Unknown cause.",
+      coachingScript: parsed.coachingScript || "No script provided.",
+      checkItems: Array.isArray(parsed.checkItems) ? parsed.checkItems : []
+    };
   } catch (error) {
     console.error('5-Star Detractor Survey Audit Error:', error);
     // Offline Mock Fallback (matches Jordan checkout detractor)

@@ -15,7 +15,7 @@ export default function DashboardSystemAlerts({
     if (!roster || roster.length === 0) return list;
 
     // 1. Employee Drop Alerts
-    const periods = Object.keys(rosterHistory).sort((a, b) => {
+    const periods = Object.keys(rosterHistory || {}).sort((a, b) => {
       return new Date(b).getTime() - new Date(a).getTime();
     });
     

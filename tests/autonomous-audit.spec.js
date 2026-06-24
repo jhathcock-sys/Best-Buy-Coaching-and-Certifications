@@ -24,10 +24,10 @@ test('Autonomous QA Crawler', async ({ page }) => {
   await page.getByTestId('persona-supervisor-btn').click();
   
   // Wait for keypad and enter PIN 1234
-  await page.locator('button.keypad-btn', { hasText: /^1$/ }).click();
-  await page.locator('button.keypad-btn', { hasText: /^2$/ }).click();
-  await page.locator('button.keypad-btn', { hasText: /^3$/ }).click();
-  await page.locator('button.keypad-btn', { hasText: /^4$/ }).click();
+  await page.getByTestId('keypad-1').click();
+  await page.getByTestId('keypad-2').click();
+  await page.getByTestId('keypad-3').click();
+  await page.getByTestId('keypad-4').click();
 
   // Wait for the app to settle by asserting the dashboard nav item is visible
   const dashboardNav = page.getByTestId('nav-dashboard');

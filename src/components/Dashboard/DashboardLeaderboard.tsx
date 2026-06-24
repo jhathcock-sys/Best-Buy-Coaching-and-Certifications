@@ -31,7 +31,7 @@ export default function DashboardLeaderboard({
     <div className="glass-card w-full p-xl">
       <div className="flex-between flex-wrap gap-sm mb-lg">
         <div>
-          <h2 className="m-0 mb-xs text-xl font-bold flex-center gap-sm text-primary justify-start" style={{ fontFamily: 'var(--font-heading)' }}>
+          <h2 className="m-0 mb-xs text-xl font-bold flex-center gap-sm text-primary justify-start">
             <ArrowUpRight size={20} className="text-bby-blue" />
             Roster Leaderboard
           </h2>
@@ -65,12 +65,11 @@ export default function DashboardLeaderboard({
           return (
             <div 
               key={emp.id} 
-              className="glass-card flex-row justify-between align-center p-md hover-scale clickable"
+              className="glass-card flex-row justify-between align-center p-md hover-scale clickable transition-normal"
               onClick={() => onCoachEmployee(emp)}
-              style={{ transition: 'var(--transition-normal)' }}
             >
               <div className="flex-row align-center gap-md">
-                <div className="text-secondary font-bold" style={{ width: '1.5rem', textAlign: 'right' }}>
+                <div className="text-secondary font-bold w-6 text-right">
                   #{idx + 1}
                 </div>
                 <div className="flex-column">
@@ -88,11 +87,11 @@ export default function DashboardLeaderboard({
                   <span className={statusBadgeClass}>{cviString}</span>
                 </div>
                 
-                <div className="flex-column text-right" style={{ minWidth: '60px' }}>
+                <div className="flex-column text-right min-w-60">
                   <span className="text-xs text-muted uppercase">
                     {rankMetric === 'memberships' ? 'PMs' : rankMetric === 'creditCards' ? 'Cards' : rankMetric === 'warranty' ? 'GSP' : rankMetric === 'rph' ? 'RPH' : 'CSAT'}
                   </span>
-                  <span className="text-lg font-bold" style={{ color: rankMetric === 'memberships' ? 'var(--bby-blue)' : rankMetric === 'creditCards' ? 'var(--bby-yellow)' : 'var(--text-primary)' }}>
+                  <span className={`text-lg font-bold ${rankMetric === 'memberships' ? 'text-bby-blue' : rankMetric === 'creditCards' ? 'text-bby-yellow' : 'text-primary'}`}>
                     {rankMetric === 'surveys' && emp.surveys === 0.2 ? 'Fail' : rankMetric === 'rph' ? `$${emp.rph}` : rankMetric === 'warranty' ? `${emp.warranty}%` : String(emp[rankMetric as keyof Employee] || '')}
                   </span>
                 </div>

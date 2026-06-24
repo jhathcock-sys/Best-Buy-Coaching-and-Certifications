@@ -178,7 +178,7 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
                   </div>
                   <div 
                     style={{ fontSize: '0.9rem', color: '#fff', lineHeight: 1.5 }}
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(log.coachingPlanMd?.substring(0, 300) + '...' || 'Review completed.') }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(log.coachingPlanMd ? log.coachingPlanMd.substring(0, 300) + '...' : 'Review completed.') }}
                   />
                 </div>
               ))}

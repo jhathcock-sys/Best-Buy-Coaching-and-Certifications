@@ -236,7 +236,7 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
 ---
 ### 🔍 Background & Performance Context
 * **Observed Strengths**: ${aiResponse.strengths || strengths || [...discoverStrengths, ...inspireStrengths, ...solveStrengths, ...closeStrengths].slice(0, 3).join(', ')}
-* **Performance Gap / Metric Focus**: ${aiResponse.gapDetails || gapDetails || aiResponse.metricGap}
+* **Performance Gap / Metric Focus**: ${aiResponse.metricGap || gapDetails}
 * **Follow-up Action**: ${followUpAction || 'Verify behaviors on the sales floor.'}
 * **Coaching Date**: ${new Date().toLocaleDateString()}`;
         } else {

@@ -7,11 +7,13 @@ import RoleplayConfiguration from '../components/RoleplayCenter/RoleplayConfigur
 import RoleplayActiveSession from '../components/RoleplayCenter/RoleplayActiveSession';
 import RoleplayResults from '../components/RoleplayCenter/RoleplayResults';
 
+const EMPTY_ARR: any[] = [];
+
 export default function RoleplayCenter() {
   const navigate = useNavigate();
   const setActiveView = (view: string) => navigate(view === 'dashboard' ? '/' : `/${view}`);
 const apiKey = useStore((state) => state.apiKey);
-  const customScenarios = useStore((state) => state.customScenarios) || [];
+  const customScenarios = useStore((state) => state.customScenarios) || EMPTY_ARR;
   const playbookSettings = useStore((state) => state.playbookSettings);
   const completeRoleplay = useStore((state) => state.completeRoleplay);
   const onCompleteRoleplay = completeRoleplay; // Alias to match existing calls

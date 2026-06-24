@@ -42,7 +42,7 @@ export default function DashboardTrendChart() {
   const { points, linePath, areaPath } = chartData;
 
   return (
-    <div className="glass-card p-xl w-full" style={{ position: 'relative' }}>
+    <div className="glass-card p-xl w-full relative">
       <div className="flex-between flex-wrap gap-sm mb-lg">
         <div>
           <h2 className="text-xl font-bold m-0 mb-xs flex-center gap-sm tracking-tight justify-start">
@@ -61,19 +61,16 @@ export default function DashboardTrendChart() {
             <Users size={14} /> PMs
           </button>
           <button 
-            className={`btn btn-sm ${chartMetric === 'cards' ? 'bg-warning text-black' : 'btn-secondary'}`}
+            className={`btn btn-sm ${chartMetric === 'cards' ? 'bg-warning text-black shadow-warning-btn' : 'btn-secondary'}`}
             onClick={() => setChartMetric('cards')}
-            style={{ 
-              boxShadow: chartMetric === 'cards' ? '0 4px 15px var(--warning-glow)' : 'none'
-            }}
           >
             <CreditCard size={14} /> Cards
           </button>
         </div>
       </div>
 
-      <div className="flex-center p-md border-glass w-full" style={{ height: '220px', background: 'var(--black-alpha-20)', borderRadius: '14px' }}>
-        <svg width="100%" height="100%" viewBox="0 0 500 200" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
+      <div className="flex-center p-md border-glass w-full rounded-xl bg-black-alpha-20 h-220px">
+        <svg width="100%" height="100%" viewBox="0 0 500 200" preserveAspectRatio="none" className="overflow-visible">
           <defs>
             <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={chartMetric === 'memberships' ? 'var(--bby-blue-alpha-20)' : 'var(--warning-glow)'} />

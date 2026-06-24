@@ -99,15 +99,11 @@ export default function DashboardTrendChart() {
             strokeLinecap="round"
             strokeLinejoin="round"
             filter="url(#glow)"
-            style={{ 
-              strokeDasharray: 2000, 
-              strokeDashoffset: 0, 
-              animation: 'dashDraw 2s ease-out forwards' 
-            }} 
+            className="animate-dash-draw"
           />
 
           {points.map((p, idx) => (
-            <g key={`point-${idx}`} style={{ animation: `fadeInPoint 0.5s ease forwards`, animationDelay: `${0.2 + idx * 0.15}s`, opacity: 0 }}>
+            <g key={`point-${idx}`} className="animate-fade-in-point opacity-0" style={{ '--point-delay': `${0.2 + idx * 0.15}s` } as React.CSSProperties}>
               <circle cx={p.x} cy={p.y} r="5" fill="var(--bg-obsidian)" stroke={chartMetric === 'memberships' ? '#60a5fa' : 'var(--warning)'} strokeWidth="2.5" />
               <text x={p.x} y={p.y - 15} fill="var(--text-primary)" fontSize="12" fontWeight="700" textAnchor="middle">{p.value}</text>
               <text x={p.x} y="190" fill="var(--text-secondary)" fontSize="11" fontWeight="600" textAnchor="middle">{p.label}</text>

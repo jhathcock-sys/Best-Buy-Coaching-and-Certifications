@@ -18,7 +18,7 @@ export default function MetricCards({ calculatedMetrics: propMetrics, recentSess
                 label="Total Memberships" icon={Users} 
                 prefix=""
                 suffix=""
-                color="var(--bby-blue)"
+                colorName="bby-blue"
                 description="Plus & Total Memberships"
             />
             <CircularGauge 
@@ -27,7 +27,7 @@ export default function MetricCards({ calculatedMetrics: propMetrics, recentSess
                 label="BBY Credit Cards" icon={CreditCard} 
                 prefix=""
                 suffix=""
-                color="var(--bby-yellow)"
+                colorName="bby-yellow"
                 description="Submitted Applications"
             />
             <CircularGauge 
@@ -35,7 +35,7 @@ export default function MetricCards({ calculatedMetrics: propMetrics, recentSess
                 label="Protection Attach" icon={Shield} 
                 prefix=""
                 suffix="%"
-                color="var(--bby-blue)"
+                colorName="bby-blue"
                 description="Geek Squad Protection"
             />
             <CircularGauge 
@@ -44,7 +44,7 @@ export default function MetricCards({ calculatedMetrics: propMetrics, recentSess
                 label="5-Star Surveys" icon={Star} 
                 prefix=""
                 suffix=""
-                color="var(--success)"
+                colorName="success"
                 description="Total 5-Star Surveys"
             />
             <CircularGauge 
@@ -53,7 +53,7 @@ export default function MetricCards({ calculatedMetrics: propMetrics, recentSess
                 label="Store RPH" icon={TrendingUp} 
                 prefix="$"
                 suffix=""
-                color="var(--info)"
+                colorName="info"
                 description="Store Average Revenue Per Hour"
             />
             <CircularGauge 
@@ -62,7 +62,7 @@ export default function MetricCards({ calculatedMetrics: propMetrics, recentSess
                 label="Coaching Sessions" icon={ClipboardList} 
                 prefix=""
                 suffix=""
-                color="var(--warning)"
+                colorName="warning"
                 description="Recorded Leadership Engagements"
             />
         </div>

@@ -247,6 +247,15 @@ h1, h2, h3, h4, h5, h6 {
 
 .transition-normal { transition: var(--transition-normal); }
 .animate-fade-in { animation: fadeIn 0.4s ease; }
+.animate-dash-draw {
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 0;
+  animation: dashDraw 2s ease-out forwards;
+}
+.animate-fade-in-point {
+  animation: fadeInPoint 0.5s ease forwards;
+  animation-delay: var(--point-delay, 0s);
+}
 
 .w-full { width: 100%; }
 .h-full { height: 100%; }
@@ -311,6 +320,43 @@ h1, h2, h3, h4, h5, h6 {
 
 .logo-text span {
   color: var(--bby-yellow);
+}
+
+.gauge-bby-blue {
+  --gauge-color: var(--bby-blue);
+  --gauge-shadow: drop-shadow(0 0 5px rgba(0, 70, 190, 0.5));
+  --gauge-text-shadow: 0 0 10px rgba(0, 70, 190, 0.3);
+}
+.gauge-bby-yellow {
+  --gauge-color: var(--bby-yellow);
+  --gauge-shadow: drop-shadow(0 0 5px rgba(255, 230, 0, 0.5));
+  --gauge-text-shadow: 0 0 10px rgba(255, 230, 0, 0.3);
+}
+.gauge-success {
+  --gauge-color: var(--success);
+  --gauge-shadow: drop-shadow(0 0 5px rgba(16, 185, 129, 0.5));
+  --gauge-text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+.gauge-info {
+  --gauge-color: var(--info);
+  --gauge-shadow: drop-shadow(0 0 5px rgba(6, 182, 212, 0.5));
+  --gauge-text-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
+}
+.gauge-warning {
+  --gauge-color: var(--warning);
+  --gauge-shadow: drop-shadow(0 0 5px rgba(245, 158, 11, 0.5));
+  --gauge-text-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+}
+
+.gauge-circle-fill {
+  stroke: var(--gauge-color);
+  filter: var(--gauge-shadow);
+}
+.gauge-val {
+  text-shadow: var(--gauge-text-shadow);
+}
+.gauge-icon {
+  color: var(--gauge-color);
 }
 
 .sidebar-menu {

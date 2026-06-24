@@ -120,7 +120,7 @@ export default function DashboardCoachingEngine({
           <TrendingUp size={20} color="var(--error)" /> Daily Coaching Priorities
         </h3>
         <span className="bg-error-alpha text-error font-bold flex-center gap-sm p-sm rounded-xl uppercase tracking-wide text-sm alert-card-danger">
-          <span className="bg-error rounded-full" style={{ width: 6, height: 6 }}></span>
+          <span className="bg-error rounded-full w-1.5 h-1.5"></span>
           Priority Engine Active
         </span>
       </div>
@@ -136,8 +136,7 @@ export default function DashboardCoachingEngine({
           coachingRecommendations.map(({ employee, gaps, lastCoachedDaysAgo, focus5 }) => (
             <div 
               key={employee.id} 
-              className={`flex-column gap-md p-md rounded-xl ${focus5 ? 'alert-card-danger' : 'bg-surface border-glass'} animate-fade-in`}
-              style={{ transition: 'var(--transition-normal)' }}
+              className={`flex-column gap-md p-md rounded-xl transition-normal ${focus5 ? 'alert-card-danger' : 'bg-surface border-glass'} animate-fade-in`}
             >
               <div className="flex-between flex-wrap gap-sm">
                 <span className="font-bold text-lg">

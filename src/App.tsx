@@ -25,18 +25,9 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Sidebar from './components/layout/Sidebar';
 import MobileNav from './components/layout/MobileNav';
 import SyncManager from './components/SyncManager';
+import ServiceWorkerBanner from './components/ServiceWorkerBanner';
+import { useCategoryAutoExpand } from './hooks/useCategoryAutoExpand';
 
-// Safe JSON Parse helper to prevent localStorage corruption crashes
-const safeJsonParse = (str, fallback) => {
-  if (!str) return fallback;
-  try {
-    return JSON.parse(str);
-  } catch (e) {
-    toast.error('Local data parsing failed, restoring defaults.');
-    console.error('JSON parsing failed:', e);
-    return fallback;
-  }
-};
 
 export default function App() {
   return (
@@ -56,6 +47,7 @@ function AppContent() {
   
   // Zustand Store Selectors
   const playbookSettings = useStore((state) => state.playbookSettings);
+  const isPlaybookHydrated = useStore((state) => state.isPlaybookHydrated);
   const activeManager = useStore((state) => state.activeManager);
   const activeAdvisor = useStore((state) => state.activeAdvisor);
 
@@ -82,29 +74,7 @@ function AppContent() {
   const setCollapsedCategories = useStore((state) => state.setCollapsedCategories);
   const toggleCategory = useStore((state) => state.toggleCategory);
 
-  const [swUpdateAvailable, setSwUpdateAvailable] = useState(false);
-
-  useEffect(() => {
-    const handleUpdate = () => setSwUpdateAvailable(true);
-    window.addEventListener('sw-update-available', handleUpdate);
-    return () => window.removeEventListener('sw-update-available', handleUpdate);
-  }, []);
-
-  // Auto-expand category of active view
-   
-  useEffect(() => {
-    setTimeout(() => {
-      if (activeView === 'dashboard') {
-        setCollapsedCategories(prev => ({ ...prev, overview: false }));
-      } else if (activeView === 'roster' || activeView === 'shadow' || activeView === 'floorLeader') {
-        setCollapsedCategories(prev => ({ ...prev, floorOps: false }));
-      } else if (activeView === 'roleplay' || activeView === 'coach') {
-        setCollapsedCategories(prev => ({ ...prev, coachingPractice: false }));
-      } else if (activeView === 'builder' || activeView === 'history' || activeView === 'playbook') {
-        setCollapsedCategories(prev => ({ ...prev, recordsSetup: false }));
-      }
-    }, 0);
-  }, [activeView, setCollapsedCategories]);
+  useCategoryAutoExpand(activeView, setCollapsedCategories);
 
 
 
@@ -130,7 +100,7 @@ function AppContent() {
         <SyncManager />
         <LoginGate 
         correctPin={playbookSettings?.storePin || storePin}
-        isHydrating={dbConnected && !playbookSettings}
+        isHydrating={dbConnected && !isPlaybookHydrated}
         onLoginSuccess={(enteredPin, storeId, type, advisorData) => {
           if (type === 'supervisor') {
             login(enteredPin, storeId);
@@ -296,47 +266,7 @@ function AppContent() {
         activeView={activeView as string}
         setActiveView={setActiveView}
       />
-      {/* Service Worker Update Toast Banner */}
-      {swUpdateAvailable && (
-        <div className="glass-card" style={{
-          position: 'fixed',
-          bottom: '24px',
-          right: '24px',
-          padding: '1.25rem',
-          zIndex: 9999,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.75rem',
-          maxWidth: '320px',
-          animation: 'fadeInUp 0.3s ease'
-        }}>
-          <div>
-            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#fff' }}>App Update Available</h4>
-            <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              A new version of FloorVision is available. Refresh to load new sales tools and metrics.
-            </p>
-          </div>
-          <div className="flex-center gap-sm">
-            <button 
-              className="btn btn-primary" 
-              data-testid="sw-update-reload-btn"
-              style={{ flex: 1, padding: '0.45rem', fontSize: '0.75rem' }}
-              onClick={() => window.location.reload()}
-            >
-              Reload Page
-            </button>
-            <button 
-              className="btn btn-secondary" 
-              data-testid="sw-update-dismiss-btn"
-              style={{ padding: '0.45rem 0.75rem', fontSize: '0.75rem' }}
-              onClick={() => setSwUpdateAvailable(false)}
-            >
-              Dismiss
-            </button>
-          </div>
-        </div>
-      )}
-
+      <ServiceWorkerBanner />
     </div>
   );
 }

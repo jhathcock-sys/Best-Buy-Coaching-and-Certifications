@@ -9,14 +9,16 @@ interface AuraHUDPageProps {
   onCoachEmployee: (employee: any) => void;
 }
 
+const EMPTY_OBJ = {};
+
 export default function AuraHUDPage({ onCoachEmployee }: AuraHUDPageProps) {
   const activePeriod = useStore((state) => state.activePeriod);
-  const rosterHistory = useStore((state) => state.rosterHistory) || {};
-  const deptGoals = useStore((state) => state.deptGoals) || {};
+  const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
+  const deptGoals = useStore((state) => state.deptGoals) || EMPTY_OBJ;
   const apiKey = useStore((state) => state.apiKey);
   const playbookSettings = useStore((state) => state.playbookSettings);
   
-  const _rawroster = rosterHistory[activePeriod] || {};
+  const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
   const roster = useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
 
   const [insights, setInsights] = useState<Record<string, AuraInsight>>({});
@@ -38,20 +40,33 @@ export default function AuraHUDPage({ onCoachEmployee }: AuraHUDPageProps) {
       return aScore - bScore;
     });
 
-    // Staggered loading: fetch in chunks to respect rate limits
-    for (const emp of sortedRoster) {
-      try {
-        const insight = await generateAuraInsightForEmployee(emp, deptGoals, apiKey, playbookSettings);
-        setInsights(prev => ({ ...prev, [emp.id]: insight }));
-      } catch (e) {
-        console.error(`Failed to generate insight for ${emp.name}`, e);
-        setInsights(prev => ({ 
-          ...prev, 
-          [emp.id]: { status: 'steady', insight: 'Scan failed due to rate limits.', action: 'Try again later' } 
-        }));
+    const CHUNK_SIZE = 3;
+    for (let i = 0; i < sortedRoster.length; i += CHUNK_SIZE) {
+      const chunk = sortedRoster.slice(i, i + CHUNK_SIZE);
+      
+      const processEmployee = async (emp: any, retryCount = 0) => {
+        try {
+          const insight = await generateAuraInsightForEmployee(emp, deptGoals, apiKey, playbookSettings);
+          setInsights(prev => ({ ...prev, [emp.id]: insight }));
+        } catch (e: any) {
+          if (e?.message?.includes('429') && retryCount < 2) {
+            await new Promise(res => setTimeout(res, 2000 * Math.pow(2, retryCount)));
+            return processEmployee(emp, retryCount + 1);
+          }
+          console.error(`Failed to generate insight for ${emp.name}`, e);
+          setInsights(prev => ({ 
+            ...prev, 
+            [emp.id]: { status: 'steady', insight: 'Scan failed due to rate limits.', action: 'Try again later' } 
+          }));
+        }
+      };
+
+      await Promise.all(chunk.map(emp => processEmployee(emp)));
+      
+      if (i + CHUNK_SIZE < sortedRoster.length) {
+        // Delay between chunks to prevent burst limit exceptions
+        await new Promise(res => setTimeout(res, 1200));
       }
-      // Artificial delay between requests to help with rate limiting
-      await new Promise(res => setTimeout(res, 500));
     }
     
     setIsScanning(false);

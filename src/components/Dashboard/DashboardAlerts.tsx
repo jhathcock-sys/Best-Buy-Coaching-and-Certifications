@@ -1,8 +1,8 @@
 import { AlertCircle, Check, Play, ClipboardList } from 'lucide-react';
 
+import { useDashboardContext } from '../../pages/DashboardContext';
+
 interface DashboardAlertsProps {
-  activeFocus5Alerts: any[];
-  pendingTasks: any[];
   onNavigate: (view: string) => void;
   onCompleteFollowUpTask: (taskId: string) => void;
   onCoachEmployee: (employee: any) => void;
@@ -10,13 +10,12 @@ interface DashboardAlertsProps {
 }
 
 export default function DashboardAlerts({ 
-  activeFocus5Alerts, 
-  pendingTasks, 
   onNavigate, 
   onCompleteFollowUpTask, 
   onCoachEmployee, 
   onShadowEmployee 
 }: DashboardAlertsProps) {
+  const { activeFocus5Alerts, pendingTasks } = useDashboardContext();
   
   if (activeFocus5Alerts.length === 0 && pendingTasks.length === 0) return null;
 
@@ -65,7 +64,7 @@ export default function DashboardAlerts({
                 Pending Follow-up
               </h3>
               <p className="m-0 text-secondary text-sm">
-                {task.title} <span style={{ opacity: 0.5 }}>• {task.employeeName}</span>
+                {task.title} <span className="opacity-50">• {task.employeeName}</span>
               </p>
             </div>
           </div>

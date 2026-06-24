@@ -180,6 +180,10 @@ export const subscribeToPlaybookSettings = (storeId: string, onUpdate: any) => {
     } else {
       onUpdate({ useGemini: false, storePin: '1234' });
     }
+  }, (error: any) => {
+    console.error('Failed to subscribe to playbookSettings (possibly blocked by rules):', error);
+    // Fallback to defaults to release any hydration locks
+    onUpdate({ useGemini: false, storePin: '1234' });
   });
 };
 
@@ -193,6 +197,9 @@ export const subscribeToManagers = (storeId: string, onUpdate: any) => {
     } else {
       onUpdate([]);
     }
+  }, (error: any) => {
+    console.error('Failed to subscribe to managersSettings:', error);
+    onUpdate([]);
   });
 };
 

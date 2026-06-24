@@ -9,22 +9,8 @@ const CircularGauge = ({ value, max = 100, label, prefix = "", suffix = "%", col
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
-    <div 
-      className="glass-card metric-card" 
-      style={{ 
-        transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease',
-        cursor: 'pointer' 
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'translateY(-6px)';
-        e.currentTarget.style.boxShadow = `0 12px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.02), 0 0 15px ${color}20`;
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = 'none';
-      }}
-    >
-      <div className="metric-circle-container">
+    <div className="glass-card metric-card hover-scale p-md flex-column justify-center align-center relative w-full">
+      <div className="metric-circle-container relative flex-center">
         <svg className="metric-svg" viewBox="0 0 120 120" width="120" height="120">
           <circle className="metric-circle-bg" cx="60" cy="60" r={radius} />
           <circle 
@@ -36,18 +22,18 @@ const CircularGauge = ({ value, max = 100, label, prefix = "", suffix = "%", col
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
             strokeLinecap="round"
-            style={{ filter: `drop-shadow(0 0 5px ${color}a0)` }}
+            style={{ filter: `drop-shadow(0 0 5px ${color}80)` }}
           />
         </svg>
-        <div className="metric-val" style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', textShadow: `0 0 10px ${color}50` }}>
-          {prefix && <span style={{ fontSize: '0.95rem', opacity: 0.8, marginRight: '1px' }}>{prefix}</span>}
-          <span style={{ fontSize: value >= 1000 ? '1.25rem' : '1.55rem' }}>{value}</span>
-          {suffix && <span style={{ fontSize: '0.85rem', opacity: 0.8, marginLeft: '1px' }}>{suffix}</span>}
+        <div className="metric-val flex-center absolute inset-0 font-bold" style={{ textShadow: `0 0 10px ${color}50` }}>
+          {prefix && <span className="text-sm opacity-80 mr-xs">{prefix}</span>}
+          <span className={value >= 1000 ? 'text-xl' : 'text-2xl'}>{value}</span>
+          {suffix && <span className="text-xs opacity-80 ml-xs">{suffix}</span>}
         </div>
       </div>
-      <div className="metric-label" style={{ fontWeight: 700, color: '#fff', fontSize: '0.9rem' }}>{label}</div>
-      <div className="metric-sub" style={{ fontSize: '0.75rem', marginTop: '0.15rem' }}>{description}</div>
-      <Icon style={{ color: color, position: 'absolute', top: '1rem', right: '1rem', opacity: 0.15, width: 22, height: 22 }} />
+      <div className="font-bold text-primary mt-sm text-center">{label}</div>
+      <div className="text-xs text-secondary text-center mt-xs">{description}</div>
+      <Icon style={{ color: color }} className="absolute top-md right-md opacity-20 w-6 h-6" />
     </div>
   );
 };

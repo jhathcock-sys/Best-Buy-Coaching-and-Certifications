@@ -20,15 +20,18 @@ export interface AssociateProfileModalProps {
 
 import { useAssociateProfile } from '../hooks/useAssociateProfile';
 import { renderMarkdown, formatMarkdownNotes } from '../utils/profileUtils';
+const EMPTY_OBJ = {};
+const EMPTY_ARR: any[] = [];
+
 export default function AssociateProfileModal({
   isOpen,
   onClose,
   employee
 }: AssociateProfileModalProps) {
-  const rosterHistory = useStore(state => state.rosterHistory) || {};
-  const coachingLogs = useStore(state => state.coachingLogs) || [];
-  const followUpTasks = useStore(state => state.followUpTasks) || [];
-  const deptGoals = useStore(state => state.deptGoals) || {};
+  const rosterHistory = useStore(state => state.rosterHistory) || EMPTY_OBJ;
+  const coachingLogs = useStore(state => state.coachingLogs) || EMPTY_ARR;
+  const followUpTasks = useStore(state => state.followUpTasks) || EMPTY_ARR;
+  const deptGoals = useStore(state => state.deptGoals) || EMPTY_OBJ;
   const activePeriod = useStore(state => state.activePeriod);
   const {
     activeTab, setActiveTab,

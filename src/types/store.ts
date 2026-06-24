@@ -50,12 +50,14 @@ export interface PlaybookSlice {
   playbookSettings: PlaybookSettings;
   followUpTasks: any[];
   coachingLogs: CoachingLog[];
+  isPlaybookHydrated: boolean;
 
   setRecentSessions: (sessions: any[]) => void;
   setCustomScenarios: (scenarios: any[]) => void;
   setCoachingLogs: (logs: CoachingLog[]) => void;
   setFollowUpTasks: (tasks: any[]) => void;
   setPlaybookSettings: (settings: PlaybookSettings) => void;
+  setIsPlaybookHydrated: (hydrated: boolean) => void;
   saveSettings: (payload: { apiKey: string, playbookSettings: PlaybookSettings }) => void;
   importCustomScenario: (newScenario: any) => void;
   deleteCustomScenario: (scenarioId: string) => void;

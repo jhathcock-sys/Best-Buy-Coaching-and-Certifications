@@ -1,23 +1,19 @@
 import { useMemo } from 'react';
 import { TrendingUp } from 'lucide-react';
+import { useDashboardContext } from '../../pages/DashboardContext';
 
 interface DashboardCoachingEngineProps {
-  roster: any[];
-  recentSessions: any[];
-  deptGoals: any;
   onShadowEmployee: (employee: any) => void;
   onCoachEmployee: (employee: any) => void;
   onCreateLog?: (employee: any) => void;
 }
 
 export default function DashboardCoachingEngine({ 
-  roster, 
-  recentSessions, 
-  deptGoals, 
   onShadowEmployee, 
   onCoachEmployee,
   onCreateLog
 }: DashboardCoachingEngineProps) {
+  const { roster, recentSessions, deptGoals } = useDashboardContext();
   
   const coachingRecommendations = useMemo(() => {
     if (!Array.isArray(roster) || roster.length === 0) return [];
@@ -123,23 +119,12 @@ export default function DashboardCoachingEngine({
         <h3 className="m-0 flex-center gap-sm text-xl">
           <TrendingUp size={20} color="var(--error)" /> Daily Coaching Priorities
         </h3>
-        <span 
-          className="bg-error-alpha text-error font-bold flex-center gap-sm"
-          style={{ 
-            fontSize: '0.65rem', 
-            border: '1px solid rgba(239, 68, 68, 0.3)', 
-            padding: '0.2rem 0.5rem', 
-            borderRadius: '20px', 
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            animation: 'skeletonPulse 2s ease-in-out infinite'
-          }}
-        >
+        <span className="bg-error-alpha text-error font-bold flex-center gap-sm p-sm rounded-xl uppercase tracking-wide text-sm alert-card-danger">
           <span className="bg-error rounded-full" style={{ width: 6, height: 6 }}></span>
           Priority Engine Active
         </span>
       </div>
-      <p className="text-secondary text-sm mb-lg mt-0" style={{ marginTop: '-0.75rem' }}>
+      <p className="text-secondary text-sm mb-lg mt-0">
         Roster scan updates: priorities based on metric gaps, scheduled hours, Focus 5 status, and coaching recency.
       </p>
       <div className="flex-column gap-md">
@@ -151,29 +136,25 @@ export default function DashboardCoachingEngine({
           coachingRecommendations.map(({ employee, gaps, lastCoachedDaysAgo, focus5 }) => (
             <div 
               key={employee.id} 
-              className="flex-column gap-md p-md"
-              style={{ 
-                borderRadius: '12px', 
-                background: focus5 ? 'rgba(239, 68, 68, 0.05)' : 'rgba(255, 255, 255, 0.02)', 
-                border: `1.5px solid ${focus5 ? 'rgba(239, 68, 68, 0.3)' : 'var(--border-glass)'}`,
-              }}
+              className={`flex-column gap-md p-md rounded-xl ${focus5 ? 'alert-card-danger' : 'bg-surface border-glass'} animate-fade-in`}
+              style={{ transition: 'var(--transition-normal)' }}
             >
               <div className="flex-between flex-wrap gap-sm">
-                <span className="font-bold text-white" style={{ fontSize: '0.95rem' }}>
+                <span className="font-bold text-lg">
                   {employee.name}
                 </span>
-                <span className="tag-pill tag-pill-active" style={{ fontSize: '0.7rem' }}>
+                <span className="tag-pill tag-pill-active text-sm">
                   {employee.dept}
                 </span>
               </div>
 
               {focus5 && (
-                <div className="text-error font-bold flex-center justify-start gap-sm" style={{ fontSize: '0.75rem' }}>
+                <div className="text-error font-bold flex-center justify-start gap-sm text-sm">
                   🔥 FOCUS 5 PRIORITY - COACH EVERY SHIFT
                 </div>
               )}
 
-              <p className="text-secondary text-sm m-0" style={{ lineHeight: 1.4 }}>
+              <p className="text-secondary text-sm m-0">
                 {gaps.length > 0 ? (
                   <span>
                     Failing target in: <strong>{gaps.join(', ')}</strong>.
@@ -181,15 +162,15 @@ export default function DashboardCoachingEngine({
                 ) : (
                   <span>Meeting all core target goals.</span>
                 )}
-                <span> Worked <strong>{employee.hours} hrs</strong> this period. </span>
+                <span> Worked <strong className="text-primary">{employee.hours} hrs</strong> this period. </span>
                 {lastCoachedDaysAgo === 999 ? (
-                  <span style={{ color: 'var(--bby-yellow)' }}>Never coached in this system.</span>
+                  <span className="text-warning">Never coached in this system.</span>
                 ) : (
                   <span>Last coached <strong>{lastCoachedDaysAgo} days ago</strong>.</span>
                 )}
               </p>
 
-              <div className="flex-center flex-wrap gap-sm" style={{ marginTop: '0.25rem' }}>
+              <div className="flex-center flex-wrap gap-sm mt-sm">
                 <button 
                   className="btn btn-secondary flex-1 btn-sm" 
                   onClick={() => onShadowEmployee && onShadowEmployee(employee)}

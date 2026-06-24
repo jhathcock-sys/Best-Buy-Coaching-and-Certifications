@@ -3,13 +3,16 @@ import { Award, Trophy, Target, Star, Flame, MonitorPlay, TrendingUp, X } from '
 
 import { useStore } from '../store/useStore';
 
+const EMPTY_OBJ = {};
+const EMPTY_ARR: any[] = [];
+
 export default function BreakroomTV({ onClose }: any) {
   const activePeriod = useStore((state) => state.activePeriod) || "Active Period";
-  const rosterHistory = useStore((state) => state.rosterHistory) || {};
-  const _rawroster = rosterHistory[activePeriod] || {};
+  const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
+  const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
   const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
-  const recentSessions = useStore((state) => state.coachingLogs) || [];
-  const deptGoals = useStore((state) => state.deptGoals) || {};
+  const recentSessions = useStore((state) => state.coachingLogs) || EMPTY_ARR;
+  const deptGoals = useStore((state) => state.deptGoals) || EMPTY_OBJ;
   const apiKey = useStore((state) => state.apiKey);
   const [activeSlide, setActiveSlide] = useState(0); // 0: Store Goals, 1: Top 3 Leaderboard, 2: Recent Wins
   const [currentTime, setCurrentTime] = useState(new Date());

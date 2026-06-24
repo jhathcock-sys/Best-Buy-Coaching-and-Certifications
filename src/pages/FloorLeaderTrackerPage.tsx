@@ -18,13 +18,16 @@ import ShiftTrackerTab from '../components/FloorLeader/ShiftTrackerTab';
 import HandoffReportModal from '../components/FloorLeaderTracker/HandoffReportModal';
 
 
+const EMPTY_OBJ = {};
+const EMPTY_ARR: any[] = [];
+
 export default function FloorLeaderTracker() {
   const activeManager = useStore((state) => state.activeManager);
   const activePeriod = useStore((state) => state.activePeriod);
-  const rosterHistory = useStore((state) => state.rosterHistory) || {};
-  const _rawroster = rosterHistory[activePeriod] || {};
+  const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
+  const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
   const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
-  const shifts = useStore((state) => state.floorLeaderShifts) || [];
+  const shifts = useStore((state) => state.floorLeaderShifts) || EMPTY_ARR;
   const onSaveShift = useStore((state) => state.saveFloorLeaderShift);
   const onDeleteShift = useStore((state) => state.deleteFloorLeaderShift);
   const onAddEmployee = useStore((state) => state.addEmployee);

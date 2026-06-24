@@ -39,16 +39,9 @@ export default function SyncManager() {
   const setManagers = useStore((state) => state.setManagers);
   const setDailySnapshots = useStore((state) => state.setDailySnapshots);
 
+  // Pre-Auth Listeners (Required for Login / Hydration)
   useEffect(() => {
     if (!dbConnected || !storeId) return;
-
-    const unsubPeriod = subscribeToActivePeriod(storeId, debounce((p) => {
-      if (p) setActivePeriod(p);
-    }, 100));
-
-    const unsubRoster = subscribeToRosterHistory(storeId, debounce((h) => {
-      if (h) setRosterHistory(h);
-    }, 100));
 
     const unsubPlaybook = subscribeToPlaybookSettings(storeId, debounce((s) => {
       if (s) {
@@ -62,6 +55,28 @@ export default function SyncManager() {
         }
         setPlaybookSettings(s);
       }
+    }, 100));
+
+    const unsubManagers = subscribeToManagers(storeId, debounce((m) => {
+      if (m) setManagers(m);
+    }, 100));
+
+    return () => {
+      if (unsubPlaybook) unsubPlaybook();
+      if (unsubManagers) unsubManagers();
+    };
+  }, [dbConnected, storeId, setPlaybookSettings, setManagers]);
+
+  // Post-Auth Listeners (Tenant Data)
+  useEffect(() => {
+    if (!dbConnected || !storeId || !isAuthenticated) return;
+
+    const unsubPeriod = subscribeToActivePeriod(storeId, debounce((p) => {
+      if (p) setActivePeriod(p);
+    }, 100));
+
+    const unsubRoster = subscribeToRosterHistory(storeId, debounce((h) => {
+      if (h) setRosterHistory(h);
     }, 100));
 
     const unsubGoals = subscribeToDeptGoals(storeId, debounce((g) => {
@@ -92,10 +107,6 @@ export default function SyncManager() {
       }
     }, 100));
 
-    const unsubManagers = subscribeToManagers(storeId, debounce((m) => {
-      if (m) setManagers(m);
-    }, 100));
-
     const unsubDailySnapshots = subscribeToDailySnapshots(storeId, debounce((s) => {
       if (s) setDailySnapshots(s);
     }, 100));
@@ -103,17 +114,15 @@ export default function SyncManager() {
     return () => {
       if (unsubPeriod) unsubPeriod();
       if (unsubRoster) unsubRoster();
-      if (unsubPlaybook) unsubPlaybook();
       if (unsubGoals) unsubGoals();
       if (unsubSessions) unsubSessions();
       if (unsubMetrics) unsubMetrics();
       if (unsubFollowUp) unsubFollowUp();
       if (unsubFloorLeader) unsubFloorLeader();
       if (unsubCoachingLogs) unsubCoachingLogs();
-      if (unsubManagers) unsubManagers();
       if (unsubDailySnapshots) unsubDailySnapshots();
     };
-  }, [dbConnected, isAuthenticated, storeId, setActivePeriod, setRosterHistory, setPlaybookSettings, setDeptGoals, setRecentSessions, setMetrics, setFollowUpTasks, setFloorLeaderShifts, setCoachingLogs, setManagers, setDailySnapshots]);
+  }, [dbConnected, isAuthenticated, storeId, setActivePeriod, setRosterHistory, setDeptGoals, setRecentSessions, setMetrics, setFollowUpTasks, setFloorLeaderShifts, setCoachingLogs, setDailySnapshots]);
 
   return null;
 }

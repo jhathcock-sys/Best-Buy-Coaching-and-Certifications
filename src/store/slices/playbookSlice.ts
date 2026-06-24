@@ -18,6 +18,7 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
     recentSessions: [],
     customScenarios: [],
     playbookSettings: initialPlaybookSettings,
+    isPlaybookHydrated: false,
     followUpTasks: [],
     coachingLogs: [],
 
@@ -25,9 +26,10 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
     setCustomScenarios: (customScenarios) => set({ customScenarios }),
     setCoachingLogs: (coachingLogs) => set({ coachingLogs }),
     setFollowUpTasks: (followUpTasks) => set({ followUpTasks }),
+    setIsPlaybookHydrated: (isPlaybookHydrated) => set({ isPlaybookHydrated }),
     
     setPlaybookSettings: (playbookSettings) => {
-      set({ playbookSettings });
+      set({ playbookSettings, isPlaybookHydrated: true });
       if (playbookSettings?.storePin) {
         set({ storePin: playbookSettings.storePin });
       }
@@ -314,11 +316,15 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
         const newTotalHours = prevTotalHours + 8;
         const trueRph = newTotalHours > 0 ? Math.round(newTotalRev / newTotalHours) : 0;
 
+        const prevWarranty = metrics.warranty || 0;
+        const newWarrantyVal = newMetrics.warranty || 0;
+        const trueWarranty = newTotalHours > 0 ? Math.round(((prevWarranty * prevTotalHours) + (newWarrantyVal * 8)) / newTotalHours) : 0;
+
         const averagedMetrics = {
           ...metrics,
           memberships: metrics.memberships + newMetrics.memberships,
           creditCards: metrics.creditCards + newMetrics.creditCards,
-          warranty: Math.round((metrics.warranty * 2 + newMetrics.warranty) / 3),
+          warranty: trueWarranty,
           surveys: metrics.surveys + newMetrics.surveys,
           rph: trueRph,
           totalRevenue: newTotalRev,

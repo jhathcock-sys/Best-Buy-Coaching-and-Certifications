@@ -1,20 +1,14 @@
 import { useMemo } from 'react';
+import { useDashboardContext } from '../../pages/DashboardContext';
 
 interface DashboardSystemAlertsProps {
-  roster: any[];
-  rosterHistory: any;
-  calculatedMetrics: any;
-  activePeriod: string;
   onNavigate: (view: string) => void;
 }
 
 export default function DashboardSystemAlerts({ 
-  roster, 
-  rosterHistory, 
-  calculatedMetrics, 
-  activePeriod, 
   onNavigate 
 }: DashboardSystemAlertsProps) {
+  const { roster, rosterHistory, calculatedMetrics, activePeriod } = useDashboardContext();
   
   const systemAlerts = useMemo(() => {
     const list: any[] = [];

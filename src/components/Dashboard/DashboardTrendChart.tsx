@@ -1,11 +1,10 @@
 import { useState, useMemo } from 'react';
 import { TrendingUp, CreditCard, Users } from 'lucide-react';
 
-interface DashboardTrendChartProps {
-  calculatedMetrics: any;
-}
+import { useDashboardContext } from '../../pages/DashboardContext';
 
-export default function DashboardTrendChart({ calculatedMetrics }: DashboardTrendChartProps) {
+export default function DashboardTrendChart() {
+  const { calculatedMetrics } = useDashboardContext();
   const [chartMetric, setChartMetric] = useState('memberships');
 
   const chartData = useMemo(() => {
@@ -43,36 +42,29 @@ export default function DashboardTrendChart({ calculatedMetrics }: DashboardTren
   const { points, linePath, areaPath } = chartData;
 
   return (
-    <div className="glass-card" style={{ padding: '1.75rem', width: '100%', position: 'relative' }}>
+    <div className="glass-card p-xl w-full" style={{ position: 'relative' }}>
       <div className="flex-between flex-wrap gap-sm mb-lg">
         <div>
-          <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: '0 0 0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', letterSpacing: '-0.02em', color: '#fff' }}>
+          <h2 className="text-xl font-bold m-0 mb-xs flex-center gap-sm tracking-tight justify-start">
             <TrendingUp size={20} color="var(--warning)" />
             30-Day Trend Analysis
           </h2>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+          <p className="m-0 text-sm text-secondary">
             Comparing current trajectory vs store targets.
           </p>
         </div>
-        <div className="flex-center gap-sm p-sm" style={{ background: 'var(--white-alpha-05)', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
+        <div className="flex-center gap-sm p-sm rounded-xl border-glass bg-surface">
           <button 
-            className={`metric-toggle-btn ${chartMetric === 'memberships' ? 'active' : ''}`}
+            className={`btn btn-sm ${chartMetric === 'memberships' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setChartMetric('memberships')}
-            style={{ 
-              display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600, border: 'none', cursor: 'pointer',
-              background: chartMetric === 'memberships' ? 'var(--bby-blue)' : 'transparent',
-              color: chartMetric === 'memberships' ? '#fff' : 'var(--text-secondary)'
-            }}
           >
             <Users size={14} /> PMs
           </button>
           <button 
-            className={`metric-toggle-btn ${chartMetric === 'cards' ? 'active' : ''}`}
+            className={`btn btn-sm ${chartMetric === 'cards' ? 'bg-warning text-black' : 'btn-secondary'}`}
             onClick={() => setChartMetric('cards')}
             style={{ 
-              display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600, border: 'none', cursor: 'pointer',
-              background: chartMetric === 'cards' ? 'var(--warning)' : 'transparent',
-              color: chartMetric === 'cards' ? '#000' : 'var(--text-secondary)'
+              boxShadow: chartMetric === 'cards' ? '0 4px 15px var(--warning-glow)' : 'none'
             }}
           >
             <CreditCard size={14} /> Cards
@@ -80,7 +72,7 @@ export default function DashboardTrendChart({ calculatedMetrics }: DashboardTren
         </div>
       </div>
 
-      <div className="flex-center p-md" style={{ width: '100%', height: '220px', background: 'var(--black-alpha-20)', border: '1px solid var(--border-glass)', borderRadius: '14px' }}>
+      <div className="flex-center p-md border-glass w-full" style={{ height: '220px', background: 'var(--black-alpha-20)', borderRadius: '14px' }}>
         <svg width="100%" height="100%" viewBox="0 0 500 200" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
           <defs>
             <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
@@ -120,7 +112,7 @@ export default function DashboardTrendChart({ calculatedMetrics }: DashboardTren
           {points.map((p, idx) => (
             <g key={`point-${idx}`} style={{ animation: `fadeInPoint 0.5s ease forwards`, animationDelay: `${0.2 + idx * 0.15}s`, opacity: 0 }}>
               <circle cx={p.x} cy={p.y} r="5" fill="var(--bg-obsidian)" stroke={chartMetric === 'memberships' ? '#60a5fa' : 'var(--warning)'} strokeWidth="2.5" />
-              <text x={p.x} y={p.y - 15} fill="#fff" fontSize="12" fontWeight="700" textAnchor="middle">{p.value}</text>
+              <text x={p.x} y={p.y - 15} fill="var(--text-primary)" fontSize="12" fontWeight="700" textAnchor="middle">{p.value}</text>
               <text x={p.x} y="190" fill="var(--text-secondary)" fontSize="11" fontWeight="600" textAnchor="middle">{p.label}</text>
             </g>
           ))}

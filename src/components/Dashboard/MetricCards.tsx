@@ -1,12 +1,9 @@
 import { Users, CreditCard, Shield, Star, TrendingUp, ClipboardList } from 'lucide-react';
 import CircularGauge from './CircularGauge';
+import { useDashboardContext } from '../../pages/DashboardContext';
 
-interface MetricCardsProps {
-    calculatedMetrics: any;
-    recentSessions: any[];
-}
-
-export default function MetricCards({ calculatedMetrics, recentSessions }: MetricCardsProps) {
+export default function MetricCards() {
+    const { calculatedMetrics, recentSessions } = useDashboardContext();
     return (
         <div className="metrics-grid">
             <CircularGauge 

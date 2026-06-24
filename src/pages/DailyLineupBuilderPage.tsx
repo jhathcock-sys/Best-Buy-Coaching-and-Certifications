@@ -3,10 +3,12 @@ import { CalendarDays, Users, MapPin, Search, AlertTriangle, CheckCircle, Clock,
 
 import { useStore } from '../store/useStore';
 
+const EMPTY_OBJ = {};
+
 export default function DailyLineupBuilder() {
   const activePeriod = useStore((state) => state.activePeriod);
-  const rosterHistory = useStore((state) => state.rosterHistory) || {};
-  const _rawroster = rosterHistory[activePeriod] || {};
+  const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
+  const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
   const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [searchTerm, setSearchTerm] = useState('');

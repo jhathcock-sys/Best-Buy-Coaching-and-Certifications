@@ -1,16 +1,10 @@
 import { Compass } from 'lucide-react';
 import { calculateCVI } from '../../store/cviHelper';
 import { Employee } from '../../types/index';
+import { useDashboardContext } from '../../pages/DashboardContext';
 
-interface DashboardHeaderProps {
-  roster: Employee[];
-  shadowingHeatmapData: Record<string, number>;
-  rosterHistory: Record<string, Record<string, Employee>>;
-  activePeriod: string;
-  activeManager?: any;
-}
-
-export default function DashboardHeader({ roster, shadowingHeatmapData, rosterHistory, activePeriod, activeManager }: DashboardHeaderProps) {
+export default function DashboardHeader() {
+  const { roster, shadowingHeatmapData, rosterHistory, activePeriod, activeManager } = useDashboardContext();
   
   // Calculate CVI Store Health
   let accelerating = 0;

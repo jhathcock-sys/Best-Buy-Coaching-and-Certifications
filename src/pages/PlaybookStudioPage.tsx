@@ -11,6 +11,9 @@ import DepartmentTargetsTab from '../components/PlaybookStudio/DepartmentTargets
 import SyncDiagnosticsTab from '../components/PlaybookStudio/SyncDiagnosticsTab';
 import CustomScenariosTab from '../components/Playbook/CustomScenariosTab';
 
+const EMPTY_OBJ = {};
+const EMPTY_ARR: any[] = [];
+
 export default function PlaybookStudio() {
   const storeId = useStore((state) => state.storeId);
   const apiKey = useStore((state) => state.apiKey);
@@ -19,12 +22,12 @@ export default function PlaybookStudio() {
   
   const playbookSettings = useStore(state => state.playbookSettings);
   const onSaveSettings = useStore(state => state.saveSettings);
-  const deptGoals = useStore(state => state.deptGoals) || {};
+  const deptGoals = useStore(state => state.deptGoals) || EMPTY_OBJ;
   const onSaveDeptGoals = useStore(state => state.saveDeptGoals);
-  const customScenarios = useStore(state => state.customScenarios) || [];
+  const customScenarios = useStore(state => state.customScenarios) || EMPTY_ARR;
   const onAddCustomScenario = useStore(state => state.importCustomScenario);
   const onDeleteCustomScenario = useStore(state => state.deleteCustomScenario);
-  const managers = useStore(state => state.managers) || [];
+  const managers = useStore(state => state.managers) || EMPTY_ARR;
   const onSaveManagers = useStore(state => state.saveManagers);
   const [activeTab, setActiveTab] = useState('engine');
   

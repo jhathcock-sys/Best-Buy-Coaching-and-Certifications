@@ -66,6 +66,9 @@ const TEMPLATES = {
   }
 };
 
+const EMPTY_OBJ = {};
+const EMPTY_ARR: any[] = [];
+
 export default function CoachSimulator({ 
   preselectedEmployee, 
   clearPreselectedEmployee, 
@@ -76,14 +79,14 @@ export default function CoachSimulator({
   const apiKey = useStore((state) => state.apiKey);
   
   const playbookSettings = useStore((state) => state.playbookSettings);
-  const customScenarios = useStore((state) => state.customScenarios) || [];
+  const customScenarios = useStore((state) => state.customScenarios) || EMPTY_ARR;
   const importCustomScenario = useStore((state) => state.importCustomScenario);
   const logCoachingSession = useStore((state) => state.logCoachingSession);
-  const coachingLogs = useStore((state) => state.coachingLogs) || [];
-  const rosterHistory = useStore((state) => state.rosterHistory) || {};
+  const coachingLogs = useStore((state) => state.coachingLogs) || EMPTY_ARR;
+  const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
   const activePeriod = useStore((state) => state.activePeriod);
   
-  const _rawroster = rosterHistory[activePeriod] || {};
+  const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
   const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
   const onImportScenario = importCustomScenario;
   const onLogCoachingSession = logCoachingSession;

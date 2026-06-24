@@ -7,7 +7,7 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
   // Initial state logic specific to auth
   const envKey = import.meta.env.VITE_GEMINI_API_KEY;
   const hasEnvKey = !!(envKey && envKey.trim().length > 10);
-  const initialApiKey = hasEnvKey ? envKey : (localStorage.getItem('bby_api_key') || '');
+  const initialApiKey = hasEnvKey ? envKey : '';
   
   let initialActiveManager = null;
   try {
@@ -32,7 +32,7 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
     activeManager: initialActiveManager,
     activeAdvisor: null,
     managers: initialManagers,
-    storeId: sessionStorage.getItem('bby_store_id') || localStorage.getItem('bby_last_store') || '1480',
+    storeId: sessionStorage.getItem('bby_store_id') || '1480',
 
     setStoreId: (storeId) => {
       set({ storeId });
@@ -44,11 +44,6 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
 
     setApiKey: (key) => {
       set({ apiKey: key });
-      if (key) {
-        localStorage.setItem('bby_api_key', key);
-      } else {
-        localStorage.removeItem('bby_api_key');
-      }
     },
     
     setDbConnected: (connected) => set({ dbConnected: connected }),
@@ -153,7 +148,6 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
 
     handleSaveFirebaseConfig: (config) => {
       if (config) {
-        localStorage.setItem('bby_firebase_config', JSON.stringify(config));
         const database = initFirebase(config);
         set({ dbConnected: !!database });
         if (database) {
@@ -177,7 +171,6 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
           });
         }
       } else {
-        localStorage.removeItem('bby_firebase_config');
         initFirebase(null);
         set({ dbConnected: false });
         alert("Switched back to Local Offline Sandbox Mode successfully.");

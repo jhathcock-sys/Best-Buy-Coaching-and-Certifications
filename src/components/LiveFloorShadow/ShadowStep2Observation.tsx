@@ -1,6 +1,32 @@
 import React, { useEffect } from 'react';
 import { ShieldCheck, Clipboard, Mic, MicOff } from 'lucide-react';
 
+interface SpeechRecognitionEvent {
+  resultIndex: number;
+  results: {
+    length: number;
+    [key: number]: {
+      isFinal: boolean;
+      [key: number]: { transcript: string };
+    };
+  };
+}
+
+interface SpeechRecognitionErrorEvent {
+  error: string;
+}
+
+interface ISpeechRecognition {
+  stop: () => void;
+  start: () => void;
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+}
+
 export interface ShadowStep2ObservationProps {
   checklist: Record<string, boolean>;
   toggleChecklistItem: (key: string) => void;
@@ -15,7 +41,7 @@ export default function ShadowStep2Observation({
   setNotes
  }: ShadowStep2ObservationProps) {
   const [isListening, setIsListening] = React.useState(false);
-  const recognitionRef = React.useRef<any>(null);
+  const recognitionRef = React.useRef<ISpeechRecognition | null>(null);
 
   useEffect(() => {
     return () => {
@@ -38,14 +64,14 @@ export default function ShadowStep2Observation({
       setIsListening(false);
     } else {
       setIsListening(true);
-      const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const SpeechRecognition = (window as unknown as { SpeechRecognition: any }).SpeechRecognition || (window as unknown as { webkitSpeechRecognition: any }).webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
       recognitionRef.current = recognition;
       recognition.continuous = true;
       recognition.interimResults = true;
       recognition.lang = 'en-US';
 
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
         let transcript = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
           if (event.results[i].isFinal) {
@@ -57,7 +83,7 @@ export default function ShadowStep2Observation({
         }
       };
 
-      recognition.onerror = (event: any) => {
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         console.error("Speech recognition error:", event.error);
         setIsListening(false);
       };

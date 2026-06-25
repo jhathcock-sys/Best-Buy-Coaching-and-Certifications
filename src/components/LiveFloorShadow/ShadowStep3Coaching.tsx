@@ -1,26 +1,18 @@
 import React from 'react';
-import { ShieldCheck, ChevronLeft, ChevronRight, Check, Clipboard, Calendar, Users, AlertCircle } from 'lucide-react';
+import { Calendar } from 'lucide-react';
+
+export interface ShadowStep3CoachingProps {
+  strengths: string;
+  setStrengths: React.Dispatch<React.SetStateAction<string>>;
+  gapDetails: string;
+  setGapDetails: React.Dispatch<React.SetStateAction<string>>;
+  followUpAction: string;
+  setFollowUpAction: React.Dispatch<React.SetStateAction<string>>;
+  followUpDate: string;
+  setFollowUpDate: React.Dispatch<React.SetStateAction<string>>;
+}
 
 export default function ShadowStep3Coaching({ 
-  roster,
-  selectedEmpId,
-  setSelectedEmpId,
-  department,
-  setDepartment,
-  setCurrentStep,
-  checklist,
-  setChecklist,
-  customerPersona,
-  setCustomerPersona,
-  customPersona,
-  setCustomPersona,
-  notes,
-  setNotes,
-  isGenerating,
-  setIsGenerating,
-  handleGenerateCoaching,
-  coachingInsight,
-  setCoachingInsight,
   strengths,
   setStrengths,
   gapDetails,
@@ -28,9 +20,8 @@ export default function ShadowStep3Coaching({
   followUpAction,
   setFollowUpAction,
   followUpDate,
-  setFollowUpDate,
-  handleComplete
- }) {
+  setFollowUpDate
+ }: ShadowStep3CoachingProps) {
   return (
     <>
       <div className="flex-column gap-lg animate-fade-in">
@@ -44,10 +35,11 @@ export default function ShadowStep3Coaching({
               Observed Strengths Summary
             </label>
             <textarea 
-              value={strengths} 
+              value={strengths || ''} 
               onChange={(e) => setStrengths(e.target.value)}
               placeholder="e.g. Great pace, professional tone, avoided pushiness"
-              className="form-control bg-obsidian-alpha border-glass text-white w-full h-80px resize-none p-sm"
+              className="form-control bg-obsidian-alpha border-glass text-white w-full h-20 resize-none p-sm"
+              data-testid="shadow-coaching-strengths"
             />
           </div>
 
@@ -56,10 +48,11 @@ export default function ShadowStep3Coaching({
               Performance Gap Details
             </label>
             <textarea 
-              value={gapDetails} 
+              value={gapDetails || ''} 
               onChange={(e) => setGapDetails(e.target.value)}
               placeholder="e.g. Missed survey pitch, didn't write name on receipt sleeve"
-              className="form-control bg-obsidian-alpha border-glass text-white w-full h-80px resize-none p-sm"
+              className="form-control bg-obsidian-alpha border-glass text-white w-full h-20 resize-none p-sm"
+              data-testid="shadow-coaching-gapDetails"
             />
           </div>
         </div>
@@ -71,10 +64,11 @@ export default function ShadowStep3Coaching({
             </label>
             <input 
               type="text"
-              value={followUpAction} 
+              value={followUpAction || ''} 
               onChange={(e) => setFollowUpAction(e.target.value)}
               placeholder="e.g. Shadow 3 customer checkouts to verify survey ask"
-              className="form-control bg-obsidian-alpha border-glass text-white w-full h-44px"
+              className="form-control bg-obsidian-alpha border-glass text-white w-full h-11"
+              data-testid="shadow-coaching-followUpAction"
             />
           </div>
 
@@ -84,9 +78,10 @@ export default function ShadowStep3Coaching({
             </label>
             <input 
               type="date"
-              value={followUpDate} 
+              value={followUpDate || ''} 
               onChange={(e) => setFollowUpDate(e.target.value)}
-              className="form-control bg-obsidian-alpha border-glass text-white w-full h-44px"
+              className="form-control bg-obsidian-alpha border-glass text-white w-full h-11"
+              data-testid="shadow-coaching-followUpDate"
             />
           </div>
         </div>

@@ -15,12 +15,25 @@ const EMPTY_OBJ = {};
 const EMPTY_ARR: any[] = [];
 
 export default function PlaybookStudio() {
+  const playbookSettings = useStore(state => state.playbookSettings);
+  
+  if (!playbookSettings) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', color: 'var(--text-secondary)' }}>
+        <RefreshCw size={24} className="spin" style={{ marginRight: '0.75rem' }} /> Loading platform configuration...
+      </div>
+    );
+  }
+
+  return <PlaybookStudioContent playbookSettings={playbookSettings} />;
+}
+
+function PlaybookStudioContent({ playbookSettings }: { playbookSettings: any }) {
   const storeId = useStore((state) => state.storeId);
   const apiKey = useStore((state) => state.apiKey);
   const dbConnected = useStore((state) => state.dbConnected);
   const handleSaveFirebaseConfig = useStore((state) => state.handleSaveFirebaseConfig);
   
-  const playbookSettings = useStore(state => state.playbookSettings);
   const onSaveSettings = useStore(state => state.saveSettings);
   const deptGoals = useStore(state => state.deptGoals) || EMPTY_OBJ;
   const onSaveDeptGoals = useStore(state => state.saveDeptGoals);

@@ -18,22 +18,22 @@ service cloud.firestore {
     match /stores/{storeId} {
       
       allow read: if isTenantManager(storeId);
-      allow write: if isTenantManager(storeId);
+      allow write: if isTenantManager(storeId) && isRoleManager();
       
       match /users/{userId} {
         allow read: if isTenantManager(storeId);
-        allow write: if isTenantManager(storeId);
+        allow write: if isTenantManager(storeId) && isRoleManager();
       }
 
       match /data/{document=**} {
         allow read: if isTenantManager(storeId);
-        allow write: if isTenantManager(storeId);
+        allow write: if isTenantManager(storeId) && isRoleManager();
       }
       
       // Subcollections
       match /periods/{document=**} {
         allow read: if isTenantManager(storeId);
-        allow write: if isTenantManager(storeId);
+        allow write: if isTenantManager(storeId) && isRoleManager();
       }
       
       match /coachingLogs/{document=**} {
@@ -43,7 +43,7 @@ service cloud.firestore {
 
       match /dailySnapshots/{document=**} {
         allow read: if isTenantManager(storeId);
-        allow write: if isTenantManager(storeId);
+        allow write: if isTenantManager(storeId) && isRoleManager();
       }
 
       match /floorLeaderShifts/{document=**} {

@@ -7,13 +7,26 @@ const EMPTY_OBJ = {};
 const EMPTY_ARR: any[] = [];
 
 export default function BreakroomTV({ onClose }: any) {
-  const activePeriod = useStore((state) => state.activePeriod) || "Active Period";
+  const rawActivePeriod = useStore((state) => state.activePeriod);
+  const activePeriod = rawActivePeriod || "Active Period";
   const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
-  const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
-  const roster: any[] = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
+  const _rawroster = rawActivePeriod ? (rosterHistory[rawActivePeriod] || EMPTY_OBJ) : EMPTY_OBJ;
+  
+  const roster: any[] = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => (a?.name || '').localeCompare(b?.name || '')), [_rawroster]);
   const recentSessions = useStore((state) => state.coachingLogs) || EMPTY_ARR;
   const deptGoals = useStore((state) => state.deptGoals) || EMPTY_OBJ;
   const apiKey = useStore((state) => state.apiKey);
+
+  if (!rawActivePeriod || Object.keys(_rawroster).length === 0) {
+    return (
+      <div style={{ width: '100vw', height: '100vh', background: '#060913', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#fff' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div className="spin" style={{ fontSize: '3rem', color: 'var(--bby-blue)', marginBottom: '1rem' }}>↻</div>
+          <p>Loading Dashboard...</p>
+        </div>
+      </div>
+    );
+  }
   const [activeSlide, setActiveSlide] = useState(0); // 0: Store Goals, 1: Top 3 Leaderboard, 2: Recent Wins
   const [currentTime, setCurrentTime] = useState(new Date());
 

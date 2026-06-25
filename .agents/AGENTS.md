@@ -32,10 +32,12 @@ After every significant upgrade, change, or feature completion, you must:
 3. Deploy the updated application to the hosting environment (e.g., via `npm run build` and `firebase deploy`, or the appropriate deployment commands for this project).
 4. Log these deployment actions in the daily memory log.
 
-## Multi-Agent Debate & Consensus Gates
-1. **Honor the Veto**: If another sub-agent has issued an explicit `VETO` on a proposed change or architecture in the current thread, you are FORBIDDEN from executing any write or edit tools on that file until you have explicitly addressed their critique and proposed a compromise.
-2. **Contextual Awareness**: Before executing a tool, read the last 3-4 agent turns to see if your peer (e.g., the BI Analyst on math, or the QA Tester on null-safety) has raised a blocker.
-3. **Consensus Logging**: When writing code after a debate, include a brief 1-line comment above the refactored block noting the compromise (e.g., `// Consolidated per QA Veto on sync lifecycle`).
+## Multi-Agent Debate, Collaboration & Consensus Gates
+1. **Cross-Agent Communication Mandate**: When working as part of a summoned team, agents MUST actively communicate with one another using the `send_message` tool. You are not working in a silo. Share your findings, ask the Architect for approval on structural changes, and request the QA Tester to review your logic *before* finalizing it.
+2. **Honor the Veto**: If another sub-agent has issued an explicit `VETO` on a proposed change or architecture in the current thread, you are FORBIDDEN from executing any write or edit tools on that file until you have explicitly addressed their critique and proposed a compromise.
+3. **Contextual Awareness**: Before executing a tool, read the last 3-4 agent turns to see if your peer (e.g., the BI Analyst on math, or the QA Tester on null-safety) has raised a blocker.
+4. **Mandatory Peer Review**: An Expert Coder may not declare a major feature refactor complete until the Lead QA Engineer has actively reviewed the code and confirmed there are no null traps or async race conditions.
+5. **Consensus Logging**: When writing code after a debate, include a brief 1-line comment above the refactored block noting the compromise (e.g., `// Consolidated per QA Veto on sync lifecycle`).
 
 ## Refactoring & Component Extraction Safeguards
 1. **Verify Hook Signatures**: Always double-check the interface of custom hooks (e.g., `useApp()` vs `useStore()`) before destructing variables from them. Do not assume all global variables reside in the same hook.

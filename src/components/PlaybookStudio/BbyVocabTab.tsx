@@ -13,7 +13,7 @@ export default function BbyVocabTab({ playbookSettings, setPlaybookSettings }) {
     setPlaybookSettings({
       ...playbookSettings,
       bbyDictionary: {
-        ...playbookSettings.bbyDictionary,
+        ...(playbookSettings.bbyDictionary || {}),
         allowedPhrases: [...allowedPhrases, newAllowed.trim()]
       }
     });
@@ -26,7 +26,7 @@ export default function BbyVocabTab({ playbookSettings, setPlaybookSettings }) {
     setPlaybookSettings({
       ...playbookSettings,
       bbyDictionary: {
-        ...playbookSettings.bbyDictionary,
+        ...(playbookSettings.bbyDictionary || {}),
         allowedPhrases: arr
       }
     });
@@ -37,7 +37,7 @@ export default function BbyVocabTab({ playbookSettings, setPlaybookSettings }) {
     setPlaybookSettings({
       ...playbookSettings,
       bbyDictionary: {
-        ...playbookSettings.bbyDictionary,
+        ...(playbookSettings.bbyDictionary || {}),
         forbiddenPhrases: [...forbiddenPhrases, newForbidden.trim()]
       }
     });
@@ -50,7 +50,7 @@ export default function BbyVocabTab({ playbookSettings, setPlaybookSettings }) {
     setPlaybookSettings({
       ...playbookSettings,
       bbyDictionary: {
-        ...playbookSettings.bbyDictionary,
+        ...(playbookSettings.bbyDictionary || {}),
         forbiddenPhrases: arr
       }
     });

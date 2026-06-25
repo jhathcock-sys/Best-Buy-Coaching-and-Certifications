@@ -11,6 +11,7 @@ const CoachingHistoryPage = lazy(() => import('./pages/CoachingHistoryPage'));
 const LiveFloorShadowPage = lazy(() => import('./pages/LiveFloorShadowPage'));
 const AuraHUDPage = lazy(() => import('./pages/AuraHUDPage'));
 import LoginGate from './components/LoginGate';
+import AuthGate from './components/AuthGate';
 const AdvisorDashboardPage = lazy(() => import('./pages/AdvisorDashboardPage'));
 const FloorLeaderTrackerPage = lazy(() => import('./pages/FloorLeaderTrackerPage'));
 const TrendReportingPage = lazy(() => import('./pages/TrendReportingPage'));
@@ -250,7 +251,11 @@ function AppContent() {
               />
             } />
             <Route path="/history" element={<CoachingHistoryPage />} />
-            <Route path="/playbook" element={<PlaybookStudioPage />} />
+            <Route path="/playbook" element={
+              <AuthGate requireManager={true}>
+                <PlaybookStudioPage />
+              </AuthGate>
+            } />
             <Route path="*" element={
               <DashboardPage 
                 onNavigate={setActiveView}

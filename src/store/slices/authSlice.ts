@@ -1,7 +1,7 @@
 import { StateCreator } from 'zustand';
 import { StoreState, AuthSlice } from '../../types/store';
 import { initFirebase, isFirebaseConnected, saveManagersToCloud, getUserByPin, signInTenant, createTenantAuth, signOutTenant } from '../../services/firebase';
-import { MANAGERS } from './constants';
+import { MANAGERS, DEFAULT_PLAYBOOK_SETTINGS } from './constants';
 import bcrypt from 'bcryptjs';
 
 export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set, get) => {
@@ -150,7 +150,13 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
         // WIPE LEAKED TENANT DATA:
         rosterHistory: {},
         dailySnapshots: {},
-        metrics: { memberships: 0, creditCards: 0, warranty: 0, surveys: 0, rph: 0, totalRevenue: 0, totalHours: 0 }
+        metrics: { memberships: 0, creditCards: 0, warranty: 0, surveys: 0, rph: 0, totalRevenue: 0, totalHours: 0 },
+        coachingLogs: [],
+        followUpTasks: [],
+        deptGoals: {},
+        recentSessions: [],
+        floorLeaderShifts: [],
+        playbookSettings: DEFAULT_PLAYBOOK_SETTINGS
       });
     },
 

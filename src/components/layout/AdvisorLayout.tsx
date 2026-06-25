@@ -3,15 +3,15 @@ import { Sparkles } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 
 interface AdvisorLayoutProps {
-  dbConnected: boolean;
   children: React.ReactNode;
 }
 
-export default function AdvisorLayout({ dbConnected, children }: AdvisorLayoutProps) {
+export default function AdvisorLayout({ children }: AdvisorLayoutProps) {
   const logout = useStore((state) => state.logout);
+  const dbConnected = useStore((state) => state.dbConnected);
 
   return (
-    <div className="layout-container dark-theme flex-column h-full overflow-hidden" data-testid="advisor-layout">
+    <div className="flex-column h-full w-full overflow-hidden bg-space text-white" data-testid="advisor-layout">
       <div className="flex-between p-md bg-white-alpha-05 border-b-glass">
         <div className="flex-center gap-sm">
           <div className="p-sm bg-bby-blue rounded-8">
@@ -43,7 +43,7 @@ export default function AdvisorLayout({ dbConnected, children }: AdvisorLayoutPr
       <div className="flex-1 overflow-hidden">
         <Suspense fallback={
           <div className="flex-center flex-column w-full h-full gap-md" data-testid="loading-module-spinner">
-            <div className="w-50px h-50px border-4 border-solid border-white-alpha-10 border-bby-yellow-t-4 rounded-full animate-spin"></div>
+            <div className="h-44px w-44px border-4 border-solid border-white-alpha-05 border-bby-yellow-t-4 rounded-full animate-spin"></div>
             <span className="text-secondary text-sm font-semibold uppercase tracking-widest animate-fade-in">Loading Module...</span>
           </div>
         }>

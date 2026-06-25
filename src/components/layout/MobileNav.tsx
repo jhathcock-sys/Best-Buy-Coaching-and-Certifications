@@ -3,17 +3,16 @@ import {
   LayoutDashboard, ClipboardList, ShieldCheck, 
   Clock, Compass, Users, Archive 
 } from 'lucide-react';
+import { useStore } from '../../store/useStore';
 
-interface MobileNavProps {
-  activeView: string;
-  setActiveView: (view: string) => void;
-}
+export default function MobileNav() {
+  const activeView = useStore((state) => state.activeView);
+  const setActiveView = useStore((state) => state.setActiveView);
 
-export default function MobileNav({ activeView, setActiveView }: MobileNavProps) {
   return (
     <div className="bottom-nav">
       <button 
-        className={`bottom-nav-item ${activeView === 'dashboard' ? 'active' : ''}`}
+        className={`bottom-nav-item cursor-pointer transition-all ${activeView === 'dashboard' ? 'active' : ''}`}
         onClick={() => setActiveView('dashboard')}
         data-testid="mobile-nav-dashboard"
       >
@@ -21,7 +20,7 @@ export default function MobileNav({ activeView, setActiveView }: MobileNavProps)
         <span>Dash</span>
       </button>
       <button 
-        className={`bottom-nav-item ${activeView === 'roster' ? 'active' : ''}`}
+        className={`bottom-nav-item cursor-pointer transition-all ${activeView === 'roster' ? 'active' : ''}`}
         onClick={() => setActiveView('roster')}
         data-testid="mobile-nav-roster"
       >
@@ -29,7 +28,7 @@ export default function MobileNav({ activeView, setActiveView }: MobileNavProps)
         <span>Roster</span>
       </button>
       <button 
-        className={`bottom-nav-item ${activeView === 'shadow' ? 'active' : ''}`}
+        className={`bottom-nav-item cursor-pointer transition-all ${activeView === 'shadow' ? 'active' : ''}`}
         onClick={() => setActiveView('shadow')}
         data-testid="mobile-nav-shadow"
       >
@@ -37,7 +36,7 @@ export default function MobileNav({ activeView, setActiveView }: MobileNavProps)
         <span>Shadow</span>
       </button>
       <button 
-        className={`bottom-nav-item ${activeView === 'floorLeader' ? 'active' : ''}`}
+        className={`bottom-nav-item cursor-pointer transition-all ${activeView === 'floorLeader' ? 'active' : ''}`}
         onClick={() => setActiveView('floorLeader')}
         data-testid="mobile-nav-floor-leader"
       >
@@ -45,7 +44,7 @@ export default function MobileNav({ activeView, setActiveView }: MobileNavProps)
         <span>Floor Lead</span>
       </button>
       <button 
-        className={`bottom-nav-item ${activeView === 'roleplay' ? 'active' : ''}`}
+        className={`bottom-nav-item cursor-pointer transition-all ${activeView === 'roleplay' ? 'active' : ''}`}
         onClick={() => setActiveView('roleplay')}
         data-testid="mobile-nav-roleplay"
       >
@@ -53,7 +52,7 @@ export default function MobileNav({ activeView, setActiveView }: MobileNavProps)
         <span>Arena</span>
       </button>
       <button 
-        className={`bottom-nav-item ${activeView === 'coach' || activeView === 'builder' ? 'active' : ''}`}
+        className={`bottom-nav-item cursor-pointer transition-all ${activeView === 'coach' || activeView === 'builder' ? 'active' : ''}`}
         onClick={() => setActiveView('coach')}
         data-testid="mobile-nav-coach"
       >
@@ -61,7 +60,7 @@ export default function MobileNav({ activeView, setActiveView }: MobileNavProps)
         <span>Coach</span>
       </button>
       <button 
-        className={`bottom-nav-item ${activeView === 'history' ? 'active' : ''}`}
+        className={`bottom-nav-item cursor-pointer transition-all ${activeView === 'history' ? 'active' : ''}`}
         onClick={() => setActiveView('history')}
         data-testid="mobile-nav-history"
       >

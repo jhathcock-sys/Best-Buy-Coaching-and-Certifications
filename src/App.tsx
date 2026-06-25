@@ -161,7 +161,7 @@ function AppContent() {
 
   if (activeAdvisor && !activeManager) {
     return (
-      <AdvisorLayout dbConnected={dbConnected}>
+      <AdvisorLayout>
         <Routes>
           <Route path="/roster" element={<StoreRosterPage />} />
           <Route path="/command-center" element={<CommandCenter />} />
@@ -311,10 +311,7 @@ function AppContent() {
         </Suspense>
       </main>
 
-      <MobileNav 
-        activeView={activeView as string}
-        setActiveView={setActiveView}
-      />
+      <MobileNav />
       <ServiceWorkerBanner />
     </div>
   );

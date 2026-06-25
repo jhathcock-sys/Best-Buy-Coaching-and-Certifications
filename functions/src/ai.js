@@ -186,3 +186,69 @@ exports.generateAIContent = functions.https.onCall(async (data, context) => {
     throw new functions.https.HttpsError('internal', error.message);
   }
 });
+
+exports.auditStoreFloor = functions.https.onCall(async (data, context) => {
+  // Security Veto Fix: Context Auth & RBAC check
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'Endpoint requires authentication.');
+  }
+  
+  if (context.auth.token.role !== 'manager') {
+    throw new functions.https.HttpsError('permission-denied', 'Only active managers can perform floor audits.');
+  }
+
+  try {
+    const { base64Image, mimeType, playbookSettings } = data.data || data;
+    if (!base64Image) {
+      throw new functions.https.HttpsError('invalid-argument', 'Image data is missing.');
+    }
+
+    const aiInstance = getGeminiClient(); // Use environment API key
+    const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-flash' });
+    
+    const prompt = `
+      You are a strict but fair Best Buy General Manager conducting a visual floor layout audit.
+      Based on the provided image, give me an analysis of the store's visual merchandising, queuing, and layout.
+      
+      Respond strictly in JSON matching exactly this schema:
+      {
+        "status": "Green" | "Yellow" | "Red",
+        "statusDetails": "A brief summary of the state of the floor.",
+        "observations": ["Obs 1", "Obs 2"],
+        "actionPlan": ["Action 1", "Action 2", "Action 3"]
+      }
+      
+      Keep your observations and actions concise and retail-focused.
+      ${playbookSettings?.customSystemPrompt ? `ADDITIONAL PLAYBOOK RULES:\n${playbookSettings.customSystemPrompt}` : ''}
+    `;
+
+    const requestOptions = { timeout: 30000 };
+    const result = await model.generateContent({
+      contents: [
+        { 
+          role: 'user', 
+          parts: [
+            { text: prompt },
+            { inlineData: { data: base64Image, mimeType: mimeType || 'image/jpeg' } }
+          ] 
+        }
+      ],
+      generationConfig: {
+        responseMimeType: 'application/json',
+        maxOutputTokens: 1024,
+        temperature: 0.2
+      }
+    }, requestOptions);
+    
+    const jsonStr = result.response.text();
+    try {
+      const parsed = JSON.parse(jsonStr);
+      return parsed;
+    } catch (e) {
+      throw new functions.https.HttpsError('internal', 'AI returned invalid JSON');
+    }
+  } catch (error) {
+    if (error instanceof functions.https.HttpsError) throw error;
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});

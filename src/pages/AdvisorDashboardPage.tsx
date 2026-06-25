@@ -65,7 +65,7 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
   ];
 
   return (
-    <div className="p-xl h-full" style={{ overflowY: 'auto' }}>
+    <div className="p-xl h-full" data-testid="advisor-dashboard-container" style={{ overflowY: 'auto' }}>
       <div className="flex-between align-center mb-xl">
         <div>
           <h1 className="flex-center gap-md" style={{ fontSize: '2.5rem', fontWeight: 800, margin: '0 0 0.5rem 0', justifyContent: 'flex-start' }}>

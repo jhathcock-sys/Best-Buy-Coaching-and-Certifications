@@ -43,6 +43,7 @@ export default function FloorLeaderTabs({ leaderTab, setLeaderTab, handleEndShif
               </button>
               <button
                 className="btn"
+                data-testid="tab-audit"
                 style={{
                   background: 'transparent',
                   border: 'none',

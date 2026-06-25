@@ -215,7 +215,7 @@ export default function ShiftSetupForm({ activeManager }) {
           </div>
         </div>
 
-        <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem' }}>
+        <button type="submit" data-testid="start-shift-btn" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem' }}>
           Start Shift Monitoring
         </button>
       </form>

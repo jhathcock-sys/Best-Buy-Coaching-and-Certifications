@@ -1,4 +1,4 @@
-﻿export interface Employee {
+export interface Employee {
   id: string;
   name: string;
   dept: string;
@@ -145,4 +145,4 @@ declare global {
     webkitSpeechRecognition: any;
   }
 }
-export interface ShiftWin { id: string; empId: string; empName: string; zone: string; type: 'pm' | 'card' | 'app'; timestamp: number; }
+export interface ShiftWin { id: string; empId: string; empName: string; zone: string; type: 'pm' | 'card' | 'app'; timestamp: number; hourIndex?: number; }

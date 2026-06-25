@@ -16,6 +16,7 @@ import FiveStarAuditor from '../components/FiveStarAuditor';
 import ShiftSetupForm from '../components/FloorLeader/ShiftSetupForm';
 import ShiftTrackerTab from '../components/FloorLeader/ShiftTrackerTab';
 import HandoffReportModal from '../components/FloorLeaderTracker/HandoffReportModal';
+import { Employee } from '../types';
 
 
 const EMPTY_OBJ = {};
@@ -26,7 +27,7 @@ export default function FloorLeaderTracker() {
   const activePeriod = useStore((state) => state.activePeriod);
   const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
   const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
-  const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
+  const roster = React.useMemo(() => (Object.values(_rawroster) as Employee[]).sort((a: Employee, b: Employee) => a.name.localeCompare(b.name)), [_rawroster]);
   const shifts = useStore((state) => state.floorLeaderShifts) || EMPTY_ARR;
   const onSaveShift = useStore((state) => state.saveFloorLeaderShift);
   const onDeleteShift = useStore((state) => state.deleteFloorLeaderShift);
@@ -40,11 +41,6 @@ export default function FloorLeaderTracker() {
     leaderMetrics,
     leaderTab, setLeaderTab,
     isImportModalOpen, setIsImportModalOpen,
-    handleAddHour,
-    handleRemoveHour,
-    handleUpdateMetric,
-    handleUpdateStartRevenue,
-    handleUpdateEndRevenue,
     handleEndShift,
     handleAssignZone,
     handleUnassignZone,
@@ -53,12 +49,7 @@ export default function FloorLeaderTracker() {
     handleDeleteBreak,
     handleToggleBreakState,
     handleImportSchedule,
-    handleLogFloorWin,
-    handleUndoWin,
-    handleLogOcvObservation,
-    getEmployeesOnShift,
-    selectedEmpId, setSelectedEmpId,
-    winType, setWinType
+    getEmployeesOnShift
   } = useFloorLeaderTracker(activeManager, roster, onSaveShift);
 
   return (
@@ -92,23 +83,7 @@ export default function FloorLeaderTracker() {
           />
 
           {leaderTab === 'tracker' && (
-            <ShiftTrackerTab 
-              activeShift={activeShift}
-              setActiveShift={setActiveShift}
-              roster={roster}
-              handleAddHour={handleAddHour}
-              handleUpdateMetric={handleUpdateMetric}
-              handleUpdateStartRevenue={handleUpdateStartRevenue}
-              handleUpdateEndRevenue={handleUpdateEndRevenue}
-              handleRemoveHour={handleRemoveHour}
-              handleLogFloorWin={handleLogFloorWin}
-              handleLogOcvObservation={handleLogOcvObservation}
-              handleUndoWin={handleUndoWin}
-              selectedEmpId={selectedEmpId}
-              setSelectedEmpId={setSelectedEmpId}
-              winType={winType}
-              setWinType={setWinType}
-            />
+            <ShiftTrackerTab roster={roster} />
           )}
 
           {leaderTab === 'scheduler' && (

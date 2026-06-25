@@ -17,103 +17,9 @@ export function useFloorLeaderTracker(activeManager, roster, onSaveShift) {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   // --- Domain Hooks ---
-  const floorLogging = useFloorLogging(roster, activeShift, setActiveShift, logCoachingSession, editEmployee);
   const floorScheduling = useFloorScheduling(roster, activeShift, setActiveShift);
 
-  // --- Core Shift Tracking Logic ---
-  const handleAddHour = () => {
-    if (!activeShift) return;
-    const nextHour = activeShift.hours.length + 1;
-    const prevHour = activeShift.hours[activeShift.hours.length - 1];
-    const initialStart = prevHour && prevHour.endRevenue !== undefined && prevHour.endRevenue !== '' ? prevHour.endRevenue : '';
-    const updated = {
-      ...activeShift,
-      hours: [
-        ...activeShift.hours,
-        { hourNumber: nextHour, pms: 0, apps: 0, revenue: 0, startRevenue: initialStart, endRevenue: '' }
-      ]
-    };
-    setActiveShift(updated);
-  };
 
-  const handleRemoveHour = (index) => {
-    if (!activeShift || activeShift.hours.length <= 1) return;
-    const updatedHours = activeShift.hours.filter((_, i) => i !== index).map((h, idx) => ({
-      ...h,
-      hourNumber: idx + 1
-    }));
-    setActiveShift({
-      ...activeShift,
-      hours: updatedHours
-    });
-  };
-
-  const handleUpdateMetric = (hourIndex, field, delta) => {
-    if (!activeShift) return;
-    const updatedHours = activeShift.hours.map((h, i) => {
-      if (i === hourIndex) {
-        const newVal = Math.max(0, h[field] + delta);
-        return { ...h, [field]: newVal };
-      }
-      return h;
-    });
-    setActiveShift({
-      ...activeShift,
-      hours: updatedHours
-    });
-  };
-
-  const handleUpdateStartRevenue = (hourIndex, value) => {
-    if (!activeShift) return;
-    const updatedHours = activeShift.hours.map((h, idx) => {
-      if (idx === hourIndex) {
-        const startVal = value === '' ? '' : (parseFloat(value) || 0);
-        const endVal = h.endRevenue !== undefined && h.endRevenue !== '' ? parseFloat(String(h.endRevenue)) : '';
-        
-        let netRevenue = h.revenue || 0;
-        if (startVal !== '' && endVal !== '') {
-          netRevenue = Math.max(0, endVal - startVal);
-        }
-        
-        return {
-          ...h,
-          startRevenue: startVal,
-          revenue: netRevenue
-        };
-      }
-      return h;
-    });
-    setActiveShift({
-      ...activeShift,
-      hours: updatedHours
-    });
-  };
-
-  const handleUpdateEndRevenue = (hourIndex, value) => {
-    if (!activeShift) return;
-    const updatedHours = activeShift.hours.map((h, idx) => {
-      if (idx === hourIndex) {
-        const endVal = value === '' ? '' : (parseFloat(value) || 0);
-        const startVal = h.startRevenue !== undefined && h.startRevenue !== '' ? parseFloat(String(h.startRevenue)) : '';
-        
-        let netRevenue = h.revenue || 0;
-        if (startVal !== '' && endVal !== '') {
-          netRevenue = Math.max(0, endVal - startVal);
-        }
-        
-        return {
-          ...h,
-          endRevenue: endVal,
-          revenue: netRevenue
-        };
-      }
-      return h;
-    });
-    setActiveShift({
-      ...activeShift,
-      hours: updatedHours
-    });
-  };
 
   const checkHourStatus = (pms, apps, isWeekendShift) => {
     const pmGoal = isWeekendShift ? 3 : 2;
@@ -190,17 +96,11 @@ export function useFloorLeaderTracker(activeManager, roster, onSaveShift) {
   return {
     leaderTab, setLeaderTab,
     isImportModalOpen, setIsImportModalOpen,
-    ...floorLogging,
     ...floorScheduling,
     
     // Core tracking state & actions
     activeShift,
     setActiveShift,
-    handleAddHour,
-    handleRemoveHour,
-    handleUpdateMetric,
-    handleUpdateStartRevenue,
-    handleUpdateEndRevenue,
     handleEndShift,
     getEmployeesOnShift,
     activeSummary,

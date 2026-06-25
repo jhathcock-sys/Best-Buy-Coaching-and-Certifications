@@ -2,9 +2,14 @@ import { useState } from 'react';
 import { useStore } from '../../store/useStore';
 import { Employee, CoachingLog } from '../../types';
 
-export function useFloorLogging(roster: Employee[], activeShift: any, setActiveShift: any, logCoachingSession: any, editEmployee: any) {
+export function useFloorLogging(roster: Employee[]) {
+  const activeShift = useStore((state) => state.activeShift);
+  const setActiveShift = useStore((state) => state.setActiveShift);
+  const logCoachingSession = useStore((state) => state.logCoachingSession);
+  const editEmployee = useStore((state) => state.editEmployee);
+
   const [selectedEmpId, setSelectedEmpId] = useState('');
-  const [winType, setWinType] = useState('pm'); // 'pm' or 'app'
+  const [winType, setWinType] = useState<'pm' | 'app'>('pm');
 
   const handleLogOcvObservation = (data: { empId: string; connect: boolean; recommend: boolean; protect: boolean; close: boolean; notes: string }) => {
     const { empId, connect, recommend, protect, close, notes } = data;

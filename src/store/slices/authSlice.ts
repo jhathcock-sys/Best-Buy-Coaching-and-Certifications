@@ -2,6 +2,7 @@ import { StateCreator } from 'zustand';
 import { StoreState, AuthSlice } from '../../types/store';
 import { initFirebase, isFirebaseConnected, saveManagersToCloud, getUserByPin, signInTenant, createTenantAuth, signOutTenant } from '../../services/firebase';
 import { MANAGERS } from './constants';
+import bcrypt from 'bcryptjs';
 
 export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set, get) => {
   // Initial state logic specific to auth
@@ -70,7 +71,14 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
       
       // 3. Fallback to legacy local state if not found or offline/not auth'd yet
       if (!manager) {
-        manager = get().managers.find(m => m.pin === pin) || null;
+        manager = get().managers.find(m => {
+          if (!m.pin) return false;
+          const isHashed = m.pin.startsWith('$2a$') || m.pin.startsWith('$2b$');
+          if (isHashed) {
+            return bcrypt.compareSync(pin, m.pin);
+          }
+          return m.pin === pin;
+        }) || null;
       }
 
       if (manager) {

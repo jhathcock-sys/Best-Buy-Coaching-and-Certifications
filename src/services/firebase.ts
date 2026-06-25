@@ -201,7 +201,7 @@ export const subscribeToManagers = (storeId: string, onUpdate: any) => {
     }
   }, (error: any) => {
     console.error('Failed to subscribe to managersSettings:', error);
-    onUpdate([]);
+    // onUpdate([]);
   });
 };
 

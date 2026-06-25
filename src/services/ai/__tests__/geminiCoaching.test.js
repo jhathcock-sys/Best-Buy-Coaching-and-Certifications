@@ -1,30 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { generateCoachingLogGemini } from '../geminiCoaching';
 
-vi.mock('@google/generative-ai', () => {
-  const mockGenerateContent = vi.fn();
+vi.mock('firebase/functions', () => {
+  const mockHttpsCallableFn = vi.fn();
   return {
-    GoogleGenerativeAI: class {
-      constructor() {}
-      getGenerativeModel() {
-        return {
-          generateContent: mockGenerateContent
-        };
-      }
-    },
-    SchemaType: {
-      STRING: 'STRING',
-      NUMBER: 'NUMBER',
-      INTEGER: 'INTEGER',
-      BOOLEAN: 'BOOLEAN',
-      ARRAY: 'ARRAY',
-      OBJECT: 'OBJECT'
-    },
-    mockGenerateContent
+    getFunctions: vi.fn(),
+    httpsCallable: vi.fn(() => mockHttpsCallableFn),
+    mockHttpsCallableFn
   };
 });
 
-import { mockGenerateContent } from '@google/generative-ai';
+import { mockHttpsCallableFn } from 'firebase/functions';
 
 describe('geminiCoaching - generateCoachingLogGemini', () => {
   beforeEach(() => {
@@ -33,12 +19,12 @@ describe('geminiCoaching - generateCoachingLogGemini', () => {
 
   it('correctly generates a coaching log based on inputs', async () => {
     const mockApiResponse = {
-      response: {
-        text: () => JSON.stringify({ what: 'Mocked What', how: 'Mocked How', why: 'Mocked Why' })
+      data: {
+        text: JSON.stringify({ what: 'Mocked What', how: 'Mocked How', why: 'Mocked Why' })
       }
     };
     
-    mockGenerateContent.mockResolvedValueOnce(mockApiResponse);
+    mockHttpsCallableFn.mockResolvedValueOnce(mockApiResponse);
 
     const result = await generateCoachingLogGemini(
       'fake-api-key',
@@ -51,11 +37,20 @@ describe('geminiCoaching - generateCoachingLogGemini', () => {
       ['Solve', 'Close']
     );
 
-    expect(result).toEqual({ what: 'Mocked What', how: 'Mocked How', why: 'Mocked Why' });
-    expect(mockGenerateContent).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({ 
+      what: 'Mocked What', 
+      how: 'Mocked How', 
+      why: 'Mocked Why',
+      strengths: 'Friendly',
+      metricGap: 'Struggling to pitch Plus',
+      expectation: 'Improve performance in the focus area.',
+      validation: 'Leader will follow up next week.',
+      discStep: 'Solve, Close'
+    });
+    expect(mockHttpsCallableFn).toHaveBeenCalledTimes(1);
     
-    const callArgs = mockGenerateContent.mock.calls[0][0];
-    const promptText = callArgs.contents[0].parts[0].text;
+    const callArgs = mockHttpsCallableFn.mock.calls[0][0];
+    const promptText = callArgs.prompt;
     
     expect(promptText).toContain('John Doe');
     expect(promptText).toContain('Memberships');
@@ -65,12 +60,12 @@ describe('geminiCoaching - generateCoachingLogGemini', () => {
 
   it('handles empty playbookSettings gracefully', async () => {
     const mockApiResponse = {
-      response: {
-        text: () => JSON.stringify({ what: 'Default What' })
+      data: {
+        text: JSON.stringify({ what: 'Default What' })
       }
     };
     
-    mockGenerateContent.mockResolvedValueOnce(mockApiResponse);
+    mockHttpsCallableFn.mockResolvedValueOnce(mockApiResponse);
 
     const result = await generateCoachingLogGemini(
       'fake-api-key',
@@ -83,7 +78,16 @@ describe('geminiCoaching - generateCoachingLogGemini', () => {
       ['Discover']
     );
 
-    expect(result).toEqual({ what: 'Default What' });
-    expect(mockGenerateContent).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({ 
+      what: 'Default What',
+      how: 'Follow the appropriate framework.',
+      why: 'To ensure a quality customer experience.',
+      strengths: 'Demonstrates good core competencies.',
+      metricGap: 'Apps',
+      expectation: 'Improve performance in the focus area.',
+      validation: 'Leader will follow up next week.',
+      discStep: 'Discover'
+    });
+    expect(mockHttpsCallableFn).toHaveBeenCalledTimes(1);
   });
 });

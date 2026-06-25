@@ -170,7 +170,6 @@ export default function PerformanceWizardModal({
             <WizardStep1General 
               editForm={editForm}
               setEditForm={setEditForm}
-              departmentGoals={deptGoals}
               DEPARTMENTS={DEPARTMENTS}
             />
           )}

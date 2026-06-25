@@ -18,6 +18,7 @@ const TrendReportingPage = lazy(() => import('./pages/TrendReportingPage'));
 const BreakroomTVPage = lazy(() => import('./pages/BreakroomTVPage'));
 const DailyLineupBuilderPage = lazy(() => import('./pages/DailyLineupBuilderPage'));
 import { Compass, Users, BookOpen, LayoutDashboard, Sparkles, ShieldCheck, ClipboardList, Archive, Clock, ChevronDown, ChevronRight, TrendingUp } from 'lucide-react';
+import AssociateProfileHeader from './components/AssociateProfile/AssociateProfileHeader';
 import { subscribeToActivePeriod } from './services/firebase';
 
 import { useStore } from './store/useStore';
@@ -46,17 +47,58 @@ function AppContent() {
   const location = useLocation();
   const activeView = location.pathname === '/' ? 'dashboard' : location.pathname.substring(1);
   const setActiveView = useCallback((view: string) => navigate(view === 'dashboard' ? '/' : `/${view}`), [navigate]);
-  
+
   // Zustand Store Selectors
   const playbookSettings = useStore((state) => state.playbookSettings);
   const isPlaybookHydrated = useStore((state) => state.isPlaybookHydrated);
   const activeManager = useStore((state) => state.activeManager);
   const activeAdvisor = useStore((state) => state.activeAdvisor);
 
-  // Zustand Store Actions
   const dbConnected = useStore((state) => state.dbConnected);
   const isAuthenticated = useStore((state) => state.isAuthenticated);
   const storePin = useStore((state) => state.storePin);
+  const activePeriod = useStore(state => state.activePeriod);
+
+  if (location.pathname === '/test-profile-header') {
+    return (
+      <div className="p-xl bg-obsidian min-h-screen">
+        <h1 className="text-white mb-md">Test Harness: AssociateProfileHeader</h1>
+        <div className="mb-xl border border-glass p-md rounded-lg">
+          <h2 className="text-white mb-sm">1. Null Employee</h2>
+          <AssociateProfileHeader employee={null as any} rosterHistory={{}} activePeriod="June 2026" onClose={() => {}} />
+        </div>
+        <div className="mb-xl border border-glass p-md rounded-lg">
+          <h2 className="text-white mb-sm">2. Focus 5 & Accelerating CVI</h2>
+          <AssociateProfileHeader 
+            employee={{ id: 'test1', name: 'Test Focus 5', dept: 'Computing', focus5: true, memberships: 2 } as any} 
+            rosterHistory={{ 'May 2026': { 'test1': { id: 'test1', memberships: 1 } as any }, 'June 2026': {} }} 
+            activePeriod="June 2026" 
+            onClose={() => {}} 
+          />
+        </div>
+        <div className="mb-xl border border-glass p-md rounded-lg">
+          <h2 className="text-white mb-sm">3. Needs Review CVI</h2>
+          <AssociateProfileHeader 
+            employee={{ id: 'test2', name: 'Test Needs Review', dept: 'Computing', focus5: false, memberships: 1 } as any} 
+            rosterHistory={{ 'May 2026': { 'test2': { id: 'test2', memberships: 2 } as any }, 'June 2026': {} }} 
+            activePeriod="June 2026" 
+            onClose={() => {}} 
+          />
+        </div>
+        <div className="mb-xl border border-glass p-md rounded-lg">
+          <h2 className="text-white mb-sm">4. Neutral CVI</h2>
+          <AssociateProfileHeader 
+            employee={{ id: 'test3', name: 'Test Neutral', dept: 'Computing', focus5: false, memberships: 1 } as any} 
+            rosterHistory={{ 'May 2026': { 'test3': { id: 'test3', memberships: 1 } as any }, 'June 2026': {} }} 
+            activePeriod="June 2026" 
+            onClose={() => {}} 
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Zustand Store Actions
   const login = useStore((state) => state.login);
   const loginAdvisor = useStore((state) => state.loginAdvisor);
   const logout = useStore((state) => state.logout);
@@ -155,6 +197,43 @@ function AppContent() {
           </div>
         }>
           <Routes>
+          <Route path="/test-profile-header" element={
+            <div className="p-xl bg-obsidian min-h-screen">
+              <h1 className="text-white mb-md">Test Harness: AssociateProfileHeader</h1>
+              <div className="mb-xl border border-glass p-md rounded-lg">
+                <h2 className="text-white mb-sm">1. Null Employee</h2>
+                <AssociateProfileHeader employee={null as any} rosterHistory={{}} activePeriod="June 2026" onClose={() => {}} />
+              </div>
+              <div className="mb-xl border border-glass p-md rounded-lg">
+                <h2 className="text-white mb-sm">2. Focus 5 & Accelerating CVI</h2>
+                <AssociateProfileHeader 
+                  employee={{ id: 'test1', name: 'Test Focus 5', dept: 'Computing', focus5: true, memberships: 2 } as any} 
+                  rosterHistory={{ 'May 2026': { 'test1': { id: 'test1', memberships: 1 } as any } }} 
+                  activePeriod="June 2026" 
+                  onClose={() => {}} 
+                />
+              </div>
+              <div className="mb-xl border border-glass p-md rounded-lg">
+                <h2 className="text-white mb-sm">3. Needs Review CVI</h2>
+                <AssociateProfileHeader 
+                  employee={{ id: 'test2', name: 'Test Needs Review', dept: 'Computing', focus5: false, memberships: 1 } as any} 
+                  rosterHistory={{ 'May 2026': { 'test2': { id: 'test2', memberships: 2 } as any } }} 
+                  activePeriod="June 2026" 
+                  onClose={() => {}} 
+                />
+              </div>
+              <div className="mb-xl border border-glass p-md rounded-lg">
+                <h2 className="text-white mb-sm">4. Neutral CVI</h2>
+                <AssociateProfileHeader 
+                  employee={{ id: 'test3', name: 'Test Neutral', dept: 'Computing', focus5: false, memberships: 1 } as any} 
+                  rosterHistory={{ 'May 2026': { 'test3': { id: 'test3', memberships: 1 } as any } }} 
+                  activePeriod="June 2026" 
+                  onClose={() => {}} 
+                />
+              </div>
+            </div>
+          } />
+
             <Route path="/" element={
               <DashboardPage 
                 onNavigate={setActiveView}

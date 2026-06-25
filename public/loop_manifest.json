@@ -1,6 +1,5 @@
 ﻿{
     "remaining_queue":  [
-                            "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/AssociateProfile/ProfileAppraisalsTab.tsx",
                             "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/AssociateProfile/ProfileCoachingTab.tsx",
                             "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/AssociateProfile/ProfileCommitmentsTab.tsx",
                             "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/AssociateProfile/ProfileTrendsTab.tsx",
@@ -159,16 +158,16 @@
                             "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/vite-env.d.ts"
                         ],
     "active_vetos":  [
-                         "AssociateProfileHeader.tsx: Null destructuring traps on employee object, missing hydration guard, unsafe calculateCVI string operations, and any type usage for props (VETO by QA Tester)",
-                         "OneOnOneTab.tsx: Infinite recursive React render loop and missing JSX (VETO by QA \u0026 Tech Debt Analyst). Action taken: Deleted orphaned file."
+
                      ],
     "processed_queue":  [
                             "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/AssociateProfile/AssociateProfileHeader.tsx",
-                            "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/AssociateProfile/OneOnOneTab.tsx"
+                            "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/AssociateProfile/OneOnOneTab.tsx",
+                            "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/AssociateProfile/ProfileAppraisalsTab.tsx"
                         ],
     "current_checkpoint":  {
-                               "file_path":  "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/AssociateProfile/ProfileAppraisalsTab.tsx"
+                               "file_path":  "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/AssociateProfile/ProfileCoachingTab.tsx"
                            },
-    "file_index":  2,
+    "file_index":  3,
     "status":  "ACTIVE"
 }

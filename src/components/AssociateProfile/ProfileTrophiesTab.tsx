@@ -18,53 +18,29 @@ export default function ProfileTrophiesTab({ employee, isGenerating, generatedPl
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+    <div className="flex-column gap-xl">
       {/* Trophy Case Section */}
-      <div className="glass-card" style={{ padding: '1.5rem', background: 'linear-gradient(145deg, rgba(255,255,255,0.03), transparent)' }}>
-        <h4 style={{ fontSize: '1.1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff' }}>
-          <Award size={20} color="var(--bby-yellow)" /> The Trophy Case
+      <div className="glass-card p-lg">
+        <h4 className="text-lg text-white mb-lg flex-row align-center gap-sm font-heading m-0">
+          <Award size={20} className="text-bby-yellow" /> The Trophy Case
         </h4>
         
         {trophies.length === 0 ? (
-          <div style={{ padding: '2rem', textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: '10px' }}>
-            <Award size={48} color="rgba(255,255,255,0.1)" style={{ marginBottom: '1rem' }} />
-            <p style={{ color: 'var(--text-secondary)', margin: 0 }}>No trophies earned yet. Start crushing goals on the floor or in the AI Arena!</p>
+          <div className="p-xl text-center bg-black-alpha-20 rounded-xl">
+            <Award size={48} className="mb-md text-white opacity-20" />
+            <p className="text-secondary m-0">No trophies earned yet. Start crushing goals on the floor or in the AI Arena!</p>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+          <div className="target-grid">
             {trophies.map((trophy, idx) => (
-              <div key={idx} style={{ 
-                background: 'rgba(255,255,255,0.05)', 
-                border: '1px solid rgba(255,255,255,0.1)', 
-                borderRadius: '12px', 
-                padding: '1.25rem',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                textAlign: 'center',
-                gap: '0.75rem',
-                transition: 'transform 0.2s',
-                cursor: 'default'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'none'}
-              >
-                <div style={{ 
-                  width: '60px', 
-                  height: '60px', 
-                  borderRadius: '50%', 
-                  background: 'rgba(0,0,0,0.3)', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  boxShadow: '0 0 15px rgba(255, 230, 0, 0.1)'
-                }}>
+              <div key={idx} className="bg-white-alpha-05 border-glass-strong rounded-xl p-lg flex-column align-center text-center gap-md hover-lift cursor-default">
+                <div className="trophy-icon-wrapper flex-center">
                   {getIcon(trophy.icon)}
                 </div>
                 <div>
-                  <div style={{ fontWeight: 700, color: '#fff', fontSize: '0.9rem', marginBottom: '0.25rem' }}>{trophy.type}</div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--bby-yellow)' }}>{trophy.category}</div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>{trophy.date}</div>
+                  <div className="font-bold text-white text-sm mb-xs">{trophy.type}</div>
+                  <div className="text-xs text-bby-yellow">{trophy.category}</div>
+                  <div className="text-xs text-muted mt-sm">{trophy.date}</div>
                 </div>
               </div>
             ))}
@@ -73,16 +49,15 @@ export default function ProfileTrophiesTab({ employee, isGenerating, generatedPl
       </div>
 
       {/* Action Plans Section */}
-      <div className="glass-card" style={{ padding: '1.5rem', borderLeft: '4px solid var(--error)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <h4 style={{ fontSize: '1.1rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff' }}>
-            <AlertTriangle size={20} color="var(--error)" /> Active Action Plans (PIPs)
+      <div className="glass-card p-lg alert-card-danger">
+        <div className="flex-between align-center mb-lg">
+          <h4 className="text-lg m-0 flex-row align-center gap-sm text-white font-heading">
+            <AlertTriangle size={20} className="text-error" /> Active Action Plans (PIPs)
           </h4>
           <button 
-            className="btn btn-primary"
+            className="btn btn-primary btn-sm flex-row align-center gap-sm"
             onClick={onGenerate}
             disabled={isGenerating}
-            style={{ fontSize: '0.8rem', padding: '0.4rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
           >
             {isGenerating ? <Loader2 size={14} className="spin" /> : <Sparkles size={14} />}
             {isGenerating ? 'Generating...' : 'Auto-Generate AI Action Plan'}
@@ -90,57 +65,46 @@ export default function ProfileTrophiesTab({ employee, isGenerating, generatedPl
         </div>
 
         {generatedPlan && (
-          <div style={{ 
-            background: 'rgba(0, 70, 190, 0.1)', 
-            border: '1px solid rgba(0, 70, 190, 0.3)', 
-            borderRadius: '10px', 
-            padding: '1.25rem',
-            marginBottom: '1.5rem'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Sparkles size={18} color="var(--bby-blue)" />
-                <span style={{ fontWeight: 700, color: '#fff', fontSize: '1.1rem' }}>{generatedPlan.type}</span>
+          <div className="bg-bby-blue-alpha-10 border-glass rounded-xl p-lg mb-lg">
+            <div className="flex-between align-start mb-md">
+              <div className="flex-row align-center gap-sm">
+                <Sparkles size={18} className="text-bby-blue" />
+                <span className="font-bold text-white text-lg">{generatedPlan.type}</span>
               </div>
               <span className="tag-pill tag-pill-active">AI Generated Draft</span>
             </div>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem', fontStyle: 'italic' }}>
+            <p className="text-sm text-secondary mb-md italic">
               {generatedPlan.reason}
             </p>
-            <div className="markdown-body" style={{ fontSize: '0.9rem', color: '#ddd' }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(renderMarkdown(generatedPlan.planText)) }} />
-            <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-               <button className="btn btn-primary" style={{ fontSize: '0.8rem' }}>Save as Active PIP</button>
+            <div className="markdown-body text-sm text-primary" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(renderMarkdown(generatedPlan.planText)) }} />
+            <div className="mt-md flex-end gap-sm">
+               <button className="btn btn-primary btn-sm">Save as Active PIP</button>
             </div>
           </div>
         )}
 
         {!generatedPlan && actionPlans.length === 0 ? (
-          <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div className="p-md bg-success-alpha-15 rounded-lg flex-row align-center gap-sm">
             <CheckCircle size={20} color="var(--success)" />
-            <span style={{ color: 'var(--success)', fontWeight: 600 }}>No active performance improvement plans. Associate is in good standing.</span>
+            <span className="text-success font-semibold">No active performance improvement plans. Associate is in good standing.</span>
           </div>
         ) : !generatedPlan && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div className="flex-column gap-xl">
             {actionPlans.map((plan, idx) => (
-              <div key={idx} style={{ 
-                background: 'rgba(0,0,0,0.2)', 
-                border: '1px solid var(--border-glass)', 
-                borderRadius: '10px', 
-                padding: '1.25rem' 
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div key={idx} className="bg-black-alpha-20 border-glass rounded-xl p-lg">
+                <div className="flex-between align-start mb-sm">
+                  <div className="flex-row align-center gap-sm">
                     <FileText size={16} color="var(--error)" />
-                    <span style={{ fontWeight: 700, color: '#fff' }}>{plan.type}</span>
+                    <span className="font-bold text-white">{plan.type}</span>
                   </div>
-                  <span className="tag-pill" style={{ background: plan.status === 'Active' ? 'rgba(239,68,68,0.2)' : 'rgba(16,185,129,0.2)', color: plan.status === 'Active' ? 'var(--error)' : 'var(--success)' }}>
+                  <span className={`tag-pill ${plan.status === 'Active' ? 'bg-error-alpha-20 text-error' : 'bg-success-alpha-15 text-success'}`}>
                     {plan.status}
                   </span>
                 </div>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 1rem 0', lineHeight: 1.5 }}>
+                <p className="text-sm text-secondary m-0 mb-md leading-relaxed">
                   <strong>Trigger:</strong> {plan.reason}
                 </p>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                <div className="text-xs text-muted">
                   Generated on {plan.dateCreated}
                 </div>
               </div>

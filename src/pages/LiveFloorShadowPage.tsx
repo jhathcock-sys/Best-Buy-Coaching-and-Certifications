@@ -57,36 +57,36 @@ export default function LiveFloorShadow({
     apiKey
   });
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', height: '100%', minHeight: '600px' }}>
+    <div className="flex-column gap-2xl h-full min-h-600">
       
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="flex-between align-center">
         <div>
-          <h2 style={{ fontSize: '1.75rem', fontFamily: 'var(--font-heading)', color: 'var(--bby-blue)', display: 'flex', alignItems: 'center', gap: '0.75rem', margin: 0 }}>
+          <h2 className="text-1-75rem font-heading text-bby-blue flex-center gap-sm m-0 justify-start">
             <ShieldCheck size={28} /> Live Floor Shadow
           </h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '0.5rem' }}>
+          <p className="text-secondary text-sm mt-sm">
             Follow an advisor, log their behaviors, and auto-generate coaching notes.
           </p>
         </div>
-        <button onClick={onNavigate} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <button onClick={onNavigate} className="btn-secondary flex-center gap-sm">
           <Check size={16} /> Finish & Close
         </button>
       </div>
 
       {!isGenerating && coachingInsight ? (
-        <div className="glass-card" style={{ padding: '3rem', textAlign: 'center', animation: 'scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>
+        <div className="glass-card p-3rem text-center animate-scale-in">
           {/* Success Overlay Screen */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ background: 'rgba(0, 203, 110, 0.15)', color: 'var(--success-green)', padding: '1rem', borderRadius: '50%' }}>
+          <div className="flex-center mb-lg">
+            <div className="bg-success-alpha text-success p-md rounded-full">
               <Check size={48} />
             </div>
           </div>
-          <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Shadow Completed!</h3>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', maxWidth: '500px', margin: '0 auto 2rem auto' }}>
+          <h3 className="text-2xl mb-md">Shadow Completed!</h3>
+          <p className="text-secondary mb-2xl max-w-500 mx-auto">
             The AI has successfully compiled your observations into actionable coaching notes and logged them to the employee's history.
           </p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
+          <div className="flex-center gap-md">
             <button onClick={onNavigate} className="btn-primary">
               Return to Profile
             </button>
@@ -95,28 +95,26 @@ export default function LiveFloorShadow({
       ) : (
         <>
           {/* Stepper Wizard Indicator */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '1rem' }}>
+          <div className="flex-center gap-md mb-md">
             {[1, 2, 3].map((step) => (
-              <div key={step} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ 
-                  width: '32px', height: '32px', borderRadius: '50%', 
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: currentStep >= step ? 'var(--bby-blue)' : 'rgba(255, 255, 255, 0.1)',
-                  color: currentStep >= step ? '#000' : 'var(--text-secondary)',
-                  fontWeight: 'bold',
-                  transition: 'all 0.3s ease'
-                }}>
+              <div key={step} className="flex-center gap-md">
+                <div 
+                  className="w-8 h-8 rounded-full flex-center font-bold transition-normal"
+                  style={{ 
+                    background: currentStep >= step ? 'var(--bby-blue)' : 'rgba(255, 255, 255, 0.1)',
+                    color: currentStep >= step ? '#000' : 'var(--text-secondary)'
+                  }}>
                   {step < currentStep ? <Check size={16} /> : step}
                 </div>
                 {step < 3 && (
-                  <div style={{ width: '40px', height: '2px', background: currentStep > step ? 'var(--bby-blue)' : 'rgba(255, 255, 255, 0.1)' }} />
+                  <div className="w-10 h-0-5" style={{ background: currentStep > step ? 'var(--bby-blue)' : 'rgba(255, 255, 255, 0.1)' }} />
                 )}
               </div>
             ))}
           </div>
 
           {/* Wizard Content Panels */}
-          <div className="glass-card" style={{ padding: '2.5rem', minHeight: '350px' }}>
+          <div className="glass-card p-xl min-h-350">
             
             {/* Step 1: Selection */}
             {currentStep === 1 && (
@@ -206,35 +204,32 @@ export default function LiveFloorShadow({
           </div>
 
           {/* Stepper Navigation Buttons */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
+          <div className="flex-between align-center mt-auto">
             <button 
-              className="btn-secondary" 
+              className="btn-secondary flex-center gap-sm" 
               onClick={() => setCurrentStep(prev => Math.max(1, prev - 1))}
               disabled={currentStep === 1 || isGenerating}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
             >
               <ChevronLeft size={16} /> Back
             </button>
 
             {currentStep < 3 ? (
               <button 
-                className="btn-primary" 
+                className="btn-primary flex-center gap-sm" 
                 onClick={() => setCurrentStep(prev => Math.min(3, prev + 1))}
                 disabled={currentStep === 1 && !selectedEmpId}
-                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
               >
                 Next <ChevronRight size={16} />
               </button>
             ) : (
               <button 
-                className="btn-primary" 
+                className="btn-primary flex-center gap-sm" 
                 onClick={handleComplete}
                 disabled={isGenerating}
-                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
               >
                 {isGenerating ? (
                   <>
-                    <div className="loading-spinner" style={{ width: '16px', height: '16px', borderWidth: '2px' }} />
+                    <div className="loading-spinner w-4 h-4 border-2" />
                     Generating...
                   </>
                 ) : (

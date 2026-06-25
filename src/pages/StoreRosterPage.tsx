@@ -88,46 +88,26 @@ export default function StoreRoster({
       {/* Header */}
       <div className="flex-between flex-wrap gap-lg w-full">
         <div>
-          <h1 className="flex-center" style={{ fontSize: '2.25rem', marginBottom: '0.25rem', gap: '0.75rem', justifyContent: 'flex-start' }}>
+          <h1 className="flex-row align-center justify-start text-3xl mb-xs gap-sm m-0">
             Store Performance Roster
           </h1>
-          <p style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-secondary">
             Review performance logs and hours for the selected period. Audited dynamically against department-specific goals.
           </p>
         </div>
 
         {/* Period Selector */}
         {rosterHistory && Object.keys(rosterHistory).length > 0 && (
-          <div className="flex-center gap-sm" style={{ 
-            background: 'rgba(16, 24, 48, 0.4)', 
-            border: '1px solid var(--border-glass)', 
-            padding: '0.5rem 1.25rem', 
-            borderRadius: '16px',
-            boxShadow: 'var(--shadow-inset)'
-          }}>
+          <div className="flex-center gap-sm period-selector-card">
             <Clock size={16} color="var(--bby-yellow)" />
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Active Period:</span>
+            <span className="text-sm text-secondary font-semibold">Active Period:</span>
             <select 
               value={activePeriod} 
               onChange={(e) => onChangePeriod && onChangePeriod(e.target.value)}
-              className="form-control"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#fff',
-                fontWeight: 700,
-                fontSize: '0.95rem',
-                cursor: 'pointer',
-                outline: 'none',
-                padding: '0 1.5rem 0 0',
-                width: 'auto',
-                height: 'auto',
-                margin: 0,
-                boxShadow: 'none'
-              }}
+              className="select-minimal"
             >
               {Object.keys(rosterHistory || {}).map(p => (
-                <option key={p} value={p} style={{ background: '#0b0f19', color: '#fff' }}>{p}</option>
+                <option key={p} value={p}>{p}</option>
               ))}
             </select>
           </div>
@@ -135,54 +115,21 @@ export default function StoreRoster({
       </div>
 
       {/* Subview Tabs bar */}
-      <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--border-glass)', paddingBottom: '0.25rem' }}>
+      <div className="flex-row gap-sm border-bottom pb-xs">
         <button
-          className="btn"
-          style={{
-            background: 'transparent',
-            border: 'none',
-            borderBottom: activeSubView === 'list' ? '2.5px solid var(--bby-blue)' : 'none',
-            color: activeSubView === 'list' ? '#fff' : 'var(--text-muted)',
-            borderRadius: 0,
-            padding: '0.75rem 1.25rem',
-            fontWeight: 700,
-            fontSize: '0.85rem',
-            cursor: 'pointer'
-          }}
+          className={`subview-tab-btn ${activeSubView === 'list' ? 'active' : ''}`}
           onClick={() => setActiveSubView('list')}
         >
           Performance Ledger
         </button>
         <button
-          className="btn"
-          style={{
-            background: 'transparent',
-            border: 'none',
-            borderBottom: activeSubView === 'audit' ? '2.5px solid var(--bby-blue)' : 'none',
-            color: activeSubView === 'audit' ? '#fff' : 'var(--text-muted)',
-            borderRadius: 0,
-            padding: '0.75rem 1.25rem',
-            fontWeight: 700,
-            fontSize: '0.85rem',
-            cursor: 'pointer'
-          }}
+          className={`subview-tab-btn ${activeSubView === 'audit' ? 'active' : ''}`}
           onClick={() => setActiveSubView('audit')}
         >
           AI Metrics Auditor
         </button>
         <button
-          className="btn"
-          style={{
-            background: 'transparent',
-            border: 'none',
-            borderBottom: activeSubView === 'rentsDue' ? '2.5px solid var(--bby-blue)' : 'none',
-            color: activeSubView === 'rentsDue' ? '#fff' : 'var(--text-muted)',
-            borderRadius: 0,
-            padding: '0.75rem 1.25rem',
-            fontWeight: 700,
-            fontSize: '0.85rem',
-            cursor: 'pointer'
-          }}
+          className={`subview-tab-btn ${activeSubView === 'rentsDue' ? 'active' : ''}`}
           onClick={() => setActiveSubView('rentsDue')}
         >
           Rents Due Auditor
@@ -234,7 +181,7 @@ export default function StoreRoster({
           />
 
           {/* Roster Table Card */}
-          <div className="glass-card p-0" style={{ overflow: 'hidden' }}>
+          <div className="glass-card p-0 overflow-hidden">
             {isDesktop ? (
                 <StoreRosterTable
                   filteredRoster={filteredRoster}
@@ -261,26 +208,20 @@ export default function StoreRoster({
           </div>
 
           {/* Department Targets Legend */}
-          <div className="glass-card" style={{ padding: '1.25rem', marginTop: '1rem' }}>
-            <h3 style={{ fontSize: '1rem', color: '#fff', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700 }}>
+          <div className="glass-card p-lg mt-md">
+            <h3 className="text-base text-white mb-md flex-row align-center gap-sm font-bold">
               <AlertTriangle size={16} color="var(--bby-blue)" /> Department Standards
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+            <div className="target-grid">
               {Object.entries(deptGoals as Record<string, DeptGoal>).map(([dept, targets]) => (
                 <div 
                   key={dept} 
-                  style={{ 
-                    padding: '1rem', 
-                    background: 'rgba(255,255,255,0.02)', 
-                    border: '1px solid var(--border-glass)', 
-                    borderRadius: '12px',
-                    fontSize: '0.775rem'
-                  }}
+                  className="target-card"
                 >
-                  <h4 style={{ fontWeight: 700, color: '#fff', marginBottom: '0.5rem', fontSize: '0.85rem', borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '0.25rem' }}>
+                  <h4 className="font-bold text-white mb-sm text-sm border-bottom pb-xs">
                     {dept}
                   </h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', color: 'var(--text-secondary)' }}>
+                  <div className="flex-column gap-xs text-secondary">
                     <div>
                       <strong>Memberships:</strong> {targets.membershipsType === 'Hours' ? `1 in ${targets.memberships} hrs` : targets.membershipsType === 'Dollars' ? `1 in $${(targets.memberships / 1000).toFixed(0)}k sales` : `${targets.memberships} goal`}
                     </div>

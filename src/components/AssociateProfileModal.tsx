@@ -55,18 +55,10 @@ export default function AssociateProfileModal({
   if (!isOpen || !employee) return null;
 
   return (
-    <div className="modal-overlay" style={{ zIndex: 1050 }} onClick={onClose}>
+    <div className="modal-overlay z-1050 cursor-pointer" onClick={onClose}>
       <div 
-        className="modal-content" 
-        onClick={(e: any) => e.stopPropagation()} 
-        style={{ 
-          border: '2px solid var(--bby-blue)', 
-          maxWidth: '750px', 
-          width: '95%',
-          background: '#0c0f18',
-          padding: 0,
-          overflow: 'hidden'
-        }}
+        className="modal-content cursor-default overflow-hidden p-0" 
+        onClick={(e: any) => e.stopPropagation()}
       >
         {/* Modal Header */}
         <AssociateProfileHeader 
@@ -77,112 +69,33 @@ export default function AssociateProfileModal({
         />
 
         {/* Tab Selection Row */}
-        <div style={{ 
-          display: 'flex', 
-          background: 'rgba(255, 255, 255, 0.02)', 
-          borderBottom: '1px solid var(--border-glass)' 
-        }}>
+        <div className="flex-row bg-white-alpha-10 border-bottom">
           <button 
             className={`tab-btn ${activeTab === 'trends' ? 'active' : ''}`}
-            style={{ 
-              flex: 1, 
-              padding: '0.85rem', 
-              background: 'transparent', 
-              border: 'none', 
-              color: activeTab === 'trends' ? 'var(--bby-blue)' : 'var(--text-muted)',
-              borderBottom: activeTab === 'trends' ? '3px solid var(--bby-blue)' : 'none',
-              fontWeight: 700, 
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.4rem'
-            }}
             onClick={() => setActiveTab('trends')}
           >
             <TrendingUp size={16} /> Performance Trends
           </button>
           <button 
             className={`tab-btn ${activeTab === 'coaching' ? 'active' : ''}`}
-            style={{ 
-              flex: 1, 
-              padding: '0.85rem', 
-              background: 'transparent', 
-              border: 'none', 
-              color: activeTab === 'coaching' ? 'var(--bby-blue)' : 'var(--text-muted)',
-              borderBottom: activeTab === 'coaching' ? '3px solid var(--bby-blue)' : 'none',
-              fontWeight: 700, 
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.4rem'
-            }}
             onClick={() => setActiveTab('coaching')}
           >
             <ClipboardList size={16} /> Coaching History ({associateLogs.length})
           </button>
           <button 
             className={`tab-btn ${activeTab === 'commitments' ? 'active' : ''}`}
-            style={{ 
-              flex: 1, 
-              padding: '0.85rem', 
-              background: 'transparent', 
-              border: 'none', 
-              color: activeTab === 'commitments' ? 'var(--bby-blue)' : 'var(--text-muted)',
-              borderBottom: activeTab === 'commitments' ? '3px solid var(--bby-blue)' : 'none',
-              fontWeight: 700, 
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.4rem'
-            }}
             onClick={() => setActiveTab('commitments')}
           >
             <Calendar size={16} /> Active Commitments ({associateTasks.filter(t => t.status !== 'completed').length})
           </button>
           <button 
             className={`tab-btn ${activeTab === 'oneOnOne' ? 'active' : ''}`}
-            style={{ 
-              flex: 1, 
-              padding: '0.85rem', 
-              background: 'transparent', 
-              border: 'none', 
-              color: activeTab === 'oneOnOne' ? 'var(--bby-blue)' : 'var(--text-muted)',
-              borderBottom: activeTab === 'oneOnOne' ? '3px solid var(--bby-blue)' : 'none',
-              fontWeight: 700, 
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.4rem'
-            }}
             onClick={() => setActiveTab('oneOnOne')}
           >
             <FileText size={16} /> 1-on-1 Appraisals
           </button>
           <button 
             className={`tab-btn ${activeTab === 'trophies' ? 'active' : ''}`}
-            style={{ 
-              flex: 1, 
-              padding: '0.85rem', 
-              background: 'transparent', 
-              border: 'none', 
-              color: activeTab === 'trophies' ? 'var(--bby-blue)' : 'var(--text-muted)',
-              borderBottom: activeTab === 'trophies' ? '3px solid var(--bby-blue)' : 'none',
-              fontWeight: 700, 
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.4rem'
-            }}
             onClick={() => setActiveTab('trophies')}
           >
             <Award size={16} /> Trophies & PIPs
@@ -190,7 +103,7 @@ export default function AssociateProfileModal({
         </div>
 
         {/* Modal Body content scroll area */}
-        <div style={{ padding: '1.5rem', maxHeight: '65vh', overflowY: 'auto' }}>
+        <div className="p-xl max-h-65vh overflow-y-auto">
           
           {/* TAB 1: Performance Trends */}
           {activeTab === 'trends' && (

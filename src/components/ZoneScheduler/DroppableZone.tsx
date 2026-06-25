@@ -28,7 +28,7 @@ export default function DroppableZone({ id, title, children, activeCount }: Drop
         <h4 className="zone-card-title">{title}</h4>
         <span className="tag-pill zone-tag">{activeCount} active</span>
       </div>
-      <div className="zone-emp-list" style={{ minHeight: '100px' }}>
+      <div className="zone-emp-list min-h-100">
         {children}
         {activeCount === 0 && !isOver && (
           <div className="zone-unstaffed">Zone unstaffed</div>

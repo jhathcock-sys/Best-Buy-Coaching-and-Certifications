@@ -65,39 +65,29 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
   ];
 
   return (
-    <div className="p-xl h-full" data-testid="advisor-dashboard-container" style={{ overflowY: 'auto' }}>
+    <div className="p-xl h-full overflow-y-auto" data-testid="advisor-dashboard-container">
       <div className="flex-between align-center mb-xl">
         <div>
-          <h1 className="flex-center gap-md" style={{ fontSize: '2.5rem', fontWeight: 800, margin: '0 0 0.5rem 0', justifyContent: 'flex-start' }}>
+          <h1 className="flex-center gap-md text-2-5rem font-extrabold m-0 mb-sm justify-start">
             Welcome back, {employee.name.split(' ')[0]}!
-            <span className="flex-center gap-sm" style={{ fontSize: '1rem', background: 'var(--bby-yellow)', color: '#000', padding: '0.2rem 0.6rem', borderRadius: '12px', fontWeight: 900 }}>
+            <span className="flex-center gap-sm text-base bg-bby-yellow text-black px-md py-xs rounded-xl font-black">
               <Star size={16} /> Level {currentLevel}
             </span>
           </h1>
-          <p style={{ color: 'var(--text-secondary)', margin: '0 0 1rem 0', fontSize: '1.1rem' }}>
+          <p className="text-secondary m-0 mb-md text-1-1rem">
             {employee.dept} Advisor • ID: {employee.id || employee.employeeId || 'N/A'}
           </p>
-          <div className="flex-center gap-md" style={{ background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '20px', width: 'fit-content' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>XP: {totalXP}</span>
-            <div style={{ width: '150px', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
-              <div style={{ width: `${(xpProgress / 500) * 100}%`, height: '100%', background: 'var(--bby-blue)' }} />
+          <div className="flex-center gap-md bg-white-alpha-05 py-sm px-md rounded-20 w-fit">
+            <span className="text-sm font-bold text-white">XP: {totalXP}</span>
+            <div className="w-150px h-8px bg-white-alpha-10 rounded-sm overflow-hidden">
+              <div className="h-full bg-bby-blue" style={{ width: `${(xpProgress / 500) * 100}%` }} />
             </div>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{xpProgress}/500 to Next Level</span>
+            <span className="text-xs text-muted">{xpProgress}/500 to Next Level</span>
           </div>
         </div>
         <button
           onClick={() => onNavigate('roleplay')}
-          className="flex-center gap-sm"
-          style={{
-            background: 'var(--bby-blue)',
-            color: '#fff',
-            border: 'none',
-            padding: '0.75rem 1.5rem',
-            borderRadius: '20px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            boxShadow: '0 4px 15px rgba(0, 70, 190, 0.3)'
-          }}
+          className="btn-primary flex-center gap-sm px-lg py-md rounded-20 font-semibold border-none cursor-pointer"
         >
           <Target size={18} />
           Practice in AI Simulator
@@ -105,7 +95,7 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
       </div>
 
       <div className="mb-xl">
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <h2 className="text-xl font-bold mb-md flex-center gap-sm justify-start">
           <TrendingUp size={20} color="var(--bby-yellow)" />
           My Performance ({activePeriod})
         </h2>
@@ -130,55 +120,55 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <div className="grid-cols-2-1 gap-2xl">
+        <div className="flex-column gap-2xl">
           
           {/* Personal Trophies */}
-          <div style={{ background: 'var(--surface-1)', borderRadius: '20px', border: '1px solid var(--border-glass)', padding: '1.5rem' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className="bg-surface rounded-20 border-glass p-lg">
+            <h2 className="text-xl font-bold mb-md flex-center gap-sm justify-start">
               <Award size={20} color="#8b5cf6" />
               My Trophy Case
             </h2>
             {(!employee.trophies || employee.trophies.length === 0) ? (
-              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+              <div className="p-2xl text-center text-muted">
                 No trophies yet. Keep practicing in the AI Simulator!
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem' }}>
+              <div className="grid-auto-fill-150 gap-md">
                 {employee.trophies.map((trophy: any, idx: number) => (
-                  <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
-                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}>
+                  <div key={idx} className="bg-white-alpha-02 p-md rounded-xl border-white-alpha-05 text-center">
+                    <div className="flex-center mb-sm">
                       {getTrophyIcon(trophy.icon)}
                     </div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff', marginBottom: '0.25rem' }}>{trophy.type}</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{trophy.date}</div>
+                    <div className="text-sm font-semibold text-white mb-xs">{trophy.type}</div>
+                    <div className="text-xs text-secondary">{trophy.date}</div>
                   </div>
                 ))}
               </div>
             )}
           </div>
 
-          <div style={{ background: 'var(--surface-1)', borderRadius: '20px', border: '1px solid var(--border-glass)', padding: '1.5rem' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className="bg-surface rounded-20 border-glass p-lg">
+          <h2 className="text-xl font-bold mb-md flex-center gap-sm justify-start">
             <Calendar size={20} color="#10b981" />
             My Recent Feedback & GROW Logs
           </h2>
           {myLogs.length === 0 ? (
-            <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+            <div className="p-3rem text-center text-muted">
               No recent coaching logs found.
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="flex-column gap-md">
               {myLogs.map((log: any, idx: number) => (
-                <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', padding: '1.25rem', borderRadius: '15px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                    <span style={{ fontWeight: 600, color: 'var(--bby-yellow)' }}>{log.discFocus}</span>
-                    <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                <div key={idx} className="bg-white-alpha-02 p-lg rounded-15 border-white-alpha-05">
+                  <div className="flex-between mb-sm">
+                    <span className="font-semibold text-bby-yellow">{log.discFocus}</span>
+                    <span className="text-sm text-secondary">
                       {log.date} by {log.coachName}
                     </span>
                   </div>
                   <div 
-                    style={{ fontSize: '0.9rem', color: '#fff', lineHeight: 1.5 }}
+                    className="text-sm text-white leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(log.coachingPlanMd ? log.coachingPlanMd.substring(0, 300) + '...' : 'Review completed.') }}
                   />
                 </div>
@@ -189,37 +179,31 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
         </div>
         
         {/* Top 3 Leaderboard Column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          <div style={{ background: 'linear-gradient(145deg, rgba(139, 92, 246, 0.1), transparent)', borderRadius: '20px', border: '1px solid rgba(139, 92, 246, 0.2)', padding: '1.5rem' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff' }}>
+        <div className="flex-column gap-2xl">
+          <div className="bg-purple-alpha rounded-20 border-purple-alpha p-lg">
+            <h2 className="text-xl font-bold mb-lg flex-center gap-sm justify-start text-white">
               <Trophy size={20} color="var(--bby-yellow)" />
               Top 3 Store Champions
             </h2>
             {top3Champions.length === 0 ? (
-              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+              <div className="p-2xl text-center text-muted">
                 No champions this period. Be the first!
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className="flex-column gap-md">
                 {top3Champions.map((champ, idx) => (
-                  <div key={champ.id} style={{ 
-                    display: 'flex', alignItems: 'center', gap: '1rem', 
+                  <div key={champ.id} className="flex-center gap-md p-md rounded-xl justify-start" style={{ 
                     background: idx === 0 ? 'rgba(255, 230, 0, 0.1)' : 'rgba(255,255,255,0.03)', 
-                    padding: '1rem', 
-                    borderRadius: '12px',
                     border: idx === 0 ? '1px solid rgba(255, 230, 0, 0.3)' : '1px solid rgba(255,255,255,0.05)'
                   }}>
-                    <div style={{ 
-                      width: '32px', height: '32px', borderRadius: '50%', 
-                      background: idx === 0 ? 'var(--bby-yellow)' : idx === 1 ? '#e2e8f0' : '#cd7f32',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#000', fontWeight: 'bold'
+                    <div className="w-8 h-8 rounded-full flex-center font-bold text-black" style={{ 
+                      background: idx === 0 ? 'var(--bby-yellow)' : idx === 1 ? '#e2e8f0' : '#cd7f32'
                     }}>
                       {idx + 1}
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 600, color: '#fff', fontSize: '0.95rem' }}>{champ.name}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{champ.trophies.length} Trophies</div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-white text-base">{champ.name}</div>
+                      <div className="text-xs text-secondary">{champ.trophies.length} Trophies</div>
                     </div>
                     {idx === 0 && <Medal size={24} color="var(--bby-yellow)" />}
                   </div>
@@ -229,35 +213,29 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
           </div>
 
           {/* Daily Quests Panel */}
-          <div style={{ background: 'linear-gradient(145deg, rgba(6, 182, 212, 0.1), transparent)', borderRadius: '20px', border: '1px solid rgba(6, 182, 212, 0.2)', padding: '1.5rem' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff' }}>
+          <div className="bg-cyan-alpha rounded-20 border-cyan-alpha p-lg">
+            <h2 className="text-xl font-bold mb-lg flex-center gap-sm justify-start text-white">
               <Zap size={20} color="var(--info)" />
               Daily Quests
             </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="flex-column gap-md">
               {dailyQuests.map((quest, idx) => (
-                <div key={idx} style={{ 
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-                  background: 'rgba(255,255,255,0.03)', 
-                  padding: '1rem', 
-                  borderRadius: '12px',
+                <div key={idx} className="flex-between align-center bg-white-alpha-02 p-md rounded-xl" style={{ 
                   border: quest.completed ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(255,255,255,0.05)',
                   opacity: quest.completed ? 0.7 : 1
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{ 
-                      width: '24px', height: '24px', borderRadius: '50%', 
+                  <div className="flex-center gap-md">
+                    <div className="w-6 h-6 rounded-full flex-center" style={{ 
                       border: quest.completed ? 'none' : '2px solid var(--text-muted)',
-                      background: quest.completed ? 'var(--success)' : 'transparent',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center'
+                      background: quest.completed ? 'var(--success)' : 'transparent'
                     }}>
                       {quest.completed && <CheckCircle size={16} color="#fff" />}
                     </div>
-                    <div style={{ fontWeight: 500, color: quest.completed ? 'var(--text-secondary)' : '#fff', textDecoration: quest.completed ? 'line-through' : 'none' }}>
+                    <div className={`font-medium ${quest.completed ? 'text-secondary line-through' : 'text-white'}`}>
                       {quest.title}
                     </div>
                   </div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--bby-blue)' }}>
+                  <div className="text-sm font-extrabold text-bby-blue">
                     +{quest.xp} XP
                   </div>
                 </div>

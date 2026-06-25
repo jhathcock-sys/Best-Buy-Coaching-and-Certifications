@@ -54,10 +54,10 @@ export default function ZoneGrid({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="zone-grid-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '1rem', minHeight: '500px' }}>
+      <div className="zone-grid-layout grid-cols-1-3 gap-md min-h-500">
         
         {/* Unassigned Pool (Sidebar) */}
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div className="flex-column">
           <DroppableZone id="unassigned" title="Unassigned (Roster)" activeCount={safeUnassignedEmps.length}>
             {safeUnassignedEmps.map((emp: any) => (
               <DraggableAssociate 
@@ -71,12 +71,7 @@ export default function ZoneGrid({
         </div>
 
         {/* Main Store Map */}
-        <div className="store-map-grid" style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
-          gridTemplateRows: 'auto',
-          gap: '1rem'
-        }}>
+        <div className="store-map-grid grid-cols-2 grid-rows-auto gap-md">
           {zones.map(zone => {
             const zoneEmps = safeZoneAssignments[zone] || [];
             

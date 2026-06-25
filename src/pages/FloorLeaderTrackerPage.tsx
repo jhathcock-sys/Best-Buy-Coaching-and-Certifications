@@ -72,8 +72,8 @@ export default function FloorLeaderTracker() {
     <div className="flex-column gap-xl">
       {/* Header Panel */}
       <div>
-        <h1 style={{ fontSize: '2.25rem', marginBottom: '0.5rem' }}>Floor Leader Tracker</h1>
-        <p style={{ color: 'var(--text-secondary)' }}>
+        <h1 className="text-3xl mb-sm">Floor Leader Tracker</h1>
+        <p className="text-secondary">
           Track hourly credit cards (Apps) and memberships (PMs) targets in real-time during your floor-leading shift.
         </p>
       </div>
@@ -134,7 +134,7 @@ export default function FloorLeaderTracker() {
           {leaderTab === 'scheduler' && (
             /* Interactive Floor Zone & Break Scheduler Tab content */
             <div className="flex-column gap-xl">
-              <div className="flex-end" style={{ marginBottom: '-1rem' }}>
+              <div className="flex-end mb-neg-md">
                 <button 
                   className="btn btn-primary flex-center gap-sm"
                   onClick={() => setIsImportModalOpen(true)}

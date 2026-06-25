@@ -88,10 +88,10 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e: React.MouseEvent) => e.stopPropagation()} style={{ border: '2px solid var(--bby-blue)', maxWidth: '650px', width: '90%' }}>
+    <div className="modal-overlay cursor-pointer" onClick={onClose}>
+      <div className="modal-content cursor-default" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
         <div className="modal-header">
-          <h3 style={{ fontSize: '1.25rem', color: '#fff', fontFamily: 'var(--font-heading)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h3 className="text-xl text-white font-heading m-0 flex-row align-center gap-sm">
             <Users size={20} color="var(--bby-yellow)" /> Add New Associate to Roster
           </h3>
           <button 
@@ -103,37 +103,34 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
           </button>
         </div>
         
-        <form onSubmit={handleSubmit} className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxHeight: '80vh', overflowY: 'auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+        <form onSubmit={handleSubmit} className="modal-body flex-column gap-lg max-h-80vh overflow-y-auto">
+          <div className="form-grid">
             <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>Associate Name:</label>
+              <label className="form-label">Associate Name:</label>
               <input 
                 type="text" 
-                className="form-control" 
+                className="form-control form-control-sm" 
                 placeholder="e.g. Sarah Jennings"
-                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                 value={form.name}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, name: e.target.value })}
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>Employee Number (Optional):</label>
+              <label className="form-label">Employee Number (Optional):</label>
               <input 
                 type="text" 
-                className="form-control" 
+                className="form-control form-control-sm" 
                 placeholder="e.g. A1234567"
-                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                 value={form.employeeNumber}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, employeeNumber: e.target.value })}
               />
             </div>
             
             <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>Department:</label>
+              <label className="form-label">Department:</label>
               <select 
-                className="form-control"
-                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
+                className="form-control form-control-sm"
                 value={form.dept}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, dept: e.target.value })}
               >
@@ -144,86 +141,79 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
             </div>
             
             <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>Monthly Hours Worked:</label>
+              <label className="form-label">Monthly Hours Worked:</label>
               <input 
                 type="number" 
                 step="0.1"
-                className="form-control" 
+                className="form-control form-control-sm" 
                 placeholder="e.g. 45.5"
-                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                 value={form.hours}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, hours: e.target.value })}
               />
             </div>
             
             <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>Memberships Attach:</label>
+              <label className="form-label">Memberships Attach:</label>
               <input 
                 type="number" 
-                className="form-control" 
+                className="form-control form-control-sm" 
                 placeholder="e.g. 6"
-                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                 value={form.memberships}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, memberships: e.target.value })}
               />
             </div>
             
             <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>Credit Card Apps:</label>
+              <label className="form-label">Credit Card Apps:</label>
               <input 
                 type="number" 
-                className="form-control" 
+                className="form-control form-control-sm" 
                 placeholder="e.g. 3"
-                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                 value={form.creditCards}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, creditCards: e.target.value })}
               />
             </div>
             
             <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>GSP/Warranty Attach %:</label>
+              <label className="form-label">GSP/Warranty Attach %:</label>
               <input 
                 type="number" 
                 step="0.1"
-                className="form-control" 
+                className="form-control form-control-sm" 
                 placeholder="e.g. 10.5"
-                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                 value={form.warranty}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, warranty: e.target.value })}
               />
             </div>
             
             <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>5 Star Surveys:</label>
+              <label className="form-label">5 Star Surveys:</label>
               <input 
                 type="text" 
-                className="form-control" 
+                className="form-control form-control-sm" 
                 placeholder="e.g. 4 or Failing"
-                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                 value={form.surveys}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, surveys: e.target.value })}
               />
             </div>
             
             <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>RPH ($ index):</label>
+              <label className="form-label">RPH ($ index):</label>
               <input 
                 type="number" 
-                className="form-control" 
+                className="form-control form-control-sm" 
                 placeholder="e.g. 950"
-                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                 value={form.rph}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, rph: e.target.value })}
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.8rem' }}>Total Transactions:</label>
+              <label className="form-label">Total Transactions:</label>
               <input 
                 type="number" 
-                className="form-control" 
+                className="form-control form-control-sm" 
                 placeholder="e.g. 150"
-                style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                 value={form.transactions}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, transactions: e.target.value })}
               />
@@ -232,13 +222,12 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
             {/* Conditional Department Metrics */}
             {(form.dept === 'Computing' || form.dept === 'Home Theatre') && (
               <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.8rem' }}>Basket Size ($):</label>
+                <label className="form-label">Basket Size ($):</label>
                 <input 
                   type="number" 
                   step="0.01"
-                  className="form-control" 
+                  className="form-control form-control-sm" 
                   placeholder="e.g. 165.50"
-                  style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                   value={form.basket}
                   onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, basket: e.target.value })}
                 />
@@ -247,13 +236,12 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
             
             {form.dept === 'Computing' && (
               <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.8rem' }}>Microsoft 365 Attach %:</label>
+                <label className="form-label">Microsoft 365 Attach %:</label>
                 <input 
                   type="number" 
                   step="0.1"
-                  className="form-control" 
+                  className="form-control form-control-sm" 
                   placeholder="e.g. 62.5"
-                  style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                   value={form.m365}
                   onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, m365: e.target.value })}
                 />
@@ -262,13 +250,12 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
 
             {form.dept === 'Home Theatre' && (
               <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.8rem' }}>Audio Attach %:</label>
+                <label className="form-label">Audio Attach %:</label>
                 <input 
                   type="number" 
                   step="0.1"
-                  className="form-control" 
+                  className="form-control form-control-sm" 
                   placeholder="e.g. 38.0"
-                  style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
                   value={form.audio}
                   onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, audio: e.target.value })}
                 />
@@ -277,31 +264,30 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
           </div>
           
           <div className="form-group">
-            <label className="form-label" style={{ fontSize: '0.8rem' }}>Opportunity Gap Description (or None):</label>
+            <label className="form-label">Opportunity Gap Description (or None):</label>
             <input 
               type="text" 
-              className="form-control" 
+              className="form-control form-control-sm" 
               placeholder="e.g. GSP Attach (4.0% vs 12.0%) or None"
-              style={{ padding: '0.55rem 1rem', fontSize: '0.85rem' }}
               value={form.gap}
               onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, gap: e.target.value })}
             />
           </div>
 
-          <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
+          <div className="form-group flex-row align-center gap-sm mt-sm">
             <input 
               type="checkbox" 
               id="add-focus5"
-              style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+              className="w-4 h-4 cursor-pointer"
               checked={form.focus5}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, focus5: e.target.checked })}
             />
-            <label htmlFor="add-focus5" style={{ fontSize: '0.85rem', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>
+            <label htmlFor="add-focus5" className="text-sm text-white cursor-pointer font-semibold">
               🔥 Add to Focus 5 List (Supervisor Observation Plan)
             </label>
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
+          <div className="flex-row gap-md justify-end mt-sm pt-md border-top">
             <button type="button" className="btn btn-secondary btn-sm" onClick={onClose}>
               Cancel
             </button>

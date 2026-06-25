@@ -195,27 +195,25 @@ export default function CoachSimulator({
 
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+    <div className="flex-column gap-2xl">
       {/* Platform Title */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="flex-between flex-wrap gap-md">
         <div>
-          <h1 style={{ fontSize: '2.25rem', marginBottom: '0.25rem' }}>Leader Coaching Portal</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>Practice roleplaying coaching conversations or document structured employee feedback logs.</p>
+          <h1 className="text-3xl mb-xs">Leader Coaching Portal</h1>
+          <p className="text-secondary">Practice roleplaying coaching conversations or document structured employee feedback logs.</p>
         </div>
 
         {/* Tab Switcher */}
         {!aiCoaching.sessionActive && (
-          <div style={{ display: 'flex', gap: '0.25rem', background: 'rgba(255,255,255,0.02)', padding: '0.35rem', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
+          <div className="flex-row gap-xs bg-white-alpha-02 p-xs rounded-xl border-glass">
             <button 
-              className={`btn ${activeTab === 'sim' ? 'btn-primary' : 'btn-secondary'}`} 
-              style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', boxShadow: 'none' }}
+              className={`btn btn-sm shadow-none ${activeTab === 'sim' ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => setActiveTab('sim')}
             >
               GROW Practice Simulator
             </button>
             <button 
-              className={`btn ${activeTab === 'builder' ? 'btn-primary' : 'btn-secondary'}`} 
-              style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', boxShadow: 'none' }}
+              className={`btn btn-sm shadow-none ${activeTab === 'builder' ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => setActiveTab('builder')}
             >
               4-Section Log Builder

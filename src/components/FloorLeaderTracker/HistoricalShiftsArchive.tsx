@@ -5,58 +5,57 @@ export default function HistoricalShiftsArchive({ shifts, onDeleteShift }: any) 
   return (
     <>
       {/* HISTORICAL SHIFTS LIST */}
-      <div className="glass-card" style={{ padding: '2rem' }}>
-        <h3 style={{ fontSize: '1.25rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      <div className="glass-card p-2xl">
+        <h3 className="text-xl mb-xl flex-center gap-sm justify-start">
           <Clock size={20} color="var(--info)" /> Past Floor Leading Shifts Archive
         </h3>
         
         {shifts.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '3rem', border: '1.5px dashed var(--border-glass)', borderRadius: '16px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+          <div className="text-center p-3rem border-1-5-dashed-glass rounded-16 text-muted text-sm">
             No archived floor-leading shifts logged yet. Complete your first shift above.
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left text-sm">
               <thead>
-                <tr style={{ borderBottom: '1px solid var(--border-glass)', color: 'var(--text-secondary)' }}>
-                  <th style={{ padding: '0.75rem 1rem' }}>DATE</th>
-                  <th style={{ padding: '0.75rem 1rem' }}>FLOOR LEADER</th>
-                  <th style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>TYPE</th>
-                  <th style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>HOURS</th>
-                  <th style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>TOTAL REVENUE</th>
-                  <th style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>TOTAL PMs</th>
-                  <th style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>TOTAL APPs</th>
-                  <th style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>ON-TRACK RATE</th>
-                  <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>ACTION</th>
+                <tr className="border-b-glass text-secondary">
+                  <th className="py-md-sm px-md">DATE</th>
+                  <th className="py-md-sm px-md">FLOOR LEADER</th>
+                  <th className="py-md-sm px-md text-center">TYPE</th>
+                  <th className="py-md-sm px-md text-center">HOURS</th>
+                  <th className="py-md-sm px-md text-center">TOTAL REVENUE</th>
+                  <th className="py-md-sm px-md text-center">TOTAL PMs</th>
+                  <th className="py-md-sm px-md text-center">TOTAL APPs</th>
+                  <th className="py-md-sm px-md text-center">ON-TRACK RATE</th>
+                  <th className="py-md-sm px-md text-right">ACTION</th>
                 </tr>
               </thead>
               <tbody>
-                {shifts.map((shift) => (
-                  <tr key={shift.id} style={{ borderBottom: '1px solid var(--border-glass)', color: 'var(--text-secondary)' }}>
-                    <td style={{ padding: '1rem', color: '#fff', fontWeight: 600 }}>{shift.date}</td>
-                    <td style={{ padding: '1rem', color: '#fff' }}>{shift.leaderName}</td>
-                    <td style={{ padding: '1rem', textAlign: 'center' }}>
+                {shifts.map((shift: any) => (
+                  <tr key={shift.id} className="border-b-glass text-secondary">
+                    <td className="p-md text-white font-semibold">{shift.date}</td>
+                    <td className="p-md text-white">{shift.leaderName}</td>
+                    <td className="p-md text-center">
                       {shift.isWeekend ? (
-                        <span style={{ fontSize: '0.7rem', color: 'var(--bby-yellow)', background: 'rgba(253, 216, 53, 0.05)', padding: '0.2rem 0.5rem', borderRadius: '8px', border: '1px solid rgba(253, 216, 53, 0.15)' }}>Weekend</span>
+                        <span className="text-xs text-bby-yellow bg-bby-yellow-alpha-05 py-xs px-sm rounded-sm border-bby-yellow-alpha-15">Weekend</span>
                       ) : (
-                        <span style={{ fontSize: '0.7rem', color: 'var(--bby-blue)', background: 'rgba(0, 70, 190, 0.08)', padding: '0.2rem 0.5rem', borderRadius: '8px', border: '1px solid rgba(0, 70, 190, 0.15)' }}>Weekday</span>
+                        <span className="text-xs text-bby-blue bg-bby-blue-alpha-08 py-xs px-sm rounded-sm border-bby-blue-alpha-15">Weekday</span>
                       )}
                     </td>
-                    <td style={{ padding: '1rem', textAlign: 'center', color: '#fff' }}>{shift.totalHours} hrs</td>
-                    <td style={{ padding: '1rem', textAlign: 'center', color: 'var(--info)', fontWeight: 700 }}>
+                    <td className="p-md text-center text-white">{shift.totalHours} hrs</td>
+                    <td className="p-md text-center text-info font-bold">
                       ${shift.totalRevenue ? shift.totalRevenue.toLocaleString([], { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '$0.00'}
                     </td>
-                    <td style={{ padding: '1rem', textAlign: 'center', color: '#fff', fontWeight: 700 }}>{shift.totalPms}</td>
-                    <td style={{ padding: '1rem', textAlign: 'center', color: '#fff', fontWeight: 700 }}>{shift.totalApps}</td>
-                    <td style={{ padding: '1rem', textAlign: 'center' }}>
-                      <span style={{ 
-                        fontWeight: 700,
+                    <td className="p-md text-center text-white font-bold">{shift.totalPms}</td>
+                    <td className="p-md text-center text-white font-bold">{shift.totalApps}</td>
+                    <td className="p-md text-center">
+                      <span className="font-bold" style={{ 
                         color: shift.onTrackRatio >= 70 ? 'var(--success)' : shift.onTrackRatio >= 40 ? 'var(--bby-yellow)' : 'var(--error)' 
                       }}>
                         {shift.onTrackRatio}%
                       </span>
                     </td>
-                    <td style={{ padding: '1rem', textAlign: 'right' }}>
+                    <td className="p-md text-right">
                       <button
                         type="button"
                         onClick={() => {
@@ -64,7 +63,7 @@ export default function HistoricalShiftsArchive({ shifts, onDeleteShift }: any) 
                             onDeleteShift(shift.id);
                           }
                         }}
-                        style={{ background: 'transparent', border: 'none', color: 'var(--error)', cursor: 'pointer', transition: 'color 0.2s', padding: 0 }}
+                        className="bg-transparent border-none text-error cursor-pointer p-0 transition-color-2s hover-opacity-80"
                         title="Delete Shift History"
                       >
                         <Trash2 size={16} />

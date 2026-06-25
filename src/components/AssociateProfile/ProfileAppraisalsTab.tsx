@@ -11,59 +11,38 @@ export default function ProfileAppraisalsTab({
  }) {
   return (
     <>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', animation: 'fadeIn 0.25s ease' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h4 style={{ fontSize: '1.1rem', color: '#fff', margin: 0 }}>Monthly Performance Appraisal</h4>
+            <div className="flex-column gap-md animate-fade-in">
+              <div className="flex-between">
+                <h4 className="text-lg text-white m-0 font-bold">Monthly Performance Appraisal</h4>
                 <button
                   onClick={handleGenerateReview}
                   disabled={isGeneratingReview}
-                  style={{
-                    background: 'var(--bby-blue)',
-                    color: '#fff',
-                    border: 'none',
-                    padding: '0.65rem 1rem',
-                    borderRadius: '8px',
-                    fontWeight: 600,
-                    cursor: isGeneratingReview ? 'not-allowed' : 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    opacity: isGeneratingReview ? 0.7 : 1,
-                    transition: 'all 0.2s ease'
-                  }}
-                  className="hover-scale"
+                  className={`btn btn-primary hover-scale ${isGeneratingReview ? 'cursor-not-allowed opacity-70' : ''}`}
                 >
                   {isGeneratingReview ? <Loader2 size={16} className="spin" /> : <FileText size={16} />}
                   {isGeneratingReview ? 'Drafting...' : 'Draft Monthly Review'}
                 </button>
               </div>
 
-              <div style={{ 
-                padding: '1.5rem', 
-                borderRadius: '12px', 
-                background: 'rgba(255, 255, 255, 0.02)', 
-                border: '1px solid var(--border-glass)',
-                minHeight: '200px',
-                color: 'var(--text-secondary)'
-              }}>
+              <div className="glass-card text-secondary min-h-200">
                 {!generatedReview && !isGeneratingReview && (
-                  <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
-                    <FileText size={48} color="var(--text-muted)" style={{ marginBottom: '1.5rem', opacity: 0.4 }} />
-                    <h3 style={{ color: '#fff', marginBottom: '0.5rem' }}>AI-Powered 1-on-1 Generator</h3>
-                    <p style={{ maxWidth: '400px', margin: '0 auto', lineHeight: '1.5' }}>
+                  <div className="text-center py-xl px-md">
+                    <FileText size={48} color="var(--text-muted)" className="mb-lg opacity-60" />
+                    <h3 className="text-white mb-sm text-xl font-bold">AI-Powered 1-on-1 Generator</h3>
+                    <p className="max-w-md mx-auto leading-relaxed">
                       Click "Draft Monthly Review" to let the AI aggregate {employee.name.split(' ')[0]}'s active metrics and 
                       all coaching logs from the past 30 days into a formal GROW performance appraisal.
                     </p>
                   </div>
                 )}
                 {isGeneratingReview && (
-                  <div style={{ textAlign: 'center', padding: '4rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
+                  <div className="text-center py-xl px-md flex-column align-center gap-lg">
                     <Loader2 size={40} color="var(--bby-blue)" className="spin" />
-                    <p style={{ color: '#fff', fontWeight: 500 }}>Synthesizing metrics and coaching logs...</p>
+                    <p className="text-white font-semibold">Synthesizing metrics and coaching logs...</p>
                   </div>
                 )}
                 {generatedReview && !isGeneratingReview && (
-                  <div style={{ background: '#111', padding: '1.5rem', borderRadius: '8px', border: '1px solid #333' }}>
+                  <div className="bg-black-alpha-20 p-lg rounded-xl border-glass">
                     {renderMarkdown(generatedReview)}
                   </div>
                 )}

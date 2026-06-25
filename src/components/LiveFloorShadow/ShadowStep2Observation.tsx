@@ -64,157 +64,149 @@ export default function ShadowStep2Observation({
 
   return (
     <>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', animation: 'fadeIn 0.3s ease' }}>
-                <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <ShieldCheck size={20} color="var(--bby-blue)" /> Behavior Checklist (DISC Model)
-                </h3>
+      <div className="flex-column gap-2xl animate-fade-in">
+        <h3 className="text-xl flex-center gap-sm justify-start m-0">
+          <ShieldCheck size={20} color="var(--bby-blue)" /> Behavior Checklist (DISC Model)
+        </h3>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem' }}>
-                  
-                  {/* Discover Section */}
-                  <div style={{ background: 'rgba(255, 255, 255, 0.01)', border: '1px solid var(--border-glass)', borderRadius: '12px', padding: '1.25rem' }}>
-                    <h4 style={{ fontSize: '1rem', color: 'var(--bby-blue)', borderBottom: '1px solid rgba(0,70,190,0.15)', paddingBottom: '0.5rem', marginBottom: '0.75rem' }}>
-                      Discover
-                    </h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+        <div className="grid-cols-2 gap-lg">
+          
+          {/* Discover Section */}
+          <div className="bg-white-alpha-01 border-glass rounded-xl p-1-25rem">
+            <h4 className="text-base text-bby-blue border-b-bby-blue-alpha-15 pb-sm mb-md m-0">
+              Discover
+            </h4>
+            <div className="flex-column gap-sm">
+              <label className="flex-center gap-sm cursor-pointer text-sm justify-start">
                         <input type="checkbox" checked={checklist.greeting} onChange={() => toggleChecklistItem('greeting')} />
                         Friendly welcome within 10s / 10ft
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+              </label>
+              <label className="flex-center gap-sm cursor-pointer text-sm justify-start">
                         <input type="checkbox" checked={checklist.nameExchange} onChange={() => toggleChecklistItem('nameExchange')} />
                         Exchanged names / introduced self
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+              </label>
+              <label className="flex-center gap-sm cursor-pointer text-sm justify-start">
                         <input type="checkbox" checked={checklist.setupProbe} onChange={() => toggleChecklistItem('setupProbe')} />
                         Probed customer environment setup
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+              </label>
+              <label className="flex-center gap-sm cursor-pointer text-sm justify-start">
                         <input type="checkbox" checked={checklist.specQuestions} onChange={() => toggleChecklistItem('specQuestions')} />
                         Asked open-ended spec/usage questions
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+              </label>
+              <label className="flex-center gap-sm cursor-pointer text-sm justify-start">
                         <input type="checkbox" checked={checklist.avoidedForbidden} onChange={() => toggleChecklistItem('avoidedForbidden')} />
                         Avoided forbidden retail vocabulary
                       </label>
-                    </div>
-                  </div>
+            </div>
+          </div>
 
-                  {/* Inspire Section */}
-                  <div style={{ background: 'rgba(255, 255, 255, 0.01)', border: '1px solid var(--border-glass)', borderRadius: '12px', padding: '1.25rem' }}>
-                    <h4 style={{ fontSize: '1rem', color: 'var(--info)', borderBottom: '1px solid rgba(6,182,212,0.15)', paddingBottom: '0.5rem', marginBottom: '0.75rem' }}>
-                      Inspire
-                    </h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+          {/* Inspire Section */}
+          <div className="bg-white-alpha-01 border-glass rounded-xl p-1-25rem">
+            <h4 className="text-base text-info border-b-cyan-alpha-15 pb-sm mb-md m-0">
+              Inspire
+            </h4>
+            <div className="flex-column gap-sm">
+              <label className="flex-center gap-sm cursor-pointer text-sm justify-start">
                         <input type="checkbox" checked={checklist.builtRapport} onChange={() => toggleChecklistItem('builtRapport')} />
                         Connected personally / built human rapport
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+              </label>
+              <label className="flex-center gap-sm cursor-pointer text-sm justify-start">
                         <input type="checkbox" checked={checklist.emotionalDriver} onChange={() => toggleChecklistItem('emotionalDriver')} />
                         Uncovered customer emotional driver
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+              </label>
+              <label className="flex-center gap-sm cursor-pointer text-sm justify-start">
                         <input type="checkbox" checked={checklist.demoProduct} onChange={() => toggleChecklistItem('demoProduct')} />
                         Demonstrated product/service features
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+              </label>
+              <label className="flex-center gap-sm cursor-pointer text-sm justify-start">
                         <input type="checkbox" checked={checklist.membershipBenefits} onChange={() => toggleChecklistItem('membershipBenefits')} />
                         Shared membership benefits during demo
                       </label>
-                    </div>
-                  </div>
+            </div>
+          </div>
 
-                  {/* Solve Section */}
-                  <div style={{ background: 'rgba(255, 255, 255, 0.01)', border: '1px solid var(--border-glass)', borderRadius: '12px', padding: '1.25rem' }}>
-                    <h4 style={{ fontSize: '1rem', color: 'var(--success)', borderBottom: '1px solid rgba(16,185,129,0.15)', paddingBottom: '0.5rem', marginBottom: '0.75rem' }}>
-                      Solve
-                    </h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+          {/* Solve Section */}
+          <div className="bg-white-alpha-01 border-glass rounded-xl p-1-25rem">
+            <h4 className="text-base text-success border-b-success-alpha-15 pb-sm mb-md m-0">
+              Solve
+            </h4>
+            <div className="flex-column gap-sm">
+              <label className="flex-center gap-sm cursor-pointer text-sm justify-start">
                         <input type="checkbox" checked={checklist.membershipPitched} onChange={() => toggleChecklistItem('membershipPitched')} />
                         Pitched Plus/Total support solution
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+              </label>
+              <label className="flex-center gap-sm cursor-pointer text-sm justify-start">
                         <input type="checkbox" checked={checklist.warrantyAttached} onChange={() => toggleChecklistItem('warrantyAttached')} />
                         Attached protection (GSP/AppleCare+)
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+              </label>
+              <label className="flex-center gap-sm cursor-pointer text-sm justify-start">
                         <input type="checkbox" checked={checklist.solutionMatched} onChange={() => toggleChecklistItem('solutionMatched')} />
                         Matched the complete solution
                       </label>
-                    </div>
-                  </div>
+            </div>
+          </div>
 
-                  {/* Close Section */}
-                  <div style={{ background: 'rgba(255, 255, 255, 0.01)', border: '1px solid var(--border-glass)', borderRadius: '12px', padding: '1.25rem' }}>
-                    <h4 style={{ fontSize: '1rem', color: 'var(--warning)', borderBottom: '1px solid rgba(245,158,11,0.15)', paddingBottom: '0.5rem', marginBottom: '0.75rem' }}>
-                      Close
-                    </h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+          {/* Close Section */}
+          <div className="bg-white-alpha-01 border-glass rounded-xl p-1-25rem">
+            <h4 className="text-base text-warning border-b-warning-alpha-15 pb-sm mb-md m-0">
+              Close
+            </h4>
+            <div className="flex-column gap-sm">
+              <label className="flex-center gap-sm cursor-pointer text-sm justify-start">
                         <input type="checkbox" checked={checklist.creditCardPitched} onChange={() => toggleChecklistItem('creditCardPitched')} />
                         Pitched Credit Card rewards/financing
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+              </label>
+              <label className="flex-center gap-sm cursor-pointer text-sm justify-start">
                         <input type="checkbox" checked={checklist.handledObjections} onChange={() => toggleChecklistItem('handledObjections')} />
                         Acknowledged and handled objections
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+              </label>
+              <label className="flex-center gap-sm cursor-pointer text-sm justify-start">
                         <input type="checkbox" checked={checklist.surveyRequested} onChange={() => toggleChecklistItem('surveyRequested')} />
                         Requested feedback via 5-Star Survey
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+              </label>
+              <label className="flex-center gap-sm cursor-pointer text-sm justify-start">
                         <input type="checkbox" checked={checklist.sleeveReceipt} onChange={() => toggleChecklistItem('sleeveReceipt')} />
                         Receipt in sleeve with written advisor name
                       </label>
-                    </div>
-                  </div>
-                </div>
+            </div>
+          </div>
+        </div>
 
-                {/* Notes & Dictation */}
-                <div className="glass-card" style={{ padding: '1.25rem', marginTop: '1rem', border: isListening ? '1px solid var(--error)' : '1px solid var(--border-glass)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                    <h4 style={{ fontSize: '1rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-                      <Clipboard size={18} color="var(--text-secondary)" /> Raw Observation Notes
-                    </h4>
-                    <button 
-                      type="button" 
-                      onClick={toggleMic}
-                      style={{ 
-                        background: isListening ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255, 255, 255, 0.1)', 
-                        border: isListening ? '1px solid var(--error)' : 'none',
-                        color: isListening ? 'var(--error)' : '#fff',
-                        padding: '0.5rem 1rem', 
-                        borderRadius: '20px', 
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        fontSize: '0.8rem',
-                        fontWeight: 'bold',
-                        animation: isListening ? 'pulse 1.5s infinite' : 'none'
-                      }}
-                    >
-                      {isListening ? <MicOff size={16} /> : <Mic size={16} />}
-                      {isListening ? 'Stop Recording' : 'Start Dictation'}
-                    </button>
-                  </div>
-                  <textarea 
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Capture raw dialogue, behavioral notes, and specific coaching feedback here. AI will summarize this later..."
-                    className="form-control"
-                    style={{ background: 'rgba(0, 0, 0, 0.3)', borderColor: 'transparent', color: '#fff', width: '100%', height: '100px', resize: 'none', padding: '0.75rem', fontSize: '0.9rem' }}
-                  />
-                  {isListening && (
-                    <div style={{ fontSize: '0.75rem', color: 'var(--error)', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                      <span style={{ display: 'inline-block', width: '8px', height: '8px', background: 'var(--error)', borderRadius: '50%', animation: 'pulse 1s infinite' }}></span>
-                      Microphone is active and transcribing...
-                    </div>
-                  )}
-                </div>
-              </div>
+        {/* Notes & Dictation */}
+        <div className="glass-card p-1-25rem mt-md" style={{ border: isListening ? '1px solid var(--error)' : '1px solid var(--border-glass)' }}>
+          <div className="flex-between align-center mb-sm">
+            <h4 className="text-base text-white flex-center gap-sm m-0">
+              <Clipboard size={18} color="var(--text-secondary)" /> Raw Observation Notes
+            </h4>
+            <button 
+              type="button" 
+              onClick={toggleMic}
+              className="flex-center gap-sm px-md py-sm rounded-20 cursor-bold text-xs font-bold"
+              style={{ 
+                background: isListening ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255, 255, 255, 0.1)', 
+                border: isListening ? '1px solid var(--error)' : 'none',
+                color: isListening ? 'var(--error)' : '#fff',
+                animation: isListening ? 'pulse 1.5s infinite' : 'none'
+              }}
+            >
+              {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+              {isListening ? 'Stop Recording' : 'Start Dictation'}
+            </button>
+          </div>
+          <textarea 
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Capture raw dialogue, behavioral notes, and specific coaching feedback here. AI will summarize this later..."
+            className="form-control bg-black-alpha-30 border-transparent text-white w-full h-100px resize-none p-sm text-sm"
+          />
+          {isListening && (
+            <div className="text-xs text-error mt-sm flex-center gap-xs justify-start">
+              <span className="inline-block w-2 h-2 bg-error rounded-full animate-pulse"></span>
+              Microphone is active and transcribing...
+            </div>
+          )}
+        </div>
+      </div>
     </>
   );
 }

@@ -60,16 +60,15 @@ export default function AuraHUDPage({ onCoachEmployee }: AuraHUDPageProps) {
             <Radar size={32} className="text-bby-yellow" />
             Aura Radar
           </h1>
-          <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem', maxWidth: '600px' }}>
+          <p className="text-secondary mt-sm max-w-600">
             Live floor command. Detects behavioral patterns and surfaces active coaching moments across your store.
           </p>
         </div>
         
         <button 
-          className="btn btn-primary flex-center gap-sm" 
+          className="btn btn-primary flex-center gap-sm px-lg py-md transition-normal z-2" 
           onClick={handleScanFloor}
           disabled={isScanning}
-          style={{ padding: '0.75rem 1.5rem', transition: 'var(--transition-normal)', zIndex: 2 }}
           data-testid="scan-floor-btn"
         >
           <RefreshCw size={18} className={isScanning ? 'spin' : ''} />
@@ -88,7 +87,7 @@ export default function AuraHUDPage({ onCoachEmployee }: AuraHUDPageProps) {
           />
         ))}
         {roster.length === 0 && (
-          <div className="glass-card p-xl flex-center w-full" style={{ gridColumn: '1 / -1' }}>
+          <div className="glass-card p-xl flex-center w-full col-span-full">
             <p className="text-muted text-center">No active employees in the current period.</p>
           </div>
         )}

@@ -58,34 +58,34 @@ export default function HandoffReportModal({ activeShift, activeSummary, apiKey,
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content" style={{ maxWidth: '700px', width: '95%' }}>
+      <div className="modal-content max-w-700 w-95">
         <div className="modal-header">
-          <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h2 className="flex-center gap-sm justify-start m-0">
             <FileText size={24} color="var(--bby-blue)" />
             Shift Handoff Report
           </h2>
           <button className="btn-close" onClick={onClose}><X size={24} /></button>
         </div>
 
-        <div className="modal-body" style={{ minHeight: '400px' }}>
+        <div className="modal-body min-h-400">
           {isGenerating ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '300px', gap: '1rem' }}>
-              <div className="loading-spinner" style={{ width: '40px', height: '40px', borderTopColor: 'var(--bby-blue)', borderRightColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: 'transparent', borderRadius: '50%', borderStyle: 'solid', borderWidth: '3px', animation: 'spin 1s linear infinite' }}></div>
-              <p style={{ color: 'var(--text-secondary)' }}>Synthesizing shift data with Gemini AI...</p>
+            <div className="flex-column align-center justify-center h-300px gap-md">
+              <div className="loading-spinner w-10 h-10 border-bby-blue-t-3 rounded-full border-solid border-3 animate-spin border-transparent-rbl"></div>
+              <p className="text-secondary">Synthesizing shift data with Gemini AI...</p>
             </div>
           ) : error ? (
-            <div className="alert alert-danger" style={{ margin: '2rem' }}>{error}</div>
+            <div className="alert alert-danger m-2xl">{error}</div>
           ) : (
-            <div style={{ padding: '1rem', background: 'var(--surface-1)', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
-              <div className="markdown-body" style={{ color: '#fff', fontSize: '0.95rem', lineHeight: '1.6' }}>
+            <div className="p-md bg-surface rounded-xl border-glass">
+              <div className="markdown-body text-white text-0-95rem leading-relaxed">
                 <ReactMarkdown>{report}</ReactMarkdown>
               </div>
             </div>
           )}
         </div>
 
-        <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between', padding: '1.5rem', borderTop: '1px solid var(--border-glass)' }}>
-          <button className="btn" onClick={onClose} style={{ background: 'transparent', color: 'var(--text-secondary)', border: '1px solid var(--border-glass)' }}>
+        <div className="modal-footer flex-between p-lg border-t-glass">
+          <button className="btn bg-transparent text-secondary border-glass" onClick={onClose}>
             Close
           </button>
           {!isGenerating && !error && (

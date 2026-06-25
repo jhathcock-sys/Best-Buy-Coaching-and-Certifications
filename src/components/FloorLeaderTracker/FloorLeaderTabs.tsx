@@ -5,90 +5,35 @@ export default function FloorLeaderTabs({ leaderTab, setLeaderTab, handleEndShif
   return (
     <>
           {/* Tab Selection Header bar with End Shift */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-glass)', flexWrap: 'wrap', gap: '1rem', paddingBottom: '0.25rem' }}>
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <div className="flex-between align-center border-b-glass flex-wrap gap-md pb-xs">
+            <div className="flex-row gap-sm flex-wrap">
               <button
-                className="btn"
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  borderBottom: leaderTab === 'tracker' ? '2.5px solid var(--bby-blue)' : 'none',
-                  color: leaderTab === 'tracker' ? '#fff' : 'var(--text-muted)',
-                  borderRadius: 0,
-                  padding: '0.75rem 1.25rem',
-                  fontWeight: 700,
-                  fontSize: '0.85rem',
-                  cursor: 'pointer'
-                }}
+                className={`btn bg-transparent rounded-0 p-md-sm-lg font-bold text-sm cursor-pointer ${leaderTab === 'tracker' ? 'border-b-bby-blue text-white' : 'border-none text-muted'}`}
                 onClick={() => setLeaderTab('tracker')}
               >
                 Hourly Tracker
               </button>
               <button
-                className="btn"
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  borderBottom: leaderTab === 'scheduler' ? '2.5px solid var(--bby-blue)' : 'none',
-                  color: leaderTab === 'scheduler' ? '#fff' : 'var(--text-muted)',
-                  borderRadius: 0,
-                  padding: '0.75rem 1.25rem',
-                  fontWeight: 700,
-                  fontSize: '0.85rem',
-                  cursor: 'pointer'
-                }}
+                className={`btn bg-transparent rounded-0 p-md-sm-lg font-bold text-sm cursor-pointer ${leaderTab === 'scheduler' ? 'border-b-bby-blue text-white' : 'border-none text-muted'}`}
                 onClick={() => setLeaderTab('scheduler')}
               >
                 Zones & Breaks Run Sheet
               </button>
               <button
-                className="btn"
+                className={`btn bg-transparent rounded-0 p-md-sm-lg font-bold text-sm cursor-pointer ${leaderTab === 'audit' ? 'border-b-bby-blue text-white' : 'border-none text-muted'}`}
                 data-testid="tab-audit"
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  borderBottom: leaderTab === 'audit' ? '2.5px solid var(--bby-blue)' : 'none',
-                  color: leaderTab === 'audit' ? '#fff' : 'var(--text-muted)',
-                  borderRadius: 0,
-                  padding: '0.75rem 1.25rem',
-                  fontWeight: 700,
-                  fontSize: '0.85rem',
-                  cursor: 'pointer'
-                }}
                 onClick={() => setLeaderTab('audit')}
               >
                 Floor Audit (Vision)
               </button>
               <button
-                className="btn"
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  borderBottom: leaderTab === 'sim' ? '2.5px solid var(--bby-blue)' : 'none',
-                  color: leaderTab === 'sim' ? '#fff' : 'var(--text-muted)',
-                  borderRadius: 0,
-                  padding: '0.75rem 1.25rem',
-                  fontWeight: 700,
-                  fontSize: '0.85rem',
-                  cursor: 'pointer'
-                }}
+                className={`btn bg-transparent rounded-0 p-md-sm-lg font-bold text-sm cursor-pointer ${leaderTab === 'sim' ? 'border-b-bby-blue text-white' : 'border-none text-muted'}`}
                 onClick={() => setLeaderTab('sim')}
               >
                 Shift Simulator
               </button>
               <button
-                className="btn"
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  borderBottom: leaderTab === 'survey' ? '2.5px solid var(--bby-blue)' : 'none',
-                  color: leaderTab === 'survey' ? '#fff' : 'var(--text-muted)',
-                  borderRadius: 0,
-                  padding: '0.75rem 1.25rem',
-                  fontWeight: 700,
-                  fontSize: '0.85rem',
-                  cursor: 'pointer'
-                }}
+                className={`btn bg-transparent rounded-0 p-md-sm-lg font-bold text-sm cursor-pointer ${leaderTab === 'survey' ? 'border-b-bby-blue text-white' : 'border-none text-muted'}`}
                 onClick={() => setLeaderTab('survey')}
               >
                 5-Star Detractor Coach
@@ -96,7 +41,7 @@ export default function FloorLeaderTabs({ leaderTab, setLeaderTab, handleEndShif
 
             </div>
             
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div className="flex-row gap-sm">
               <button className="btn btn-secondary btn-sm flex-center" onClick={handleGenerateHandoff}>
                 <FileText size={16} color="var(--bby-blue)" /> Generate Handoff
               </button>

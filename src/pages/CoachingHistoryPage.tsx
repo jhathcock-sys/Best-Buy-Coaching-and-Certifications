@@ -105,24 +105,23 @@ export default function CoachingHistory() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+    <div className="flex-column gap-2xl">
       
       {/* Header */}
       <div>
-        <h1 style={{ fontSize: '2.25rem', marginBottom: '0.25rem' }}>Coaching History Hub</h1>
-        <p style={{ color: 'var(--text-secondary)' }}>
+        <h1 className="text-3xl mb-xs">Coaching History Hub</h1>
+        <p className="text-secondary">
           Review and manage archived coaching sessions, floor observations, and consulting roleplays.
         </p>
       </div>
 
       {/* Controls */}
-      <div className="glass-card" style={{ padding: '1.25rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
-        <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+      <div className="glass-card glass-card-compact flex-between flex-wrap gap-lg">
+        <div className="flex-row gap-xs flex-wrap">
           {['All', 'Observation', 'Practice', 'Roleplay'].map(cat => (
             <button 
               key={cat} 
-              className={`tag-pill ${categoryFilter === cat ? 'tag-pill-active' : ''}`}
-              style={{ cursor: 'pointer', padding: '0.45rem 1rem', fontSize: '0.8rem' }}
+              className={`tag-pill cursor-pointer px-md py-sm text-sm ${categoryFilter === cat ? 'tag-pill-active' : ''}`}
               onClick={() => setCategoryFilter(cat)}
             >
               {cat === 'All' ? 'All Logs' : cat === 'Practice' ? 'GROW Practice' : cat === 'Roleplay' ? 'Consult Roleplays' : 'Floor Observations'}
@@ -130,108 +129,72 @@ export default function CoachingHistory() {
           ))}
         </div>
 
-        <div style={{ position: 'relative', width: '250px' }}>
+        <div className="relative w-250px">
           <input 
             type="text" 
-            className="form-control" 
-            style={{ paddingLeft: '2.5rem', paddingRight: '1rem', height: '38px', fontSize: '0.85rem' }}
+            className="form-control search-input text-sm"
             placeholder="Search by associate or topic..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', top: '11px', left: '0.85rem' }} />
+          <Search size={16} color="var(--text-muted)" className="search-icon-pos" />
         </div>
       </div>
 
       {/* History Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
+      <div className="history-grid">
         {filteredSessions.length === 0 ? (
-          <div className="glass-card" style={{ gridColumn: '1 / -1', padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
-            <BookOpen size={32} color="var(--text-muted)" style={{ opacity: 0.5 }} />
+          <div className="glass-card grid-col-full p-3rem text-center text-secondary flex-column align-center gap-sm">
+            <BookOpen size={32} color="var(--text-muted)" className="opacity-50" />
             <p>No coaching logs match your active filters.</p>
           </div>
         ) : (
           filteredSessions.map((session, index) => (
             <div 
               key={index} 
-              className="glass-card"
-              style={{ 
-                padding: '1.25rem', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'space-between',
-                gap: '1rem',
-                cursor: 'pointer',
-                transition: 'transform 0.2s ease, border-color 0.2s ease'
-              }}
+              className="glass-card session-card"
               onClick={() => {
                 setSelectedSession(session);
                 handleStopSpeech();
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-3px)';
-                e.currentTarget.style.borderColor = 'var(--bby-blue)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.borderColor = 'var(--border-glass)';
-              }}
             >
               <div>
                 {/* Header: Avatar, Name, Score, Trash */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <img src={session.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'} alt="" style={{ width: 36, height: 36, borderRadius: '50%', border: '1.5px solid var(--border-glass)' }} />
+                <div className="flex-between align-start gap-sm">
+                  <div className="flex-row align-center gap-sm">
+                    <img src={session.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'} alt="" className="avatar-sm border-glass" />
                     <div>
-                      <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff', margin: 0 }}>{session.employeeName || session.customerName}</h4>
-                      <span className="tag-pill" style={{ 
-                        fontSize: '0.65rem', 
-                        padding: '0.15rem 0.45rem', 
-                        marginTop: '0.2rem',
-                        background: session.category?.includes('Observation') ? 'rgba(16, 185, 129, 0.08)' : session.category?.includes('Practice') ? 'rgba(0, 70, 190, 0.08)' : 'rgba(255, 230, 0, 0.08)',
-                        color: session.category?.includes('Observation') ? 'var(--success)' : session.category?.includes('Practice') ? '#a5f3fc' : 'var(--bby-yellow)',
-                        borderColor: 'transparent'
-                      }}>
+                      <h4 className="text-base font-bold text-white m-0">{session.employeeName || session.customerName}</h4>
+                      <span className={`tag-pill tag-mini ${session.category?.includes('Observation') ? 'tag-obs' : session.category?.includes('Practice') ? 'tag-prac' : 'tag-role'}`}>
                         {session.category}
                       </span>
                       {session.coachName && (
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '0.2rem', fontWeight: 500 }}>
+                        <div className="text-xxs text-muted mt-0-2rem font-medium">
                           Coach: {session.coachName}
                         </div>
                       )}
                     </div>
                   </div>
                   <button 
-                    className="btn btn-secondary btn-icon" 
-                    style={{ padding: '0.35rem', minWidth: 'auto', height: 'auto', borderColor: 'transparent', background: 'transparent' }}
+                    className="btn btn-secondary btn-icon btn-icon-transparent"
                     onClick={(e) => handleDelete(session, e)}
                   >
                     <Trash2 size={14} color="var(--error)" />
                   </button>
                 </div>
 
-                <p style={{ 
-                  fontSize: '0.8rem', 
-                  color: 'var(--text-muted)', 
-                  lineHeight: 1.4, 
-                  marginTop: '1rem',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden'
-                }}>
+                <p className="session-notes">
                   {session.notes}
                 </p>
               </div>
 
               {/* Footer: Date & Score Indicator */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '0.75rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Clock size={12} /> {session.date?.split(' ')[0]}</span>
+              <div className="session-footer">
+                <span className="flex-row align-center gap-xs"><Clock size={12} /> {session.date?.split(' ')[0]}</span>
                 {session.score !== 100 && (
-                  <span style={{ 
-                    fontWeight: 700,
-                    color: session.score >= 80 ? 'var(--success)' : 'var(--error)'
-                  }}>Score: {session.score}%</span>
+                  <span className={`font-bold ${session.score >= 80 ? 'text-success' : 'text-error'}`}>
+                    Score: {session.score}%
+                  </span>
                 )}
               </div>
             </div>
@@ -242,69 +205,47 @@ export default function CoachingHistory() {
       {/* Details Modal */}
       {selectedSession && (
         <div className="modal-overlay" onClick={() => setSelectedSession(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ border: '2.5px solid var(--bby-blue)', maxWidth: '650px' }}>
+          <div className="modal-content modal-border-bby" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <img src={selectedSession.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'} alt="" style={{ width: 36, height: 36, borderRadius: '50%' }} />
+              <div className="flex-row align-center gap-sm">
+                <img src={selectedSession.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'} alt="" className="avatar-sm" />
                 <div>
-                  <h3 style={{ fontSize: '1.15rem', color: '#fff', fontFamily: 'var(--font-heading)', margin: 0 }}>
+                  <h3 className="text-1-15rem text-white font-heading m-0">
                     Coaching Review: {selectedSession.employeeName || selectedSession.customerName}
                   </h3>
-                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                  <span className="text-0-7rem text-muted">
                     {selectedSession.category} | {selectedSession.date} {selectedSession.coachName ? `| Coach: ${selectedSession.coachName}` : ''}
                   </span>
                 </div>
               </div>
               <button 
-                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.25rem' }} 
+                className="btn-close-transparent" 
                 onClick={() => setSelectedSession(null)}
               >
                 &times;
               </button>
             </div>
             
-            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxHeight: '70vh', overflowY: 'auto' }}>
-              <div 
-                style={{ 
-                  background: 'rgba(11, 15, 25, 0.7)', 
-                  border: '1px solid var(--border-glass)',
-                  padding: '1.25rem',
-                  borderRadius: '16px',
-                  fontFamily: 'monospace',
-                  fontSize: '0.85rem',
-                  lineHeight: 1.5,
-                  color: 'var(--text-primary)',
-                  whiteSpace: 'pre-wrap'
-                }}
-              >
+            <div className="modal-body modal-body-scroll">
+              <div className="notes-code-block">
                 {selectedSession.notes}
               </div>
 
               {/* Text-to-Speech controls */}
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                gap: '0.5rem', 
-                padding: '0.85rem 1rem', 
-                background: 'rgba(255,255,255,0.02)', 
-                border: '1px solid var(--border-glass)', 
-                borderRadius: '12px' 
-              }}>
-                <h4 style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+              <div className="tts-controls-container">
+                <h4 className="text-0-825rem text-secondary flex-row align-center gap-sm m-0">
                   <Volume2 size={15} color="var(--bby-yellow)" /> Coaching Plan Reader (Text-to-Speech)
                 </h4>
-                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+                <div className="flex-row gap-sm mt-xs">
                   <button 
-                    className={`btn ${isPlayingSpeech && !isPausedSpeech ? 'btn-secondary' : 'btn-accent'}`} 
-                    style={{ flex: 1, padding: '0.4rem 0.8rem', fontSize: '0.75rem', height: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}
+                    className={`btn btn-tts ${isPlayingSpeech && !isPausedSpeech ? 'btn-secondary' : 'btn-accent'}`} 
                     onClick={() => handleSpeech(selectedSession.notes)}
                   >
                     <Volume2 size={13} /> {isPlayingSpeech ? (isPausedSpeech ? 'Resume' : 'Pause') : 'Read Plan Aloud'}
                   </button>
                   {isPlayingSpeech && (
                     <button 
-                      className="btn btn-secondary" 
-                      style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', height: 'auto' }}
+                      className="btn btn-secondary btn-tts-stop" 
                       onClick={handleStopSpeech}
                     >
                       Stop
@@ -312,15 +253,15 @@ export default function CoachingHistory() {
                   )}
                 </div>
                 {isPlayingSpeech && (
-                  <div style={{ fontSize: '0.675rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                    <span className="pulse-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--bby-yellow)', display: 'inline-block' }}></span>
+                  <div className="tts-status">
+                    <span className="pulse-dot pulse-dot-mini"></span>
                     <span>{isPausedSpeech ? 'Paused' : 'Currently speaking...'}</span>
                   </div>
                 )}
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <button className="btn btn-secondary" style={{ padding: '0.55rem 1.25rem' }} onClick={() => setSelectedSession(null)}>
+              <div className="flex-end">
+                <button className="btn btn-secondary btn-close-modal" onClick={() => setSelectedSession(null)}>
                   Close
                 </button>
               </div>

@@ -239,7 +239,14 @@ exports.verifyCertification = functions.https.onRequest((req, res) => {
 // 4. Generic Callable AI generation function to replace client-side SDK usage
 exports.generateAIContent = functions.https.onCall(async (data, context) => {
   try {
-    const { prompt, systemInstruction, modelConfig, isJSON, isVision, base64Image, mimeType, isProMode, apiKey } = data;
+    const payload = data.data || data;
+    const { prompt, systemInstruction, modelConfig, isJSON, isVision, base64Image, mimeType, isProMode, apiKey } = payload;
+    
+    if (!prompt || prompt.trim() === '') {
+      console.error("ERROR: The prompt extracted from the payload was empty!");
+      throw new functions.https.HttpsError('invalid-argument', 'Prompt is empty or missing from the request payload.');
+    }
+    
     const aiInstance = getGeminiClient(apiKey);
     
     // Choose model

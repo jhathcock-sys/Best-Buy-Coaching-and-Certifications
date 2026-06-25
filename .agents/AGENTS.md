@@ -78,3 +78,9 @@ After every significant upgrade, change, or feature completion, you must:
     1. **Identify**: Summon the `tech_debt_analyst` or `qa_tester` to perform a deep sweep and identify the root cause or anti-pattern.
     2. **Verify**: Pass their findings directly to the `research_agent`. The Research Agent MUST perform exhaustive web research to find the authoritative documentation, Best Practices, and precise resolutions for those specific issues.
     3. **Implement**: Only after the `research_agent` has synthesized the verified findings may you pass the baton to the `expert_coder` to write the final implementation.
+24. **Master Orchestrator TDD Pipeline**: The Master Orchestrator (the parent agent) must enforce a strict Test-Driven Development (TDD) pipeline. For every objective, the following exact order of operations must be enforced:
+    1. Run `npm run typecheck ; npm run test` to verify baseline health.
+    2. Present the task to the sub-agents. Do NOT let any agent write to disk if a VETO is active in the chat history.
+    3. Require that any code file change by the `expert_coder` is accompanied by a matching test file modification by the `automation_tester`.
+    4. Immediately run the full test suite via PowerShell after modifications. If errors return, force the agents into an internal repair loop until the terminal output is 100% SUCCESS.
+    5. Only commit to Git and log to `agent_memory/` once the verification gate is completely green.

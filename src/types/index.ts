@@ -11,6 +11,8 @@ export interface Employee {
   rph: number;
   transactions?: number;
   gap?: string;
+  metricGap?: string;
+  avatar?: string;
   lastUpdated?: number;
   basket?: number;
   m365?: number;
@@ -18,6 +20,10 @@ export interface Employee {
   focus5?: boolean;
   trophies?: any[];
   actionPlans?: any[];
+  description?: string;
+  initialGreeting?: string;
+  personality?: string;
+  coachingGoal?: string;
   revenue?: number;
   revenueOwed?: number;
   revenueStatus?: 'on-track' | 'off-track' | 'none';

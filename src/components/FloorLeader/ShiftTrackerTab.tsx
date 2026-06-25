@@ -4,8 +4,8 @@ import ShiftTrackerGoals from './ShiftTrackerGoals';
 import ShiftTrackerHourlyLog from './ShiftTrackerHourlyLog';
 import ShiftTrackerSidebar from './ShiftTrackerSidebar';
 
-export default function ShiftTrackerTab({ activeShift, setActiveShift, roster = [], handleAddHour, handleUpdateMetric, handleUpdateStartRevenue, handleUpdateEndRevenue, handleRemoveHour, handleLogFloorWin, handleLogOcvObservation, ocvSuccessMsg, handleUndoWin,
-  selectedEmpId, setSelectedEmpId, winType, setWinType, ocvEmpId, setOcvEmpId, ocvConnect, setOcvConnect, ocvRecommend, setOcvRecommend, ocvProtect, setOcvProtect, ocvClose, setOcvClose, ocvNotes, setOcvNotes
+export default function ShiftTrackerTab({ activeShift, setActiveShift, roster = [], handleAddHour, handleUpdateMetric, handleUpdateStartRevenue, handleUpdateEndRevenue, handleRemoveHour, handleLogFloorWin, handleLogOcvObservation, handleUndoWin,
+  selectedEmpId, setSelectedEmpId, winType, setWinType
 }) {
   const [currentHourKey, setCurrentHourKey] = useState(null);
   const [selectedLog, setSelectedLog] = useState(null);
@@ -141,14 +141,7 @@ export default function ShiftTrackerTab({ activeShift, setActiveShift, roster = 
               handleLogFloorWin
             }}
             ocvConfig={{
-              ocvEmpId, setOcvEmpId,
-              ocvConnect, setOcvConnect,
-              ocvRecommend, setOcvRecommend,
-              ocvProtect, setOcvProtect,
-              ocvClose, setOcvClose,
-              ocvNotes, setOcvNotes,
-              handleLogOcvObservation,
-              ocvSuccessMsg
+              handleLogOcvObservation
             }}
           />
           </div>

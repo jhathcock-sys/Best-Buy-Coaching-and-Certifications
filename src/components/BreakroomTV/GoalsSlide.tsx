@@ -1,35 +1,61 @@
 import React from 'react';
 import { Target } from 'lucide-react';
 
+interface MetricGoal {
+  actual: number;
+  goal: number;
+}
+
 interface GoalsSlideProps {
-  storeGoals: any;
+  storeGoals: {
+    pms?: MetricGoal;
+    apps?: MetricGoal;
+  } | null;
 }
 
 export default function GoalsSlide({ storeGoals }: GoalsSlideProps) {
+  if (!storeGoals) return null;
+
+  const pmsActual = storeGoals.pms?.actual || 0;
+  const pmsGoal = storeGoals.pms?.goal || 1; // Prevent division by zero
+  const appsActual = storeGoals.apps?.actual || 0;
+  const appsGoal = storeGoals.apps?.goal || 1;
+
+  const pmsPercent = Math.min(100, (pmsActual / pmsGoal) * 100);
+  const appsPercent = Math.min(100, (appsActual / appsGoal) * 100);
+
   return (
-    <div className="slide-fade-in flex-column flex-center" style={{ animation: 'fadeIn 1s ease' }}>
-      <h2 style={{ fontSize: '3.5rem', marginBottom: '4rem', color: '#fff', display: 'flex', alignItems: 'center' }}>
-        <Target size={40} color="var(--bby-blue)" style={{ marginRight: '1rem' }} /> Daily Store Goals
+    <div className="slide-fade-in flex-column flex-center h-full w-full" data-testid="goals-slide">
+      <h2 className="text-4xl text-white mb-xl flex align-center justify-center gap-md font-heading m-0 text-center">
+        <Target size={48} className="text-bby-blue" /> Daily Store Goals
       </h2>
       
-      <div className="flex-center" style={{ gap: '4rem' }}>
-        <div style={{ background: 'var(--white-alpha-05)', border: '1px solid var(--white-alpha-10)', borderRadius: '24px', padding: '3rem', width: '350px' }}>
-          <h3 style={{ fontSize: '1.5rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Memberships</h3>
-          <div style={{ fontSize: '5rem', fontWeight: 800, margin: '1rem 0', color: storeGoals.pms.actual >= storeGoals.pms.goal ? 'var(--success)' : '#fff' }}>
-            {storeGoals.pms.actual} <span style={{ fontSize: '2rem', color: 'var(--text-muted)' }}>/ {storeGoals.pms.goal}</span>
+      <div className="flex-row justify-center gap-xl">
+        <div className="glass-card p-xl flex-column w-400px" data-testid="memberships-goal-card">
+          <h3 className="text-lg text-secondary uppercase tracking-widest font-heading m-0">Memberships</h3>
+          <div className={`text-6xl font-bold my-md ${pmsActual >= pmsGoal ? 'text-success' : 'text-white'}`}>
+            {pmsActual} <span className="text-2xl text-muted font-normal">/ {pmsGoal}</span>
           </div>
-          <div style={{ background: 'var(--white-alpha-10)', height: '12px', borderRadius: '6px', overflow: 'hidden' }}>
-            <div style={{ background: storeGoals.pms.actual >= storeGoals.pms.goal ? 'var(--success)' : 'var(--bby-blue)', width: `${Math.min(100, (storeGoals.pms.actual / storeGoals.pms.goal) * 100)}%`, height: '100%', transition: 'width 1s ease-in-out' }} />
+          <div className="bg-white-alpha-10 h-3 rounded-full overflow-hidden w-full relative">
+            <div 
+              className={`h-full transition-normal ${pmsActual >= pmsGoal ? 'bg-success' : 'bg-bby-blue'}`}
+              style={{ width: `${pmsPercent}%` }}
+              data-testid="memberships-progress-bar"
+            />
           </div>
         </div>
 
-        <div style={{ background: 'var(--white-alpha-05)', border: '1px solid var(--white-alpha-10)', borderRadius: '24px', padding: '3rem', width: '350px' }}>
-          <h3 style={{ fontSize: '1.5rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Credit Cards</h3>
-          <div style={{ fontSize: '5rem', fontWeight: 800, margin: '1rem 0', color: storeGoals.apps.actual >= storeGoals.apps.goal ? 'var(--success)' : '#fff' }}>
-            {storeGoals.apps.actual} <span style={{ fontSize: '2rem', color: 'var(--text-muted)' }}>/ {storeGoals.apps.goal}</span>
+        <div className="glass-card p-xl flex-column w-400px" data-testid="credit-cards-goal-card">
+          <h3 className="text-lg text-secondary uppercase tracking-widest font-heading m-0">Credit Cards</h3>
+          <div className={`text-6xl font-bold my-md ${appsActual >= appsGoal ? 'text-success' : 'text-white'}`}>
+            {appsActual} <span className="text-2xl text-muted font-normal">/ {appsGoal}</span>
           </div>
-          <div style={{ background: 'var(--white-alpha-10)', height: '12px', borderRadius: '6px', overflow: 'hidden' }}>
-            <div style={{ background: storeGoals.apps.actual >= storeGoals.apps.goal ? 'var(--success)' : 'var(--bby-yellow)', width: `${Math.min(100, (storeGoals.apps.actual / storeGoals.apps.goal) * 100)}%`, height: '100%', transition: 'width 1s ease-in-out' }} />
+          <div className="bg-white-alpha-10 h-3 rounded-full overflow-hidden w-full relative">
+            <div 
+              className={`h-full transition-normal ${appsActual >= appsGoal ? 'bg-success' : 'bg-bby-yellow'}`}
+              style={{ width: `${appsPercent}%` }}
+              data-testid="credit-cards-progress-bar"
+            />
           </div>
         </div>
       </div>

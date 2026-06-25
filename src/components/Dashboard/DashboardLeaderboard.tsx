@@ -5,13 +5,11 @@ import { calculateCVI } from '../../store/cviHelper';
 import { useCalculatedMetrics } from '../../hooks/useCalculatedMetrics';
 
 interface DashboardLeaderboardProps {
-  onCoachEmployee: (employee: any) => void;
-  onShadowEmployee: (employee: any) => void;
+  onCoachEmployee: (employee: Employee) => void;
 }
 
 export default function DashboardLeaderboard({ 
-  onCoachEmployee, 
-  onShadowEmployee 
+  onCoachEmployee
 }: DashboardLeaderboardProps) {
   const { roster, rosterHistory, activePeriod } = useCalculatedMetrics();
   const [rankMetric, setRankMetric] = useState('memberships');
@@ -28,7 +26,7 @@ export default function DashboardLeaderboard({
   }, [roster, rankMetric]);
 
   return (
-    <div className="glass-card w-full p-xl">
+    <div className="glass-card w-full p-xl" data-testid="dashboard-leaderboard">
       <div className="flex-between flex-wrap gap-sm mb-lg">
         <div>
           <h2 className="m-0 mb-xs text-xl font-bold flex-center gap-sm text-primary justify-start">
@@ -43,6 +41,7 @@ export default function DashboardLeaderboard({
           className="bby-select p-sm border-glass text-primary text-sm bg-white-alpha-05 rounded-lg"
           value={rankMetric}
           onChange={(e) => setRankMetric(e.target.value)}
+          data-testid="rank-metric-select"
         >
           <option value="memberships">Rank by Plus & Total</option>
           <option value="creditCards">Rank by BBY Cards</option>
@@ -53,7 +52,9 @@ export default function DashboardLeaderboard({
       </div>
 
       <div className="flex-column gap-sm">
-        {leaderboardData.map((emp: Employee, idx: number) => {
+        {leaderboardData.map((emp: Employee | undefined, idx: number) => {
+          if (!emp) return null;
+          
           const cviString = calculateCVI(emp, rosterHistory, activePeriod);
           const isAccelerating = cviString.includes('Accelerating');
           const isReview = cviString.includes('Review');
@@ -64,9 +65,10 @@ export default function DashboardLeaderboard({
 
           return (
             <div 
-              key={emp.id} 
-              className="glass-card flex-row justify-between align-center p-md hover-scale clickable transition-normal"
+              key={emp.id || idx} 
+              className="glass-card flex-row justify-between align-center p-md hover-scale clickable transition-normal cursor-pointer"
               onClick={() => onCoachEmployee(emp)}
+              data-testid={`leaderboard-row-${idx}`}
             >
               <div className="flex-row align-center gap-md">
                 <div className="text-secondary font-bold w-6 text-right">
@@ -74,10 +76,10 @@ export default function DashboardLeaderboard({
                 </div>
                 <div className="flex-column">
                   <div className="flex-row align-center gap-sm">
-                    <span className="text-md font-bold text-primary">{emp.name}</span>
+                    <span className="text-md font-bold text-primary">{emp.name || 'Unknown Employee'}</span>
                     {emp.focus5 && <span className="badge-error">F5</span>}
                   </div>
-                  <span className="text-xs text-secondary">{emp.dept}</span>
+                  <span className="text-xs text-secondary">{emp.dept || 'Unknown Dept'}</span>
                 </div>
               </div>
 

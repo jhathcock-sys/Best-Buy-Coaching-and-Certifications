@@ -1,11 +1,12 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { TrendingUp } from 'lucide-react';
 import { useCalculatedMetrics } from '../../hooks/useCalculatedMetrics';
+import { Employee, CoachingLog } from '../../types';
 
 interface DashboardCoachingEngineProps {
-  onShadowEmployee: (employee: any) => void;
-  onCoachEmployee: (employee: any) => void;
-  onCreateLog?: (employee: any) => void;
+  onShadowEmployee: (employee: Employee) => void;
+  onCoachEmployee: (employee: Employee) => void;
+  onCreateLog?: (employee: Employee) => void;
 }
 
 export default function DashboardCoachingEngine({ 
@@ -18,55 +19,64 @@ export default function DashboardCoachingEngine({
   const coachingRecommendations = useMemo(() => {
     if (!Array.isArray(roster) || roster.length === 0) return [];
 
-    const getEmployeeGaps = (emp: any) => {
+    const getEmployeeGaps = (emp: Employee) => {
       const gaps: string[] = [];
-      const goals = (deptGoals && deptGoals[emp.dept]) || { memberships: 8, creditCards: 12.5, warranty: 11, surveys: 1, rph: 640 };
+      const goals: any = (deptGoals && emp?.dept && deptGoals[emp.dept]) || { memberships: 8, creditCards: 12.5, warranty: 11, surveys: 1, rph: 640 };
       
+      const empHours = emp.hours || 0;
+      const empMemberships = emp.memberships || 0;
+      const empCreditCards = emp.creditCards || 0;
+      const empWarranty = emp.warranty || 0;
+      const empSurveys = emp.surveys === 0.2 ? 0 : parseFloat(String(emp.surveys)) || 0;
+      const empRph = emp.rph || 0;
+      const empBasket = emp.basket || 0;
+      const empM365 = emp.m365 || 0;
+      const empAudio = emp.audio || 0;
+
       if (goals.membershipsType === 'Hours') {
-        const pace = emp.hours / (emp.memberships || 0.001);
-        if (pace > goals.memberships) gaps.push('Memberships');
+        const pace = empHours / (empMemberships || 0.001);
+        if (pace > (goals.memberships || 8)) gaps.push('Memberships');
       } else if (goals.membershipsType === 'Dollars') {
-        const rev = emp.hours * emp.rph;
-        const pace = rev / (emp.memberships || 0.001);
-        if (pace > goals.memberships) gaps.push('Memberships');
+        const rev = empHours * empRph;
+        const pace = rev / (empMemberships || 0.001);
+        if (pace > (goals.memberships || 8)) gaps.push('Memberships');
       } else {
-        if ((emp.memberships || 0) < (goals.memberships || 0)) gaps.push('Memberships');
+        if (empMemberships < (goals.memberships || 0)) gaps.push('Memberships');
       }
 
       if (goals.creditCardsType === 'Hours') {
-        const pace = emp.hours / (emp.creditCards || 0.001);
-        if (pace > goals.creditCards) gaps.push('Credit Cards');
+        const pace = empHours / (empCreditCards || 0.001);
+        if (pace > (goals.creditCards || 12.5)) gaps.push('Credit Cards');
       } else if (goals.creditCardsType === 'Dollars') {
-        const rev = emp.hours * emp.rph;
-        const pace = rev / (emp.creditCards || 0.001);
-        if (pace > goals.creditCards) gaps.push('Credit Cards');
+        const rev = empHours * empRph;
+        const pace = rev / (empCreditCards || 0.001);
+        if (pace > (goals.creditCards || 12.5)) gaps.push('Credit Cards');
       } else {
-        if ((emp.creditCards || 0) < (goals.creditCards || 0)) gaps.push('Credit Cards');
+        if (empCreditCards < (goals.creditCards || 0)) gaps.push('Credit Cards');
       }
 
-      if ((emp.warranty || 0) < (goals.warranty || 0)) gaps.push('GSP Attach');
+      if (empWarranty < (goals.warranty || 0)) gaps.push('GSP Attach');
 
-      const surveyVal = emp.surveys === 0.2 ? 0 : parseFloat(emp.surveys) || 0;
-      if (surveyVal < (goals.surveys || 0)) gaps.push('Surveys');
+      if (empSurveys < (goals.surveys || 0)) gaps.push('Surveys');
 
-      if ((emp.rph || 0) < (goals.rph || 0)) gaps.push('RPH');
+      if (empRph < (goals.rph || 0)) gaps.push('RPH');
 
-      if ((emp.dept === 'Computing' || emp.dept === 'Home Theatre') && (emp.basket || 0) < (goals.basket || 150)) {
+      if ((emp.dept === 'Computing' || emp.dept === 'Home Theatre') && empBasket < (goals.basket || 150)) {
         gaps.push('Basket');
       }
 
-      if (emp.dept === 'Computing' && (emp.m365 || 0) < (goals.m365 || 60)) {
+      if (emp.dept === 'Computing' && empM365 < (goals.m365 || 60)) {
         gaps.push('M365 Attach');
       }
 
-      if (emp.dept === 'Home Theatre' && (emp.audio || 0) < (goals.audio || 35)) {
+      if (emp.dept === 'Home Theatre' && empAudio < (goals.audio || 35)) {
         gaps.push('Audio Attach');
       }
 
       return gaps;
     };
 
-    const scored = roster.map(emp => {
+    const scored = roster.map((emp: Employee) => {
       const gaps = getEmployeeGaps(emp);
       let score = gaps.length * 10;
 
@@ -74,14 +84,17 @@ export default function DashboardCoachingEngine({
         score += 1000;
       }
 
-      const empSessions = (recentSessions || []).filter((s: any) => 
-        (s.employeeName && s.employeeName.toLowerCase() === emp.name.toLowerCase()) ||
-        (s.customerName && s.customerName.toLowerCase() === emp.name.toLowerCase())
-      );
+      const empSessions = (recentSessions || []).filter((s: CoachingLog) => {
+        const safeEmpName = (emp.name || '').toLowerCase();
+        return (
+          (s.employeeName && s.employeeName.toLowerCase() === safeEmpName) ||
+          (s.customerName && s.customerName.toLowerCase() === safeEmpName)
+        );
+      });
 
       let lastCoachedDaysAgo = 999;
       if (empSessions.length > 0) {
-        const dates = empSessions.map((s: any) => {
+        const dates = empSessions.map((s: CoachingLog) => {
           const d = new Date(s.date);
           return isNaN(d.getTime()) ? 0 : d.getTime();
         }).filter((t: number) => t > 0);
@@ -114,12 +127,12 @@ export default function DashboardCoachingEngine({
   }, [roster, recentSessions, deptGoals]);
 
   return (
-    <div className="glass-card">
+    <div className="glass-card" data-testid="coaching-engine-container">
       <div className="flex-between flex-wrap gap-sm mb-lg">
         <h3 className="m-0 flex-center gap-sm text-xl">
           <TrendingUp size={20} color="var(--error)" /> Daily Coaching Priorities
         </h3>
-        <span className="bg-error-alpha text-error font-bold flex-center gap-sm p-sm rounded-xl uppercase tracking-wide text-sm alert-card-danger">
+        <span className="text-error font-bold flex-center gap-sm p-sm rounded-xl uppercase tracking-wide text-sm alert-card-danger">
           <span className="bg-error rounded-full w-1.5 h-1.5"></span>
           Priority Engine Active
         </span>
@@ -133,17 +146,18 @@ export default function DashboardCoachingEngine({
             No coaching priorities flagged at this time.
           </p>
         ) : (
-          coachingRecommendations.map(({ employee, gaps, lastCoachedDaysAgo, focus5 }) => (
+          coachingRecommendations.map(({ employee, gaps, lastCoachedDaysAgo, focus5 }, idx) => (
             <div 
-              key={employee.id} 
+              key={employee.id || idx} 
+              data-testid="coaching-recommendation-card"
               className={`flex-column gap-md p-md rounded-xl transition-normal ${focus5 ? 'alert-card-danger' : 'bg-surface border-glass'} animate-fade-in`}
             >
               <div className="flex-between flex-wrap gap-sm">
                 <span className="font-bold text-lg">
-                  {employee.name}
+                  {employee.name || 'Unknown Employee'}
                 </span>
                 <span className="tag-pill tag-pill-active text-sm">
-                  {employee.dept}
+                  {employee.dept || 'Unknown Dept'}
                 </span>
               </div>
 
@@ -161,7 +175,7 @@ export default function DashboardCoachingEngine({
                 ) : (
                   <span>Meeting all core target goals.</span>
                 )}
-                <span> Worked <strong className="text-primary">{employee.hours} hrs</strong> this period. </span>
+                <span> Worked <strong className="text-primary">{employee.hours || 0} hrs</strong> this period. </span>
                 {lastCoachedDaysAgo === 999 ? (
                   <span className="text-warning">Never coached in this system.</span>
                 ) : (
@@ -171,19 +185,22 @@ export default function DashboardCoachingEngine({
 
               <div className="flex-center flex-wrap gap-sm mt-sm">
                 <button 
-                  className="btn btn-secondary flex-1 btn-sm" 
+                  className="btn btn-secondary flex-1 btn-sm cursor-pointer" 
+                  data-testid="observe-shadow-btn"
                   onClick={() => onShadowEmployee && onShadowEmployee(employee)}
                 >
                   Observe Shadow 🕵️
                 </button>
                 <button 
-                  className="btn btn-secondary flex-1 btn-sm" 
+                  className="btn btn-secondary flex-1 btn-sm cursor-pointer" 
+                  data-testid="grow-coach-btn"
                   onClick={() => onCoachEmployee && onCoachEmployee(employee)}
                 >
                   GROW Coach 🧠
                 </button>
                 <button 
-                  className="btn btn-accent flex-1 btn-sm" 
+                  className="btn btn-accent flex-1 btn-sm cursor-pointer" 
+                  data-testid="log-builder-btn"
                   onClick={() => onCreateLog ? onCreateLog(employee) : onCoachEmployee(employee)}
                 >
                   Log Builder 📝

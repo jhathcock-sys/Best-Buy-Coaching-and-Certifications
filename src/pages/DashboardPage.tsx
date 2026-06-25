@@ -6,6 +6,7 @@ import DashboardCoachingEngine from '../components/Dashboard/DashboardCoachingEn
 import DashboardTrendChart from '../components/Dashboard/DashboardTrendChart';
 import DashboardLeaderboard from '../components/Dashboard/DashboardLeaderboard';
 import MetricCards from '../components/Dashboard/MetricCards';
+import { useCalculatedMetrics } from '../hooks/useCalculatedMetrics';
 
 export default function DashboardPage({ 
   onNavigate, 
@@ -13,7 +14,7 @@ export default function DashboardPage({
   onCoachEmployee, 
   onShadowEmployee
 }: any) {
-  // Child components will pull data from useCalculatedMetrics directly
+  const { calculatedMetrics, recentSessions } = useCalculatedMetrics();
 
   return (
     <div className="flex-column gap-xl">
@@ -24,13 +25,12 @@ export default function DashboardPage({
       />
 
       <DashboardAlerts 
-        onNavigate={onNavigate} 
         onCompleteFollowUpTask={onCompleteFollowUpTask} 
         onCoachEmployee={onCoachEmployee} 
         onShadowEmployee={onShadowEmployee} 
       />
 
-      <MetricCards />
+      <MetricCards calculatedMetrics={calculatedMetrics} recentSessions={recentSessions} />
 
       <div className="dashboard-grid">
         <DashboardCoachingEngine 
@@ -40,10 +40,9 @@ export default function DashboardPage({
         <DashboardTrendChart />
       </div>
 
-      <DashboardLeaderboard 
-        onCoachEmployee={onCoachEmployee} 
-        onShadowEmployee={onShadowEmployee} 
-      />
+      <DashboardLeaderboard onCoachEmployee={onCoachEmployee} />
     </div>
   );
 }
+
+

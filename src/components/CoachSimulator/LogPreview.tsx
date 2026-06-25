@@ -2,6 +2,20 @@ import React from 'react';
 import { FileText, Copy, Check, Volume2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
+export interface LogPreviewProps {
+  isGeneratingLog: boolean;
+  outputViewMode: string;
+  setOutputViewMode: React.Dispatch<React.SetStateAction<string>>;
+  coachingLogText: string;
+  huddleScriptText: string;
+  copySuccess: boolean;
+  handleCopyToClipboard: (text: string) => void;
+  isPlayingSpeech: boolean;
+  isPausedSpeech: boolean;
+  handleSpeech: (text: string) => void;
+  handleStopSpeech: () => void;
+}
+
 export default function LogPreview({
   isGeneratingLog,
   outputViewMode,
@@ -14,111 +28,95 @@ export default function LogPreview({
   isPausedSpeech,
   handleSpeech,
   handleStopSpeech
-}) {
+}: LogPreviewProps) {
   const currentText = outputViewMode === 'grow' ? coachingLogText : huddleScriptText;
+  const safeText = currentText || '';
 
   return (
-    <div className="glass-card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h3 style={{ fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <FileText size={18} color="var(--info)" /> Coaching Log Preview
+    <div className="glass-card flex-column" style={{ flex: 1 }} data-testid="log-preview-container">
+      <div className="flex-row justify-between items-center mb-md">
+        <h3 className="flex-row items-center gap-sm text-lg">
+          <FileText size={18} className="text-info" /> Coaching Log Preview
         </h3>
-        <span className="tag-pill" style={{ fontSize: '0.7rem' }}>Best Buy Standard Layout</span>
+        <span className="tag-pill text-xs">Best Buy Standard Layout</span>
       </div>
 
       {isGeneratingLog ? (
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1.25rem',
-          padding: '1.5rem',
-          background: 'rgba(11,15,25,0.7)',
-          border: '1px solid rgba(255,255,255,0.05)',
-          borderRadius: '12px',
-          minHeight: '400px',
-          justifyContent: 'center'
-        }}>
+        <div className="flex-column gap-xl p-xl bg-obsidian-alpha border border-glass rounded-xl justify-center" style={{ minHeight: '400px' }}>
           {/* Pulsing skeleton bars */}
-          <div className="skeleton-pulse" style={{ height: '24px', width: '60%', background: 'rgba(255,255,255,0.08)', borderRadius: '6px' }}></div>
-          <div className="skeleton-pulse" style={{ height: '14px', width: '90%', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', marginTop: '0.5rem' }}></div>
-          <div className="skeleton-pulse" style={{ height: '14px', width: '85%', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}></div>
-          <div className="skeleton-pulse" style={{ height: '14px', width: '40%', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}></div>
+          <div className="skeleton-pulse rounded-md" style={{ height: '24px', width: '60%', background: 'rgba(255,255,255,0.08)' }}></div>
+          <div className="skeleton-pulse rounded-sm mt-sm" style={{ height: '14px', width: '90%', background: 'rgba(255,255,255,0.05)' }}></div>
+          <div className="skeleton-pulse rounded-sm" style={{ height: '14px', width: '85%', background: 'rgba(255,255,255,0.05)' }}></div>
+          <div className="skeleton-pulse rounded-sm" style={{ height: '14px', width: '40%', background: 'rgba(255,255,255,0.05)' }}></div>
           
-          <div className="skeleton-pulse" style={{ height: '20px', width: '45%', background: 'rgba(255,255,255,0.08)', borderRadius: '6px', marginTop: '1.25rem' }}></div>
-          <div className="skeleton-pulse" style={{ height: '14px', width: '95%', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', marginTop: '0.5rem' }}></div>
-          <div className="skeleton-pulse" style={{ height: '14px', width: '70%', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}></div>
+          <div className="skeleton-pulse rounded-md mt-xl" style={{ height: '20px', width: '45%', background: 'rgba(255,255,255,0.08)' }}></div>
+          <div className="skeleton-pulse rounded-sm mt-sm" style={{ height: '14px', width: '95%', background: 'rgba(255,255,255,0.05)' }}></div>
+          <div className="skeleton-pulse rounded-sm" style={{ height: '14px', width: '70%', background: 'rgba(255,255,255,0.05)' }}></div>
           
-          <div className="skeleton-pulse" style={{ height: '20px', width: '50%', background: 'rgba(255,255,255,0.08)', borderRadius: '6px', marginTop: '1.25rem' }}></div>
-          <div className="skeleton-pulse" style={{ height: '14px', width: '88%', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', marginTop: '0.5rem' }}></div>
+          <div className="skeleton-pulse rounded-md mt-xl" style={{ height: '20px', width: '50%', background: 'rgba(255,255,255,0.08)' }}></div>
+          <div className="skeleton-pulse rounded-sm mt-sm" style={{ height: '14px', width: '88%', background: 'rgba(255,255,255,0.05)' }}></div>
         </div>
       ) : (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div className="flex-column flex-1">
           
-          <div style={{ display: 'flex', marginBottom: '1rem', background: 'rgba(255,255,255,0.02)', padding: '0.35rem', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
+          <div className="flex-row mb-md p-xs bg-white-alpha-02 rounded-lg border border-glass">
             <button 
-              className={`btn ${outputViewMode === 'grow' ? 'btn-primary' : 'btn-secondary'}`} 
-              style={{ flex: 1, padding: '0.4rem', fontSize: '0.8rem', boxShadow: 'none' }}
+              className={`btn ${outputViewMode === 'grow' ? 'btn-primary' : 'btn-secondary'} flex-1 p-sm text-sm no-shadow cursor-pointer`}
               onClick={() => setOutputViewMode('grow')}
+              data-testid="btn-grow-plan"
             >
               📋 GROW Plan
             </button>
             <button 
-              className={`btn ${outputViewMode === 'huddle' ? 'btn-primary' : 'btn-secondary'}`} 
-              style={{ flex: 1, padding: '0.4rem', fontSize: '0.8rem', boxShadow: 'none' }}
+              className={`btn ${outputViewMode === 'huddle' ? 'btn-primary' : 'btn-secondary'} flex-1 p-sm text-sm no-shadow cursor-pointer`}
               onClick={() => setOutputViewMode('huddle')}
+              data-testid="btn-huddle-script"
             >
               💬 Huddle Script
             </button>
           </div>
 
-          <div className="markdown-body" style={{
-            flex: 1,
-            padding: '1.5rem',
-            background: 'rgba(11,15,25,0.7)',
-            border: '1px solid rgba(255,255,255,0.05)',
-            borderRadius: '12px',
-            fontSize: '0.9rem',
-            lineHeight: 1.6,
+          <div className="markdown-body p-xl bg-obsidian-alpha border border-glass rounded-xl text-sm leading-relaxed whitespace-pre-wrap flex-1" style={{
             minHeight: '400px',
-            whiteSpace: 'pre-wrap',
             fontFamily: outputViewMode === 'grow' ? 'monospace' : 'inherit'
           }}>
-            <ReactMarkdown>{currentText}</ReactMarkdown>
+            <ReactMarkdown>{safeText}</ReactMarkdown>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+          <div className="flex-row gap-sm mt-md">
             <button 
-              className="btn btn-secondary" 
-              style={{ flex: 1, padding: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', 
-                background: copySuccess ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.05)',
-                color: copySuccess ? 'var(--success)' : '#fff',
+              className="btn btn-secondary flex-1 p-md flex-center gap-sm cursor-pointer" 
+              style={{
+                background: copySuccess ? 'rgba(16, 185, 129, 0.1)' : 'var(--bg-obsidian)',
+                color: copySuccess ? 'var(--success-glow)' : '#fff',
                 borderColor: copySuccess ? 'rgba(16, 185, 129, 0.3)' : 'var(--border-glass)'
               }}
-              onClick={() => handleCopyToClipboard(currentText)}
+              onClick={() => handleCopyToClipboard(safeText)}
+              data-testid="btn-copy-clipboard"
             >
               {copySuccess ? <Check size={18} /> : <Copy size={18} />}
               {copySuccess ? 'Copied to Clipboard!' : 'Copy Document to Clipboard'}
             </button>
             <button 
-              className="btn btn-secondary" 
-              style={{ padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+              className="btn btn-secondary px-md py-md flex-center gap-sm cursor-pointer" 
+              style={{
                 borderColor: 'var(--bby-yellow)',
                 color: 'var(--bby-yellow)',
                 background: isPlayingSpeech ? 'rgba(255, 230, 0, 0.1)' : 'transparent'
               }}
               title="Read Aloud"
-              onClick={() => handleSpeech(currentText)}
+              onClick={() => handleSpeech(safeText)}
+              data-testid="btn-read-aloud"
             >
               {isPlayingSpeech && !isPausedSpeech ? (
                 <>
                   <Volume2 size={18} className="pulse-animation" />
-                  <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Playing...</span>
+                  <span className="text-xs font-semibold">Playing...</span>
                 </>
               ) : isPlayingSpeech && isPausedSpeech ? (
                 <>
-                  <Volume2 size={18} style={{ opacity: 0.5 }} />
-                  <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Paused</span>
+                  <Volume2 size={18} className="opacity-50" />
+                  <span className="text-xs font-semibold">Paused</span>
                 </>
               ) : (
                 <Volume2 size={18} />
@@ -126,10 +124,11 @@ export default function LogPreview({
             </button>
             {isPlayingSpeech && (
               <button 
-                className="btn btn-secondary" 
-                style={{ padding: '0.75rem 1rem', borderColor: 'var(--error)', color: 'var(--error)' }}
+                className="btn btn-secondary px-md py-md cursor-pointer" 
+                style={{ borderColor: 'var(--error)', color: 'var(--error)' }}
                 onClick={handleStopSpeech}
                 title="Stop Audio"
+                data-testid="btn-stop-audio"
               >
                 Stop
               </button>

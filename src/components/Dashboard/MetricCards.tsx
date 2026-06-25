@@ -1,18 +1,16 @@
 import { Users, CreditCard, Shield, Star, TrendingUp, ClipboardList } from 'lucide-react';
 import CircularGauge from './CircularGauge';
-import { useCalculatedMetrics } from '../../hooks/useCalculatedMetrics';
+import { CalculatedMetrics } from '../../hooks/useCalculatedMetrics';
+import { CoachingLog } from '../../types';
 
 interface MetricCardsProps {
-    calculatedMetrics?: any;
-    recentSessions?: any[];
+    calculatedMetrics?: Partial<CalculatedMetrics>;
+    recentSessions?: CoachingLog[];
 }
 
-export default function MetricCards({ calculatedMetrics: propMetrics, recentSessions: propSessions }: MetricCardsProps = {}) {
-    const context = useCalculatedMetrics();
-    const calculatedMetrics = propMetrics || context.calculatedMetrics;
-    const recentSessions = propSessions || context.recentSessions;
+export default function MetricCards({ calculatedMetrics, recentSessions }: MetricCardsProps) {
     return (
-        <div className="metrics-grid">
+        <div className="metrics-grid" data-testid="metric-cards-grid">
             <CircularGauge 
                 value={calculatedMetrics?.memberships || 0} 
                 label="Total Memberships" icon={Users} 

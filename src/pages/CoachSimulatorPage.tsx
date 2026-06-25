@@ -253,16 +253,12 @@ export default function CoachSimulator({
           toggleVoiceMode={audioEngine.toggleVoiceMode}
           isListening={audioEngine.isListening}
           handleMicClick={audioEngine.handleMicClick}
-          playbookSettings={playbookSettings}
         />
       )}
 
       {/* Builder Tab Content */}
       {activeTab === 'builder' && !aiCoaching.sessionActive && (
         <LogBuilderTab 
-          playbookSettings={playbookSettings}
-          apiKey={apiKey}
-          roster={roster}
           prefillBuilderData={prefillBuilderData}
           clearPrefillBuilderData={clearPrefillBuilderData}
           builderForm={builderForm}

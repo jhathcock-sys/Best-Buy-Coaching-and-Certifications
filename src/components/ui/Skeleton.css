@@ -8,13 +8,13 @@
 }
 
 .skeleton-loader {
-  background: #1e293b;
+  background: var(--white-alpha-05);
   background-image: linear-gradient(
     to right,
-    #1e293b 0%,
-    #334155 20%,
-    #1e293b 40%,
-    #1e293b 100%
+    var(--white-alpha-05) 0%,
+    var(--white-alpha-10) 20%,
+    var(--white-alpha-05) 40%,
+    var(--white-alpha-05) 100%
   );
   background-repeat: no-repeat;
   background-size: 1000px 100%; 

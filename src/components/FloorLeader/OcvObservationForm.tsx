@@ -1,49 +1,91 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Employee } from '../../types';
+
+interface OcvData {
+  empId: string;
+  connect: boolean;
+  recommend: boolean;
+  protect: boolean;
+  close: boolean;
+  notes: string;
+}
+
+interface OcvObservationFormProps {
+  roster: Employee[];
+  getEmployeesOnShift: () => Employee[];
+  handleLogOcvObservation: (data: OcvData) => void;
+}
 
 export default function OcvObservationForm({
-  ocvEmpId, setOcvEmpId,
-  getEmployeesOnShift, roster,
-  ocvConnect, setOcvConnect,
-  ocvRecommend, setOcvRecommend,
-  ocvProtect, setOcvProtect,
-  ocvClose, setOcvClose,
-  ocvNotes, setOcvNotes,
+  getEmployeesOnShift,
+  roster,
   handleLogOcvObservation,
-  ocvSuccessMsg
-}: any) {
+}: OcvObservationFormProps) {
+  const [ocvEmpId, setOcvEmpId] = useState('');
+  const [ocvConnect, setOcvConnect] = useState(false);
+  const [ocvRecommend, setOcvRecommend] = useState(false);
+  const [ocvProtect, setOcvProtect] = useState(false);
+  const [ocvClose, setOcvClose] = useState(false);
+  const [ocvNotes, setOcvNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    await handleLogOcvObservation({
+      empId: ocvEmpId,
+      connect: ocvConnect,
+      recommend: ocvRecommend,
+      protect: ocvProtect,
+      close: ocvClose,
+      notes: ocvNotes,
+    });
+    
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 3000);
+    
+    setOcvEmpId('');
+    setOcvConnect(false);
+    setOcvRecommend(false);
+    setOcvProtect(false);
+    setOcvClose(false);
+    setOcvNotes('');
+    setIsSubmitting(false);
+  };
+
   return (
-    <div className="glass-card" style={{ padding: '1.5rem' }}>
-      <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#fff' }}>
+    <div className="glass-card p-xl">
+      <h3 className="text-1-1rem font-bold mb-xs flex-center gap-sm text-white justify-start">
         ⏱️ 30-Second OCV Floor Observation
       </h3>
-      <p style={{ fontSize: '0.725rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+      <p className="text-xs text-secondary mb-lg">
         Observe behavior on the fly. Score out of 4 benchmarks.
       </p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        <div className="form-group" style={{ marginBottom: '0.5rem' }}>
-          <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Select Associate:</label>
+      <div className="flex-column gap-md">
+        <div className="form-group mb-sm">
+          <label className="form-label text-xs text-secondary">Select Associate:</label>
           <select 
-            className="form-control"
-            style={{ background: '#0e1220', fontSize: '0.85rem', height: '38px', width: '100%' }}
+            className="form-control bg-obsidian text-sm h-38px w-full"
             value={ocvEmpId}
             onChange={(e) => setOcvEmpId(e.target.value)}
+            data-testid="ocv-emp-select"
           >
             <option value="">-- Select Associate --</option>
             {(() => {
-              const onShift = getEmployeesOnShift();
-              const offShift = roster.filter((emp: any) => !onShift.some((os: any) => os.id === emp.id));
+              const onShift = getEmployeesOnShift() || [];
+              const offShift = (roster || []).filter(emp => !onShift.some(os => os.id === emp.id));
               return (
                 <>
                   {onShift.length > 0 && (
                     <optgroup label="Associates On Shift">
-                      {onShift.map((emp: any) => (
+                      {onShift.map(emp => (
                         <option key={emp.id} value={emp.id}>{emp.name} ({emp.dept || 'Floor'})</option>
                       ))}
                     </optgroup>
                   )}
                   <optgroup label="Other Roster Associates">
-                    {offShift.map((emp: any) => (
+                    {offShift.map(emp => (
                       <option key={emp.id} value={emp.id}>{emp.name} ({emp.dept || 'Floor'})</option>
                     ))}
                   </optgroup>
@@ -54,68 +96,72 @@ export default function OcvObservationForm({
         </div>
 
         {/* Checkbox Benchmarks */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', background: 'rgba(0,0,0,0.15)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.775rem', color: '#fff' }}>
+        <div className="flex-column gap-sm bg-black-alpha-15 p-md rounded-lg border-glass">
+          <label className="flex-center gap-sm cursor-pointer text-xs text-white justify-start">
             <input 
               type="checkbox" 
               checked={ocvConnect} 
               onChange={(e) => setOcvConnect(e.target.checked)} 
-              style={{ accentColor: 'var(--bby-blue)' }}
+              className="accent-bby-blue"
+              data-testid="ocv-checkbox-connect"
             />
             <span><strong>Connect</strong> (Greeting & discovery)</span>
           </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.775rem', color: '#fff' }}>
+          <label className="flex-center gap-sm cursor-pointer text-xs text-white justify-start">
             <input 
               type="checkbox" 
               checked={ocvRecommend} 
               onChange={(e) => setOcvRecommend(e.target.checked)} 
-              style={{ accentColor: 'var(--bby-blue)' }}
+              className="accent-bby-blue"
+              data-testid="ocv-checkbox-recommend"
             />
             <span><strong>Recommend</strong> (Solution matching)</span>
           </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.775rem', color: '#fff' }}>
+          <label className="flex-center gap-sm cursor-pointer text-xs text-white justify-start">
             <input 
               type="checkbox" 
               checked={ocvProtect} 
               onChange={(e) => setOcvProtect(e.target.checked)} 
-              style={{ accentColor: 'var(--bby-blue)' }}
+              className="accent-bby-blue"
+              data-testid="ocv-checkbox-protect"
             />
             <span><strong>Protect</strong> (Membership & GSP attach)</span>
           </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.775rem', color: '#fff' }}>
+          <label className="flex-center gap-sm cursor-pointer text-xs text-white justify-start">
             <input 
               type="checkbox" 
               checked={ocvClose} 
               onChange={(e) => setOcvClose(e.target.checked)} 
-              style={{ accentColor: 'var(--bby-blue)' }}
+              className="accent-bby-blue"
+              data-testid="ocv-checkbox-close"
             />
             <span><strong>Close</strong> (Financing card & survey ask)</span>
           </label>
         </div>
 
-        <div className="form-group" style={{ marginBottom: '0.25rem' }}>
-          <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Micro Observations / Notes:</label>
+        <div className="form-group mb-xs">
+          <label className="form-label text-xs text-secondary">Micro Observations / Notes:</label>
           <textarea
-            className="form-control"
+            className="form-control text-xs bg-obsidian"
             rows={2}
             placeholder="Quick coaching feedback note..."
             value={ocvNotes}
             onChange={(e) => setOcvNotes(e.target.value)}
-            style={{ fontSize: '0.775rem', background: '#0e1220' }}
+            data-testid="ocv-notes-textarea"
           />
         </div>
 
         <button 
-          className="btn btn-primary"
-          style={{ padding: '0.6rem', fontSize: '0.825rem', fontWeight: 700, width: '100%' }}
-          onClick={handleLogOcvObservation}
-          disabled={!ocvEmpId}
+          className="btn btn-primary p-md text-sm font-bold w-full"
+          onClick={handleSubmit}
+          disabled={!ocvEmpId || isSubmitting}
+          data-testid="ocv-submit-btn"
         >
-          Log Floor Observation
+          {isSubmitting ? 'Logging...' : 'Log Floor Observation'}
         </button>
 
-        {ocvSuccessMsg && (
-          <div style={{ color: 'var(--success)', fontSize: '0.75rem', textAlign: 'center', marginTop: '0.25rem', fontWeight: 600 }}>
+        {showSuccess && (
+          <div className="text-success text-xs text-center mt-xs font-semibold" data-testid="ocv-success-msg">
             ✅ OCV Observation logged successfully!
           </div>
         )}

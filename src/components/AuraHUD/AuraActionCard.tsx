@@ -1,16 +1,19 @@
 import React from 'react';
 import { PlayCircle, Target, CheckCircle, AlertTriangle, TrendingUp } from 'lucide-react';
 import { AuraInsight } from '../../services/ai/auraEngine';
+import { Employee } from '../../types';
 import './AuraHUD.css';
 
 interface AuraActionCardProps {
-  employee: any;
+  employee: Employee | null;
   insight: AuraInsight | null;
   isScanning: boolean;
-  onCoachEmployee: (employee: any) => void;
+  onCoachEmployee: (employee: Employee) => void;
 }
 
 export default function AuraActionCard({ employee, insight, isScanning, onCoachEmployee }: AuraActionCardProps) {
+  if (!employee) return null;
+
   const statusClass = insight ? `aura-card-${insight.status}` : 'aura-card-steady';
   const showSkeleton = isScanning && !insight;
 
@@ -22,7 +25,7 @@ export default function AuraActionCard({ employee, insight, isScanning, onCoachE
           <h3 className="text-lg font-heading text-white m-0">
             {employee.name}
           </h3>
-          <span className="text-xs text-secondary">{employee.department}</span>
+          <span className="text-xs text-secondary">{employee.dept}</span>
         </div>
         
         {insight?.status === 'needs_coaching' && <AlertTriangle size={20} className="text-bby-yellow" />}
@@ -58,8 +61,10 @@ export default function AuraActionCard({ employee, insight, isScanning, onCoachE
       </div>
 
       <button 
-        className="btn btn-primary w-full flex-center gap-sm p-md-sm transition-normal"
+        className="btn btn-primary w-full flex-center gap-sm p-md-sm transition-normal cursor-pointer"
         onClick={() => onCoachEmployee(employee)}
+        disabled={isScanning}
+        data-testid={`coach-btn-${employee.id}`}
       >
         <PlayCircle size={16} /> Coach Now
       </button>

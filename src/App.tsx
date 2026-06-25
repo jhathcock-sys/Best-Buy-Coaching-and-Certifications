@@ -30,6 +30,7 @@ import AdvisorLayout from './components/layout/AdvisorLayout';
 import SyncManager from './components/SyncManager';
 import ServiceWorkerBanner from './components/ServiceWorkerBanner';
 import { useCategoryAutoExpand } from './hooks/useCategoryAutoExpand';
+import CommandCenter from './pages/CommandCenter';
 
 
 export default function App() {
@@ -162,7 +163,8 @@ function AppContent() {
     return (
       <AdvisorLayout dbConnected={dbConnected}>
         <Routes>
-          <Route path="/roleplay" element={<RoleplayCenterPage />} />
+          <Route path="/roster" element={<StoreRosterPage />} />
+          <Route path="/command-center" element={<CommandCenter />} />
           <Route path="*" element={
             <AdvisorDashboardPage 
               employee={activeAdvisor}
@@ -197,6 +199,7 @@ function AppContent() {
           </div>
         }>
           <Routes>
+          <Route path="/command-center" element={<CommandCenter />} />
           <Route path="/test-profile-header" element={
             <div className="p-xl bg-obsidian min-h-screen">
               <h1 className="text-white mb-md">Test Harness: AssociateProfileHeader</h1>

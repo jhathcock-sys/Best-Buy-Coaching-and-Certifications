@@ -1,38 +1,47 @@
 import React from 'react';
-import { Target, CheckCircle, User, Zap, Activity, MessageSquare } from 'lucide-react';
+
+export interface LogBuilderForm {
+  employeeName?: string;
+  metricGap?: string;
+  discFocus?: string | string[];
+  strengths?: string;
+  gapDetails?: string;
+  rawObservation?: string;
+  [key: string]: any;
+}
+
+export interface LogBuilderFormFieldsProps {
+  builderForm: LogBuilderForm;
+  setBuilderForm: React.Dispatch<React.SetStateAction<LogBuilderForm>>;
+}
 
 export default function LogBuilderFormFields({ 
   builderForm, 
-  setBuilderForm, 
-  roster, 
-  handleSpeech, 
-  handleStopSpeech, 
-  isPlayingSpeech, 
-  isPausedSpeech 
-}) {
+  setBuilderForm 
+}: LogBuilderFormFieldsProps) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div className="flex-column gap-xl" data-testid="log-builder-form-fields">
       
       {/* Basic Info */}
-      <div style={{ display: 'flex', gap: '1rem' }}>
-        <div style={{ flex: 1 }}>
-          <label style={{ display: 'block', marginBottom: '0.5rem', color: '#fff', fontSize: '0.9rem' }}>Employee Name</label>
+      <div className="flex-row gap-md">
+        <div className="flex-1">
+          <label className="block mb-xs text-white text-sm">Employee Name</label>
           <input 
             type="text" 
-            className="modern-input"
-            value={builderForm.employeeName || ''}
-            onChange={e => setBuilderForm({ ...builderForm, employeeName: e.target.value })}
+            className="form-control"
+            value={builderForm?.employeeName || ''}
+            onChange={e => setBuilderForm(prev => ({ ...prev, employeeName: e.target.value }))}
             placeholder="e.g., John Doe"
-            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'rgba(255,255,255,0.05)', color: '#fff' }}
+            data-testid="input-employee-name"
           />
         </div>
-        <div style={{ flex: 1 }}>
-          <label style={{ display: 'block', marginBottom: '0.5rem', color: '#fff', fontSize: '0.9rem' }}>Metric Focus</label>
+        <div className="flex-1">
+          <label className="block mb-xs text-white text-sm">Metric Focus</label>
           <select 
-            className="modern-input"
-            value={builderForm.metricGap || 'Memberships'}
-            onChange={e => setBuilderForm({ ...builderForm, metricGap: e.target.value })}
-            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'rgba(0,0,0,0.5)', color: '#fff' }}
+            className="form-control"
+            value={builderForm?.metricGap || 'Memberships'}
+            onChange={e => setBuilderForm(prev => ({ ...prev, metricGap: e.target.value }))}
+            data-testid="select-metric-focus"
           >
             <option value="Memberships">Memberships</option>
             <option value="Credit Cards">Credit Cards</option>
@@ -45,12 +54,12 @@ export default function LogBuilderFormFields({
       </div>
 
       <div>
-        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#fff', fontSize: '0.9rem' }}>DISC Focus Strategy</label>
+        <label className="block mb-xs text-white text-sm">DISC Focus Strategy</label>
         <select 
-          className="modern-input"
-          value={Array.isArray(builderForm.discFocus) ? builderForm.discFocus[0] : (builderForm.discFocus || 'Solve')}
-          onChange={e => setBuilderForm({ ...builderForm, discFocus: [e.target.value] })}
-          style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'rgba(0,0,0,0.5)', color: '#fff' }}
+          className="form-control"
+          value={Array.isArray(builderForm?.discFocus) ? builderForm.discFocus[0] : (builderForm?.discFocus || 'Solve')}
+          onChange={e => setBuilderForm(prev => ({ ...prev, discFocus: [e.target.value] }))}
+          data-testid="select-disc-focus"
         >
           <option value="Discover">Discover (Asking Questions)</option>
           <option value="Inspire">Inspire (Demoing & Value)</option>
@@ -61,38 +70,38 @@ export default function LogBuilderFormFields({
 
       {/* Text Areas */}
       <div>
-        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#fff', fontSize: '0.9rem' }}>Observed Strengths</label>
+        <label className="block mb-xs text-white text-sm">Observed Strengths</label>
         <textarea 
-          className="modern-input"
-          value={builderForm.strengths || ''}
-          onChange={e => setBuilderForm({ ...builderForm, strengths: e.target.value })}
+          className="form-control resize-y"
+          value={builderForm?.strengths || ''}
+          onChange={e => setBuilderForm(prev => ({ ...prev, strengths: e.target.value }))}
           placeholder="What did they do well during your observation?"
           rows={3}
-          style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'rgba(255,255,255,0.05)', color: '#fff', resize: 'vertical' }}
+          data-testid="textarea-strengths"
         />
       </div>
 
       <div>
-        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#fff', fontSize: '0.9rem' }}>Gap / Opportunity Details</label>
+        <label className="block mb-xs text-white text-sm">Gap / Opportunity Details</label>
         <textarea 
-          className="modern-input"
-          value={builderForm.gapDetails || ''}
-          onChange={e => setBuilderForm({ ...builderForm, gapDetails: e.target.value })}
+          className="form-control resize-y"
+          value={builderForm?.gapDetails || ''}
+          onChange={e => setBuilderForm(prev => ({ ...prev, gapDetails: e.target.value }))}
           placeholder="What specific behavior or metric are you addressing?"
           rows={3}
-          style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'rgba(255,255,255,0.05)', color: '#fff', resize: 'vertical' }}
+          data-testid="textarea-gap-details"
         />
       </div>
 
       <div>
-        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#fff', fontSize: '0.9rem' }}>Raw Observation Notes (Optional)</label>
+        <label className="block mb-xs text-white text-sm">Raw Observation Notes (Optional)</label>
         <textarea 
-          className="modern-input"
-          value={builderForm.rawObservation || ''}
-          onChange={e => setBuilderForm({ ...builderForm, rawObservation: e.target.value })}
+          className="form-control resize-y"
+          value={builderForm?.rawObservation || ''}
+          onChange={e => setBuilderForm(prev => ({ ...prev, rawObservation: e.target.value }))}
           placeholder="Paste unformatted or rough notes here, and the AI will parse them..."
           rows={3}
-          style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-glass)', background: 'rgba(255,255,255,0.05)', color: '#fff', resize: 'vertical' }}
+          data-testid="textarea-raw-observation"
         />
       </div>
 

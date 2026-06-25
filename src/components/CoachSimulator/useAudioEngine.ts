@@ -1,12 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 
-export function useAudioEngine(messages, setInputVal) {
+export interface ChatMessage {
+  sender: string;
+  text: string;
+}
+
+export function useAudioEngine(messages: ChatMessage[], setInputVal: React.Dispatch<React.SetStateAction<string>>) {
   const [isPlayingSpeech, setIsPlayingSpeech] = useState(false);
   const [isPausedSpeech, setIsPausedSpeech] = useState(false);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef(null);
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     return () => {
@@ -19,49 +24,24 @@ export function useAudioEngine(messages, setInputVal) {
     };
   }, []);
 
-  const speakText = (text) => {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    
-    // Clean up markdown formatting for better reading
-    const cleanText = text
+  const sanitizeTextForSpeech = (text: string) => {
+    if (!text) return '';
+    return text
       .replace(/## 📋 /g, '')
       .replace(/## 💬 /g, '')
       .replace(/\* \*\*(.*?)\*\*/g, '$1')
       .replace(/---/g, '')
       .replace(/### 🔍 /g, '')
       .replace(/\*/g, '');
-      
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    window.speechSynthesis.speak(utterance);
   };
 
-  const handleSpeech = (textToSpeak) => {
-    if (!window.speechSynthesis) {
-      alert("Text-to-speech is not supported in this browser.");
-      return;
-    }
-
-    if (isPlayingSpeech) {
-      if (isPausedSpeech) {
-        window.speechSynthesis.resume();
-        setIsPausedSpeech(false);
-      } else {
-        window.speechSynthesis.pause();
-        setIsPausedSpeech(true);
-      }
-      return;
-    }
-
-    const cleanText = textToSpeak
-      .replace(/## 📋 /g, '')
-      .replace(/## 💬 /g, '')
-      .replace(/\* \*\*(.*?)\*\*/g, '$1')
-      .replace(/\-\-\-/g, '')
-      .replace(/### 🔍 /g, '')
-      .replace(/\*/g, '');
-
+  const speakText = (text: string) => {
+    if (!text || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    
+    const cleanText = sanitizeTextForSpeech(text);
     const utterance = new SpeechSynthesisUtterance(cleanText);
+    
     utterance.onend = () => {
       setIsPlayingSpeech(false);
       setIsPausedSpeech(false);
@@ -76,6 +56,28 @@ export function useAudioEngine(messages, setInputVal) {
     window.speechSynthesis.speak(utterance);
   };
 
+  const handleSpeech = (textToSpeak: string) => {
+    if (!window.speechSynthesis) {
+      toast.error("Text-to-speech is not supported in this browser.");
+      return;
+    }
+    
+    if (!textToSpeak) return;
+
+    if (isPlayingSpeech) {
+      if (isPausedSpeech) {
+        window.speechSynthesis.resume();
+        setIsPausedSpeech(false);
+      } else {
+        window.speechSynthesis.pause();
+        setIsPausedSpeech(true);
+      }
+      return;
+    }
+
+    speakText(textToSpeak);
+  };
+
   const handleStopSpeech = () => {
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
@@ -88,21 +90,21 @@ export function useAudioEngine(messages, setInputVal) {
     const nextMode = !isVoiceMode;
     setIsVoiceMode(nextMode);
     if (nextMode) {
-      const lastMsg = messages[messages.length - 1];
-      if (lastMsg && lastMsg.sender !== 'coach') {
-        speakText(lastMsg.text);
+      if (messages?.length > 0) {
+        const lastMsg = messages[messages.length - 1];
+        if (lastMsg && lastMsg.sender !== 'coach') {
+          speakText(lastMsg.text);
+        }
       }
     } else {
-      if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
+      handleStopSpeech();
     }
   };
 
   const handleMicClick = () => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert("Speech recognition is not supported in this browser. Please use a modern browser like Google Chrome or Microsoft Edge.");
+      toast.error("Speech recognition is not supported in this browser. Please use Chrome or Edge.");
       return;
     }
 
@@ -115,7 +117,7 @@ export function useAudioEngine(messages, setInputVal) {
     }
 
     if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
+      handleStopSpeech();
     }
 
     try {
@@ -128,14 +130,14 @@ export function useAudioEngine(messages, setInputVal) {
         setIsListening(true);
       };
 
-      recognition.onresult = (event) => {
+      recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
         if (transcript) {
           setInputVal(prev => prev ? prev + ' ' + transcript : transcript);
         }
       };
 
-      recognition.onerror = (event) => {
+      recognition.onerror = (event: any) => {
         toast.error("Speech recognition error.");
         console.error("Speech recognition error:", event.error);
         setIsListening(false);

@@ -1,28 +1,42 @@
 import React from 'react';
 import { Flame } from 'lucide-react';
 
+export interface WinRecord {
+  id?: string;
+  name: string;
+  win: string;
+  time: string;
+}
+
 interface WinsSlideProps {
-  recentWins: any[];
+  recentWins: WinRecord[];
 }
 
 export default function WinsSlide({ recentWins }: WinsSlideProps) {
+  if (!recentWins || recentWins.length === 0) return null;
+
   return (
-    <div className="slide-fade-in" style={{ animation: 'fadeIn 1s ease', width: '100%', maxWidth: '1000px', margin: '0 auto' }}>
-      <h2 style={{ fontSize: '3.5rem', marginBottom: '3rem', color: '#fff', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Flame size={40} color="var(--error)" style={{ marginRight: '1rem' }} /> Floor Wins Feed
+    <div className="slide-fade-in w-full max-w-1000px mx-auto" data-testid="wins-slide">
+      <h2 className="text-4xl text-white mb-xl flex align-center justify-center gap-md font-heading m-0 text-center">
+        <Flame size={48} className="text-error" /> Floor Wins Feed
       </h2>
       
-      <div className="flex-column" style={{ gap: '1.5rem' }}>
-        {recentWins.map((win: any, idx: number) => (
-          <div key={idx} className="flex-center" style={{ justifyContent: 'flex-start', background: 'var(--white-alpha-05)', border: '1px solid var(--white-alpha-10)', borderRadius: '16px', padding: '2rem', gap: '2rem', animation: `slideInRight ${0.4 + idx * 0.2}s ease forwards`, opacity: 0, transform: 'translateX(50px)' }}>
-            <div className="flex-center" style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--bby-blue)', fontSize: '2rem', fontWeight: 800 }}>
-              {win.name.charAt(0)}
+      <div className="flex-column gap-xl mt-xl">
+        {recentWins.map((win, idx) => (
+          <div 
+            key={win.id || idx} 
+            className="flex-row align-center justify-start bg-white-alpha-05 border-glass rounded-2xl p-xl gap-xl opacity-0 animate-slide-in-right" 
+            style={{ animationDelay: `${0.4 + idx * 0.2}s`, animationFillMode: 'forwards' }}
+            data-testid={`win-item-${win.id || idx}`}
+          >
+            <div className="flex-center w-80px h-80px rounded-full bg-bby-blue text-3xl font-bold shrink-0">
+              {win.name?.charAt(0) || '?'}
             </div>
-            <div style={{ flex: 1 }}>
-              <h3 style={{ fontSize: '2rem', margin: '0 0 0.5rem 0', color: 'var(--bby-yellow)' }}>{win.name}</h3>
-              <p style={{ fontSize: '1.5rem', margin: 0, color: '#fff' }}>"{win.win}"</p>
+            <div className="flex-1">
+              <h3 className="text-2xl font-bold m-0 mb-sm text-bby-yellow">{win.name}</h3>
+              <p className="text-xl m-0 text-white">"{win.win}"</p>
             </div>
-            <div style={{ fontSize: '1.2rem', color: 'var(--text-muted)' }}>
+            <div className="text-lg text-muted whitespace-nowrap shrink-0">
               {win.time}
             </div>
           </div>

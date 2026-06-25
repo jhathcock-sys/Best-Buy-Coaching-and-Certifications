@@ -1,40 +1,33 @@
 import { useState } from 'react';
 import { useStore } from '../../store/useStore';
+import { Employee, CoachingLog } from '../../types';
 
-export function useFloorLogging(roster, activeShift, setActiveShift, logCoachingSession, editEmployee) {
+export function useFloorLogging(roster: Employee[], activeShift: any, setActiveShift: any, logCoachingSession: any, editEmployee: any) {
   const [selectedEmpId, setSelectedEmpId] = useState('');
   const [winType, setWinType] = useState('pm'); // 'pm' or 'app'
 
-  // States for OCV Floor Observation Card
-  const [ocvEmpId, setOcvEmpId] = useState('');
-  const [ocvConnect, setOcvConnect] = useState(false);
-  const [ocvRecommend, setOcvRecommend] = useState(false);
-  const [ocvProtect, setOcvProtect] = useState(false);
-  const [ocvClose, setOcvClose] = useState(false);
-  const [ocvNotes, setOcvNotes] = useState('');
-  const [ocvSuccessMsg, setOcvSuccessMsg] = useState(false);
-
-  const handleLogOcvObservation = () => {
-    if (!ocvEmpId) {
+  const handleLogOcvObservation = (data: { empId: string; connect: boolean; recommend: boolean; protect: boolean; close: boolean; notes: string }) => {
+    const { empId, connect, recommend, protect, close, notes } = data;
+    if (!empId) {
       alert("Please select an associate for the OCV Floor Observation!");
-      return;
+      return Promise.resolve();
     }
 
-    const emp = roster.find(e => e.id === ocvEmpId);
-    if (!emp) return;
+    const emp = roster.find(e => e.id === empId);
+    if (!emp) return Promise.resolve();
 
-    const checkedCount = (ocvConnect ? 1 : 0) + (ocvRecommend ? 1 : 0) + (ocvProtect ? 1 : 0) + (ocvClose ? 1 : 0);
+    const checkedCount = (connect ? 1 : 0) + (recommend ? 1 : 0) + (protect ? 1 : 0) + (close ? 1 : 0);
     const score = Math.round((checkedCount / 4) * 100);
 
     const notesText = `### 30-Second OCV Floor Observation
 **Benchmarks Met:** ${checkedCount}/4 (${score}%)
-- **Connect:** ${ocvConnect ? '✅ Met' : '❌ Missed'} (warm greeting, intro, open discovery)
-- **Recommend:** ${ocvRecommend ? '✅ Met' : '❌ Missed'} (solution match, Good/Better/Best demo)
-- **Protect:** ${ocvProtect ? '✅ Met' : '❌ Missed'} (Plus/Total memberships & protection attach)
-- **Close:** ${ocvClose ? '✅ Met' : '❌ Missed'} (Best Buy Card financing pitch & survey ask)
+- **Connect:** ${connect ? '✅ Met' : '❌ Missed'} (warm greeting, intro, open discovery)
+- **Recommend:** ${recommend ? '✅ Met' : '❌ Missed'} (solution match, Good/Better/Best demo)
+- **Protect:** ${protect ? '✅ Met' : '❌ Missed'} (Plus/Total memberships & protection attach)
+- **Close:** ${close ? '✅ Met' : '❌ Missed'} (Best Buy Card financing pitch & survey ask)
 
 **Supervisor observations & feedback:**
-${ocvNotes || 'No specific observation notes logged.'}`;
+${notes || 'No specific observation notes logged.'}`;
 
     logCoachingSession({
       customerName: emp.name,
@@ -43,18 +36,9 @@ ${ocvNotes || 'No specific observation notes logged.'}`;
       score: score,
       avatar: emp.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
       notes: notesText
-    });
+    } as CoachingLog);
 
-    setOcvSuccessMsg(true);
-    setTimeout(() => setOcvSuccessMsg(false), 3000);
-
-    // Reset OCV form
-    setOcvEmpId('');
-    setOcvConnect(false);
-    setOcvRecommend(false);
-    setOcvProtect(false);
-    setOcvClose(false);
-    setOcvNotes('');
+    return Promise.resolve();
   };
 
   const handleLogFloorWin = () => {
@@ -121,9 +105,9 @@ ${ocvNotes || 'No specific observation notes logged.'}`;
     setSelectedEmpId('');
   };
 
-  const handleUndoWin = (winId) => {
+  const handleUndoWin = (winId: string) => {
     if (!activeShift) return;
-    const win = (activeShift.wins || []).find(w => w.id === winId);
+    const win = (activeShift.wins || []).find((w: any) => w.id === winId);
     if (!win) return;
 
     const emp = roster.find(e => e.id === win.empId);
@@ -140,7 +124,7 @@ ${ocvNotes || 'No specific observation notes logged.'}`;
       updatedHours[hourIdx] = targetHour;
     }
 
-    const updatedWins = (activeShift.wins || []).filter(w => w.id !== winId);
+    const updatedWins = (activeShift.wins || []).filter((w: any) => w.id !== winId);
 
     setActiveShift({
       ...activeShift,
@@ -159,13 +143,6 @@ ${ocvNotes || 'No specific observation notes logged.'}`;
   return {
     selectedEmpId, setSelectedEmpId,
     winType, setWinType,
-    ocvEmpId, setOcvEmpId,
-    ocvConnect, setOcvConnect,
-    ocvRecommend, setOcvRecommend,
-    ocvProtect, setOcvProtect,
-    ocvClose, setOcvClose,
-    ocvNotes, setOcvNotes,
-    ocvSuccessMsg, setOcvSuccessMsg,
     handleLogOcvObservation,
     handleLogFloorWin,
     handleUndoWin

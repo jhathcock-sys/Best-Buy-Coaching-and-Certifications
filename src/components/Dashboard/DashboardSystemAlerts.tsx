@@ -1,8 +1,17 @@
 import { useMemo } from 'react';
 import { useCalculatedMetrics } from '../../hooks/useCalculatedMetrics';
+import { Employee } from '../../types/index';
 
 interface DashboardSystemAlertsProps {
   onNavigate: (view: string) => void;
+}
+
+interface SystemAlert {
+  id: string | number;
+  type: 'success' | 'warning' | 'error';
+  text: string;
+  actionLabel: string;
+  navTarget: string;
 }
 
 export default function DashboardSystemAlerts({ 
@@ -11,7 +20,7 @@ export default function DashboardSystemAlerts({
   const { roster, rosterHistory, calculatedMetrics, activePeriod } = useCalculatedMetrics();
   
   const systemAlerts = useMemo(() => {
-    const list: any[] = [];
+    const list: SystemAlert[] = [];
     if (!roster || roster.length === 0) return list;
 
     // 1. Employee Drop Alerts
@@ -25,13 +34,13 @@ export default function DashboardSystemAlerts({
       const pastRosterMap = rosterHistory[pastPeriod];
       
       if (pastRosterMap) {
-        roster.forEach(emp => {
-          const pastEmp = pastRosterMap[emp.id] || Object.values(pastRosterMap).find((e: any) => e.name === emp.name);
+        roster.forEach((emp: Employee) => {
+          const pastEmp = pastRosterMap[emp.id] || Object.values(pastRosterMap).find((e: Employee) => e.name === emp.name);
           if (!pastEmp) return;
 
-          const checkDrop = (metricKey: string, label: string) => {
-            const currentVal = (emp as any)[metricKey] || 0;
-            const pastVal = pastEmp[metricKey] || 0;
+          const checkDrop = (metricKey: keyof Employee, label: string) => {
+            const currentVal = parseFloat(String(emp[metricKey] || 0)) || 0;
+            const pastVal = parseFloat(String(pastEmp[metricKey] || 0)) || 0;
             
             if (pastVal > 0) {
               const dropPercent = ((pastVal - currentVal) / pastVal) * 100;
@@ -39,8 +48,8 @@ export default function DashboardSystemAlerts({
                 list.push({
                   id: `trend-${emp.id}-${metricKey}`,
                   type: 'warning',
-                  text: `🚨 ${emp.name}'s ${label} dropped by ${Math.round(dropPercent)}% compared to last week (from ${pastVal}${metricKey === 'warranty' ? '%' : ''} down to ${currentVal}${metricKey === 'warranty' ? '%' : ''}). Assign a coaching shadow.`,
-                  actionLabel: `Shadow ${emp.name.split(' ')[0]}`,
+                  text: `🚨 ${emp.name || 'Employee'}'s ${label} dropped by ${Math.round(dropPercent)}% compared to last week (from ${pastVal}${metricKey === 'warranty' ? '%' : ''} down to ${currentVal}${metricKey === 'warranty' ? '%' : ''}). Assign a coaching shadow.`,
+                  actionLabel: `Shadow ${emp.name?.split(' ')[0] || 'Employee'}`,
                   navTarget: 'shadow'
                 });
               }
@@ -105,11 +114,12 @@ export default function DashboardSystemAlerts({
   if (systemAlerts.length === 0) return null;
 
   return (
-    <div className="flex-column gap-md mb-sm">
-      {systemAlerts.map(alert => (
+    <div className="flex-column gap-md mb-sm" data-testid="system-alerts-container">
+      {systemAlerts.map((alert) => (
         <div 
           key={alert.id}
-          className={`glass-card flex-between flex-wrap gap-md p-lg alert-card-${alert.type}`} 
+          className={`glass-card flex-between flex-wrap gap-md p-lg alert-card-${alert.type === 'error' ? 'danger' : alert.type}`} 
+          data-testid={`system-alert-${alert.id}`}
         >
           <div className="flex-center justify-start gap-sm">
             <div 
@@ -124,8 +134,9 @@ export default function DashboardSystemAlerts({
             </span>
           </div>
           <button 
-            className={`btn btn-sm ${alert.type === 'success' ? 'btn-primary bg-success text-black border-none' : 'btn-secondary'}`}
+            className={`btn btn-sm cursor-pointer ${alert.type === 'success' ? 'btn-primary bg-success text-black border-none' : 'btn-secondary'}`}
             onClick={() => onNavigate(alert.navTarget)}
+            data-testid={`alert-action-btn-${alert.id}`}
           >
             {alert.actionLabel}
           </button>

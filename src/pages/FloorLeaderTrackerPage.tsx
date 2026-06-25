@@ -40,7 +40,6 @@ export default function FloorLeaderTracker() {
     leaderMetrics,
     leaderTab, setLeaderTab,
     isImportModalOpen, setIsImportModalOpen,
-    ocvSuccessMsg, setOcvSuccessMsg,
     handleAddHour,
     handleRemoveHour,
     handleUpdateMetric,
@@ -59,13 +58,7 @@ export default function FloorLeaderTracker() {
     handleLogOcvObservation,
     getEmployeesOnShift,
     selectedEmpId, setSelectedEmpId,
-    winType, setWinType,
-    ocvEmpId, setOcvEmpId,
-    ocvConnect, setOcvConnect,
-    ocvRecommend, setOcvRecommend,
-    ocvProtect, setOcvProtect,
-    ocvClose, setOcvClose,
-    ocvNotes, setOcvNotes
+    winType, setWinType
   } = useFloorLeaderTracker(activeManager, roster, onSaveShift);
 
   return (
@@ -110,24 +103,11 @@ export default function FloorLeaderTracker() {
               handleRemoveHour={handleRemoveHour}
               handleLogFloorWin={handleLogFloorWin}
               handleLogOcvObservation={handleLogOcvObservation}
-              ocvSuccessMsg={ocvSuccessMsg}
               handleUndoWin={handleUndoWin}
               selectedEmpId={selectedEmpId}
               setSelectedEmpId={setSelectedEmpId}
               winType={winType}
               setWinType={setWinType}
-              ocvEmpId={ocvEmpId}
-              setOcvEmpId={setOcvEmpId}
-              ocvConnect={ocvConnect}
-              setOcvConnect={setOcvConnect}
-              ocvRecommend={ocvRecommend}
-              setOcvRecommend={setOcvRecommend}
-              ocvProtect={ocvProtect}
-              setOcvProtect={setOcvProtect}
-              ocvClose={ocvClose}
-              setOcvClose={setOcvClose}
-              ocvNotes={ocvNotes}
-              setOcvNotes={setOcvNotes}
             />
           )}
 

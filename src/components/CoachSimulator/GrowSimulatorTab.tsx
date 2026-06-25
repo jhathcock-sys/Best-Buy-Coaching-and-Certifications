@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
 import { Users, Send, Check } from 'lucide-react';
+import { Employee } from '../../types';
+
+export interface GrowSimulatorTabProps {
+  allEmployees: Employee[];
+  startCoaching: (employee: Employee, isVoiceMode: boolean, speakText: (text: string) => void) => void;
+  isVoiceMode: boolean;
+  speakText: (text: string) => void;
+  onImportScenario: (scenario: any) => void;
+}
 
 export default function GrowSimulatorTab({
   allEmployees,
@@ -7,10 +16,10 @@ export default function GrowSimulatorTab({
   isVoiceMode,
   speakText,
   onImportScenario
-}) {
+}: GrowSimulatorTabProps) {
   const [importText, setImportText] = useState('');
   const [importSuccess, setImportSuccess] = useState(false);
-  const [parseLogs, setParseLogs] = useState(null);
+  const [parseLogs, setParseLogs] = useState<{name: string; gap: string} | null>(null);
 
   const handleImportPastCoaching = () => {
     if (!importText.trim()) {
@@ -75,57 +84,50 @@ export default function GrowSimulatorTab({
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
+    <div className="grid gap-xl" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))' }} data-testid="grow-simulator-container">
       
       {/* Active Employees List */}
       <div className="glass-card">
-        <h2 style={{ fontSize: '1.4rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <h2 className="text-xl mb-sm flex align-center gap-sm m-0">
           <Users color="var(--bby-blue)" size={22} /> Employee Coaching Scenarios
         </h2>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.825rem', marginBottom: '1.75rem' }}>
+        <p className="text-sm text-secondary mb-xl m-0">
           Select an advisor to run a simulated GROW coaching conversation. Guide them behaviorally to address their metric targets.
         </p>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          {allEmployees.map(employee => (
+        <div className="flex-column gap-lg">
+          {(allEmployees || []).map(employee => (
             <div 
               key={employee.id} 
-              style={{ 
-                padding: '1.25rem', 
-                background: 'rgba(255,255,255,0.02)', 
-                border: '1px solid var(--border-glass)',
-                borderRadius: '16px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem'
-              }}
+              className="p-xl bg-white-alpha-02 border border-glass rounded-2xl flex-column gap-md"
+              data-testid={`employee-scenario-card-${employee.id}`}
             >
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <img src={employee.avatar} alt="" style={{ width: 44, height: 44, borderRadius: '50%', border: '2px solid var(--bby-blue)' }} />
+              <div className="flex-row gap-md align-center">
+                <img src={employee.avatar} alt="" className="w-44px h-44px rounded-full border-2 border-bby-blue" />
                 <div>
-                  <h3 style={{ fontSize: '0.95rem' }}>{employee.name}</h3>
-                  <span className="tag-pill" style={{ background: 'var(--error-glow)', color: 'var(--error)', borderColor: 'rgba(239, 68, 68, 0.2)', fontSize: '0.7rem', padding: '0.2rem 0.5rem', marginTop: '0.25rem' }}>
+                  <h3 className="text-base m-0">{employee.name}</h3>
+                  <span className="tag-pill bg-error-glow text-error border border-error-alpha-20 text-xs py-xs px-sm mt-xs inline-block">
                     Focus: {employee.metricGap}
                   </span>
                 </div>
               </div>
               
-              <p style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                {employee.description}
+              <p className="text-sm text-secondary line-height-normal m-0">
+                {employee.description || `Needs coaching on ${employee.metricGap}`}
               </p>
               
               <button 
-                className="btn btn-secondary" 
-                style={{ width: '100%', padding: '0.6rem', fontSize: '0.85rem' }}
+                className="btn btn-secondary w-full p-md text-sm cursor-pointer" 
                 onClick={() => startCoaching(employee, isVoiceMode, speakText)}
+                data-testid={`btn-start-practice-${employee.id}`}
               >
                 Start Practice Session
               </button>
             </div>
           ))}
           
-          {allEmployees.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
+          {(allEmployees || []).length === 0 && (
+            <div className="text-center p-xl text-secondary">
               No custom scenarios available. Import one using the NLP parser.
             </div>
           )}
@@ -133,27 +135,25 @@ export default function GrowSimulatorTab({
       </div>
 
       {/* Right side area: Quick NLP Scenario Importer */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div className="flex-column gap-xl">
         <div className="glass-card">
-          <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>Create Custom Scenario</h3>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>
+          <h3 className="text-lg mb-sm m-0">Create Custom Scenario</h3>
+          <p className="text-sm text-secondary mb-xl m-0">
             Paste notes from a previous coaching log or leadership feedback form. The AI parser will automatically generate a roleplay scenario based on your historical notes.
           </p>
           
           <textarea 
-            className="form-control"
+            className="form-control min-h-120px mb-md"
             placeholder="Paste coaching notes here... e.g. 'Jane is struggling with membership attach on the floor...'"
-            style={{ minHeight: '120px', marginBottom: '1rem' }}
             value={importText}
             onChange={(e) => setImportText(e.target.value)}
+            data-testid="input-coaching-notes"
           />
           
           <button 
-            className={`btn ${importSuccess ? 'btn-secondary' : 'btn-primary'}`} 
-            style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem',
-              borderColor: importSuccess ? 'var(--success)' : '', color: importSuccess ? 'var(--success)' : ''
-             }}
+            className={`btn ${importSuccess ? 'btn-secondary text-success border-success' : 'btn-primary'} w-full flex-center gap-sm cursor-pointer`} 
             onClick={handleImportPastCoaching}
+            data-testid="btn-parse-notes"
           >
             {importSuccess ? (
               <>

@@ -32,7 +32,7 @@ export default function ZoneGrid({
       
       if (targetZone === 'unassigned') {
         // Find which zone they were in and unassign them
-        const currentZone = zones.find(z => (zoneAssignments[z] || []).includes(empId));
+        const currentZone = zones.find(z => ((zoneAssignments || {})[z] || []).includes(empId));
         if (currentZone) {
           onUnassignZone(currentZone, empId);
         }
@@ -43,22 +43,28 @@ export default function ZoneGrid({
     }
   };
 
+  const safeZoneAssignments = zoneAssignments || {};
+  const safeRoster = roster || [];
+  const safeActiveBreaks = activeBreaks || {};
+  const safeUnassignedEmps = unassignedEmps || [];
+
   return (
     <DndContext 
       collisionDetection={closestCenter}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '1rem', minHeight: '500px' }}>
+      <div className="zone-grid-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '1rem', minHeight: '500px' }}>
         
         {/* Unassigned Pool (Sidebar) */}
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <DroppableZone id="unassigned" title="Unassigned (Roster)" activeCount={unassignedEmps.length}>
-            {unassignedEmps.map(emp => (
+          <DroppableZone id="unassigned" title="Unassigned (Roster)" activeCount={safeUnassignedEmps.length}>
+            {safeUnassignedEmps.map((emp: any) => (
               <DraggableAssociate 
                 key={emp.id} 
                 emp={emp} 
-                isOnBreak={activeBreaks[emp.id]} 
+                isOnBreak={safeActiveBreaks[emp.id]}
+                onToggleBreakState={onToggleBreakState}
               />
             ))}
           </DroppableZone>
@@ -72,19 +78,19 @@ export default function ZoneGrid({
           gap: '1rem'
         }}>
           {zones.map(zone => {
-            const zoneEmps = zoneAssignments[zone] || [];
+            const zoneEmps = safeZoneAssignments[zone] || [];
             
             return (
               <DroppableZone key={zone} id={zone} title={zone} activeCount={zoneEmps.length}>
-                {zoneEmps.map(empId => {
-                  const emp = roster.find(e => e.id === empId);
+                {zoneEmps.map((empId: string) => {
+                  const emp = safeRoster.find((e: any) => e.id === empId);
                   if (!emp) return null;
                   
                   return (
                     <DraggableAssociate 
                       key={empId} 
                       emp={emp} 
-                      isOnBreak={activeBreaks[empId]} 
+                      isOnBreak={safeActiveBreaks[empId]} 
                       onUnassignZone={() => onUnassignZone(zone, empId)}
                       onToggleBreakState={onToggleBreakState}
                     />
@@ -100,7 +106,8 @@ export default function ZoneGrid({
         {activeDragEmp ? (
           <DraggableAssociate 
             emp={activeDragEmp} 
-            isOnBreak={activeBreaks[activeDragEmp.id]} 
+            isOnBreak={safeActiveBreaks[activeDragEmp.id]} 
+            isOverlay={true}
           />
         ) : null}
       </DragOverlay>

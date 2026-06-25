@@ -14,15 +14,16 @@ export default function DroppableZone({ id, title, children, activeCount }: Drop
   });
 
   const style: React.CSSProperties = {
-    transition: 'all 0.2s ease',
+    transition: 'var(--transition-normal)',
     border: isOver ? '2px dashed var(--bby-blue)' : '2px solid transparent',
-    background: isOver ? 'rgba(0, 70, 190, 0.1)' : 'var(--bg-space)',
-    boxShadow: isOver ? '0 0 15px rgba(0, 70, 190, 0.3)' : 'none',
+    background: isOver ? 'var(--bby-blue-alpha-10)' : undefined,
+    boxShadow: isOver ? '0 0 20px var(--bby-blue-alpha-20), inset 0 0 15px var(--bby-blue-alpha-10)' : 'none',
+    transform: isOver ? 'scale(1.02)' : 'scale(1)',
     minHeight: '200px'
   };
 
   return (
-    <div ref={setNodeRef} className="zone-card" style={style}>
+    <div ref={setNodeRef} className="zone-card" style={style} data-testid={`droppable-zone-${id.replace(/\s+/g, '-').toLowerCase()}`}>
       <div className="zone-card-header">
         <h4 className="zone-card-title">{title}</h4>
         <span className="tag-pill zone-tag">{activeCount} active</span>

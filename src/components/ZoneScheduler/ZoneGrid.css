@@ -6,25 +6,28 @@
 
 .zone-card {
   padding: 1.25rem;
-  background: rgba(255, 255, 255, 0.01);
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
   border: 1px solid var(--border-glass);
   border-radius: 16px;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  transition: var(--transition-normal);
 }
 
 .zone-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid var(--border-glass);
   padding-bottom: 0.5rem;
 }
 
 .zone-card-title {
+  font-family: var(--font-heading);
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
   font-size: 0.9rem;
 }
 
@@ -36,7 +39,7 @@
   font-size: 0.75rem;
   height: 32px;
   padding: 0.2rem 0.5rem;
-  background: #0e1220;
+  background: var(--bg-obsidian);
 }
 
 .zone-emp-list {
@@ -51,7 +54,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px dashed rgba(255,255,255,0.04);
+  border: 1px dashed var(--border-glass);
   border-radius: 8px;
   color: var(--text-muted);
   font-size: 0.75rem;
@@ -70,14 +73,14 @@
 }
 
 .zone-emp-card-active {
-  background: rgba(255,255,255,0.02);
+  background: var(--white-alpha-05);
   border: 1px solid var(--border-glass);
   opacity: 1;
 }
 
 .zone-emp-card-break {
-  background: rgba(0, 70, 190, 0.05);
-  border: 1px solid rgba(0, 70, 190, 0.25);
+  background: var(--bby-blue-alpha-10);
+  border: 1px solid var(--bby-blue-alpha-20);
   opacity: 0.7;
 }
 
@@ -88,8 +91,9 @@
 }
 
 .zone-emp-name {
+  font-family: var(--font-heading);
   font-weight: 600;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .zone-emp-name-break {
@@ -136,7 +140,7 @@
   align-items: center;
   margin-top: 0.45rem;
   padding-top: 0.45rem;
-  border-top: 1px solid rgba(255,255,255,0.03);
+  border-top: 1px solid var(--border-glass);
 }
 
 .zone-break-active {
@@ -156,13 +160,18 @@
 }
 
 .zone-break-end-btn {
-  background: rgba(255,255,255,0.05);
+  background: var(--white-alpha-05);
   border: 1px solid var(--border-glass);
   border-radius: 6px;
   font-size: 0.65rem;
-  color: #fff;
+  color: var(--text-primary);
   padding: 0.15rem 0.4rem;
   cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.zone-break-end-btn:hover {
+  background: var(--white-alpha-10);
 }
 
 .zone-break-inactive {
@@ -187,17 +196,17 @@
 }
 
 .zone-break-btn {
-  background: rgba(255,255,255,0.02);
+  background: var(--white-alpha-05);
   border: 1px solid var(--border-glass);
   border-radius: 4px;
   font-size: 0.65rem;
   color: var(--text-secondary);
   padding: 0.15rem 0.35rem;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: var(--transition-fast);
 }
 
 .zone-break-btn:hover {
-  background: rgba(0, 70, 190, 0.15);
-  color: #fff;
+  background: var(--bby-blue-alpha-20);
+  color: var(--text-primary);
 }

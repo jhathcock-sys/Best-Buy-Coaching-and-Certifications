@@ -16,8 +16,10 @@ export default function ZoneScheduler({
   onImportSchedule
 }) {
   const zones = ['Computing', 'Mobile', 'Home Theatre', 'Front End', 'Geek Squad', 'Appliances'];
-  const assignedEmpIds = Object.values(zoneAssignments).flat() as string[];
-  const unassignedEmps = roster.filter(emp => !assignedEmpIds.includes(emp.id));
+  const safeZoneAssignments = zoneAssignments || {};
+  const safeRoster = roster || [];
+  const assignedEmpIds = Object.values(safeZoneAssignments).flat() as string[];
+  const unassignedEmps = safeRoster.filter(emp => !assignedEmpIds.includes(emp.id));
   const apiKey = useStore(state => state.apiKey);
   const playbookSettings = useStore(state => state.playbookSettings);
 
@@ -26,17 +28,23 @@ export default function ZoneScheduler({
   const timeSlots = ['10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM'];
 
   const handleAutoDeploy = async () => {
+    if (!apiKey) {
+      toast.error('API Key missing. Cannot Auto-Deploy.');
+      return;
+    }
+
+    let toastId;
     try {
       setIsDeploying(true);
-      const toastId = toast.loading('Gemini is analyzing floor traffic and optimizing roster...');
-      const assignments = await generateSmartZoning(roster, zones, apiKey, playbookSettings);
+      toastId = toast.loading('Gemini is analyzing floor traffic and optimizing roster...');
+      const assignments = await generateSmartZoning(safeRoster, zones, apiKey, playbookSettings);
       
       if (onImportSchedule) {
         onImportSchedule({ zoneAssignments: assignments, breakSchedule: [] });
       }
       toast.success('Roster optimized and Auto-Deployed!', { id: toastId });
     } catch (err) {
-      toast.error('Auto-Deploy failed. Check API key and network.');
+      toast.error('Auto-Deploy failed. Check API key and network.', { id: toastId });
       console.error(err);
     } finally {
       setIsDeploying(false);
@@ -56,6 +64,7 @@ export default function ZoneScheduler({
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button
+            data-testid="auto-deploy-btn"
             onClick={handleAutoDeploy}
             disabled={isDeploying}
             style={{
@@ -121,10 +130,10 @@ export default function ZoneScheduler({
       {viewMode === 'grid' ? (
         <ZoneGrid 
           zones={zones}
-          zoneAssignments={zoneAssignments}
+          zoneAssignments={safeZoneAssignments}
           unassignedEmps={unassignedEmps}
-          roster={roster}
-          activeBreaks={activeBreaks}
+          roster={safeRoster}
+          activeBreaks={activeBreaks || {}}
           onAssignZone={onAssignZone}
           onUnassignZone={onUnassignZone}
           onToggleBreakState={onToggleBreakState}
@@ -133,9 +142,9 @@ export default function ZoneScheduler({
         <ZoneTimeline 
           timeSlots={timeSlots}
           assignedEmpIds={assignedEmpIds}
-          roster={roster}
-          zoneAssignments={zoneAssignments}
-          activeBreaks={activeBreaks}
+          roster={safeRoster}
+          zoneAssignments={safeZoneAssignments}
+          activeBreaks={activeBreaks || {}}
         />
       )}
     </div>

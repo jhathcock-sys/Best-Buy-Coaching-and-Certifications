@@ -26,16 +26,17 @@ export default function ZoneTimeline({
             <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>No associates currently scheduled in zones.</div>
           ) : (
             assignedEmpIds.map(empId => {
-              const emp = roster.find(e => e.id === empId);
+              const emp = (roster || []).find(e => e.id === empId);
               if (!emp) return null;
               
               // Find what zone they are in
               let currentZone = 'Unassigned';
-              Object.keys(zoneAssignments).forEach(z => {
-                if (zoneAssignments[z].includes(empId)) currentZone = z;
+              const safeZoneAssignments = zoneAssignments || {};
+              Object.keys(safeZoneAssignments).forEach(z => {
+                if ((safeZoneAssignments[z] || []).includes(empId)) currentZone = z;
               });
 
-              const isOnBreak = activeBreaks[empId]; // '15m', '30m', or null
+              const isOnBreak = (activeBreaks || {})[empId]; // '15m', '30m', or null
               
               return (
                 <div key={empId} style={{ display: 'grid', gridTemplateColumns: '150px 1fr', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>

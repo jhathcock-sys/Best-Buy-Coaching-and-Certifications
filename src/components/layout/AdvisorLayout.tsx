@@ -8,8 +8,10 @@ interface AdvisorLayoutProps {
 }
 
 export default function AdvisorLayout({ dbConnected, children }: AdvisorLayoutProps) {
+  const logout = useStore((state) => state.logout);
+
   return (
-    <div className="layout-container dark-theme flex-column h-full overflow-hidden">
+    <div className="layout-container dark-theme flex-column h-full overflow-hidden" data-testid="advisor-layout">
       <div className="flex-between p-md bg-white-alpha-05 border-b-glass">
         <div className="flex-center gap-sm">
           <div className="p-sm bg-bby-blue rounded-8">
@@ -19,19 +21,19 @@ export default function AdvisorLayout({ dbConnected, children }: AdvisorLayoutPr
         </div>
         <div className="flex-center gap-md">
           {dbConnected ? (
-            <div className="badge-sync">
+            <div className="badge-sync" data-testid="cloud-sync-badge">
               <span className="badge-sync-dot" />
               <span className="badge-sync-text">Cloud Sync</span>
             </div>
           ) : (
-            <div className="badge-sandbox">
+            <div className="badge-sandbox" data-testid="local-sandbox-badge">
               <span className="badge-sandbox-dot" />
               <span className="badge-sandbox-text">Local Sandbox</span>
             </div>
           )}
           <button 
-            onClick={() => useStore.getState().logout()} 
-            className="btn btn-secondary"
+            onClick={logout} 
+            className="btn btn-secondary cursor-pointer"
             data-testid="advisor-logout-btn"
           >
             Log Out
@@ -40,7 +42,7 @@ export default function AdvisorLayout({ dbConnected, children }: AdvisorLayoutPr
       </div>
       <div className="flex-1 overflow-hidden">
         <Suspense fallback={
-          <div className="flex-center flex-column w-full h-full gap-md">
+          <div className="flex-center flex-column w-full h-full gap-md" data-testid="loading-module-spinner">
             <div className="w-50px h-50px border-4 border-solid border-white-alpha-10 border-bby-yellow-t-4 rounded-full animate-spin"></div>
             <span className="text-secondary text-sm font-semibold uppercase tracking-widest animate-fade-in">Loading Module...</span>
           </div>

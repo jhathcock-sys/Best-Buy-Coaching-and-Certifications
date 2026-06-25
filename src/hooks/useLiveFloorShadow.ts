@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { generateCoachingLogGemini } from '../services/ai';
 
 export function useLiveFloorShadow({
@@ -20,15 +20,18 @@ export function useLiveFloorShadow({
 
   const [prevPreselectedEmployee, setPrevPreselectedEmployee] = useState(preselectedEmployee);
 
-  if (preselectedEmployee !== prevPreselectedEmployee) {
-    setPrevPreselectedEmployee(preselectedEmployee);
-    if (preselectedEmployee) {
-      setSelectedEmpId(preselectedEmployee.id || '');
-      setTimeout(() => {
-        if (clearPreselectedEmployee) clearPreselectedEmployee();
-      }, 50);
+  useEffect(() => {
+    if (preselectedEmployee !== prevPreselectedEmployee) {
+      setPrevPreselectedEmployee(preselectedEmployee);
+      if (preselectedEmployee) {
+        setSelectedEmpId(preselectedEmployee.id || '');
+        const timer = setTimeout(() => {
+          if (clearPreselectedEmployee) clearPreselectedEmployee();
+        }, 50);
+        return () => clearTimeout(timer);
+      }
     }
-  }
+  }, [preselectedEmployee, prevPreselectedEmployee, clearPreselectedEmployee]);
   
   // DISC Checklist States
   const [checklist, setChecklist] = useState({
@@ -67,12 +70,12 @@ export function useLiveFloorShadow({
   const [compiledLog, setCompiledLog] = useState('');
 
   // Find selected employee object
-  const selectedEmployee = roster.find(emp => emp.id === selectedEmpId);
+  const selectedEmployee = (roster || []).find(emp => emp.id === selectedEmpId);
 
   // Handle employee dropdown select
-  const handleSelectEmployee = (empId) => {
+  const handleSelectEmployee = useCallback((empId) => {
     setSelectedEmpId(empId);
-    const emp = roster.find(e => e.id === empId);
+    const emp = (roster || []).find(e => e.id === empId);
     if (emp) {
       setDepartment(emp.dept || 'General Sales');
       // Set some pre-filled gaps if they have one
@@ -82,14 +85,14 @@ export function useLiveFloorShadow({
         setGapDetails('');
       }
     }
-  };
+  }, [roster]);
 
-  const toggleChecklistItem = (key) => {
+  const toggleChecklistItem = useCallback((key) => {
     setChecklist(prev => ({
       ...prev,
       [key]: !prev[key]
     }));
-  };
+  }, []);
 
   // Compile the GROW log format
   const generateGrowLog = () => {
@@ -156,8 +159,8 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
 * **Coaching Date**: ${todayDate}`;
   };
 
-  const handleCompileAndLog = async () => {
-    if (!selectedEmpId) {
+  const handleCompileAndLog = useCallback(async () => {
+    if (!selectedEmpId || !selectedEmployee) {
       alert("Please select an associate first.");
       return;
     }
@@ -286,7 +289,21 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
 
     // 4. Trigger success screen overlay
     setShowSuccessOverlay(true);
-  };
+  }, [
+    selectedEmpId,
+    selectedEmployee,
+    followUpDate,
+    playbookSettings,
+    apiKey,
+    checklist,
+    notes,
+    strengths,
+    gapDetails,
+    department,
+    followUpAction,
+    onLogCoachingSession,
+    onAddFollowUpTask
+  ]);
 
   const handleResetForm = () => {
     setCurrentStep(1);

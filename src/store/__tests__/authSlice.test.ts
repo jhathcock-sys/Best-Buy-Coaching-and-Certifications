@@ -11,7 +11,8 @@ vi.mock('../../services/firebase', () => ({
   isFirebaseConnected: vi.fn().mockReturnValue(true), // cloud-only
   initFirebase: vi.fn(),
   saveManagersToCloud: vi.fn(),
-  signOutTenant: vi.fn()
+  signOutTenant: vi.fn(),
+  getStoreGuestPin: vi.fn().mockResolvedValue('1234')
 }));
 
 // Mock sessionStorage

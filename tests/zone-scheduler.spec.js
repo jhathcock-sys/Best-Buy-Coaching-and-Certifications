@@ -88,28 +88,22 @@ test.describe('Zone Scheduler E2E', () => {
     // Drag to Computing zone using dispatchEvent for dnd-kit
     const computingZone = page.getByTestId('droppable-zone-computing');
     
-    // Get boxes
-    const sourceBox = await firstAssociate.boundingBox();
+    // Focus the draggable item to prepare for keyboard drag
+    // dnd-kit pointer sensors need careful dispatching, or dragTo works if configured
+    await firstAssociate.hover();
+    await page.mouse.down();
+    
+    // Move to computing zone
     const targetBox = await computingZone.boundingBox();
-
-    const startX = sourceBox.x + sourceBox.width / 2;
-    const startY = sourceBox.y + sourceBox.height / 2;
-    const endX = targetBox.x + targetBox.width / 2;
-    const endY = targetBox.y + targetBox.height / 2;
-
-    // Dispatch dnd-kit pointer events directly
-    await firstAssociate.dispatchEvent('pointerdown', { button: 0, clientX: startX, clientY: startY });
-    
-    // Move enough to trigger drag
-    await page.mouse.move(startX + 20, startY + 20, { steps: 5 });
-    
-    // Move to target
-    await page.mouse.move(endX, endY, { steps: 10 });
-    
-    await computingZone.dispatchEvent('pointerup', { button: 0, clientX: endX, clientY: endY });
+    if (targetBox) {
+      await page.mouse.move(targetBox.x + targetBox.width / 2, targetBox.y + targetBox.height / 2, { steps: 5 });
+      await page.mouse.up();
+    } else {
+      await firstAssociate.dragTo(computingZone);
+    }
 
     // Verify the associate is now inside the Computing zone
-    await expect(computingZone.locator(`[data-testid="${associateId}"]`)).toBeVisible();
+    await expect(computingZone.locator(`[data-testid="${associateId}"]`)).toBeVisible({ timeout: 5000 });
     
     // Verify the unassigned zone no longer has this associate
     await expect(unassignedZone.locator(`[data-testid="${associateId}"]`)).not.toBeVisible();

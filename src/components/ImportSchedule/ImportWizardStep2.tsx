@@ -1,44 +1,58 @@
 import React from 'react';
-import ImportScheduleRow from './ImportScheduleRow';
+import ImportScheduleRow, { ParsedShiftRowData } from './ImportScheduleRow';
+import { Employee } from '../../types';
+
+export interface ImportWizardStep2Props {
+  reviews?: ParsedShiftRowData[];
+  setReviews: (val: ParsedShiftRowData[]) => void;
+  setParsedItems: (val: any[]) => void;
+  roster?: Employee[];
+  handleMatchChange: (id: string, value: string) => void;
+  handleZoneChange: (id: string, value: string) => void;
+  handleShiftTimeChange: (id: string, value: string) => void;
+  isProcessing?: boolean;
+}
 
 export default function ImportWizardStep2({
-  reviews,
+  reviews = [],
   setReviews,
   setParsedItems,
-  roster,
+  roster = [],
   handleMatchChange,
   handleZoneChange,
-  handleShiftTimeChange
-}) {
+  handleShiftTimeChange,
+  isProcessing = false
+}: ImportWizardStep2Props) {
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+      <div className="flex-between align-center mb-xl">
         <div>
-          <h4 style={{ fontSize: '1.05rem', margin: 0 }}>Validate & Map Floor Schedule</h4>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.775rem', margin: '0.15rem 0 0 0' }}>Verify fuzzy matches to your roster. Red highlights indicate unmatched names that will be ignored unless overridden.</p>
+          <h4 className="text-md m-0 text-white">Validate & Map Floor Schedule</h4>
+          <p className="text-secondary text-xs mt-xs mb-0">Verify fuzzy matches to your roster. Red highlights indicate unmatched names that will be ignored unless overridden.</p>
         </div>
         <button 
-          className="btn btn-secondary"
-          style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}
+          className="btn btn-secondary py-xs px-sm text-xs cursor-pointer"
           onClick={() => { setParsedItems([]); setReviews([]); }}
+          disabled={isProcessing}
+          data-testid="clear-import-btn"
         >
           Clear Import
         </button>
       </div>
 
-      <div style={{ overflowX: 'auto', border: '1px solid var(--border-glass)', borderRadius: '12px', background: 'rgba(0,0,0,0.2)' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', textAlign: 'left' }}>
+      <div className="overflow-x-auto border-glass rounded-xl bg-black-alpha-20">
+        <table className="w-full border-collapse text-xs text-left">
           <thead>
-            <tr style={{ background: 'rgba(16, 24, 48, 0.9)', borderBottom: '1px solid var(--border-glass)' }}>
-              <th style={{ padding: '0.75rem 1rem' }}>EXTRACTED NAME</th>
-              <th style={{ padding: '0.75rem 1rem' }}>SHIFT TIME</th>
-              <th style={{ padding: '0.75rem 1rem' }}>ROSTER MATCH</th>
-              <th style={{ padding: '0.75rem 1rem' }}>ZONE ASSIGNMENT</th>
-              <th style={{ padding: '0.75rem 1rem' }}>AUTO BREAKS</th>
+            <tr className="bg-obsidian-alpha-90 border-b-glass text-secondary">
+              <th className="p-md">EXTRACTED NAME</th>
+              <th className="p-md">SHIFT TIME</th>
+              <th className="p-md">ROSTER MATCH</th>
+              <th className="p-md">ZONE ASSIGNMENT</th>
+              <th className="p-md">AUTO BREAKS</th>
             </tr>
           </thead>
           <tbody>
-            {reviews.map((rev) => {
+            {reviews?.map((rev) => {
               return (
                 <ImportScheduleRow 
                   key={rev.id}

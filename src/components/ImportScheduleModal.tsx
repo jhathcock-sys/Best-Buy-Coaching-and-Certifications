@@ -113,6 +113,7 @@ export default function ImportScheduleModal({ isOpen, onClose, roster = [], onIm
               handleMatchChange={handleMatchChange}
               handleZoneChange={handleZoneChange}
               handleShiftTimeChange={handleShiftTimeChange}
+              isProcessing={isParsing}
             />
           )}
 

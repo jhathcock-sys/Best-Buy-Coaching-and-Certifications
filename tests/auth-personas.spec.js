@@ -2,17 +2,17 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Authentication Personas', () => {
 
-  test('Guest backdoor login (PIN 1234)', async ({ page }) => {
+  test('Guest backdoor login (PIN 1022)', async ({ page }) => {
     await page.goto('/');
 
     // Select Supervisor persona
     await page.getByTestId('persona-supervisor-btn').click();
 
-    // Enter backdoor PIN
+    // Enter backdoor PIN (1022)
     await page.getByTestId('keypad-1').click();
+    await page.getByTestId('keypad-0').click();
     await page.getByTestId('keypad-2').click();
-    await page.getByTestId('keypad-3').click();
-    await page.getByTestId('keypad-4').click();
+    await page.getByTestId('keypad-2').click();
 
     // Assert successful navigation by looking for the dashboard nav item
     const dashboardNav = page.getByTestId('nav-dashboard');

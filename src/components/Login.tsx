@@ -78,6 +78,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
           {!isSuccess && (
             <input
               type="text"
+              data-testid="store-input"
               value={storeId}
               onChange={(e) => {
                 setStoreId(e.target.value);

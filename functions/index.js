@@ -237,10 +237,10 @@ exports.verifyCertification = functions.https.onRequest((req, res) => {
 });
 
 // 4. Generic Callable AI generation function to replace client-side SDK usage
-exports.generateAIContent = functions.https.onCall(async (data, context) => {
-  console.log('generateAIContent started. Data received:', JSON.stringify(data));
+exports.generateAIContent = functions.https.onCall(async (request) => {
+  const payload = request.data || request;
+  console.log('generateAIContent started. Data received:', JSON.stringify(payload));
   try {
-    const payload = data.data || data;
     console.log('Extracted payload:', JSON.stringify(payload));
     const { prompt, systemInstruction, modelConfig, isJSON, isVision, base64Image, mimeType, isProMode, apiKey } = payload;
     
@@ -313,7 +313,8 @@ exports.generateAIContent = functions.https.onCall(async (data, context) => {
 
 // 5. Parse Rents Due CSV on the backend
 exports.parseRentsDueCSV = functions.https.onCall(async (data, context) => {
-  const text = data.csvText;
+  const payload = data.data || data;
+  const text = payload.csvText;
   if (!text || typeof text !== 'string') {
     throw new functions.https.HttpsError('invalid-argument', 'Missing CSV text data');
   }
@@ -405,7 +406,8 @@ exports.parseRentsDueCSV = functions.https.onCall(async (data, context) => {
 // Eradicates client-side auth forgery by securely creating tenant accounts backend-only
 exports.provisionTenantAccount = functions.https.onCall(async (data, context) => {
   try {
-    const { storeId, pin } = data;
+    const payload = data.data || data;
+    const { storeId, pin } = payload;
     if (!storeId || !pin) {
       throw new functions.https.HttpsError('invalid-argument', 'Missing storeId or pin.');
     }

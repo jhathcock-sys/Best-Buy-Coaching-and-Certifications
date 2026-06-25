@@ -101,7 +101,10 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
         if (get().dbConnected && !authSuccess) {
           authSuccess = await signInTenant(storeId, pin);
           if (!authSuccess) {
-            authSuccess = await createTenantAuth(storeId, pin);
+            const created = await createTenantAuth(storeId, pin);
+            if (created) {
+              authSuccess = await signInTenant(storeId, pin);
+            }
             if (!authSuccess) console.error("Failed true Firebase authentication. Writes will be rejected.");
           }
         }

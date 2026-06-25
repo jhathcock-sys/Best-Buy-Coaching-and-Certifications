@@ -2,6 +2,7 @@ export interface Employee {
   id: string;
   name: string;
   dept: string;
+  employeeNumber?: string;
   hours: number;
   memberships: number;
   creditCards: number;

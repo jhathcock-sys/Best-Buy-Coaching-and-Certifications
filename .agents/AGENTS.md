@@ -84,3 +84,10 @@ After every significant upgrade, change, or feature completion, you must:
     3. Require that any code file change by the `expert_coder` is accompanied by a matching test file modification by the `automation_tester`.
     4. Immediately run the full test suite via PowerShell after modifications. If errors return, force the agents into an internal repair loop until the terminal output is 100% SUCCESS.
     5. Only commit to Git and log to `agent_memory/` once the verification gate is completely green.
+
+## 25. STATEFUL LOOP MANIFEST & FINAL DEPLOYMENT MANDATES
+1. The Orchestrator is strictly FORBIDDEN from relying on chat message window history to recall its file queue sequence or position.
+2. At the absolute start of every single evaluation turn, the orchestrator MUST call its file tools to read `agent_memory/loop_manifest.json` to verify its active `current_checkpoint`.
+3. If any sub-agent issues an explicit `VETO` during the round-table debate, the orchestrator must append the veto reason to the manifest's `active_vetos` log before triggering the repair loop.
+4. The moment the PowerShell Quality Gate returns 100% SUCCESS (`npm run typecheck ; npm run test`), the orchestrator MUST call its manifest tracking tools to advance the file index, move the completed target to `processed_queue`, and stage the next file path before executing Phase 5 Git commits.
+5. The moment the manifest array shows that the `remaining_queue` has reached 0 files, the orchestrator MUST autonomously trigger the production build and deployment pipeline (`npm run build ; firebase deploy`) to sync all architectural modifications to Firebase Hosting and Firebase Cloud Functions, verifying live availability before officially spinning down.

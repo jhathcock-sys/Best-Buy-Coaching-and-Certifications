@@ -1,15 +1,25 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { calculateCVI } from '../../store/cviHelper';
+import { Employee } from '../../types';
+
+interface AssociateProfileHeaderProps {
+  employee: Employee;
+  rosterHistory: Record<string, Record<string, Employee>>;
+  activePeriod: string;
+  onClose: () => void;
+}
 
 export default function AssociateProfileHeader({
   employee,
   rosterHistory,
   activePeriod,
   onClose
-}: any) {
+}: AssociateProfileHeaderProps) {
+  if (!employee) return <div data-testid="profile-header-loading" className="p-lg text-center text-muted">Loading...</div>;
+
   return (
-    <div className="flex-between align-center border-bottom profile-header-bg p-lg">
+    <div data-testid="associate-profile-header" className="flex-between align-center border-bottom profile-header-bg p-lg">
       <div>
         <div className="flex-row align-center gap-sm flex-wrap">
           <h3 className="text-xl text-white font-heading m-0">
@@ -19,7 +29,7 @@ export default function AssociateProfileHeader({
             {employee.dept}
           </span>
           {employee.focus5 && (
-            <span className="text-xxs text-white focus5-badge font-extrabold flex-row align-center gap-xs rounded-sm p-xs">
+            <span data-testid="profile-header-focus5-badge" className="text-xxs text-white focus5-badge font-extrabold flex-row align-center gap-xs rounded-sm p-xs">
               🔥 FOCUS 5
             </span>
           )}
@@ -38,7 +48,8 @@ export default function AssociateProfileHeader({
           )}
           <span className="text-xs text-muted">•</span>
           {(() => {
-            const cvi = calculateCVI(employee, rosterHistory, activePeriod);
+            const rawCvi = calculateCVI(employee, rosterHistory, activePeriod);
+            const cvi = String(rawCvi || '');
             let badgeClasses = 'bg-white-alpha-05 text-secondary border-glass-strong';
             let cviIcon = '▶';
             if (cvi.includes('Accelerating')) {
@@ -53,6 +64,7 @@ export default function AssociateProfileHeader({
             }
             return (
               <span 
+                data-testid="profile-header-cvi-badge"
                 title="Coaching Velocity Index (Month over Month growth velocity)"
                 className={`text-xxs font-bold flex-row align-center gap-xs rounded-lg p-xs ${badgeClasses}`}
               >
@@ -64,6 +76,7 @@ export default function AssociateProfileHeader({
       </div>
       <button 
         type="button"
+        data-testid="profile-header-close-btn"
         className="btn-link text-muted bg-transparent border-none cursor-pointer p-xs"
         onClick={onClose}
       >

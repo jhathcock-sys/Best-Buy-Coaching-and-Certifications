@@ -11,10 +11,12 @@ import { calculateCVI } from '../store/cviHelper';
 
 import { useStore } from '../store/useStore';
 
+import { Employee } from '../types';
+
 export interface AssociateProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
-  employee: any;
+  employee: Employee | null;
 }
 
 

@@ -401,11 +401,12 @@ exports.provisionTenantAccount = functions.https.onCall(async (data, context) =>
     } catch (e) {
       if (e.code === 'auth/user-not-found') {
         // User does not exist, safe to create
-        await admin.auth().createUser({
+        const userRecord = await admin.auth().createUser({
           email,
           password,
           displayName: `Store ${storeId} Manager`
         });
+        await admin.auth().setCustomUserClaims(userRecord.uid, { role: 'manager' });
         return { success: true, message: 'Account securely created.' };
       }
       throw e;

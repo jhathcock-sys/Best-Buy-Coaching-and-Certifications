@@ -25,6 +25,16 @@ service cloud.firestore {
         allow write: if isTenantManager(storeId) && isRoleManager();
       }
 
+      match /data/playbookSettings {
+        allow read: if true;
+        allow write: if isTenantManager(storeId) && isRoleManager();
+      }
+
+      match /data/managersSettings {
+        allow read: if true;
+        allow write: if isTenantManager(storeId) && isRoleManager();
+      }
+
       match /data/{document=**} {
         allow read: if isTenantManager(storeId);
         allow write: if isTenantManager(storeId) && isRoleManager();
@@ -53,7 +63,7 @@ service cloud.firestore {
 
       match /followUpTasks/{document=**} {
         allow read: if isTenantManager(storeId);
-        allow write: if isTenantManager(storeId);
+        allow write: if isTenantManager(storeId) && isRoleManager();
       }
     }
   }

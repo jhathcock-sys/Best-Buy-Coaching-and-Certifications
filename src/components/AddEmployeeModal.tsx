@@ -96,7 +96,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
           </h3>
           <button 
             type="button"
-            style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
+            className="flex-center text-muted border-none bg-transparent"
             onClick={onClose}
           >
             <X size={20} />
@@ -302,10 +302,10 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
           </div>
 
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
-            <button type="button" className="btn btn-secondary" style={{ padding: '0.55rem 1.25rem' }} onClick={onClose}>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" style={{ padding: '0.55rem 1.25rem', background: 'var(--bby-yellow)', color: '#000', fontWeight: 600 }}>
+            <button type="submit" className="btn btn-accent btn-sm">
               Add Associate
             </button>
           </div>

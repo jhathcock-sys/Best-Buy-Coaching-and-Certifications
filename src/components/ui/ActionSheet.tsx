@@ -31,7 +31,7 @@ export default function ActionSheet({ isOpen, onClose, title, children }: Action
       >
         <div className="action-sheet-header">
           <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700 }}>{title}</h3>
-          <button onClick={onClose} className="icon-btn clickable" style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', borderRadius: '50%', padding: '0.4rem' }}>
+          <button onClick={onClose} className="icon-btn clickable bg-white-alpha-10 border-none text-white rounded-full p-xs flex-center">
             <X size={18} />
           </button>
         </div>

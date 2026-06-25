@@ -7,11 +7,13 @@ interface AuthGateProps {
   children: React.ReactNode;
 }
 
-export default function AuthGate({ requireManager, children }: AuthGateProps) {
+export default function AuthGate({ requireManager = true, children }: AuthGateProps) {
   const activeManager = useStore((state) => state.activeManager);
 
-  if (requireManager && !activeManager) {
-    return <Navigate replace to="/dashboard" />;
+  if (requireManager) {
+    if (!activeManager || !['Store Leader', 'Sales Supervisor', 'Manager'].includes(activeManager.role)) {
+      return <Navigate replace to="/dashboard" />;
+    }
   }
 
   return <>{children}</>;

@@ -219,17 +219,16 @@ Let's crush it! Let me know if you have any questions or need me to jump in and 
         <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
           <p style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.75rem', color: '#fff' }}>Load Standard Templates:</p>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <button className="tag-pill" style={{ cursor: 'pointer' }} onClick={() => loadTemplate('memberships')}>Membership Gap</button>
-            <button className="tag-pill" style={{ cursor: 'pointer' }} onClick={() => loadTemplate('gsp')}>GSP / Warranty</button>
-            <button className="tag-pill" style={{ cursor: 'pointer' }} onClick={() => loadTemplate('card')}>Credit Cards</button>
-            <button className="tag-pill" style={{ cursor: 'pointer' }} onClick={() => loadTemplate('surveys')}>5-Star Surveys</button>
+            <button className="tag-pill" onClick={() => loadTemplate('memberships')}>Membership Gap</button>
+            <button className="tag-pill" onClick={() => loadTemplate('gsp')}>GSP / Warranty</button>
+            <button className="tag-pill" onClick={() => loadTemplate('card')}>Credit Cards</button>
+            <button className="tag-pill" onClick={() => loadTemplate('surveys')}>5-Star Surveys</button>
           </div>
         </div>
 
         {/* AI Generator Button */}
         <button 
-          className="btn btn-primary" 
-          style={{ padding: '0.85rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+          className="btn btn-primary w-full"
           onClick={handleAIFillCoachingLog}
           disabled={isGeneratingLog}
         >

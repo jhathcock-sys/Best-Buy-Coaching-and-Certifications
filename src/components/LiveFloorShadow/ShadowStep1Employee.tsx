@@ -1,27 +1,24 @@
 import React from 'react';
-import { ShieldCheck, ChevronLeft, ChevronRight, Check, Clipboard, Calendar, Users, AlertCircle } from 'lucide-react';
+import { Users, AlertCircle } from 'lucide-react';
+import { Employee } from '../../types';
+
+export interface ShadowStep1EmployeeProps {
+  roster: Employee[];
+  selectedEmpId: string;
+  department: string;
+  setDepartment: (dept: string) => void;
+  handleSelectEmployee: (id: string) => void;
+  activeEmployee?: Employee | null;
+}
 
 export default function ShadowStep1Employee({ 
   roster,
   selectedEmpId,
-  setSelectedEmpId,
   department,
   setDepartment,
-  setCurrentStep,
-  checklist,
-  setChecklist,
-  customerPersona,
-  setCustomerPersona,
-  customPersona,
-  setCustomPersona,
-  notes,
-  setNotes,
-  isGenerating,
-  setIsGenerating,
-  handleGenerateCoaching,
   handleSelectEmployee,
   activeEmployee
- }) {
+}: ShadowStep1EmployeeProps) {
   return (
     <>
       <div className="flex-column gap-lg animate-fade-in">
@@ -37,16 +34,17 @@ export default function ShadowStep1Employee({
             <select 
               value={selectedEmpId} 
               onChange={(e) => handleSelectEmployee(e.target.value)}
-              className="form-control bg-obsidian-alpha border-glass text-white w-full h-44px py-sm px-md-lg"
+              className="form-control bg-obsidian-alpha border-glass text-white w-full h-44px py-sm px-md-lg cursor-pointer transition-all"
+              data-testid="shadow-associate-select"
             >
               <option value="">-- Choose Associate --</option>
-                      {roster.map(emp => (
-                        <option key={emp.id} value={emp.id}>
-                          {emp.name} ({emp.dept})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+              {roster?.map(emp => (
+                <option key={emp?.id} value={emp?.id}>
+                  {emp?.name} ({emp?.dept})
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div className="form-group">
             <label className="block text-sm text-secondary mb-sm">
@@ -55,21 +53,22 @@ export default function ShadowStep1Employee({
             <select 
               value={department} 
               onChange={(e) => setDepartment(e.target.value)}
-              className="form-control bg-obsidian-alpha border-glass text-white w-full h-44px py-sm px-md-lg"
+              className="form-control bg-obsidian-alpha border-glass text-white w-full h-44px py-sm px-md-lg cursor-pointer transition-all"
+              data-testid="shadow-department-select"
             >
               <option value="Front End">Front End</option>
-                      <option value="General Sales">General Sales</option>
-                      <option value="Appliances">Appliances</option>
-                      <option value="Computing">Computing</option>
-                      <option value="Mobile">Mobile</option>
-                      <option value="Home Theatre">Home Theatre</option>
-                      <option value="Geek Squad">Geek Squad</option>
-                    </select>
-                  </div>
-                </div>
+              <option value="General Sales">General Sales</option>
+              <option value="Appliances">Appliances</option>
+              <option value="Computing">Computing</option>
+              <option value="Mobile">Mobile</option>
+              <option value="Home Theatre">Home Theatre</option>
+              <option value="Geek Squad">Geek Squad</option>
+            </select>
+          </div>
+        </div>
 
         {activeEmployee && (
-          <div className="mt-lg p-1-25rem rounded-xl bg-bby-blue-alpha-06 border-bby-blue-alpha-15 flex-column gap-sm">
+          <div className="mt-lg p-1-25rem rounded-xl bg-bby-blue-alpha-06 border-bby-blue-alpha-15 flex-column gap-sm" data-testid="shadow-active-employee">
             <div className="flex-between">
               <span className="font-bold text-base text-white">{activeEmployee.name}</span>
               <span className="tag-pill tag-pill-active">{activeEmployee.dept}</span>
@@ -87,7 +86,7 @@ export default function ShadowStep1Employee({
             )}
           </div>
         )}
-              </div>
+      </div>
     </>
   );
 }

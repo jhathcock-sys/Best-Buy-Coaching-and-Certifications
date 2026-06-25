@@ -9,6 +9,7 @@ import { generateCoachingLogGemini } from '../services/ai';
 
 
 import { useStore } from '../store/useStore';
+import { Employee } from '../types';
 
 const EMPTY_OBJ = {};
 
@@ -23,7 +24,8 @@ export default function LiveFloorShadow({
   const activePeriod = useStore((state) => state.activePeriod);
   const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
   const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
-  const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
+  const roster = React.useMemo(() => (Object.values(_rawroster) as Employee[]).sort((a: Employee, b: Employee) => 
+    a.name.localeCompare(b.name)), [_rawroster]);
   
   const onLogCoachingSession = useStore((state) => state.logCoachingSession);
   const onAddFollowUpTask = useStore((state) => state.addFollowUpTask);
@@ -121,22 +123,9 @@ export default function LiveFloorShadow({
               <ShadowStep1Employee 
                 roster={roster}
                 selectedEmpId={selectedEmpId}
-                setSelectedEmpId={setSelectedEmpId}
                 department={department}
                 setDepartment={setDepartment}
                 handleSelectEmployee={handleSelectEmployee}
-                setCurrentStep={setCurrentStep}
-                checklist={checklist}
-                setChecklist={setChecklist}
-                customerPersona={customerPersona}
-                setCustomerPersona={setCustomerPersona}
-                customPersona={customPersona}
-                setCustomPersona={setCustomPersona}
-                notes={notes}
-                setNotes={setNotes}
-                isGenerating={isGenerating}
-                setIsGenerating={setIsGenerating}
-                handleGenerateCoaching={handleGenerateCoaching}
                 activeEmployee={selectedEmployee}
               />
             )}

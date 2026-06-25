@@ -11,7 +11,7 @@ export default function AuthGate({ requireManager = true, children }: AuthGatePr
   const activeManager = useStore((state) => state.activeManager);
 
   if (requireManager) {
-    if (!activeManager || !['Store Leader', 'Sales Supervisor', 'Manager'].includes(activeManager.role)) {
+    if (!activeManager || !/manager|supervisor|leader|gm/i.test(activeManager.role)) {
       return <Navigate replace to="/dashboard" />;
     }
   }

@@ -111,6 +111,7 @@ function PlaybookStudioContent({ playbookSettings }: { playbookSettings: any }) 
           return (
             <button
               key={tab.id}
+              data-testid={`tab-${tab.id}`}
               className={`btn ${isActive ? 'btn-primary' : 'btn-secondary'}`}
               style={{
                 display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1rem',

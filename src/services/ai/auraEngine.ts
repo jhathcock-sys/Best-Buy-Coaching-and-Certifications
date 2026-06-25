@@ -16,7 +16,9 @@ export async function generateAuraBatchInsights(
 ): Promise<Record<string, AuraInsight>> {
   if (!roster || roster.length === 0) return {};
   
-  const model = getGeminiModel(apiKey, playbookSettings);
+  // Force Flash model for high-speed batch processing
+  const fastSettings = { ...playbookSettings, aiMode: 'flash' };
+  const model = getGeminiModel(apiKey, fastSettings);
   
   const rosterStats = roster.map(emp => ({
     id: emp.id,

@@ -179,17 +179,7 @@ function AppContent() {
   return (
     <div className="app-container">
       <SyncManager />
-      <Sidebar 
-        activeView={activeView as string}
-        setActiveView={setActiveView}
-        activeManager={activeManager}
-        logout={logout}
-        toggleCategory={toggleCategory}
-        collapsedCategories={collapsedCategories}
-        dbConnected={dbConnected}
-        playbookSettings={playbookSettings}
-        apiKey={apiKey}
-      />
+      <Sidebar />
       {/* Main View Display Port */}
       <main className="main-content">
         <Suspense fallback={

@@ -4,30 +4,32 @@ import {
   ShieldCheck, ClipboardList, Archive, Clock, 
   ChevronDown, ChevronRight, TrendingUp, MonitorPlay, CalendarDays, Radar
 } from 'lucide-react';
+import { useStore } from '../../store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 
-interface SidebarProps {
-  activeView: string;
-  setActiveView: (view: string) => void;
-  activeManager: any;
-  logout: () => void;
-  toggleCategory: (category: string) => void;
-  collapsedCategories: any;
-  dbConnected: boolean;
-  playbookSettings: any;
-  apiKey: string;
-}
+export default function Sidebar() {
+  const {
+    activeView,
+    setActiveView,
+    activeManager,
+    logout,
+    toggleCategory,
+    collapsedCategories,
+    dbConnected,
+    playbookSettings,
+    apiKey
+  } = useStore(useShallow(state => ({
+    activeView: state.activeView,
+    setActiveView: state.setActiveView,
+    activeManager: state.activeManager,
+    logout: state.logout,
+    toggleCategory: state.toggleCategory,
+    collapsedCategories: state.collapsedCategories,
+    dbConnected: state.dbConnected,
+    playbookSettings: state.playbookSettings,
+    apiKey: state.apiKey
+  })));
 
-export default function Sidebar({
-  activeView,
-  setActiveView,
-  activeManager,
-  logout,
-  toggleCategory,
-  collapsedCategories,
-  dbConnected,
-  playbookSettings,
-  apiKey
-}: SidebarProps) {
   return (
     <nav className="sidebar">
       <div className="sidebar-logo">
@@ -46,7 +48,7 @@ export default function Sidebar({
         <div className="bg-white-alpha-02 border-glass rounded-16 px-md py-sm-md mb-lg flex-column gap-xs">
           <span className="text-xxs text-bby-yellow font-bold uppercase tracking-wider">Logged in as</span>
           <div className="flex-between align-center">
-            <span className="text-sm font-bold text-white">{activeManager.name}</span>
+            <span className="text-sm font-bold text-white">{activeManager?.name}</span>
             <button 
               onClick={logout} 
               data-testid="manager-logout-btn"
@@ -55,19 +57,19 @@ export default function Sidebar({
               Log Out
             </button>
           </div>
-          <span className="text-xxs text-secondary leading-relaxed">{activeManager.role}</span>
+          <span className="text-xxs text-secondary leading-relaxed">{activeManager?.role}</span>
         </div>
       )}
 
       <ul className="sidebar-menu">
-        <li className="menu-group-header" onClick={() => toggleCategory('overview')}>
+        <li className="menu-group-header cursor-pointer transition-all" onClick={() => toggleCategory('overview')} data-testid="toggle-overview">
           <span>Overview</span>
-          {collapsedCategories.overview ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+          {collapsedCategories?.overview ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
         </li>
-        {!collapsedCategories.overview && (
+        {!collapsedCategories?.overview && (
           <>
             <li 
-              className={`menu-item ${activeView === 'dashboard' ? 'active' : ''}`}
+              className={`menu-item cursor-pointer transition-all ${activeView === 'dashboard' ? 'active' : ''}`}
               onClick={() => setActiveView('dashboard')}
               data-testid="nav-dashboard"
             >
@@ -76,56 +78,56 @@ export default function Sidebar({
           </>
         )}
 
-        <li className="menu-group-header" onClick={() => toggleCategory('floorOps')}>
+        <li className="menu-group-header cursor-pointer transition-all" onClick={() => toggleCategory('floorOps')} data-testid="toggle-floorOps">
           <span>Floor Operations</span>
-          {collapsedCategories.floorOps ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+          {collapsedCategories?.floorOps ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
         </li>
-        {!collapsedCategories.floorOps && (
+        {!collapsedCategories?.floorOps && (
           <>
             <li 
-              className={`menu-item ${activeView === 'roster' ? 'active' : ''}`}
+              className={`menu-item cursor-pointer transition-all ${activeView === 'roster' ? 'active' : ''}`}
               onClick={() => setActiveView('roster')}
               data-testid="nav-roster"
             >
               <ClipboardList className="menu-item-icon" /> Store Roster
             </li>
             <li 
-              className={`menu-item ${activeView === 'shadow' ? 'active' : ''}`}
+              className={`menu-item cursor-pointer transition-all ${activeView === 'shadow' ? 'active' : ''}`}
               onClick={() => setActiveView('shadow')}
               data-testid="nav-shadow"
             >
               <ShieldCheck className="menu-item-icon" /> Floor Shadowing
             </li>
             <li 
-              className={`menu-item ${activeView === 'aura' ? 'active' : ''}`}
+              className={`menu-item cursor-pointer transition-all ${activeView === 'aura' ? 'active' : ''}`}
               onClick={() => setActiveView('aura')}
               data-testid="nav-aura"
             >
               <Radar className="menu-item-icon text-bby-yellow" /> Aura Radar
             </li>
             <li 
-              className={`menu-item ${activeView === 'dailyLineup' ? 'active' : ''}`}
+              className={`menu-item cursor-pointer transition-all ${activeView === 'dailyLineup' ? 'active' : ''}`}
               onClick={() => setActiveView('dailyLineup')}
               data-testid="nav-daily-lineup"
             >
               <CalendarDays className="menu-item-icon" /> Daily Lineup
             </li>
             <li 
-              className={`menu-item ${activeView === 'floorLeader' ? 'active' : ''}`}
+              className={`menu-item cursor-pointer transition-all ${activeView === 'floorLeader' ? 'active' : ''}`}
               onClick={() => setActiveView('floorLeader')}
               data-testid="nav-floor-leader"
             >
               <Clock className="menu-item-icon" /> Floor Leader
             </li>
             <li 
-              className={`menu-item ${activeView === 'trends' ? 'active' : ''}`}
+              className={`menu-item cursor-pointer transition-all ${activeView === 'trends' ? 'active' : ''}`}
               onClick={() => setActiveView('trends')}
               data-testid="nav-trends"
             >
               <TrendingUp className="menu-item-icon" /> Trend Reporting
             </li>
             <li 
-              className={`menu-item ${activeView === 'tv' ? 'active' : ''}`}
+              className={`menu-item cursor-pointer transition-all ${activeView === 'tv' ? 'active' : ''}`}
               onClick={() => setActiveView('tv')}
               data-testid="nav-tv"
             >
@@ -134,21 +136,21 @@ export default function Sidebar({
           </>
         )}
 
-        <li className="menu-group-header" onClick={() => toggleCategory('coachingPractice')}>
+        <li className="menu-group-header cursor-pointer transition-all" onClick={() => toggleCategory('coachingPractice')} data-testid="toggle-coachingPractice">
           <span>Coaching & Practice</span>
-          {collapsedCategories.coachingPractice ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+          {collapsedCategories?.coachingPractice ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
         </li>
-        {!collapsedCategories.coachingPractice && (
+        {!collapsedCategories?.coachingPractice && (
           <>
             <li 
-              className={`menu-item ${activeView === 'roleplay' ? 'active' : ''}`}
+              className={`menu-item cursor-pointer transition-all ${activeView === 'roleplay' ? 'active' : ''}`}
               onClick={() => setActiveView('roleplay')}
               data-testid="nav-roleplay"
             >
               <Compass className="menu-item-icon" /> Consult Arena
             </li>
             <li 
-              className={`menu-item ${activeView === 'coach' ? 'active' : ''}`}
+              className={`menu-item cursor-pointer transition-all ${activeView === 'coach' ? 'active' : ''}`}
               onClick={() => setActiveView('coach')}
               data-testid="nav-coach"
             >
@@ -157,28 +159,28 @@ export default function Sidebar({
           </>
         )}
 
-        <li className="menu-group-header" onClick={() => toggleCategory('recordsSetup')}>
+        <li className="menu-group-header cursor-pointer transition-all" onClick={() => toggleCategory('recordsSetup')} data-testid="toggle-recordsSetup">
           <span>Records & Setup</span>
-          {collapsedCategories.recordsSetup ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+          {collapsedCategories?.recordsSetup ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
         </li>
-        {!collapsedCategories.recordsSetup && (
+        {!collapsedCategories?.recordsSetup && (
           <>
             <li 
-              className={`menu-item ${activeView === 'builder' ? 'active' : ''}`}
+              className={`menu-item cursor-pointer transition-all ${activeView === 'builder' ? 'active' : ''}`}
               onClick={() => setActiveView('builder')}
               data-testid="nav-builder"
             >
               <Sparkles className="menu-item-icon" /> Coaching Generator
             </li>
             <li 
-              className={`menu-item ${activeView === 'history' ? 'active' : ''}`}
+              className={`menu-item cursor-pointer transition-all ${activeView === 'history' ? 'active' : ''}`}
               onClick={() => setActiveView('history')}
               data-testid="nav-history"
             >
               <Archive className="menu-item-icon" /> History Hub
             </li>
             <li 
-              className={`menu-item ${activeView === 'playbook' ? 'active' : ''}`}
+              className={`menu-item cursor-pointer transition-all ${activeView === 'playbook' ? 'active' : ''}`}
               onClick={() => setActiveView('playbook')}
               data-testid="nav-playbook"
             >
@@ -202,7 +204,7 @@ export default function Sidebar({
           </div>
         )}
 
-        {playbookSettings.useGemini && apiKey.trim().length > 10 && (
+        {playbookSettings?.useGemini && apiKey && apiKey.trim().length > 10 && (
           <div className="api-key-indicator bg-cyan-alpha border-cyan-alpha">
             <div className="indicator-dot active" />
             <span className="text-info-light">Gemini Free Mode Active</span>

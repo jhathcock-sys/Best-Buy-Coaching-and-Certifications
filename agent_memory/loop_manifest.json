@@ -1,6 +1,5 @@
 {
     "remaining_queue": [
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/layout/MobileNav.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/layout/Sidebar.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/LiveFloorShadow/ShadowStep1Employee.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/LiveFloorShadow/ShadowStep2Observation.tsx",
@@ -162,12 +161,13 @@
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/ImportSchedule/ImportScheduleRow.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/ImportSchedule/ImportWizardStep1.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/ImportSchedule/ImportWizardStep2.tsx",
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/layout/AdvisorLayout.tsx"
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/layout/AdvisorLayout.tsx",
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/layout/MobileNav.tsx"
     ],
     "current_checkpoint": {
-        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/layout/MobileNav.tsx"
+        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/layout/Sidebar.tsx"
     },
-    "file_index": 43,
+    "file_index": 44,
     "status": "ACTIVE",
     "agent_feed": [
         {

@@ -1,10 +1,9 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { getGeminiModel } from './core';
 
-export async function generateSmartZoning(roster: any[], zones: string[], apiKey: string) {
+export async function generateSmartZoning(roster: any[], zones: string[], apiKey: string, playbookSettings: any) {
   if (!apiKey) throw new Error("Missing Gemini API Key");
   
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = getGeminiModel(apiKey, playbookSettings);
 
   const prompt = `
     You are an AI Floor Leader for Best Buy. 
@@ -25,7 +24,12 @@ export async function generateSmartZoning(roster: any[], zones: string[], apiKey
   `;
 
   try {
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+      }
+    });
     const response = await result.response;
     const text = response.text().replace(/```json/g, '').replace(/```/g, '').trim();
     const parsed = JSON.parse(text);

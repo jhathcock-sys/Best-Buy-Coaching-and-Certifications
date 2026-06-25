@@ -1,4 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { DndContext, DragOverlay, closestCenter } from '@dnd-kit/core';
+import DroppableZone from './DroppableZone';
+import DraggableAssociate from './DraggableAssociate';
 import './ZoneGrid.css';
 
 export default function ZoneGrid({
@@ -11,124 +14,96 @@ export default function ZoneGrid({
   onUnassignZone,
   onToggleBreakState
 }) {
+  const [activeDragEmp, setActiveDragEmp] = useState<any>(null);
+
+  const handleDragStart = (event: any) => {
+    const { active } = event;
+    const emp = active.data.current?.emp;
+    if (emp) setActiveDragEmp(emp);
+  };
+
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+    setActiveDragEmp(null);
+
+    if (over && over.id) {
+      const empId = active.id;
+      const targetZone = over.id as string;
+      
+      if (targetZone === 'unassigned') {
+        // Find which zone they were in and unassign them
+        const currentZone = zones.find(z => (zoneAssignments[z] || []).includes(empId));
+        if (currentZone) {
+          onUnassignZone(currentZone, empId);
+        }
+      } else {
+        // Assign to new zone (this will remove from old zone via zustand action)
+        onAssignZone(targetZone, empId);
+      }
+    }
+  };
+
   return (
-    <div className="zone-grid-container">
-      {zones.map(zone => {
-        const zoneEmps = zoneAssignments[zone] || [];
+    <DndContext 
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '1rem', minHeight: '500px' }}>
+        
+        {/* Unassigned Pool (Sidebar) */}
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <DroppableZone id="unassigned" title="Unassigned (Roster)" activeCount={unassignedEmps.length}>
+            {unassignedEmps.map(emp => (
+              <DraggableAssociate 
+                key={emp.id} 
+                emp={emp} 
+                isOnBreak={activeBreaks[emp.id]} 
+              />
+            ))}
+          </DroppableZone>
+        </div>
 
-        return (
-          <div key={zone} className="zone-card">
-            <div className="zone-card-header">
-              <h4 className="zone-card-title">{zone}</h4>
-              <span className="tag-pill zone-tag">{zoneEmps.length} active</span>
-            </div>
-
-            {/* Assign Select */}
-            <div className="form-group" style={{ margin: 0 }}>
-              <select 
-                className="form-control zone-select"
-                value=""
-                onChange={(e) => onAssignZone(zone, e.target.value)}
-              >
-                <option value="">+ Assign Associate...</option>
-                {unassignedEmps.map(emp => (
-                  <option key={emp.id} value={emp.id}>{emp.name} ({emp.dept})</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Assigned List */}
-            <div className="zone-emp-list">
-              {zoneEmps.length === 0 ? (
-                <div className="zone-unstaffed">
-                  Zone unstaffed
-                </div>
-              ) : (
-                zoneEmps.map(empId => {
+        {/* Main Store Map */}
+        <div className="store-map-grid" style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gridTemplateRows: 'auto',
+          gap: '1rem'
+        }}>
+          {zones.map(zone => {
+            const zoneEmps = zoneAssignments[zone] || [];
+            
+            return (
+              <DroppableZone key={zone} id={zone} title={zone} activeCount={zoneEmps.length}>
+                {zoneEmps.map(empId => {
                   const emp = roster.find(e => e.id === empId);
                   if (!emp) return null;
                   
-                  const isOnBreak = activeBreaks[empId]; // '15m' or '30m' or undefined
-
                   return (
-                    <div 
+                    <DraggableAssociate 
                       key={empId} 
-                      className={`zone-emp-card ${isOnBreak ? 'zone-emp-card-break' : 'zone-emp-card-active'}`}
-                    >
-                      <div className="zone-emp-header">
-                        <span className={`zone-emp-name ${isOnBreak ? 'zone-emp-name-break' : ''}`}>{emp.name}</span>
-                        <button 
-                          className="zone-emp-remove"
-                          onClick={() => onUnassignZone(zone, empId)}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                      
-                      <div className="zone-emp-metrics">
-                        <span>Membs: {emp.memberships}</span>
-                        <span>CCs: {emp.creditCards}</span>
-                        <span>GSP: {emp.warranty}%</span>
-                      </div>
-
-                      <div className="zone-emp-tags">
-                        {emp.focus5 && (
-                          <span className="zone-emp-focus">
-                            🔥 FOCUS 5
-                          </span>
-                        )}
-                        {emp.gap && emp.gap !== 'None' && (
-                          <span className="zone-emp-gap">
-                            ⚠️ Gap: {emp.gap.split(' & ')[0]}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Manual Break Controls */}
-                      <div className="zone-break-controls">
-                        {isOnBreak ? (
-                          <div className="zone-break-active">
-                            <span className="zone-break-text">
-                              {isOnBreak === '15m' ? '☕ On 15m Break' : '🍔 On 30m Lunch'}
-                            </span>
-                            <button
-                              className="zone-break-end-btn"
-                              onClick={() => onToggleBreakState(empId, null)}
-                            >
-                              End Break
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="zone-break-inactive">
-                            <span className="zone-break-label">Send on:</span>
-                            <div className="zone-break-btns">
-                              <button
-                                type="button"
-                                className="zone-break-btn"
-                                onClick={() => onToggleBreakState(empId, '15m')}
-                              >
-                                ☕ 15m
-                              </button>
-                              <button
-                                type="button"
-                                className="zone-break-btn"
-                                onClick={() => onToggleBreakState(empId, '30m')}
-                              >
-                                🍔 30m
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                    </div>
+                      emp={emp} 
+                      isOnBreak={activeBreaks[empId]} 
+                      onUnassignZone={() => onUnassignZone(zone, empId)}
+                      onToggleBreakState={onToggleBreakState}
+                    />
                   );
-                })
-              )}
-            </div>
-          </div>
-        );
-      })}
-    </div>
+                })}
+              </DroppableZone>
+            );
+          })}
+        </div>
+      </div>
+
+      <DragOverlay dropAnimation={null}>
+        {activeDragEmp ? (
+          <DraggableAssociate 
+            emp={activeDragEmp} 
+            isOnBreak={activeBreaks[activeDragEmp.id]} 
+          />
+        ) : null}
+      </DragOverlay>
+    </DndContext>
   );
 }

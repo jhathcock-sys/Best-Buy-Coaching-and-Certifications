@@ -149,6 +149,7 @@ export default function FloorLeaderTracker() {
                 onUnassignZone={handleUnassignZone}
                 activeBreaks={activeShift.activeBreaks || {}}
                 onToggleBreakState={handleToggleBreakState}
+                onImportSchedule={handleImportSchedule}
               />
               <BreakRunSheet 
                 breakSchedule={activeShift.breakSchedule || []}

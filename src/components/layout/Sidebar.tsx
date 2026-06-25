@@ -31,7 +31,7 @@ export default function Sidebar({
   return (
     <nav className="sidebar">
       <div className="sidebar-logo">
-        <svg viewBox="0 0 100 100" width="32" height="32" style={{ marginRight: '0.2rem', flexShrink: 0 }}>
+        <svg viewBox="0 0 100 100" width="32" height="32" className="mr-xs shrink-0">
           <g transform="rotate(-12 50 50)">
             <path d="M 10,25 L 75,25 L 90,50 L 75,75 L 10,75 Z" fill="#FFE000" />
             <circle cx="22" cy="50" r="5" fill="#0b0f19" />
@@ -43,37 +43,19 @@ export default function Sidebar({
       </div>
 
       {activeManager && (
-        <div style={{ 
-          background: 'rgba(255, 255, 255, 0.02)', 
-          border: '1px solid var(--border-glass)', 
-          borderRadius: '16px', 
-          padding: '0.85rem 1rem', 
-          marginBottom: '1.5rem',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.15rem'
-        }}>
-          <span style={{ fontSize: '0.65rem', color: 'var(--bby-yellow)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Logged in as</span>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff' }}>{activeManager.name}</span>
+        <div className="bg-white-alpha-02 border-glass rounded-16 px-md py-sm-md mb-lg flex-column gap-xs">
+          <span className="text-xxs text-bby-yellow font-bold uppercase tracking-wider">Logged in as</span>
+          <div className="flex-between align-center">
+            <span className="text-sm font-bold text-white">{activeManager.name}</span>
             <button 
               onClick={logout} 
               data-testid="manager-logout-btn"
-              style={{ 
-                background: 'transparent', 
-                border: 'none', 
-                color: 'var(--error)', 
-                fontSize: '0.65rem', 
-                cursor: 'pointer', 
-                padding: 0,
-                fontWeight: 600,
-                textTransform: 'uppercase'
-              }}
+              className="bg-transparent border-none text-error text-xxs cursor-pointer p-0 font-semibold uppercase"
             >
               Log Out
             </button>
           </div>
-          <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', lineHeight: 1.2 }}>{activeManager.role}</span>
+          <span className="text-xxs text-secondary leading-relaxed">{activeManager.role}</span>
         </div>
       )}
 
@@ -119,7 +101,7 @@ export default function Sidebar({
               onClick={() => setActiveView('aura')}
               data-testid="nav-aura"
             >
-              <Radar className="menu-item-icon" style={{ color: 'var(--bby-yellow)' }} /> Aura Radar
+              <Radar className="menu-item-icon text-bby-yellow" /> Aura Radar
             </li>
             <li 
               className={`menu-item ${activeView === 'dailyLineup' ? 'active' : ''}`}
@@ -207,23 +189,23 @@ export default function Sidebar({
       </ul>
 
       {/* Sidebar Footer Status Indicator */}
-      <div className="sidebar-footer" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      <div className="sidebar-footer flex-column gap-sm">
         {dbConnected ? (
-          <div className="api-key-indicator" style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-            <div className="indicator-dot active" style={{ background: 'var(--success)', boxShadow: '0 0 8px rgba(16, 185, 129, 0.4)' }} />
-            <span style={{ color: '#a7f3d0' }}>Cloud Database Synced</span>
+          <div className="api-key-indicator bg-success-alpha border-success-alpha-20">
+            <div className="indicator-dot active bg-success shadow-success-glow" />
+            <span className="text-success-light">Cloud Database Synced</span>
           </div>
         ) : (
-          <div className="api-key-indicator" style={{ background: 'var(--warning-glow)', border: '1px solid rgba(245,158,11,0.15)' }}>
-            <div className="indicator-dot inactive" style={{ background: 'var(--bby-yellow)', boxShadow: '0 0 8px rgba(255, 230, 0, 0.4)' }} />
-            <span style={{ color: '#fde047' }}>Local Sandbox Active</span>
+          <div className="api-key-indicator bg-warning-alpha border-warning-alpha-20">
+            <div className="indicator-dot inactive bg-bby-yellow shadow-warning-glow" />
+            <span className="text-warning-light">Local Sandbox Active</span>
           </div>
         )}
 
         {playbookSettings.useGemini && apiKey.trim().length > 10 && (
-          <div className="api-key-indicator" style={{ background: 'var(--info-glow)', border: '1px solid rgba(6,182,212,0.15)' }}>
+          <div className="api-key-indicator bg-cyan-alpha border-cyan-alpha">
             <div className="indicator-dot active" />
-            <span style={{ color: '#a5f3fc' }}>Gemini Free Mode Active</span>
+            <span className="text-info-light">Gemini Free Mode Active</span>
           </div>
         )}
       </div>

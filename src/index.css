@@ -2071,3 +2071,44 @@ input[type="checkbox"]:hover {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* --- Added for Batch 4 CSS Refactor --- */
+.h-50vh { height: 50vh; }
+.mr-sm { margin-right: 0.5rem; }
+.mr-xs { margin-right: 0.25rem; }
+.shrink-0 { flex-shrink: 0; }
+.text-xxs { font-size: 0.65rem; }
+.tracking-wider { letter-spacing: 0.05em; }
+.tracking-widest { letter-spacing: 0.1em; }
+.leading-relaxed { line-height: 1.2; }
+.text-success-light { color: #a7f3d0; }
+.text-warning-light { color: #fde047; }
+.text-info-light { color: #a5f3fc; }
+.bg-white-alpha-02 { background: rgba(255, 255, 255, 0.02); }
+.shadow-success-glow { box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
+.shadow-warning-glow { box-shadow: 0 0 8px rgba(255, 230, 0, 0.4); }
+
+.flex-1 { flex: 1; }
+.overflow-hidden { overflow: hidden; }
+.border-bby-yellow-t-4 { border-top-color: var(--bby-yellow); }
+.border-4 { border-width: 4px; }
+.rounded-full { border-radius: 50%; }
+
+.px-2rem { padding-left: 2rem; padding-right: 2rem; }
+.py-1-25rem { padding-top: 1.25rem; padding-bottom: 1.25rem; }
+.w-200px { width: 200px; }
+.pl-2-5rem { padding-left: 2.5rem; }
+.top-11px { top: 11px; }
+.left-0-85rem { left: 0.85rem; }
+.border-text-muted { border-color: var(--text-muted) !important; }
+.border-transparent { border-color: transparent !important; }
+.border-bby-yellow { border-color: var(--bby-yellow) !important; }
+.bg-bby-yellow-alpha-05 { background: rgba(253, 216, 53, 0.05); }
+.text-black { color: #000; }
+.whitespace-nowrap { white-space: nowrap; }
+.shadow-none { box-shadow: none; }
+.overflow-x-auto { overflow-x: auto; }
+.pb-sm { padding-bottom: 0.5rem; }
+.scrollbar-none { scrollbar-width: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
+

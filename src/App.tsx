@@ -150,9 +150,8 @@ function AppContent() {
       <main className="main-content">
         <Suspense fallback={
           <div className="flex-center flex-column w-full h-full gap-md">
-            <div style={{ width: '50px', height: '50px', border: '4px solid var(--white-alpha-10)', borderTopColor: 'var(--bby-yellow)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-            <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', animation: 'fadeIn 0.5s ease' }}>Loading Module...</span>
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } } @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }`}</style>
+            <div className="w-50px h-50px border-4 border-solid border-white-alpha-10 border-bby-yellow-t-4 rounded-full animate-spin"></div>
+            <span className="text-secondary text-sm font-semibold uppercase tracking-widest animate-fade-in">Loading Module...</span>
           </div>
         }>
           <Routes>

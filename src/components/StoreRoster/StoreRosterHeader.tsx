@@ -17,14 +17,13 @@ export default function StoreRosterHeader({
   setShowViewSettings
 }) {
   return (
-    <div className="glass-card" style={{ padding: '1.25rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
+    <div className="glass-card flex-between align-center flex-wrap gap-xl px-2rem py-1-25rem">
       {/* Department Filters */}
-      <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+      <div className="flex gap-xs flex-wrap">
         {DEPARTMENTS.map(dept => (
           <button 
             key={dept} 
-            className={`tag-pill ${activeDept === dept ? 'tag-pill-active' : ''}`}
-            style={{ cursor: 'pointer', padding: '0.45rem 1rem', fontSize: '0.8rem' }}
+            className={`tag-pill cursor-pointer px-md py-sm-md text-xs ${activeDept === dept ? 'tag-pill-active' : ''}`}
             onClick={() => setActiveDept(dept)}
           >
             {dept}
@@ -33,17 +32,9 @@ export default function StoreRosterHeader({
       </div>
 
       {/* Action block with Toggle and Search */}
-      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+      <div className="flex-center gap-md flex-wrap justify-start">
         <button 
-          className="btn btn-secondary" 
-          style={{ 
-            padding: '0.55rem 1rem', 
-            fontSize: '0.8rem', 
-            height: '38px', 
-            borderColor: 'var(--bby-yellow)', 
-            color: 'var(--bby-yellow)',
-            background: showNewPeriodForm ? 'rgba(255, 230, 0, 0.05)' : 'transparent'
-          }} 
+          className={`btn btn-secondary px-md py-sm-md text-xs h-38px border-bby-yellow text-bby-yellow ${showNewPeriodForm ? 'bg-bby-yellow-alpha-05' : 'bg-transparent'}`} 
           onClick={() => {
             setShowNewPeriodForm(!showNewPeriodForm);
             setShowAddForm(false);
@@ -53,8 +44,7 @@ export default function StoreRosterHeader({
         </button>
         
         <button 
-          className="btn btn-accent" 
-          style={{ padding: '0.55rem 1rem', fontSize: '0.8rem', color: '#000', height: '38px' }} 
+          className="btn btn-accent px-md py-sm-md text-xs text-black h-38px" 
           onClick={() => {
             setShowAddForm(!showAddForm);
             setShowNewPeriodForm(false);
@@ -64,8 +54,7 @@ export default function StoreRosterHeader({
         </button>
 
         <button 
-          className="btn btn-secondary" 
-          style={{ padding: '0.55rem 1rem', fontSize: '0.8rem', height: '38px', borderColor: 'var(--text-muted)' }} 
+          className="btn btn-secondary px-md py-sm-md text-xs h-38px border-text-muted" 
           onClick={() => {
             setShowImporter(true);
             setShowAddForm(false);
@@ -77,17 +66,7 @@ export default function StoreRosterHeader({
         </button>
 
         <button 
-          className="btn btn-secondary" 
-          style={{ 
-            padding: '0.55rem 1rem', 
-            fontSize: '0.8rem', 
-            height: '38px', 
-            borderColor: 'var(--text-muted)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.35rem',
-            background: showViewSettings ? 'rgba(255, 255, 255, 0.05)' : 'transparent'
-          }} 
+          className={`btn btn-secondary flex-center gap-xs px-md py-sm-md text-xs h-38px border-text-muted ${showViewSettings ? 'bg-white-alpha-05' : 'bg-transparent'}`} 
           onClick={() => {
             setShowViewSettings(!showViewSettings);
             setShowAddForm(false);
@@ -97,16 +76,15 @@ export default function StoreRosterHeader({
           <Sliders size={14} /> View Options
         </button>
 
-        <div style={{ position: 'relative', width: '200px' }}>
+        <div className="relative w-200px">
           <input 
             type="text" 
-            className="form-control" 
-            style={{ paddingLeft: '2.5rem', paddingRight: '1rem', height: '38px', fontSize: '0.85rem' }}
+            className="form-control pl-2-5rem pr-md h-38px text-sm" 
             placeholder="Search by name..."
             value={tempSearch}
             onChange={(e) => setTempSearch(e.target.value)}
           />
-          <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', top: '11px', left: '0.85rem' }} />
+          <Search size={16} color="var(--text-muted)" className="absolute top-11px left-0-85rem" />
         </div>
       </div>
     </div>

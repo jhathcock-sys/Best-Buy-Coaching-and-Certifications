@@ -19,8 +19,8 @@ export default function PlaybookStudio() {
   
   if (!playbookSettings) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', color: 'var(--text-secondary)' }}>
-        <RefreshCw size={24} className="spin" style={{ marginRight: '0.75rem' }} /> Loading platform configuration...
+      <div className="flex-center h-50vh text-secondary">
+        <RefreshCw size={24} className="animate-spin mr-sm" /> Loading platform configuration...
       </div>
     );
   }
@@ -64,19 +64,19 @@ function PlaybookStudioContent({ playbookSettings }: { playbookSettings: any }) 
   const [selectedDept, setSelectedDept] = useState('Front End');
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+    <div className="flex-column gap-2xl">
+      <div className="flex-between align-start flex-wrap gap-md">
         <div>
-          <h1 style={{ fontSize: '2.25rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <h1 className="text-2-5rem mb-xs flex-center justify-start gap-sm m-0">
             <Cpu size={32} color="var(--bby-blue)" /> Platform Configuration Center
           </h1>
-          <p style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-secondary m-0">
             Manage core AI simulation behavior, configure leader profiles, manage metric targets, and adjust store offline sync settings.
           </p>
         </div>
         
         <button 
-          className="btn btn-primary" 
+          className="btn btn-primary flex-center gap-sm px-md-lg py-sm font-bold" 
           onClick={() => {
             const nextMode = aiMode === 'local' ? 'local' : aiMode;
               onSaveSettings({
@@ -90,14 +90,13 @@ function PlaybookStudioContent({ playbookSettings }: { playbookSettings: any }) 
               });
             alert('Settings saved globally! Changes will apply immediately.');
           }}
-          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.25rem' }}
         >
           <Check size={18} />
           Save Platform Config
         </button>
       </div>
 
-      <div style={{ display: 'flex', gap: '0.25rem', overflowX: 'auto', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border-glass)', scrollbarWidth: 'none' }}>
+      <div className="flex gap-xs overflow-x-auto pb-sm border-b-glass scrollbar-none">
         {[
           { id: 'engine', icon: <Key size={16} />, label: 'AI Strategy & Security' },
           { id: 'prompts', icon: <Sparkles size={16} />, label: 'System Prompts' },
@@ -112,14 +111,7 @@ function PlaybookStudioContent({ playbookSettings }: { playbookSettings: any }) 
             <button
               key={tab.id}
               data-testid={`tab-${tab.id}`}
-              className={`btn ${isActive ? 'btn-primary' : 'btn-secondary'}`}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1rem',
-                fontSize: '0.85rem', boxShadow: 'none', whiteSpace: 'nowrap',
-                background: isActive ? 'var(--bby-blue)' : 'transparent',
-                borderColor: isActive ? 'transparent' : 'transparent',
-                color: isActive ? '#fff' : 'var(--text-secondary)'
-              }}
+              className={`btn flex-center gap-sm px-md py-sm text-sm whitespace-nowrap shadow-none border-transparent ${isActive ? 'bg-bby-blue text-white' : 'bg-transparent text-secondary hover-opacity-80'}`}
               onClick={() => setActiveTab(tab.id)}
             >
               {tab.icon}

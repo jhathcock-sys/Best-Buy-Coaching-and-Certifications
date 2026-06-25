@@ -163,11 +163,7 @@ function PlaybookStudioContent({ playbookSettings }: { playbookSettings: any }) 
       )}
 
       {activeTab === 'scenarios' && (
-        <CustomScenariosTab 
-          customScenarios={customScenarios}
-          onAddCustomScenario={onAddCustomScenario}
-          onDeleteCustomScenario={onDeleteCustomScenario}
-        />
+        <CustomScenariosTab />
       )}
 
       {activeTab === 'sync' && (

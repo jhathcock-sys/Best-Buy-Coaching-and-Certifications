@@ -1,55 +1,57 @@
 import React from 'react';
 import { Trash2, Compass } from 'lucide-react';
 import CustomScenarioForm from './CustomScenarioForm';
+import { useStore } from '../../store/useStore';
+import { StoreState } from '../../types/store';
+import { useShallow } from 'zustand/react/shallow';
+import { CustomScenario } from './CustomScenarioForm';
 
-export default function CustomScenariosTab({ customScenarios = [], onAddCustomScenario, onDeleteCustomScenario }: any) {
+export default function CustomScenariosTab() {
+  const { customScenarios, deleteCustomScenario } = useStore(useShallow((state: StoreState) => ({
+    customScenarios: state.customScenarios || [],
+    deleteCustomScenario: state.deleteCustomScenario
+  })));
+
   return (
     <div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(400px,1fr))] gap-xl">
           
           {/* Extracted Form Component */}
-          <CustomScenarioForm onAddCustomScenario={onAddCustomScenario} />
+          <CustomScenarioForm />
 
-          <div className="glass-card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div className="glass-card flex-column gap-xl p-xl">
             <div>
-              <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff', margin: 0 }}>
+              <h3 className="text-xl flex-center justify-start gap-sm m-0 text-white">
                 <Compass size={20} color="var(--bby-blue)" /> Custom Scenarios Library
               </h3>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.775rem', marginTop: '0.15rem' }}>Active custom customer personas loaded into your local store consult database.</p>
+              <p className="text-xs text-secondary mt-1">Active custom customer personas loaded into your local store consult database.</p>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="flex-column gap-md">
               {customScenarios.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '3rem', border: '1.5px dashed var(--border-glass)', borderRadius: '16px', color: 'var(--text-muted)', fontSize: '0.825rem' }}>
+                <div className="text-center p-3xl border-2 border-dashed border-[var(--border-glass)] rounded-2xl text-muted text-sm">
                   No custom roleplay scenarios added yet. Use the form on the left to configure your first one!
                 </div>
               ) : (
-                customScenarios.map((scen: any) => (
+                customScenarios.map((scen: CustomScenario) => (
                   <div 
                     key={scen.id}
-                    style={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
-                      alignItems: 'center', 
-                      padding: '1rem', 
-                      background: 'rgba(255, 255, 255, 0.01)', 
-                      border: '1px solid var(--border-glass)',
-                      borderRadius: '12px' 
-                    }}
+                    className="flex-between items-center p-md bg-white/5 border border-[var(--border-glass)] rounded-xl"
+                    data-testid={`custom-scenario-item-${scen.id}`}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <img src={scen.avatar} alt="" style={{ width: '36px', height: '36px', borderRadius: '50%', border: '1px solid var(--border-glass)' }} />
+                    <div className="flex-center justify-start gap-md">
+                      <img src={scen.avatar} alt="" className="w-9 h-9 rounded-full border border-[var(--border-glass)]" />
                       <div>
-                        <h4 style={{ fontSize: '0.95rem', margin: 0, color: '#fff', fontWeight: 600 }}>{scen.title}</h4>
-                        <span style={{ fontSize: '0.725rem', color: 'var(--text-secondary)' }}>Customer: {scen.name} | {scen.difficulty}</span>
+                        <h4 className="text-md m-0 text-white font-semibold">{scen.title}</h4>
+                        <span className="text-xs text-secondary">Customer: {scen.name} | {scen.difficulty}</span>
                       </div>
                     </div>
                     <button
                       type="button"
-                      className="btn-trash"
-                      style={{ background: 'transparent', border: 'none', color: 'var(--error)', cursor: 'pointer', padding: 0 }}
-                      onClick={() => onDeleteCustomScenario(scen.id)}
+                      className="btn-trash bg-transparent border-none text-error cursor-pointer p-0"
+                      onClick={() => deleteCustomScenario && deleteCustomScenario(scen.id)}
                       title="Remove Custom Scenario"
+                      data-testid={`delete-scenario-${scen.id}`}
                     >
                       <Trash2 size={16} />
                     </button>

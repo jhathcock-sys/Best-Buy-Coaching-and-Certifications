@@ -95,7 +95,6 @@ export default function ShiftTrackerTab({ activeShift, setActiveShift, roster = 
             handleRemoveHour={handleRemoveHour}
           />
           <ShiftTrackerSidebar 
-            activeShift={activeShift}
             handleUndoWin={handleUndoWin}
             getShiftLeaderboard={getShiftLeaderboard}
             getEmployeesOnShift={getEmployeesOnShift}

@@ -1,4 +1,4 @@
-export interface Employee {
+﻿export interface Employee {
   id: string;
   name: string;
   dept: string;
@@ -125,7 +125,7 @@ export interface ShiftEvent {
   preExistingApps?: number;
   preExistingPms?: number;
   isWeekend?: boolean;
-  wins?: any[];
+  wins?: ShiftWin[];
 }
 
 export interface FollowUpTask {
@@ -145,3 +145,4 @@ declare global {
     webkitSpeechRecognition: any;
   }
 }
+export interface ShiftWin { id: string; empId: string; empName: string; zone: string; type: 'pm' | 'card' | 'app'; timestamp: number; }

@@ -46,6 +46,7 @@ export function getGeminiModel(apiKey: any, playbookSettings: any) {
           isVision,
           base64Image,
           mimeType,
+          apiKey,
           modelConfig: {
             responseSchema
           }

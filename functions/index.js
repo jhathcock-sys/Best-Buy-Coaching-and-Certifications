@@ -11,10 +11,10 @@ const DOMPurify = createDOMPurify(window);
 admin.initializeApp();
 
 // Helper to get Gemini client
-function getGeminiClient() {
-  const apiKey = process.env.GEMINI_API_KEY || functions.config().gemini?.key;
+function getGeminiClient(clientApiKey = null) {
+  const apiKey = clientApiKey || process.env.GEMINI_API_KEY || functions.config().gemini?.key;
   if (!apiKey) {
-    throw new Error('Gemini API key is not configured in Cloud Functions. Please set GEMINI_API_KEY.');
+    throw new Error('Gemini API key is not configured in Cloud Functions. Please set GEMINI_API_KEY or provide it from the client.');
   }
   return new GoogleGenerativeAI(apiKey);
 }
@@ -27,8 +27,8 @@ exports.generateCoaching = functions.https.onRequest((req, res) => {
         return res.status(405).json({ error: 'Method Not Allowed' });
       }
 
-      const { name, gapType, gapDetails, positives, rawObservation, playbookSettings, selectedDiscSteps } = req.body;
-      const aiInstance = getGeminiClient();
+      const { name, gapType, gapDetails, positives, rawObservation, playbookSettings, selectedDiscSteps, apiKey } = req.body;
+      const aiInstance = getGeminiClient(apiKey);
       
       // Using gemini-3.5-pro flagship model
       const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-pro' });
@@ -119,8 +119,8 @@ exports.auditDialogue = functions.https.onRequest((req, res) => {
         return res.status(405).json({ error: 'Method Not Allowed' });
       }
 
-      const { history, scenario, playbookSettings } = req.body;
-      const aiInstance = getGeminiClient();
+      const { history, scenario, playbookSettings, apiKey } = req.body;
+      const aiInstance = getGeminiClient(apiKey);
       const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-pro' });
 
       const dialogueStr = history.messages.map(m => `${m.sender}: ${m.text}`).join('\n');
@@ -239,8 +239,8 @@ exports.verifyCertification = functions.https.onRequest((req, res) => {
 // 4. Generic Callable AI generation function to replace client-side SDK usage
 exports.generateAIContent = functions.https.onCall(async (data, context) => {
   try {
-    const { prompt, systemInstruction, modelConfig, isJSON, isVision, base64Image, mimeType, isProMode } = data;
-    const aiInstance = getGeminiClient();
+    const { prompt, systemInstruction, modelConfig, isJSON, isVision, base64Image, mimeType, isProMode, apiKey } = data;
+    const aiInstance = getGeminiClient(apiKey);
     
     // Choose model
     const modelName = isProMode ? 'gemini-3.5-pro' : 'gemini-3.5-flash';

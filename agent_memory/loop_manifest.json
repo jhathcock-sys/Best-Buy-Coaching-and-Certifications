@@ -1,6 +1,5 @@
 ﻿{
     "remaining_queue":  [
-                            "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/AssociateProfile/ProfileTrendsTab.tsx",
                             "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/AssociateProfile/ProfileTrophiesTab.tsx",
                             "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/AuraHUD/AuraActionCard.tsx",
                             "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/BreakroomTV/GoalsSlide.tsx",
@@ -163,11 +162,12 @@
                             "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/AssociateProfile/OneOnOneTab.tsx",
                             "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/AssociateProfile/ProfileAppraisalsTab.tsx",
                             "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/AssociateProfile/ProfileCoachingTab.tsx",
-                            "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/AssociateProfile/ProfileCommitmentsTab.tsx"
+                            "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/AssociateProfile/ProfileCommitmentsTab.tsx",
+                            "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/AssociateProfile/ProfileTrendsTab.tsx"
                         ],
     "current_checkpoint":  {
-                               "file_path":  "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/AssociateProfile/ProfileTrendsTab.tsx"
+                               "file_path":  "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/AssociateProfile/ProfileTrophiesTab.tsx"
                            },
-    "file_index":  5,
+    "file_index":  6,
     "status":  "ACTIVE"
 }

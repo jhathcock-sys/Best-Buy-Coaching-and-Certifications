@@ -108,23 +108,13 @@ export default function AssociateProfileModal({
         <div className="p-xl max-h-65vh overflow-y-auto">
           
           {/* TAB 1: Performance Trends */}
-          {activeTab === 'trends' && (
-            <ProfileTrendsTab 
-              employee={employee}
-              rosterHistory={rosterHistory}
-              activePeriod={activePeriod}
-              activeHistoryPoints={activeHistoryPoints}
-              associateLogs={associateLogs}
-              associateTasks={associateTasks}
-              activeGoals={activeGoals}
-              calculateCVI={calculateCVI}
-              renderMarkdown={renderMarkdown}
-              playingLogId={playingLogId}
-              setPlayingLogId={setPlayingLogId}
- />
-          )}
-
-          {/* TAB 2: Coaching logs history list */}
+              {activeTab === 'trends' && (
+                <ProfileTrendsTab 
+                  employee={employee}
+                  activeHistoryPoints={activeHistoryPoints}
+                  activeGoals={activeGoals}
+                />
+              )}{/* TAB 2: Coaching logs history list */}
               {activeTab === 'coaching' && (
                 <ProfileCoachingTab 
                   associateLogs={associateLogs}

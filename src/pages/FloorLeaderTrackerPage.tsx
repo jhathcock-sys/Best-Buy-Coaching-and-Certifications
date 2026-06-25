@@ -72,7 +72,7 @@ export default function FloorLeaderTracker() {
       </div>
 
       {!activeShift ? (
-        <ShiftSetupForm activeManager={activeManager} />
+        <ShiftSetupForm />
       ) : (
         /* ACTIVE MONITORING VIEW */
         <div className="flex-column gap-xl">

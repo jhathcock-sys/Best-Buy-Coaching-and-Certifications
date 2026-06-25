@@ -4,20 +4,14 @@ import ShiftTrackerGoals from './ShiftTrackerGoals';
 import ShiftTrackerHourlyLog from './ShiftTrackerHourlyLog';
 import ShiftTrackerSidebar from './ShiftTrackerSidebar';
 
-export default function ShiftTrackerTab({ activeShift, setActiveShift, roster = [], handleAddHour, handleUpdateMetric, handleUpdateStartRevenue, handleUpdateEndRevenue, handleRemoveHour, handleLogFloorWin, handleLogOcvObservation, ocvSuccessMsg, handleUndoWin }) {
+export default function ShiftTrackerTab({ activeShift, setActiveShift, roster = [], handleAddHour, handleUpdateMetric, handleUpdateStartRevenue, handleUpdateEndRevenue, handleRemoveHour, handleLogFloorWin, handleLogOcvObservation, ocvSuccessMsg, handleUndoWin,
+  selectedEmpId, setSelectedEmpId, winType, setWinType, ocvEmpId, setOcvEmpId, ocvConnect, setOcvConnect, ocvRecommend, setOcvRecommend, ocvProtect, setOcvProtect, ocvClose, setOcvClose, ocvNotes, setOcvNotes
+}) {
   const [currentHourKey, setCurrentHourKey] = useState(null);
   const [selectedLog, setSelectedLog] = useState(null);
   const [newObservation, setNewObservation] = useState('');
   const [newWinMsg, setNewWinMsg] = useState('');
   const [winFeed, setWinFeed] = useState([]);
-  const [selectedEmpId, setSelectedEmpId] = useState('');
-  const [winType, setWinType] = useState('App');
-  const [ocvEmpId, setOcvEmpId] = useState('');
-  const [ocvConnect, setOcvConnect] = useState(false);
-  const [ocvRecommend, setOcvRecommend] = useState(false);
-  const [ocvProtect, setOcvProtect] = useState(false);
-  const [ocvClose, setOcvClose] = useState(false);
-  const [ocvNotes, setOcvNotes] = useState('');
 
   const handleSaveHourlyLog = () => {};
   const handleSaveObservation = () => {};

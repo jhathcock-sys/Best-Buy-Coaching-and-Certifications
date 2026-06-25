@@ -57,7 +57,15 @@ export default function FloorLeaderTracker() {
     handleLogFloorWin,
     handleUndoWin,
     handleLogOcvObservation,
-    getEmployeesOnShift
+    getEmployeesOnShift,
+    selectedEmpId, setSelectedEmpId,
+    winType, setWinType,
+    ocvEmpId, setOcvEmpId,
+    ocvConnect, setOcvConnect,
+    ocvRecommend, setOcvRecommend,
+    ocvProtect, setOcvProtect,
+    ocvClose, setOcvClose,
+    ocvNotes, setOcvNotes
   } = useFloorLeaderTracker(activeManager, roster, onSaveShift);
 
   return (
@@ -104,6 +112,22 @@ export default function FloorLeaderTracker() {
               handleLogOcvObservation={handleLogOcvObservation}
               ocvSuccessMsg={ocvSuccessMsg}
               handleUndoWin={handleUndoWin}
+              selectedEmpId={selectedEmpId}
+              setSelectedEmpId={setSelectedEmpId}
+              winType={winType}
+              setWinType={setWinType}
+              ocvEmpId={ocvEmpId}
+              setOcvEmpId={setOcvEmpId}
+              ocvConnect={ocvConnect}
+              setOcvConnect={setOcvConnect}
+              ocvRecommend={ocvRecommend}
+              setOcvRecommend={setOcvRecommend}
+              ocvProtect={ocvProtect}
+              setOcvProtect={setOcvProtect}
+              ocvClose={ocvClose}
+              setOcvClose={setOcvClose}
+              ocvNotes={ocvNotes}
+              setOcvNotes={setOcvNotes}
             />
           )}
 

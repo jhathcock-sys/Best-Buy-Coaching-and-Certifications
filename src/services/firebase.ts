@@ -99,9 +99,23 @@ export const createTenantAuth = async (storeId: string, pin: string) => {
     await provisionTenantAccount({ storeId, pin });
     return true;
   } catch (error) {
-    console.error('Failed to create tenant auth via Cloud Function:', error);
+    console.error('Firebase Auth Provisioning Failed:', error);
     return false;
   }
+};
+
+export const getStoreGuestPin = async (storeId: string): Promise<string | null> => {
+  if (!db) return null;
+  try {
+    const docRef = doc(db, 'stores', storeId, 'settings', 'playbook');
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data().storePin || null;
+    }
+  } catch (e) {
+    console.error('Failed to get store guest pin', e);
+  }
+  return null;
 };
 
 export const signOutTenant = async () => {

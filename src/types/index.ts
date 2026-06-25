@@ -90,6 +90,16 @@ export interface CoachingLog {
   rating?: string;
 }
 
+export interface ShiftHourEntry {
+  hourNumber: number;
+  pms: number;
+  apps: number;
+  revenue: string | number;
+  startRevenue?: string | number;
+  endRevenue?: string | number;
+  [key: string]: any;
+}
+
 export interface ShiftEvent {
   id: string;
   date: string;
@@ -98,7 +108,7 @@ export interface ShiftEvent {
   notes?: string;
   lastUpdated?: number;
   leaderName?: string;
-  hours?: any[];
+  hours?: ShiftHourEntry[];
   totalPms?: number;
   totalApps?: number;
   totalRevenue?: number;

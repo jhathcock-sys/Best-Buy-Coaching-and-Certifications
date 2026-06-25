@@ -68,7 +68,7 @@ export function useFloorLeaderTracker(activeManager, roster, onSaveShift) {
     const updatedHours = activeShift.hours.map((h, idx) => {
       if (idx === hourIndex) {
         const startVal = value === '' ? '' : (parseFloat(value) || 0);
-        const endVal = h.endRevenue !== undefined && h.endRevenue !== '' ? parseFloat(h.endRevenue) : '';
+        const endVal = h.endRevenue !== undefined && h.endRevenue !== '' ? parseFloat(String(h.endRevenue)) : '';
         
         let netRevenue = h.revenue || 0;
         if (startVal !== '' && endVal !== '') {
@@ -94,7 +94,7 @@ export function useFloorLeaderTracker(activeManager, roster, onSaveShift) {
     const updatedHours = activeShift.hours.map((h, idx) => {
       if (idx === hourIndex) {
         const endVal = value === '' ? '' : (parseFloat(value) || 0);
-        const startVal = h.startRevenue !== undefined && h.startRevenue !== '' ? parseFloat(h.startRevenue) : '';
+        const startVal = h.startRevenue !== undefined && h.startRevenue !== '' ? parseFloat(String(h.startRevenue)) : '';
         
         let netRevenue = h.revenue || 0;
         if (startVal !== '' && endVal !== '') {
@@ -127,7 +127,7 @@ export function useFloorLeaderTracker(activeManager, roster, onSaveShift) {
       const hoursArray = Array.isArray(activeShift.hours) ? activeShift.hours : [];
       const totalPms = hoursArray.reduce((sum, h) => sum + (h.pms || 0), 0) + (activeShift.preExistingPms || 0);
       const totalApps = hoursArray.reduce((sum, h) => sum + (h.apps || 0), 0) + (activeShift.preExistingApps || 0);
-      const totalRevenue = hoursArray.reduce((sum, h) => sum + (parseFloat(h.revenue) || 0), 0) + (activeShift.preExistingRevenue || 0);
+      const totalRevenue = hoursArray.reduce((sum, h) => sum + (parseFloat(String(h.revenue)) || 0), 0) + (activeShift.preExistingRevenue || 0);
       const onTrackCount = hoursArray.filter(h => 
         checkHourStatus(h.pms || 0, h.apps || 0, activeShift.isWeekend)
       ).length;
@@ -171,7 +171,7 @@ export function useFloorLeaderTracker(activeManager, roster, onSaveShift) {
   const activeSummary = activeShift ? {
     totalPms: hoursArray.reduce((sum, h) => sum + (h.pms || 0), 0) + (activeShift.preExistingPms || 0),
     totalApps: hoursArray.reduce((sum, h) => sum + (h.apps || 0), 0) + (activeShift.preExistingApps || 0),
-    totalRevenue: hoursArray.reduce((sum, h) => sum + (parseFloat(h.revenue) || 0), 0) + (activeShift.preExistingRevenue || 0),
+    totalRevenue: hoursArray.reduce((sum, h) => sum + (parseFloat(String(h.revenue)) || 0), 0) + (activeShift.preExistingRevenue || 0),
     onTrackHours: hoursArray.filter(h => 
       checkHourStatus(h.pms || 0, h.apps || 0, activeShift.isWeekend)
     ).length,

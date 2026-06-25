@@ -58,12 +58,13 @@ export default function ShiftTrackerHourlyLog({
                     key={idx}
                     idx={idx}
                     hour={hour}
-                    activeShift={activeShift}
-                    checkHourStatus={checkHourStatus}
-                    handleUpdateMetric={handleUpdateMetric}
-                    handleUpdateStartRevenue={handleUpdateStartRevenue}
-                    handleUpdateEndRevenue={handleUpdateEndRevenue}
-                    handleRemoveHour={handleRemoveHour}
+                    actions={{
+                      checkHourStatus,
+                      handleUpdateMetric,
+                      handleUpdateStartRevenue,
+                      handleUpdateEndRevenue,
+                      handleRemoveHour
+                    }}
                   />
                 );
               })}

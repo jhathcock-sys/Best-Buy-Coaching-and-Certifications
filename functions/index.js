@@ -238,8 +238,10 @@ exports.verifyCertification = functions.https.onRequest((req, res) => {
 
 // 4. Generic Callable AI generation function to replace client-side SDK usage
 exports.generateAIContent = functions.https.onCall(async (data, context) => {
+  console.log('generateAIContent started. Data received:', JSON.stringify(data));
   try {
     const payload = data.data || data;
+    console.log('Extracted payload:', JSON.stringify(payload));
     const { prompt, systemInstruction, modelConfig, isJSON, isVision, base64Image, mimeType, isProMode, apiKey } = payload;
     
     if (!prompt || prompt.trim() === '') {
@@ -247,10 +249,12 @@ exports.generateAIContent = functions.https.onCall(async (data, context) => {
       throw new functions.https.HttpsError('invalid-argument', 'Prompt is empty or missing from the request payload.');
     }
     
+    console.log('Initializing Gemini client...');
     const aiInstance = getGeminiClient(apiKey);
     
     // Choose model
     const modelName = isProMode ? 'gemini-3.5-pro' : 'gemini-3.5-flash';
+    console.log(`Getting generative model: ${modelName}`);
     const model = aiInstance.getGenerativeModel({ model: modelName });
     
     const generationConfig = {};
@@ -260,9 +264,11 @@ exports.generateAIContent = functions.https.onCall(async (data, context) => {
     if (modelConfig && modelConfig.responseSchema) {
       generationConfig.responseSchema = modelConfig.responseSchema;
     }
+    console.log('Generation config:', JSON.stringify(generationConfig));
     
     const parts = [];
     if (isVision && base64Image) {
+      console.log('Adding vision/image data to parts...');
       parts.push({
         inlineData: {
           data: base64Image,
@@ -274,20 +280,33 @@ exports.generateAIContent = functions.https.onCall(async (data, context) => {
     // In Gemini API, systemInstruction is usually set during model instantiation, or as a combined prompt.
     // If we have a systemInstruction, we'll append it to the text.
     if (systemInstruction) {
+        console.log('Appending system instruction to prompt...');
         parts.push({ text: `System Instruction: ${systemInstruction}\n\nUser Input: ${prompt}` });
     } else {
+        console.log('Adding prompt text to parts...');
         parts.push({ text: prompt });
     }
     
+    console.log('Calling model.generateContent... Payload size:', JSON.stringify(parts).length);
+    const requestOptions = { timeout: 30000 }; // 30 second timeout for the Gemini API call
     const result = await model.generateContent({
       contents: [{ role: 'user', parts }],
       generationConfig
-    });
+    }, requestOptions);
     
-    return { text: result.response.text() };
+    console.log('model.generateContent completed successfully.');
+    const textResult = result.response.text();
+    console.log('Result text length:', textResult.length);
+    
+    return { text: textResult };
   } catch (error) {
-    console.error('generateAIContent error:', error);
+    console.error('generateAIContent error caught in try/catch block:', error);
+    if (error instanceof functions.https.HttpsError) {
+      console.error('Rethrowing existing HttpsError.');
+      throw error;
+    }
     // Throw a generic error for the client
+    console.error('Wrapping error in HttpsError and throwing to client:', error.message);
     throw new functions.https.HttpsError('internal', error.message || 'An error occurred while generating AI content.');
   }
 });

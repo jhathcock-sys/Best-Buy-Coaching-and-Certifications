@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stateful Purification Monitor</title>
+    <title>Stateful Purification Command Center</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Inter:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Inter:wght@400;500;700&display=swap');
         
         :root {
             --bg-space: #0f111a;
             --bg-obsidian: #161821;
+            --bg-panel: #1a1d27;
             --bby-blue: #0046be;
             --bby-yellow: #fff200;
             --success-glow: rgba(0, 255, 128, 0.6);
@@ -22,33 +23,34 @@
             color: #fff;
             font-family: 'Inter', sans-serif;
             margin: 0;
-            padding: 2rem;
-            min-height: 100vh;
+            padding: 0;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-        }
-
-        .dashboard {
-            width: 100%;
-            max-width: 1200px;
-            display: grid;
-            gap: 2rem;
-            grid-template-columns: 1fr;
+            overflow: hidden;
         }
 
         .header {
-            text-align: center;
-            margin-bottom: 2rem;
+            padding: 1.5rem 2rem;
+            background: rgba(15, 17, 26, 0.8);
+            border-bottom: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
         }
 
         .header h1 {
             font-family: 'Outfit', sans-serif;
-            font-size: 3rem;
+            font-size: 2rem;
             margin: 0;
             background: linear-gradient(90deg, #fff, #a0a5b5);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
 
         .status-badge {
@@ -61,7 +63,6 @@
             border: 1px solid var(--success-glow);
             color: #00ff80;
             font-weight: 600;
-            margin-top: 1rem;
             font-size: 0.9rem;
             box-shadow: 0 0 20px rgba(0, 255, 128, 0.2);
             animation: pulse 2s infinite;
@@ -73,71 +74,74 @@
             100% { box-shadow: 0 0 10px rgba(0, 255, 128, 0.2); }
         }
 
-        .metrics-grid {
+        .dashboard {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: 300px 1fr 350px;
+            gap: 1px;
+            background: var(--glass-border);
+            flex: 1;
+            overflow: hidden;
         }
 
-        .card {
+        .panel {
             background: var(--bg-obsidian);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
             padding: 1.5rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        .card h3 {
+        .panel-header {
             font-family: 'Outfit', sans-serif;
             color: #a0a5b5;
-            margin: 0 0 0.5rem 0;
+            margin: 0 0 1rem 0;
             font-size: 1.1rem;
             text-transform: uppercase;
             letter-spacing: 1px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 0.5rem;
         }
 
-        .card .value {
-            font-size: 3rem;
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        /* Metrics */
+        .metric-card {
+            background: var(--bg-panel);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .metric-card h4 {
+            margin: 0 0 0.5rem 0;
+            color: #a0a5b5;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .metric-card .value {
+            font-size: 2.5rem;
             font-weight: 800;
             margin: 0;
             font-family: 'Outfit', sans-serif;
-        }
-
-        .target-file {
-            font-family: 'Inter', monospace;
-            color: var(--bby-yellow);
-            font-size: 1.1rem;
-            word-break: break-all;
-        }
-
-        .veto-log {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .veto-item {
-            background: rgba(255, 64, 64, 0.1);
-            border-left: 4px solid #ff4040;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-radius: 0 8px 8px 0;
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-
-        .veto-item:last-child {
-            margin-bottom: 0;
+            color: #fff;
         }
 
         .progress-container {
             width: 100%;
-            height: 12px;
+            height: 8px;
             background: #2a2d3d;
             border-radius: 999px;
             margin-top: 1rem;
             overflow: hidden;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
         }
 
         .progress-bar {
@@ -148,37 +152,112 @@
             box-shadow: 0 0 10px var(--bby-blue);
         }
 
-        .list-container {
-            max-height: 200px;
-            overflow-y: auto;
-            font-family: 'Inter', monospace;
-            font-size: 0.85rem;
-            color: #a0a5b5;
+        /* Current Target */
+        .target-box {
+            background: rgba(255, 242, 0, 0.05);
+            border: 1px solid rgba(255, 242, 0, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1rem;
         }
 
-        .list-item {
-            padding: 0.5rem 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+        .target-box h4 {
+            color: var(--bby-yellow);
+            margin: 0 0 0.5rem 0;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+        }
+
+        .target-file {
+            font-family: 'Inter', monospace;
+            color: #fff;
+            font-size: 1.1rem;
+            word-break: break-all;
+            font-weight: 600;
+        }
+
+        /* Veto Log */
+        .veto-item {
+            background: rgba(255, 64, 64, 0.05);
+            border-left: 4px solid #ff4040;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border-radius: 0 12px 12px 0;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            gap: 0.5rem;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .veto-item:hover {
+            background: rgba(255, 64, 64, 0.08);
+            transform: translateX(4px);
+        }
+
+        .veto-file {
+            font-family: 'Inter', monospace;
+            font-weight: 700;
+            color: #ff8080;
+            font-size: 1rem;
+        }
+
+        .veto-reason {
+            color: #d0d5e5;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* File Lists */
+        .file-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .file-item {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            font-family: 'Inter', monospace;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            word-break: break-all;
+        }
+
+        .file-item.processed {
+            background: rgba(0, 255, 128, 0.05);
+            color: #a0a5b5;
+            border: 1px solid rgba(0, 255, 128, 0.1);
+        }
+
+        .file-item.pending {
+            background: var(--bg-panel);
+            color: #808595;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        .file-icon-success {
+            color: #00ff80;
+            font-size: 1rem;
         }
         
-        .list-item.active {
-            color: var(--bby-yellow);
-            font-weight: bold;
+        .file-icon-pending {
+            color: #808595;
+            font-size: 1rem;
         }
 
         /* Scrollbar styles */
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: var(--bg-obsidian); 
-            border-radius: 4px;
+            background: transparent; 
         }
         ::-webkit-scrollbar-thumb {
             background: #3f4459; 
-            border-radius: 4px;
+            border-radius: 999px;
         }
         ::-webkit-scrollbar-thumb:hover {
             background: #555b77; 
@@ -188,7 +267,14 @@
 <body>
 
     <div class="header">
-        <h1>Zero-Regression Purification Sweep</h1>
+        <h1>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--bby-yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            Purification Command Center
+        </h1>
         <div class="status-badge" id="sweepStatus">
             <span class="dot">●</span> <span>INITIALIZING</span>
         </div>
@@ -196,68 +282,83 @@
 
     <div class="dashboard">
         
-        <div class="metrics-grid">
-            <div class="card">
-                <h3>Total Files Swept</h3>
-                <p class="value" id="valProcessed">0</p>
-            </div>
-            <div class="card">
-                <h3>Remaining Queue</h3>
-                <p class="value" id="valRemaining">0</p>
-            </div>
-            <div class="card">
-                <h3>Veto Interventions</h3>
-                <p class="value" id="valVetos">0</p>
+        <!-- Left Panel: Metrics & Target -->
+        <div class="panel">
+            <div class="panel-header">Execution Status</div>
+            <div class="panel-content">
+                
+                <div class="metric-card">
+                    <h4>Overall Progress</h4>
+                    <p class="value" id="valPercent">0%</p>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; color: #a0a5b5; font-size: 0.85rem;">
+                        <span id="ratioText">0 / 0</span>
+                        <span>Files</span>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <h4>Active Interventions</h4>
+                    <p class="value" style="color: #ff8080;" id="valVetos">0</p>
+                </div>
+
+                <div class="target-box">
+                    <h4>Currently Auditing</h4>
+                    <div class="target-file" id="valCurrent">Awaiting Target...</div>
+                    <div style="margin-top: 1rem; font-size: 0.8rem; color: rgba(255, 255, 255, 0.5); text-transform: uppercase;">Phase 1-5 Active</div>
+                </div>
+
             </div>
         </div>
 
-        <div class="card">
-            <h3>Overall Progress</h3>
-            <div class="progress-container">
-                <div class="progress-bar" id="progressBar"></div>
+        <!-- Center Panel: The Veto Log -->
+        <div class="panel">
+            <div class="panel-header">
+                <span>Immutable Veto Log</span>
+                <span style="font-size: 0.8rem; background: rgba(255,255,255,0.1); padding: 0.2rem 0.6rem; border-radius: 999px;">Persistent History</span>
             </div>
-            <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; color: #a0a5b5; font-size: 0.9rem;">
-                <span id="percentText">0%</span>
-                <span id="ratioText">0 / 0</span>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>Currently Auditing (Phase 1-5 Active)</h3>
-            <p class="target-file" id="valCurrent">No active file</p>
-        </div>
-
-        <div class="metrics-grid">
-            <div class="card">
-                <h3>Active Queue (<span id="queueCount">0</span>)</h3>
-                <div class="list-container" id="queueList">
-                    <!-- Queue items injected here -->
+            <div class="panel-content" id="vetoList">
+                <div style="color: #a0a5b5; padding: 2rem; text-align: center; font-family: 'Outfit';">
+                    No structural anomalies detected yet.
                 </div>
             </div>
-            <div class="card">
-                <h3>Veto Log</h3>
-                <div class="veto-log" id="vetoList">
-                    <div style="color: #a0a5b5; padding: 1rem; text-align: center;">No vetos logged yet.</div>
-                </div>
+        </div>
+
+        <!-- Right Panel: Queue -->
+        <div class="panel">
+            <div class="panel-header">
+                <span>File Manifest</span>
+                <span id="queueCount" style="color: #fff;">0 Remaining</span>
+            </div>
+            <div class="panel-content">
+                <ul class="file-list" id="queueList">
+                    <!-- Files injected here -->
+                </ul>
             </div>
         </div>
 
     </div>
 
     <script>
+        // Store historical vetos locally in the UI so they don't disappear if the backend clears them
+        const persistentVetos = new Set();
+        let vetoArray = [];
+
         async function fetchManifest() {
             try {
-                // Prevent caching by appending a timestamp query
                 const res = await fetch(`/loop_manifest.json?t=${new Date().getTime()}`);
                 if (!res.ok) throw new Error('Manifest not found');
                 const data = await res.json();
                 updateUI(data);
             } catch (err) {
                 console.error("Error fetching manifest:", err);
-                document.getElementById('sweepStatus').innerHTML = '<span style="color: #ff4040;">● OFFLINE / WAITING</span>';
-                document.getElementById('sweepStatus').style.borderColor = 'rgba(255, 64, 64, 0.6)';
-                document.getElementById('sweepStatus').style.background = 'rgba(255, 64, 64, 0.1)';
-                document.getElementById('sweepStatus').style.color = '#ff4040';
+                const statusEl = document.getElementById('sweepStatus');
+                statusEl.innerHTML = '<span style="color: #ff4040;">● OFFLINE / WAITING</span>';
+                statusEl.style.borderColor = 'rgba(255, 64, 64, 0.6)';
+                statusEl.style.background = 'rgba(255, 64, 64, 0.1)';
+                statusEl.style.color = '#ff4040';
             }
         }
 
@@ -278,12 +379,19 @@
             // Metrics
             const processedCount = manifest.processed_queue ? manifest.processed_queue.length : 0;
             const remainingCount = manifest.remaining_queue ? manifest.remaining_queue.length : 0;
-            const vetoCount = manifest.active_vetos ? manifest.active_vetos.length : 0;
             const totalFiles = processedCount + remainingCount;
 
-            document.getElementById('valProcessed').innerText = processedCount;
-            document.getElementById('valRemaining').innerText = remainingCount;
-            document.getElementById('valVetos').innerText = vetoCount;
+            // Merge new vetos into persistent history
+            if (manifest.active_vetos && manifest.active_vetos.length > 0) {
+                manifest.active_vetos.forEach(v => {
+                    if (!persistentVetos.has(v)) {
+                        persistentVetos.add(v);
+                        vetoArray.unshift(v); // Add to top
+                    }
+                });
+            }
+
+            document.getElementById('valVetos').innerText = persistentVetos.size;
 
             // Current Target
             const currentPath = manifest.current_checkpoint && manifest.current_checkpoint.file_path 
@@ -297,28 +405,64 @@
                 percent = Math.round((processedCount / totalFiles) * 100);
             }
             document.getElementById('progressBar').style.width = `${percent}%`;
-            document.getElementById('percentText').innerText = `${percent}%`;
+            document.getElementById('valPercent').innerText = `${percent}%`;
             document.getElementById('ratioText').innerText = `${processedCount} / ${totalFiles}`;
 
-            // Vetos
+            // Render Persistent Veto Log
             const vetoList = document.getElementById('vetoList');
-            if (vetoCount > 0) {
-                vetoList.innerHTML = manifest.active_vetos.map(v => `<div class="veto-item">${v}</div>`).reverse().join('');
-            } else {
-                vetoList.innerHTML = '<div style="color: #a0a5b5; padding: 1rem; text-align: center;">No vetos logged yet. Quality Gate is clear.</div>';
+            if (vetoArray.length > 0) {
+                vetoList.innerHTML = vetoArray.map(v => {
+                    // Try to parse out the filename from the start of the string if formatted as "Filename.tsx: Reason"
+                    let filename = "Anomaly Detected";
+                    let reason = v;
+                    if (v.includes(':')) {
+                        const parts = v.split(':');
+                        filename = parts[0].trim();
+                        reason = parts.slice(1).join(':').trim();
+                    }
+
+                    return `
+                        <div class="veto-item">
+                            <div class="veto-file">${filename}</div>
+                            <div class="veto-reason">${reason}</div>
+                        </div>
+                    `;
+                }).join('');
             }
 
-            // Queue List
+            // Render Queue Lists
             const queueList = document.getElementById('queueList');
-            document.getElementById('queueCount').innerText = remainingCount;
-            if (remainingCount > 0) {
-                queueList.innerHTML = manifest.remaining_queue.map((path, idx) => {
-                    const filename = path.split('/').pop();
-                    return `<div class="list-item ${idx === 0 ? 'active' : ''}"><span>${filename}</span> <span>${idx === 0 ? 'AUDITING' : 'PENDING'}</span></div>`;
-                }).join('');
-            } else {
-                queueList.innerHTML = '<div style="color: #a0a5b5; padding: 1rem; text-align: center;">Queue Empty</div>';
+            document.getElementById('queueCount').innerText = `${remainingCount} Remaining`;
+            
+            let listHTML = '';
+            
+            // Show last 5 processed files
+            if (manifest.processed_queue) {
+                const recentProcessed = manifest.processed_queue.slice(-5).reverse();
+                recentProcessed.forEach(path => {
+                    listHTML += `
+                        <li class="file-item processed">
+                            <span class="file-icon-success">✓</span>
+                            <span>${path.split('/').pop()}</span>
+                        </li>
+                    `;
+                });
             }
+
+            // Show next 15 pending files
+            if (manifest.remaining_queue) {
+                const pending = manifest.remaining_queue.slice(0, 15);
+                pending.forEach((path, idx) => {
+                    listHTML += `
+                        <li class="file-item pending" ${idx === 0 ? 'style="border-left: 3px solid var(--bby-yellow);"' : ''}>
+                            <span class="file-icon-pending">◷</span>
+                            <span ${idx === 0 ? 'style="color: var(--bby-yellow); font-weight: bold;"' : ''}>${path.split('/').pop()}</span>
+                        </li>
+                    `;
+                });
+            }
+
+            queueList.innerHTML = listHTML;
         }
 
         // Poll every 2 seconds

@@ -147,3 +147,6 @@ declare global {
 }
 export interface ShiftWin { id: string; empId: string; empName: string; zone: string; type: 'pm' | 'card' | 'app'; timestamp: number; hourIndex?: number; }
 export interface ShiftSummary { totalPms: number; totalApps: number; totalRevenue: number; onTrackHours: number; onTrackRatio: number; }
+
+export interface HistoricalShift { id: string; date: string; leaderName: string; isWeekend: boolean; totalHours: number; totalRevenue: number; totalPms: number; totalApps: number; onTrackRatio: number; }
+

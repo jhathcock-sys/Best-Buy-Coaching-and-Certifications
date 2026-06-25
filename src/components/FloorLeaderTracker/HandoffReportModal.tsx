@@ -2,27 +2,48 @@ import React, { useState, useEffect } from 'react';
 import { X, CheckCircle2, FileText } from 'lucide-react';
 import { getGeminiModel, isGeminiAvailable } from '../../services/ai/core';
 import ReactMarkdown from 'react-markdown';
-import { ShiftEvent, ShiftSummary } from '../../types';
+import { useStore } from '../../store/useStore';
 
-export interface HandoffReportModalProps {
-  activeShift: ShiftEvent | null;
-  activeSummary: ShiftSummary | null;
-  apiKey: string;
+interface HandoffReportModalProps {
   onClose: () => void;
 }
 
-export default function HandoffReportModal({ activeShift, activeSummary, apiKey, onClose }: HandoffReportModalProps) {
-  const [report, setReport] = useState('');
-  const [isGenerating, setIsGenerating] = useState(true);
-  const [error, setError] = useState('');
+export default function HandoffReportModal({ onClose }: HandoffReportModalProps) {
+  const apiKey = useStore(state => state.apiKey);
+  const activeShift = useStore(state => state.activeShift);
+  
+  const [report, setReport] = useState<string>('');
+  const [isGenerating, setIsGenerating] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
+
+  // Calculate activeSummary internally to prevent prop-drilling
+  const hoursArray = activeShift && Array.isArray(activeShift.hours) ? activeShift.hours : [];
+  const activeSummary = activeShift ? {
+    totalPms: hoursArray.reduce((sum, h) => sum + (h.pms || 0), 0) + (activeShift.preExistingPms || 0),
+    totalApps: hoursArray.reduce((sum, h) => sum + (h.apps || 0), 0) + (activeShift.preExistingApps || 0),
+    totalRevenue: hoursArray.reduce((sum, h) => sum + (parseFloat(String(h.revenue)) || 0), 0) + (activeShift.preExistingRevenue || 0),
+    onTrackRatio: hoursArray.length > 0 ? Math.round((hoursArray.filter(h => {
+        const pmGoal = activeShift.isWeekend ? 3 : 2;
+        const appGoal = activeShift.isWeekend ? 3 : 2;
+        return (h.pms || 0) >= pmGoal && (h.apps || 0) >= appGoal;
+    }).length / hoursArray.length) * 100) : 0
+  } : null;
 
   useEffect(() => {
     let isMounted = true;
-
-    const generateReport = async () => {
+    
+    const generateReport = async (): Promise<void> => {
       if (!isGeminiAvailable(apiKey)) {
         if (isMounted) {
           setError('Gemini API key is required to generate handoff reports.');
+          setIsGenerating(false);
+        }
+        return;
+      }
+
+      if (!activeShift) {
+        if (isMounted) {
+          setError('No active shift data available.');
           setIsGenerating(false);
         }
         return;
@@ -37,16 +58,16 @@ export default function HandoffReportModal({ activeShift, activeSummary, apiKey,
           Focus on metrics vs goals, areas of momentum, and areas needing attention.
 
           SHIFT DATA:
-          - Leader: ${activeShift?.leaderName ?? 'Unknown'}
-          - Total Revenue: $${activeSummary?.totalRevenue ?? 0}
-          - Memberships (PMs): ${activeSummary?.totalPms ?? 0}
-          - Credit Cards (Apps): ${activeSummary?.totalApps ?? 0}
-          - On Track Ratio: ${activeSummary?.onTrackRatio ?? 0}%
-          - Floor Wins Logged: ${activeShift?.wins?.length ?? 0}
-          - Hours Tracked: ${activeShift?.hours?.length ?? 0}
+          - Leader: ${activeShift.leaderName || 'Unknown'}
+          - Total Revenue: $${activeSummary?.totalRevenue || 0}
+          - Memberships (PMs): ${activeSummary?.totalPms || 0}
+          - Credit Cards (Apps): ${activeSummary?.totalApps || 0}
+          - On Track Ratio: ${activeSummary?.onTrackRatio || 0}%
+          - Floor Wins Logged: ${activeShift.wins?.length || 0}
+          - Hours Tracked: ${hoursArray.length || 0}
           
           Recent Activity/Wins: 
-          ${JSON.stringify(activeShift?.wins?.slice(0, 5) ?? [])}
+          ${JSON.stringify(activeShift.wins?.slice(0, 5) || [])}
           
           Format the output with sections: 
           ## Shift Summary
@@ -60,9 +81,13 @@ export default function HandoffReportModal({ activeShift, activeSummary, apiKey,
         if (isMounted) {
           setReport(result.response.text());
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (isMounted) {
-          setError(err.message || 'Failed to generate report.');
+            if (err instanceof Error) {
+                setError(err.message || 'Failed to generate report.');
+            } else {
+                setError('Failed to generate report.');
+            }
         }
       } finally {
         if (isMounted) {
@@ -72,11 +97,11 @@ export default function HandoffReportModal({ activeShift, activeSummary, apiKey,
     };
 
     generateReport();
-
+    
     return () => {
-      isMounted = false;
+        isMounted = false;
     };
-  }, [activeShift, activeSummary, apiKey]);
+  }, [apiKey, activeShift, activeSummary?.totalRevenue, activeSummary?.totalPms, activeSummary?.totalApps, activeSummary?.onTrackRatio, hoursArray.length]);
 
   return (
     <div className="modal-overlay" data-testid="handoff-report-modal">

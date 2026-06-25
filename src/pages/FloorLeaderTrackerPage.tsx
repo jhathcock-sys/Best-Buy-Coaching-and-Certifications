@@ -28,9 +28,9 @@ export default function FloorLeaderTracker() {
   const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
   const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
   const roster = React.useMemo(() => (Object.values(_rawroster) as Employee[]).sort((a: Employee, b: Employee) => a.name.localeCompare(b.name)), [_rawroster]);
-  const shifts = useStore((state) => state.floorLeaderShifts) || EMPTY_ARR;
+
   const onSaveShift = useStore((state) => state.saveFloorLeaderShift);
-  const onDeleteShift = useStore((state) => state.deleteFloorLeaderShift);
+
   const onAddEmployee = useStore((state) => state.addEmployee);
   const apiKey = useStore((state) => state.apiKey);
   const [isHandoffModalOpen, setIsHandoffModalOpen] = useState(false);
@@ -135,15 +135,12 @@ export default function FloorLeaderTracker() {
       {/* Handoff Modal */}
       {isHandoffModalOpen && (
         <HandoffReportModal
-          activeShift={activeShift}
-          activeSummary={activeSummary}
-          apiKey={apiKey}
           onClose={() => setIsHandoffModalOpen(false)}
         />
       )}
 
       {/* HISTORICAL SHIFTS LIST */}
-      <HistoricalShiftsArchive shifts={shifts} onDeleteShift={onDeleteShift} />
+      <HistoricalShiftsArchive />
 
       {/* Import Schedule Modal */}
       <ImportScheduleModal 

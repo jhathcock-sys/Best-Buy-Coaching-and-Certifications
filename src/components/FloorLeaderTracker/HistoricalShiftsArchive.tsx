@@ -1,7 +1,12 @@
 import React from 'react';
 import { Clock, Trash2 } from 'lucide-react';
+import { HistoricalShift } from '../../types';
+import { useStore } from '../../store/useStore';
 
-export default function HistoricalShiftsArchive({ shifts, onDeleteShift }: any) {
+export default function HistoricalShiftsArchive() {
+  const shifts = useStore((state) => state.floorLeaderShifts) as unknown as HistoricalShift[] || [];
+  const onDeleteShift = useStore((state) => state.deleteFloorLeaderShift);
+
   return (
     <>
       {/* HISTORICAL SHIFTS LIST */}
@@ -11,7 +16,7 @@ export default function HistoricalShiftsArchive({ shifts, onDeleteShift }: any) 
         </h3>
         
         {shifts.length === 0 ? (
-          <div className="text-center p-3rem border-1-5-dashed-glass rounded-16 text-muted text-sm">
+          <div className="text-center p-3rem border-1-5-dashed-glass rounded-16 text-muted text-sm" data-testid="empty-archive-msg">
             No archived floor-leading shifts logged yet. Complete your first shift above.
           </div>
         ) : (
@@ -31,8 +36,8 @@ export default function HistoricalShiftsArchive({ shifts, onDeleteShift }: any) 
                 </tr>
               </thead>
               <tbody>
-                {shifts.map((shift: any) => (
-                  <tr key={shift.id} className="border-b-glass text-secondary">
+                {shifts.map((shift) => (
+                  <tr key={shift.id} className="border-b-glass text-secondary" data-testid={`historical-shift-row-${shift.id}`}>
                     <td className="p-md text-white font-semibold">{shift.date}</td>
                     <td className="p-md text-white">{shift.leaderName}</td>
                     <td className="p-md text-center">
@@ -44,20 +49,19 @@ export default function HistoricalShiftsArchive({ shifts, onDeleteShift }: any) 
                     </td>
                     <td className="p-md text-center text-white">{shift.totalHours} hrs</td>
                     <td className="p-md text-center text-info font-bold">
-                      ${shift.totalRevenue ? shift.totalRevenue.toLocaleString([], { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '$0.00'}
+                      ${shift.totalRevenue ? shift.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
                     </td>
                     <td className="p-md text-center text-white font-bold">{shift.totalPms}</td>
                     <td className="p-md text-center text-white font-bold">{shift.totalApps}</td>
                     <td className="p-md text-center">
-                      <span className="font-bold" style={{ 
-                        color: shift.onTrackRatio >= 70 ? 'var(--success)' : shift.onTrackRatio >= 40 ? 'var(--bby-yellow)' : 'var(--error)' 
-                      }}>
+                      <span className={`font-bold ${shift.onTrackRatio >= 70 ? 'text-success' : shift.onTrackRatio >= 40 ? 'text-bby-yellow' : 'text-error'}`}>
                         {shift.onTrackRatio}%
                       </span>
                     </td>
                     <td className="p-md text-right">
                       <button
                         type="button"
+                        data-testid={`btn-delete-shift-${shift.id}`}
                         onClick={() => {
                           if (confirm('Are you sure you want to delete this archived shift?')) {
                             onDeleteShift(shift.id);

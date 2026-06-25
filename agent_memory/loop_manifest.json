@@ -1,6 +1,5 @@
 {
     "remaining_queue": [
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/FloorLeaderTracker/FloorLeaderTabs.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/FloorLeaderTracker/HandoffReportModal.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/FloorLeaderTracker/HistoricalShiftsArchive.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/ImportSchedule/ImportScheduleRow.tsx",
@@ -162,12 +161,13 @@
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/FloorLeader/ShiftTrackerHourlyRow.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/FloorLeader/ShiftTrackerSidebar.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/FloorLeader/ShiftTrackerTab.tsx",
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/FloorLeaderTracker/FloorLeaderHeader.tsx"
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/FloorLeaderTracker/FloorLeaderHeader.tsx",
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/FloorLeaderTracker/FloorLeaderTabs.tsx"
     ],
     "current_checkpoint": {
-        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/FloorLeaderTracker/FloorLeaderTabs.tsx"
+        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/FloorLeaderTracker/HandoffReportModal.tsx"
     },
-    "file_index": 36,
+    "file_index": 37,
     "status": "ACTIVE",
     "agent_feed": [
         {

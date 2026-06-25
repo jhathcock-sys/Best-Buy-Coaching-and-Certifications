@@ -3,6 +3,7 @@ import { useStore } from '../store/useStore';
 import { toast } from 'react-hot-toast';
 import { useFloorLogging } from './FloorLeader/useFloorLogging';
 import { useFloorScheduling } from './FloorLeader/useFloorScheduling';
+import { FloorLeaderTabType } from '../components/FloorLeaderTracker/FloorLeaderTabs';
 
 export function useFloorLeaderTracker(activeManager, roster, onSaveShift) {
   const activeShift = useStore((state) => state.activeShift);
@@ -13,7 +14,7 @@ export function useFloorLeaderTracker(activeManager, roster, onSaveShift) {
   const logCoachingSession = useStore((state) => state.logCoachingSession);
 
   // --- UI State ---
-  const [leaderTab, setLeaderTab] = useState('tracker');
+  const [leaderTab, setLeaderTab] = useState<FloorLeaderTabType>('tracker');
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   // --- Domain Hooks ---

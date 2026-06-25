@@ -87,30 +87,13 @@ export default function ShiftTrackerTab({ activeShift, setActiveShift, roster = 
               
           <ShiftTrackerGoals activeSummary={activeSummary} />
           <ShiftTrackerHourlyLog 
-  activeSummary={activeSummary}
-  activeShift={activeShift}
-  setActiveShift={setActiveShift}
-  checkHourStatus={checkHourStatus}
-  handleAddHour={handleAddHour}
-  handleUpdateMetric={handleUpdateMetric}
-  handleUpdateStartRevenue={handleUpdateStartRevenue}
-  handleUpdateEndRevenue={handleUpdateEndRevenue}
-  handleRemoveHour={handleRemoveHour}
-  currentHourKey={currentHourKey}
-  selectedLog={selectedLog}
-  setSelectedLog={setSelectedLog}
-  newObservation={newObservation}
-  setNewObservation={setNewObservation}
-  newWinMsg={newWinMsg}
-  setNewWinMsg={setNewWinMsg}
-  winFeed={winFeed}
-  setWinFeed={setWinFeed}
-  handleSaveHourlyLog={handleSaveHourlyLog}
-  handleSaveObservation={handleSaveObservation}
-  handleLogWin={handleLogWin}
-  renderPaceIndicator={renderPaceIndicator}
-  handleUndoWin={handleUndoWin}
- />
+            checkHourStatus={checkHourStatus}
+            handleAddHour={handleAddHour}
+            handleUpdateMetric={handleUpdateMetric}
+            handleUpdateStartRevenue={handleUpdateStartRevenue}
+            handleUpdateEndRevenue={handleUpdateEndRevenue}
+            handleRemoveHour={handleRemoveHour}
+          />
           <ShiftTrackerSidebar 
             activeShift={activeShift}
             handleUndoWin={handleUndoWin}

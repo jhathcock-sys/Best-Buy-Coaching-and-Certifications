@@ -13,7 +13,6 @@ export default function StoreRosterTable({
   setSelectedProfileEmployee,
   handleStartEdit,
   DEPARTMENTS,
-  onUpdateEmployeeDept,
   onCoachEmployee,
   onCreateLog
 }: any) {
@@ -21,6 +20,7 @@ export default function StoreRosterTable({
   const rosterHistory = useStore((state) => state.rosterHistory);
   const activePeriod = useStore((state) => state.activePeriod);
   const onDeleteEmployee = useStore((state) => state.deleteEmployee);
+  const onUpdateEmployeeDept = useStore((state) => state.updateEmployeeDept);
 
   const [sortConfig, setSortConfig] = React.useState({ key: null, direction: 'asc' });
 

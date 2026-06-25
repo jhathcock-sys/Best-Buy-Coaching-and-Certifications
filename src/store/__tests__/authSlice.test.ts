@@ -29,7 +29,7 @@ describe('authSlice - login', () => {
     vi.clearAllMocks();
     
     // Create a vanilla zustand store for testing the slice
-    store = createStore((set, get, api) => ({
+    store = createStore<any>((set, get, api) => ({
       ...createAuthSlice(set, get, api),
       // Set the initial storePin to '1234' for Guest PIN tests
       storePin: '1234'

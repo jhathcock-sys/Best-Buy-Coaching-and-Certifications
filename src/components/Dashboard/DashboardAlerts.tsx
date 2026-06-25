@@ -1,6 +1,6 @@
 import { AlertCircle, Check, Play, ClipboardList } from 'lucide-react';
 
-import { useDashboardContext } from '../../pages/DashboardContext';
+import { useCalculatedMetrics } from '../../hooks/useCalculatedMetrics';
 
 interface DashboardAlertsProps {
   onNavigate: (view: string) => void;
@@ -15,7 +15,7 @@ export default function DashboardAlerts({
   onCoachEmployee, 
   onShadowEmployee 
 }: DashboardAlertsProps) {
-  const { activeFocus5Alerts, pendingTasks } = useDashboardContext();
+  const { activeFocus5Alerts, pendingTasks } = useCalculatedMetrics();
   
   if (activeFocus5Alerts.length === 0 && pendingTasks.length === 0) return null;
 

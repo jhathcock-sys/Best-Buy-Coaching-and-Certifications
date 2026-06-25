@@ -66,7 +66,6 @@ const renderMobileMetricBadge = (val, type, dept, emp, label, displayValue, dept
 export default function StoreRosterMobileCard({
   filteredRoster,
   DEPARTMENTS,
-  onUpdateEmployeeDept,
   handleStartEdit,
   onCoachEmployee,
   onCreateLog
@@ -75,6 +74,7 @@ export default function StoreRosterMobileCard({
   const rosterHistory = useStore((state) => state.rosterHistory);
   const activePeriod = useStore((state) => state.activePeriod);
   const onDeleteEmployee = useStore((state) => state.deleteEmployee);
+  const onUpdateEmployeeDept = useStore((state) => state.updateEmployeeDept);
 
   const getDeptStyle = (deptName) => {
     switch(deptName) {

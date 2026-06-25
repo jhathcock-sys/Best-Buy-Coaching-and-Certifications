@@ -60,10 +60,10 @@ export default function SyncDiagnosticsTab({
 
   return (
     <>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', border: dbConnected ? '1.5px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--border-glass)' }}>
+        <div className="flex-column" style={{ gap: '2rem' }}>
+          <div className="glass-card flex-column" style={{ gap: '1.5rem', width: '100%', border: dbConnected ? '1.5px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--border-glass)' }}>
             <div>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: dbConnected ? 'var(--success)' : '#fff' }}>
+              <h3 className="flex-center" style={{ justifyContent: 'flex-start', fontSize: '1.25rem', marginBottom: '0.5rem', gap: '0.5rem', color: dbConnected ? 'var(--success)' : '#fff' }}>
                 <Compass size={20} color={dbConnected ? 'var(--success)' : 'var(--bby-blue)'} /> Collaborative Cloud Sync (Firebase Firestore)
               </h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.825rem', lineHeight: 1.4 }}>
@@ -157,14 +157,17 @@ export default function SyncDiagnosticsTab({
               </ul>
             </div>
 
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', alignItems: 'center', marginTop: '0.5rem', flexWrap: 'wrap' }}>
-              {dbConnected && (
-                <span style={{ fontSize: '0.8rem', color: 'var(--success)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                  ✓ Cloud Database Synced successfully!
-                </span>
+            <div className="flex-center flex-wrap" style={{ gap: '1rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+              {!dbConnected ? (
+                <p style={{ margin: 0, fontSize: '0.825rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                  A restart may be required after first connection.
+                </p>
+              ) : (
+                <div className="flex-center" style={{ gap: '0.5rem', color: 'var(--success)', fontSize: '0.85rem', fontWeight: 600 }}>
+                  <ShieldAlert size={14} /> Connected to Cloud
+                </div>
               )}
-              
-              <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <div className="flex-center" style={{ gap: '0.75rem' }}>
                 {dbConnected && (
                   <button 
                     className="btn btn-secondary" 

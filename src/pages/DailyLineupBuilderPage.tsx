@@ -28,6 +28,7 @@ export default function DailyLineupBuilder() {
   const [isSmartAssigning, setIsSmartAssigning] = useState(false);
   const apiKey = useStore((state) => state.apiKey);
 
+  const playbookSettings = useStore(state => state.playbookSettings);
   const handleSmartAssign = async () => {
     if (!apiKey) {
       alert("Please configure your Gemini API key in Settings first.");
@@ -36,7 +37,7 @@ export default function DailyLineupBuilder() {
     setIsSmartAssigning(true);
     try {
       const { generateSmartZoning } = await import('../services/ai/geminiSmartZoning');
-      const newAssignments = await generateSmartZoning(roster, zones, apiKey);
+      const newAssignments = await generateSmartZoning(roster, zones, apiKey, playbookSettings);
       
       // Ensure all zones exist in the result, even if empty
       const normalizedAssignments: Record<string, string[]> = {};

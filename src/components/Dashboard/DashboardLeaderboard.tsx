@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { ArrowUpRight, ChevronRight } from 'lucide-react';
 import { Employee } from '../../types/index';
 import { calculateCVI } from '../../store/cviHelper';
-import { useDashboardContext } from '../../pages/DashboardContext';
+import { useCalculatedMetrics } from '../../hooks/useCalculatedMetrics';
 
 interface DashboardLeaderboardProps {
   onCoachEmployee: (employee: any) => void;
@@ -13,7 +13,7 @@ export default function DashboardLeaderboard({
   onCoachEmployee, 
   onShadowEmployee 
 }: DashboardLeaderboardProps) {
-  const { roster, rosterHistory, activePeriod } = useDashboardContext();
+  const { roster, rosterHistory, activePeriod } = useCalculatedMetrics();
   const [rankMetric, setRankMetric] = useState('memberships');
 
   const leaderboardData = useMemo(() => {

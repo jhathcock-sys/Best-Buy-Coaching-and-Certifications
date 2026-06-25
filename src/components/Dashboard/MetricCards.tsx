@@ -1,6 +1,6 @@
 import { Users, CreditCard, Shield, Star, TrendingUp, ClipboardList } from 'lucide-react';
 import CircularGauge from './CircularGauge';
-import { useDashboardContext } from '../../pages/DashboardContext';
+import { useCalculatedMetrics } from '../../hooks/useCalculatedMetrics';
 
 interface MetricCardsProps {
     calculatedMetrics?: any;
@@ -8,7 +8,7 @@ interface MetricCardsProps {
 }
 
 export default function MetricCards({ calculatedMetrics: propMetrics, recentSessions: propSessions }: MetricCardsProps = {}) {
-    const context = useDashboardContext() || {};
+    const context = useCalculatedMetrics();
     const calculatedMetrics = propMetrics || context.calculatedMetrics;
     const recentSessions = propSessions || context.recentSessions;
     return (

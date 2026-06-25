@@ -1,10 +1,10 @@
 import { useState, useMemo } from 'react';
 import { TrendingUp, CreditCard, Users } from 'lucide-react';
 
-import { useDashboardContext } from '../../pages/DashboardContext';
+import { useCalculatedMetrics } from '../../hooks/useCalculatedMetrics';
 
 export default function DashboardTrendChart() {
-  const { calculatedMetrics } = useDashboardContext();
+  const { calculatedMetrics } = useCalculatedMetrics();
   const [chartMetric, setChartMetric] = useState('memberships');
 
   const chartData = useMemo(() => {

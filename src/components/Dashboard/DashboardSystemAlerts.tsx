@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useDashboardContext } from '../../pages/DashboardContext';
+import { useCalculatedMetrics } from '../../hooks/useCalculatedMetrics';
 
 interface DashboardSystemAlertsProps {
   onNavigate: (view: string) => void;
@@ -8,7 +8,7 @@ interface DashboardSystemAlertsProps {
 export default function DashboardSystemAlerts({ 
   onNavigate 
 }: DashboardSystemAlertsProps) {
-  const { roster, rosterHistory, calculatedMetrics, activePeriod } = useDashboardContext();
+  const { roster, rosterHistory, calculatedMetrics, activePeriod } = useCalculatedMetrics();
   
   const systemAlerts = useMemo(() => {
     const list: any[] = [];

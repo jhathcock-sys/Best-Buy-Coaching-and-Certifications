@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { TrendingUp } from 'lucide-react';
-import { useDashboardContext } from '../../pages/DashboardContext';
+import { useCalculatedMetrics } from '../../hooks/useCalculatedMetrics';
 
 interface DashboardCoachingEngineProps {
   onShadowEmployee: (employee: any) => void;
@@ -13,7 +13,7 @@ export default function DashboardCoachingEngine({
   onCoachEmployee,
   onCreateLog
 }: DashboardCoachingEngineProps) {
-  const { roster, recentSessions, deptGoals } = useDashboardContext();
+  const { roster, recentSessions, deptGoals } = useCalculatedMetrics();
   
   const coachingRecommendations = useMemo(() => {
     if (!Array.isArray(roster) || roster.length === 0) return [];
@@ -99,7 +99,7 @@ export default function DashboardCoachingEngine({
         score += lastCoachedDaysAgo;
       }
 
-      score += (parseFloat(emp.hours) || 0) * 0.5;
+      score += (parseFloat(String(emp.hours)) || 0) * 0.5;
 
       return {
         employee: emp,

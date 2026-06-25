@@ -6,15 +6,14 @@ import DashboardCoachingEngine from '../components/Dashboard/DashboardCoachingEn
 import DashboardTrendChart from '../components/Dashboard/DashboardTrendChart';
 import DashboardLeaderboard from '../components/Dashboard/DashboardLeaderboard';
 import MetricCards from '../components/Dashboard/MetricCards';
-import { DashboardProvider, useDashboardContext } from './DashboardContext';
 
-function DashboardContent({ 
+export default function DashboardPage({ 
   onNavigate, 
   onCompleteFollowUpTask, 
   onCoachEmployee, 
   onShadowEmployee
 }: any) {
-  // Child components will pull data from useDashboardContext directly
+  // Child components will pull data from useCalculatedMetrics directly
 
   return (
     <div className="flex-column gap-xl">
@@ -46,13 +45,5 @@ function DashboardContent({
         onShadowEmployee={onShadowEmployee} 
       />
     </div>
-  );
-}
-
-export default function DashboardPage(props: any) {
-  return (
-    <DashboardProvider>
-      <DashboardContent {...props} />
-    </DashboardProvider>
   );
 }

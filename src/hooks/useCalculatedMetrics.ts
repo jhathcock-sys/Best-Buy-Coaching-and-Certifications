@@ -1,16 +1,22 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useStore } from '../store/useStore';
 import { useShallow } from 'zustand/react/shallow';
-import { Employee } from '../types';
+import { Employee, CoachingLog, ShiftEvent, FollowUpTask, DeptGoal } from '../types';
 
 const EMPTY_OBJ = {};
-const EMPTY_ARR = [];
+const EMPTY_ARR: any[] = [];
 
-const DashboardContext = createContext<any>(null);
+export interface CalculatedMetrics {
+  memberships: number;
+  creditCards: number;
+  warranty: number;
+  surveys: number;
+  rph: number;
+  totalRevenue: number;
+  totalHours: number;
+}
 
-export const useDashboardContext = () => useContext(DashboardContext);
-
-export const DashboardProvider = ({ children }: { children: React.ReactNode }) => {
+export function useCalculatedMetrics() {
   const {
     recentSessions,
     followUpTasks,
@@ -31,11 +37,16 @@ export const DashboardProvider = ({ children }: { children: React.ReactNode }) =
     activeManager: state.activeManager
   })));
 
-  const _rawroster = (rosterHistory || {})[activePeriod as string] || EMPTY_OBJ;
-  const roster = useMemo(() => (Object.values(_rawroster) as Employee[]).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
+  const _rawroster = (rosterHistory || EMPTY_OBJ)[activePeriod as string] || EMPTY_OBJ;
   
-  const calculatedMetrics = useMemo(() => {
-    if (!roster || roster.length === 0) return { memberships: 0, creditCards: 0, warranty: 0, surveys: 0, rph: 0, totalRevenue: 0, totalHours: 0 };
+  const roster = useMemo(() => {
+    return (Object.values(_rawroster) as Employee[]).sort((a, b) => a.name.localeCompare(b.name));
+  }, [_rawroster]);
+  
+  const calculatedMetrics = useMemo<CalculatedMetrics>(() => {
+    if (!roster || roster.length === 0) {
+      return { memberships: 0, creditCards: 0, warranty: 0, surveys: 0, rph: 0, totalRevenue: 0, totalHours: 0 };
+    }
     
     let totalMemberships = 0;
     let totalCreditCards = 0;
@@ -48,24 +59,24 @@ export const DashboardProvider = ({ children }: { children: React.ReactNode }) =
     let weightedWarrantySum = 0;
     let totalTransactionsForWarranty = 0;
 
-    roster.forEach((emp: Employee) => {
-      totalMemberships += ((emp as any).memberships || 0);
-      totalCreditCards += ((emp as any).creditCards || 0);
+    roster.forEach((emp) => {
+      totalMemberships += (emp.memberships || 0);
+      totalCreditCards += (emp.creditCards || 0);
       
-      const hours = (emp as any).hours || 0;
-      const rph = (emp as any).rph || 0;
-      const transactions = (emp as any).transactions || 0;
+      const hours = emp.hours || 0;
+      const rph = emp.rph || 0;
+      const transactions = emp.transactions || 0;
       
-      const warranty = (emp as any).warranty || 0;
-      if ((emp as any).warranty > 0) {
-        weightedWarrantySum += ((emp as any).warranty * transactions);
+      const warranty = emp.warranty || 0;
+      if (warranty > 0) {
+        weightedWarrantySum += (warranty * transactions);
       }
       
       if (transactions > 0) {
         totalTransactionsForWarranty += transactions;
       }
 
-      let empSurveys = (emp as any).surveys || 0;
+      let empSurveys = emp.surveys || 0;
       if (empSurveys === 0.2) empSurveys = 0; // 0.2 is used as a 'Failing' flag internally
       sumSurveys += empSurveys;
       
@@ -97,22 +108,22 @@ export const DashboardProvider = ({ children }: { children: React.ReactNode }) =
     if (mostRecentShift.date !== todayStr) return [];
     
     const zoneAssignments = mostRecentShift.zoneAssignments || {};
-    const alerts: any[] = [];
+    const alerts: { employee: Employee; zone: string }[] = [];
     
     const todayStart = new Date().setHours(0,0,0,0);
-    const todayLogs = (coachingLogs || []).filter((log: any) => {
+    const todayLogs = (coachingLogs || EMPTY_ARR).filter((log) => {
       const logTime = log.timestamp || 0;
       return logTime >= todayStart;
     });
 
     Object.keys(zoneAssignments).forEach(zone => {
       const empIds = zoneAssignments[zone] || [];
-      empIds.forEach((empId: string) => {
-        const emp = roster.find((e: any) => e.id === empId);
-        if (emp && (emp as any).focus5) {
-          const hasLogToday = todayLogs.some((log: any) => log.employeeId === empId || log.employeeName === (emp as any).name);
+      empIds.forEach((empId) => {
+        const emp = roster.find(e => e.id === empId);
+        if (emp && emp.focus5) {
+          const hasLogToday = todayLogs.some(log => log.employeeId === empId || log.employeeName === emp.name);
           if (!hasLogToday) {
-            alerts.push({ employee: emp, zone: zone });
+            alerts.push({ employee: emp, zone });
           }
         }
       });
@@ -123,11 +134,11 @@ export const DashboardProvider = ({ children }: { children: React.ReactNode }) =
 
   const activePeriodLogs = useMemo(() => {
     if (!activePeriod) return coachingLogs || EMPTY_ARR;
-    const [activeMonthStr, activeYearStr] = (activePeriod || "").split(' ');
+    const [activeMonthStr, activeYearStr] = activePeriod.split(' ');
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const activeMonthIdx = months.findIndex(m => activeMonthStr.startsWith(m));
     
-    return (coachingLogs || EMPTY_ARR).filter((log: any) => {
+    return (coachingLogs || EMPTY_ARR).filter((log) => {
       const logDate = log.timestamp ? new Date(log.timestamp) : new Date(log.date);
       if (isNaN(logDate.getTime())) return true;
       const parsedYear = activeYearStr ? parseInt(activeYearStr) : NaN;
@@ -136,23 +147,23 @@ export const DashboardProvider = ({ children }: { children: React.ReactNode }) =
   }, [coachingLogs, activePeriod]);
 
   const shadowingHeatmapData = useMemo(() => {
-    const counts = { 'Front End': 0, 'Computing': 0, 'Mobile': 0, 'Home Theatre': 0, 'Geek Squad': 0, 'Appliances': 0 };
+    const counts: Record<string, number> = { 'Front End': 0, 'Computing': 0, 'Mobile': 0, 'Home Theatre': 0, 'Geek Squad': 0, 'Appliances': 0 };
     
     // Pre-build a master lookup for O(1) department resolution
     const deptLookup: Record<string, string> = {};
     
     // First fill from all history (older to newer, so active overwrites)
-    Object.values(rosterHistory || {}).forEach((empMap: any) => {
-      Object.values(empMap || {}).forEach((emp: any) => {
+    Object.values(rosterHistory || EMPTY_OBJ).forEach((empMap: any) => {
+      Object.values(empMap || EMPTY_OBJ).forEach((emp: any) => {
         if (emp.id && emp.dept) deptLookup[emp.id] = emp.dept;
         if (emp.name && emp.dept) deptLookup[emp.name] = emp.dept;
       });
     });
     
-    activePeriodLogs.forEach((log: any) => {
+    activePeriodLogs.forEach((log) => {
       const dept = deptLookup[log.employeeId] || deptLookup[log.employeeName];
       if (dept && dept in counts) {
-        (counts as any)[dept]++;
+        counts[dept]++;
       }
     });
     
@@ -160,26 +171,20 @@ export const DashboardProvider = ({ children }: { children: React.ReactNode }) =
   }, [activePeriodLogs, rosterHistory]);
 
   const pendingTasks = useMemo(() => {
-    return (followUpTasks || []).filter((task: any) => !task.completed);
+    return (followUpTasks || EMPTY_ARR).filter((task) => !task.completed);
   }, [followUpTasks]);
 
-  const value = {
+  return {
     roster,
     calculatedMetrics,
     activeFocus5Alerts,
     activePeriodLogs,
     shadowingHeatmapData,
     pendingTasks,
-    recentSessions,
-    deptGoals,
+    recentSessions: recentSessions || EMPTY_ARR,
+    deptGoals: deptGoals || EMPTY_OBJ,
     activePeriod,
-    rosterHistory,
+    rosterHistory: rosterHistory || EMPTY_OBJ,
     activeManager
   };
-
-  return (
-    <DashboardContext.Provider value={value}>
-      {children}
-    </DashboardContext.Provider>
-  );
-};
+}

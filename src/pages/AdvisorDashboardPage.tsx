@@ -10,6 +10,7 @@ interface AdvisorDashboardProps {
 }
 
 const EMPTY_ARR: any[] = [];
+const EMPTY_OBJ = {};
 
 export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashboardProps) {
   const coachingLogs = useStore(state => state.coachingLogs) || EMPTY_ARR;
@@ -21,8 +22,8 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
   );
 
   const rosterHistory = useStore(state => state.rosterHistory);
-  const _rawactiveRoster = rosterHistory?.[activePeriod] || {};
-  const activeRoster = React.useMemo(() => Object.values(_rawactiveRoster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawactiveRoster]);
+  const _rawactiveRoster = rosterHistory?.[activePeriod] || EMPTY_OBJ;
+  const activeRoster = React.useMemo(() => (Object.values(_rawactiveRoster) as any[]).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawactiveRoster]);
   
   // Calculate Top 3 Roleplay Champions based on "Perfect Roleplay Score" trophies or general trophies
   const top3Champions = [...activeRoster]

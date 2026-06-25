@@ -38,7 +38,6 @@ export default function StoreRoster({
   const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
   const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
 
-  const updateEmployeeDept = useStore((state) => state.updateEmployeeDept);
   const addEmployee = useStore((state) => state.addEmployee);
   const editEmployee = useStore((state) => state.editEmployee);
   const deleteEmployee = useStore((state) => state.deleteEmployee);
@@ -47,7 +46,7 @@ export default function StoreRoster({
   const bulkImportEmployees = useStore((state) => state.bulkImportEmployees);
   
   // Create aliases for the functions that were previously props
-  const onUpdateEmployeeDept = updateEmployeeDept;
+
   const onAddEmployee = addEmployee;
   const onEditEmployee = editEmployee;
   const onDeleteEmployee = deleteEmployee;
@@ -244,7 +243,6 @@ export default function StoreRoster({
                   setSelectedProfileEmployee={setSelectedProfileEmployee}
                   handleStartEdit={handleStartEdit}
                   DEPARTMENTS={DEPARTMENTS}
-                  onUpdateEmployeeDept={onUpdateEmployeeDept}
                   onCoachEmployee={onCoachEmployee}
                   onCreateLog={onCreateLog}
                 />
@@ -256,7 +254,6 @@ export default function StoreRoster({
                   setSelectedProfileEmployee={setSelectedProfileEmployee}
                   handleStartEdit={handleStartEdit}
                   DEPARTMENTS={DEPARTMENTS}
-                  onUpdateEmployeeDept={onUpdateEmployeeDept}
                   onCoachEmployee={onCoachEmployee}
                   onCreateLog={onCreateLog}
                 />

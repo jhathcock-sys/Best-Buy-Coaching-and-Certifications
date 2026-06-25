@@ -19,7 +19,7 @@ function getGeminiClient(clientApiKey = null) {
   return new GoogleGenerativeAI(apiKey);
 }
 
-// 1. Generate Coaching Log via Gemini 3.1 Pro
+// 1. Generate Coaching Log via Gemini 3.5 Pro
 exports.generateCoaching = functions.https.onRequest((req, res) => {
   return cors(req, res, async () => {
     try {
@@ -98,11 +98,26 @@ exports.generateCoaching = functions.https.onRequest((req, res) => {
       const result = await model.generateContent({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
         generationConfig: {
-          responseMimeType: 'application/json'
+          responseMimeType: 'application/json',
+          temperature: 0.4,
+          maxOutputTokens: 2048,
+          topP: 0.8,
+          topK: 40
         }
       });
 
-      const data = JSON.parse(result.response.text());
+      const textResult = result.response.text();
+      let data;
+      try {
+        data = JSON.parse(textResult);
+      } catch (parseError) {
+        console.error('JSON Parsing Error. Raw output:', textResult);
+        return res.status(500).json({
+          error: 'AI generated malformed JSON',
+          details: parseError.message,
+          raw: textResult
+        });
+      }
       return res.status(200).json(data);
     } catch (error) {
       console.error('Error generating coaching log:', error);
@@ -111,7 +126,7 @@ exports.generateCoaching = functions.https.onRequest((req, res) => {
   });
 });
 
-// 2. Audit dialogue and evaluate soft skills via Gemini 3.1 Pro
+// 2. Audit dialogue and evaluate soft skills via Gemini 3.5 Pro
 exports.auditDialogue = functions.https.onRequest((req, res) => {
   return cors(req, res, async () => {
     try {
@@ -123,17 +138,17 @@ exports.auditDialogue = functions.https.onRequest((req, res) => {
       const aiInstance = getGeminiClient(apiKey);
       const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-pro' });
 
-      const dialogueStr = history.messages.map(m => `${m.sender}: ${m.text}`).join('\n');
+      const dialogueStr = history?.messages?.map(m => `${m.sender}: ${m.text}`).join('\n') || '';
       
       const evaluationPrompt = `
-        You are a Best Buy Sales Evaluator and Coach. Evaluate the following sales roleplay transcript between a Sales Advisor and a Customer (${scenario.name}) focusing heavily on soft skills (empathy, building rapport, active listening).
+        You are a Best Buy Sales Evaluator and Coach. Evaluate the following sales roleplay transcript between a Sales Advisor and a Customer (${scenario?.name || 'Customer'}) focusing heavily on soft skills (empathy, building rapport, active listening).
         
         Transcript:
         ${dialogueStr}
         
         Playbook standards:
-        - Allowed Terms: ${playbookSettings.allowedPhrases ? playbookSettings.allowedPhrases.join(', ') : 'My Best Buy Total/Plus, GSP'}
-        - Prohibited Terms: ${playbookSettings.forbiddenPhrases ? playbookSettings.forbiddenPhrases.join(', ') : 'warranty'}
+        - Allowed Terms: ${playbookSettings?.allowedPhrases ? playbookSettings.allowedPhrases.join(', ') : 'My Best Buy Total/Plus, GSP'}
+        - Prohibited Terms: ${playbookSettings?.forbiddenPhrases ? playbookSettings.forbiddenPhrases.join(', ') : 'warranty'}
 
         Evaluate on a 0-100 scale for each Best Buy Sales Flow Step:
         - Connect: Greeting, welcoming, building emotional connection/rapport.
@@ -186,11 +201,26 @@ exports.auditDialogue = functions.https.onRequest((req, res) => {
       const result = await model.generateContent({
         contents: [{ role: 'user', parts: [{ text: evaluationPrompt }] }],
         generationConfig: {
-          responseMimeType: 'application/json'
+          responseMimeType: 'application/json',
+          temperature: 0.3,
+          maxOutputTokens: 2048,
+          topP: 0.8,
+          topK: 40
         }
       });
 
-      const data = JSON.parse(result.response.text());
+      const textResult = result.response.text();
+      let data;
+      try {
+        data = JSON.parse(textResult);
+      } catch (parseError) {
+        console.error('JSON Parsing Error. Raw output:', textResult);
+        return res.status(500).json({
+          error: 'AI generated malformed JSON',
+          details: parseError.message,
+          raw: textResult
+        });
+      }
       return res.status(200).json(data);
     } catch (error) {
       console.error('Error auditing dialogue:', error);
@@ -257,7 +287,12 @@ exports.generateAIContent = functions.https.onCall(async (request) => {
     console.log(`Getting generative model: ${modelName}`);
     const model = aiInstance.getGenerativeModel({ model: modelName });
     
-    const generationConfig = {};
+    const generationConfig = {
+      temperature: modelConfig?.temperature ?? 0.4,
+      maxOutputTokens: modelConfig?.maxOutputTokens ?? 4096,
+      topP: modelConfig?.topP ?? 0.8,
+      topK: modelConfig?.topK ?? 40,
+    };
     if (isJSON) {
       generationConfig.responseMimeType = 'application/json';
     }
@@ -352,18 +387,19 @@ exports.parseRentsDueCSV = functions.https.onCall(async (data, context) => {
             if (typeof val === 'string') {
               val = val.replace(/[^0-9.-]+/g, '');
               val = parseFloat(val);
-              if (isNaN(val)) continue;
             }
-            return val;
+            if (typeof val === 'number' && !isNaN(val)) {
+              return val;
+            }
           }
         }
         return defaultVal;
       };
 
       const nameKey = Object.keys(row).find(k => k.toLowerCase().includes('name') || k.toLowerCase().includes('employee') || k.toLowerCase().includes('advisor'));
-      let name = nameKey ? row[nameKey] : "Unknown";
-      // Sanitize the name strictly via DOMPurify
-      name = DOMPurify.sanitize(String(name).trim());
+      let rawName = nameKey && row[nameKey] != null ? String(row[nameKey]).trim() : "Unknown";
+      // Sanitize the name strictly via DOMPurify, fallback to 'Unknown' if emptied
+      let name = DOMPurify.sanitize(rawName) || "Unknown";
 
       const rph = getVal(['rph', 'rev/hr', 'revenue per hour']);
       const rphOwed = getVal(['rph goal', 'rph owed', 'rph target'], 640);
@@ -402,7 +438,7 @@ exports.parseRentsDueCSV = functions.https.onCall(async (data, context) => {
   }
 });
 
-// 5. Secure Account Provisioning Function (Phase 1)
+// 6. Secure Account Provisioning Function (Phase 1)
 // Eradicates client-side auth forgery by securely creating tenant accounts backend-only
 exports.provisionTenantAccount = functions.https.onCall(async (data, context) => {
   try {

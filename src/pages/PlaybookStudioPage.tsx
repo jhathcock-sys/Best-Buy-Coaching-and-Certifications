@@ -147,10 +147,7 @@ function PlaybookStudioContent({ playbookSettings }: { playbookSettings: any }) 
       )}
 
       {activeTab === 'vocab' && (
-        <BbyVocabTab 
-          playbookSettings={playbookSettings}
-          setPlaybookSettings={onSaveSettings}
-        />
+        <BbyVocabTab />
       )}
 
       {activeTab === 'targets' && (

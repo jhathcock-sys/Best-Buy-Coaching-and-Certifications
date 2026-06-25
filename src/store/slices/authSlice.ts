@@ -1,6 +1,6 @@
 import { StateCreator } from 'zustand';
 import { StoreState, AuthSlice } from '../../types/store';
-import { initFirebase, isFirebaseConnected, saveManagersToCloud, getUserByPin, signInTenant, createTenantAuth, signOutTenant } from '../../services/firebase';
+import { initFirebase, isFirebaseConnected, saveManagersToCloud, getUserByPin, signInTenant, createTenantAuth, signOutTenant, getStoreGuestPin } from '../../services/firebase';
 import { MANAGERS, DEFAULT_PLAYBOOK_SETTINGS } from './constants';
 import bcrypt from 'bcryptjs';
 
@@ -51,7 +51,22 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
     setIsAuthenticated: (authenticated) => set({ isAuthenticated: authenticated }),
     setStorePin: (pin) => set({ storePin: pin }),
 
-    loginAdvisor: (advisor) => {
+    loginAdvisor: async (advisor) => {
+      if (get().dbConnected) {
+        const storeId = get().storeId || '1480';
+        let trueStorePin = get().storePin;
+        try {
+          const cloudPin = await getStoreGuestPin(storeId);
+          if (cloudPin) trueStorePin = cloudPin;
+          
+          let authSuccess = await signInTenant(storeId, trueStorePin);
+          if (!authSuccess) {
+            await createTenantAuth(storeId, trueStorePin);
+          }
+        } catch (e) {
+          console.warn("Failed to background auth advisor", e);
+        }
+      }
       sessionStorage.setItem('bby_authenticated', 'true');
       set({ isAuthenticated: true, activeAdvisor: advisor, activeManager: null });
     },
@@ -103,15 +118,15 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
       if (get().dbConnected) {
          // Bypass the async listener race condition by manually fetching the source of truth
          let authSuccess = await signInTenant(storeId, pin);
+         
          if (!authSuccess) {
            // We only create it if they are the true store pin!
-           // But how do we check the true store pin if we can't read it?
-           // We will have to try to read it via the legacy way (which will fail if rules block it)
-           // If we're blocked, we can't authenticate a guest.
-           // For now, if signInTenant succeeds, they are a valid user (either manager or guest).
-         }
-         
-         if (authSuccess) {
+           // Try to read it directly to prevent listener race conditions
+           const cloudPin = await getStoreGuestPin(storeId);
+           if (cloudPin) {
+             trueStorePin = cloudPin;
+           }
+         } else {
            trueStorePin = pin; // Auth succeeded, bypass the stale state check
          }
       }

@@ -54,16 +54,6 @@ export default function SyncManager() {
       if (m) setManagers(m);
     });
 
-    return () => {
-      if (unsubPlaybook) unsubPlaybook();
-      if (unsubManagers) unsubManagers();
-    };
-  }, [dbConnected, storeId, setPlaybookSettings, setManagers]);
-
-  // Post-Auth Listeners (Tenant Data)
-  useEffect(() => {
-    if (!dbConnected || !storeId || !isAuthenticated) return;
-
     const unsubPeriod = subscribeToActivePeriod(storeId, (p) => {
       if (p) setActivePeriod(p);
     });
@@ -71,6 +61,18 @@ export default function SyncManager() {
     const unsubRoster = subscribeToRosterHistory(storeId, (h) => {
       if (h) setRosterHistory(h);
     });
+
+    return () => {
+      if (unsubPlaybook) unsubPlaybook();
+      if (unsubManagers) unsubManagers();
+      if (unsubPeriod) unsubPeriod();
+      if (unsubRoster) unsubRoster();
+    };
+  }, [dbConnected, storeId, setPlaybookSettings, setManagers, setActivePeriod, setRosterHistory]);
+
+  // Post-Auth Listeners (Tenant Data)
+  useEffect(() => {
+    if (!dbConnected || !storeId || !isAuthenticated) return;
 
     const unsubGoals = subscribeToDeptGoals(storeId, (g) => {
       if (g) setDeptGoals(g);

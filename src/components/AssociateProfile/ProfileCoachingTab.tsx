@@ -1,27 +1,28 @@
-import React from 'react';
-import { TrendingUp, ClipboardList, Calendar, Volume2, Square, Clock, AlertCircle, CheckCircle, FileText, Loader2 } from 'lucide-react';
-import MetricSparkline from '../MetricSparkline';
+import React, { ReactNode } from 'react';
+import { Volume2, Square, Clock, AlertCircle } from 'lucide-react';
+import { CoachingLog } from '../../types';
+
+interface ProfileCoachingTabProps {
+  associateLogs: CoachingLog[];
+  expandedLogId: string | null;
+  setExpandedLogId: (id: string | null) => void;
+  handlePlayTTS: (id: string, text: string) => void;
+  formatMarkdownNotes: (markdown: string) => ReactNode;
+  playingLogId: string | null;
+}
 
 export default function ProfileCoachingTab({ 
-  employee,
-  rosterHistory,
-  activePeriod,
-  activeHistoryPoints,
   associateLogs,
-  associateTasks,
   expandedLogId,
   setExpandedLogId,
   handlePlayTTS,
   formatMarkdownNotes,
-  calculateCVI,
-  renderMarkdown,
   playingLogId,
-  setPlayingLogId,
- }) {
+ }: ProfileCoachingTabProps) {
   return (
     <>
-            <div className="flex-column gap-md animate-fade-in">
-              {associateLogs.length === 0 ? (
+            <div className="flex-column gap-md animate-fade-in" data-testid="profile-coaching-tab">
+              {!associateLogs || associateLogs.length === 0 ? (
                 <div className="text-center p-xl bg-white-alpha-05 rounded-xl border-glass">
                   <AlertCircle size={24} color="var(--text-muted)" className="mb-sm" />
                   <p className="text-sm text-muted m-0">
@@ -30,7 +31,7 @@ export default function ProfileCoachingTab({
                 </div>
               ) : (
                 <div className="flex-column gap-sm">
-                  {associateLogs.map((log: any) => {
+                  {(associateLogs || []).map((log: CoachingLog) => {
                     const isExpanded = expandedLogId === log.id;
                     const isPlaying = playingLogId === log.id;
 
@@ -38,6 +39,7 @@ export default function ProfileCoachingTab({
                       <div 
                         key={log.id || log.timestamp}
                         className="glass-card-sm flex-column gap-sm"
+                        data-testid="coaching-log-item"
                       >
                         <div className="flex-between flex-wrap gap-sm align-center">
                           <div className="flex-row align-center gap-sm">
@@ -64,6 +66,7 @@ export default function ProfileCoachingTab({
                             <button 
                               className="btn-link text-xs font-semibold cursor-pointer text-bby-blue bg-transparent border-none"
                               onClick={() => setExpandedLogId(log.id)}
+                              data-testid="view-notes-btn"
                             >
                               View Notes
                             </button>
@@ -75,8 +78,9 @@ export default function ProfileCoachingTab({
                               <span className="text-xs text-muted">Coaching Plan Document</span>
                               <div className="flex-row gap-xs">
                                 <button 
-                                  className={`btn ${isPlaying ? 'btn-danger' : 'btn-secondary'} text-xxs flex-row align-center gap-xs px-sm py-xs`}
+                                  className={`btn ${isPlaying ? 'btn-danger' : 'btn-secondary'} text-xxs flex-row align-center gap-xs px-sm py-xs cursor-pointer`}
                                   onClick={() => handlePlayTTS(log.id, log.notes)}
+                                  data-testid="play-tts-btn"
                                 >
                                   {isPlaying ? (
                                     <>

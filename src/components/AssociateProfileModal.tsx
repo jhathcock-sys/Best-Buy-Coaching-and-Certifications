@@ -125,26 +125,16 @@ export default function AssociateProfileModal({
           )}
 
           {/* TAB 2: Coaching logs history list */}
-          {activeTab === 'coaching' && (
-            <ProfileCoachingTab 
-              employee={employee}
-              rosterHistory={rosterHistory}
-              activePeriod={activePeriod}
-              activeHistoryPoints={activeHistoryPoints}
-              associateLogs={associateLogs}
-              associateTasks={associateTasks}
-              expandedLogId={expandedLogId}
-              setExpandedLogId={setExpandedLogId}
-              handlePlayTTS={handlePlayTTS}
-              formatMarkdownNotes={formatMarkdownNotes}
-              calculateCVI={calculateCVI}
-              renderMarkdown={renderMarkdown}
-              playingLogId={playingLogId}
-              setPlayingLogId={setPlayingLogId}
- />
-          )}
-
-          {/* TAB 3: Commitments Follow-up Tasks */}
+              {activeTab === 'coaching' && (
+                <ProfileCoachingTab 
+                  associateLogs={associateLogs}
+                  expandedLogId={expandedLogId}
+                  setExpandedLogId={setExpandedLogId}
+                  handlePlayTTS={handlePlayTTS}
+                  formatMarkdownNotes={formatMarkdownNotes}
+                  playingLogId={playingLogId}
+                />
+              )}{/* TAB 3: Commitments Follow-up Tasks */}
           {activeTab === 'commitments' && (
             <ProfileCommitmentsTab 
               associateTasks={associateTasks}

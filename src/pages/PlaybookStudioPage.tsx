@@ -125,8 +125,6 @@ function PlaybookStudioContent({ playbookSettings }: { playbookSettings: any }) 
         <AiEngineTab 
           aiMode={aiMode} setAiMode={setAiMode}
           localApiKey={localApiKey} setLocalApiKey={setLocalApiKey}
-          playbookSettings={playbookSettings}
-          storePin={storePin} setStorePin={setStorePin}
         />
       )}
 

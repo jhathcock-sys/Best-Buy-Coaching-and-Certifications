@@ -178,7 +178,6 @@ export default function PerformanceWizardModal({
             <WizardStep2Attach 
               editForm={editForm}
               setEditForm={setEditForm}
-              departmentGoals={deptGoals}
             />
           )}
 

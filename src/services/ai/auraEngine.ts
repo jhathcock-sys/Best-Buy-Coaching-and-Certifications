@@ -8,34 +8,38 @@ export interface AuraInsight {
   action: string;
 }
 
-export async function generateAuraInsightForEmployee(
-  employee: any,
+export async function generateAuraBatchInsights(
+  roster: any[],
   deptGoals: any,
   apiKey: string,
   playbookSettings: any
-): Promise<AuraInsight> {
+): Promise<Record<string, AuraInsight>> {
+  if (!roster || roster.length === 0) return {};
+  
   const model = getGeminiModel(apiKey, playbookSettings);
   
-  const empStats = {
-    name: employee.name,
-    department: employee.department,
-    revenue: employee.revenue || 0,
-    transactions: employee.transactions || 0,
-    apps: employee.applications || 0,
-    memberships: employee.memberships || 0,
-  };
+  const rosterStats = roster.map(emp => ({
+    id: emp.id,
+    name: emp.name,
+    department: emp.department,
+    revenue: emp.revenue || 0,
+    transactions: emp.transactions || 0,
+    apps: emp.applications || 0,
+    memberships: emp.memberships || 0,
+  }));
 
   const prompt = `
 You are the AI engine powering the 'Aura' HUD for Best Buy Floor Leaders.
-Analyze this employee's current shift performance:
-${JSON.stringify(empStats, null, 2)}
+Analyze this entire employee roster's current shift performance:
+${JSON.stringify(rosterStats, null, 2)}
 
-Provide a strict JSON response containing exactly these three fields:
-1. "status": Must be exactly one of: "excellent", "needs_coaching", or "steady". Use "needs_coaching" if they have 0 apps/memberships or very low revenue per transaction.
-2. "insight": A single concise sentence observing their performance (e.g., "High transactions but 0 memberships attached.").
-3. "action": A 3-4 word recommended action for the Floor Leader to take right now (e.g., "Roleplay Best Buy Total").
+Provide a strict JSON response containing an array of objects. Each object must represent an employee and contain exactly these four fields:
+1. "id": The employee's exact id from the provided roster data.
+2. "status": Must be exactly one of: "excellent", "needs_coaching", or "steady". Use "needs_coaching" if they have 0 apps/memberships or very low revenue per transaction.
+3. "insight": A single concise sentence observing their performance (e.g., "High transactions but 0 memberships attached.").
+4. "action": A 3-4 word recommended action for the Floor Leader to take right now (e.g., "Roleplay Best Buy Total").
 
-Do not include any other text, markdown formatting, or explanations. Only the raw JSON object.
+Do not include any other text, markdown formatting, or explanations. Only the raw JSON array.
 `;
 
   const apiCall = async () => {
@@ -48,20 +52,35 @@ Do not include any other text, markdown formatting, or explanations. Only the ra
 
     const responseText = result.response.text();
     try {
-      // In case the model wraps it in markdown blocks
       const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-      const parsed = JSON.parse(cleanJson);
+      const parsedArray = JSON.parse(cleanJson);
       
-      // Validate schema loosely
-      if (['excellent', 'needs_coaching', 'steady'].includes(parsed.status) && parsed.insight && parsed.action) {
-        return parsed as AuraInsight;
+      if (!Array.isArray(parsedArray)) {
+        throw new Error('Aura Engine did not return an array');
       }
-      throw new Error('Invalid JSON structure returned by Aura Engine');
+      
+      const insightsMap: Record<string, AuraInsight> = {};
+      parsedArray.forEach((item: any) => {
+        if (item.id && ['excellent', 'needs_coaching', 'steady'].includes(item.status) && item.insight && item.action) {
+          insightsMap[item.id] = {
+            status: item.status,
+            insight: item.insight,
+            action: item.action
+          };
+        }
+      });
+      
+      return insightsMap;
     } catch (e) {
       console.error("Aura parse error:", e, responseText);
-      return { status: 'steady', insight: 'Data inconclusive.', action: 'Observe on floor' };
+      // Fallback: mark everyone as steady
+      const fallbackMap: Record<string, AuraInsight> = {};
+      roster.forEach(emp => {
+        fallbackMap[emp.id] = { status: 'steady', insight: 'Data inconclusive.', action: 'Observe on floor' };
+      });
+      return fallbackMap;
     }
   };
 
-  return executeWithRetry(apiCall, 2);
+  return executeWithRetry(apiCall, 1);
 }

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Radar, RefreshCw } from 'lucide-react';
 import { useStore } from '../store/useStore';
-import { generateAuraInsightForEmployee, AuraInsight } from '../services/ai/auraEngine';
+import { generateAuraBatchInsights, AuraInsight } from '../services/ai/auraEngine';
 import AuraActionCard from '../components/AuraHUD/AuraActionCard';
 import '../components/AuraHUD/AuraHUD.css';
 
@@ -40,33 +40,11 @@ export default function AuraHUDPage({ onCoachEmployee }: AuraHUDPageProps) {
       return aScore - bScore;
     });
 
-    const CHUNK_SIZE = 3;
-    for (let i = 0; i < sortedRoster.length; i += CHUNK_SIZE) {
-      const chunk = sortedRoster.slice(i, i + CHUNK_SIZE);
-      
-      const processEmployee = async (emp: any, retryCount = 0) => {
-        try {
-          const insight = await generateAuraInsightForEmployee(emp, deptGoals, apiKey, playbookSettings);
-          setInsights(prev => ({ ...prev, [emp.id]: insight }));
-        } catch (e: any) {
-          if (e?.message?.includes('429') && retryCount < 2) {
-            await new Promise(res => setTimeout(res, 2000 * Math.pow(2, retryCount)));
-            return processEmployee(emp, retryCount + 1);
-          }
-          console.error(`Failed to generate insight for ${emp.name}`, e);
-          setInsights(prev => ({ 
-            ...prev, 
-            [emp.id]: { status: 'steady', insight: 'Scan failed due to rate limits.', action: 'Try again later' } 
-          }));
-        }
-      };
-
-      await Promise.all(chunk.map(emp => processEmployee(emp)));
-      
-      if (i + CHUNK_SIZE < sortedRoster.length) {
-        // Delay between chunks to prevent burst limit exceptions
-        await new Promise(res => setTimeout(res, 1200));
-      }
+    try {
+      const batchInsights = await generateAuraBatchInsights(sortedRoster, deptGoals, apiKey, playbookSettings);
+      setInsights(batchInsights);
+    } catch (e) {
+      console.error("Batch scan failed:", e);
     }
     
     setIsScanning(false);

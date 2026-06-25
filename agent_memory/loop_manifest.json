@@ -1,6 +1,5 @@
 {
     "remaining_queue": [
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/PerformanceWizardModal/WizardStep2Attach.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/PerformanceWizardModal/WizardStep3Quality.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/Playbook/CustomScenarioForm.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/Playbook/CustomScenariosTab.tsx",
@@ -162,12 +161,13 @@
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/LiveFloorShadow/ShadowStep1Employee.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/LiveFloorShadow/ShadowStep2Observation.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/LiveFloorShadow/ShadowStep3Coaching.tsx",
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/PerformanceWizardModal/WizardStep1General.tsx"
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/PerformanceWizardModal/WizardStep1General.tsx",
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/PerformanceWizardModal/WizardStep2Attach.tsx"
     ],
     "current_checkpoint": {
-        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/PerformanceWizardModal/WizardStep2Attach.tsx"
+        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/PerformanceWizardModal/WizardStep3Quality.tsx"
     },
-    "file_index": 49,
+    "file_index": 50,
     "status": "ACTIVE",
     "agent_feed": [
         {

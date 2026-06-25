@@ -1,44 +1,73 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Trophy } from 'lucide-react';
+import { Employee } from '../../types';
+
+export interface QuickLogWinFormProps {
+  selectedEmpId: string;
+  setSelectedEmpId: (id: string) => void;
+  getEmployeesOnShift: () => Employee[];
+  roster: Employee[];
+  winType: 'pm' | 'app';
+  setWinType: (type: 'pm' | 'app') => void;
+  handleLogFloorWin: () => Promise<void> | void;
+}
 
 export default function QuickLogWinForm({
   selectedEmpId, setSelectedEmpId,
   getEmployeesOnShift, roster,
   winType, setWinType,
   handleLogFloorWin
-}: any) {
+}: QuickLogWinFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const safeRoster = roster || [];
+  const safeOnShift = getEmployeesOnShift() || [];
+
+  const handleLogClick = async () => {
+    if (!selectedEmpId) return;
+    setIsSubmitting(true);
+    try {
+      await handleLogFloorWin();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div className="glass-card" style={{ padding: '1.5rem' }}>
-      <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#fff' }}>
+    <div className="glass-card p-lg" data-testid="win-form-container">
+      <h3 className="font-bold mb-md flex-center justify-start gap-xs text-white text-lg">
         <Trophy size={18} color="var(--bby-yellow)" /> Quick Log Floor Win
       </h3>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div className="flex-column gap-md">
         <div className="form-group">
-          <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Select Associate:</label>
+          <label className="form-label text-sm text-secondary">Select Associate:</label>
           <select 
             className="form-control"
             style={{ background: '#0e1220', fontSize: '0.85rem', height: '38px' }}
             value={selectedEmpId}
             onChange={(e) => setSelectedEmpId(e.target.value)}
+            data-testid="win-form-select"
+            disabled={isSubmitting}
           >
             <option value="">-- Select Associate --</option>
             {(() => {
-              const onShift = getEmployeesOnShift();
-              const offShift = roster.filter((emp: any) => !onShift.some((os: any) => os.id === emp.id));
+              const offShift = safeRoster.filter((emp: Employee) => !safeOnShift.some((os: Employee) => os.id === emp.id));
               return (
                 <>
-                  {onShift.length > 0 && (
+                  {safeOnShift.length > 0 && (
                     <optgroup label="Associates On Shift">
-                      {onShift.map((emp: any) => (
+                      {safeOnShift.map((emp: Employee) => (
                         <option key={emp.id} value={emp.id}>{emp.name} ({emp.dept || 'Floor'})</option>
                       ))}
                     </optgroup>
                   )}
-                  <optgroup label="Other Roster Associates">
-                    {offShift.map((emp: any) => (
-                      <option key={emp.id} value={emp.id}>{emp.name} ({emp.dept || 'Floor'})</option>
-                    ))}
-                  </optgroup>
+                  {offShift.length > 0 && (
+                    <optgroup label="Other Roster Associates">
+                      {offShift.map((emp: Employee) => (
+                        <option key={emp.id} value={emp.id}>{emp.name} ({emp.dept || 'Floor'})</option>
+                      ))}
+                    </optgroup>
+                  )}
                 </>
               );
             })()}
@@ -46,11 +75,11 @@ export default function QuickLogWinForm({
         </div>
 
         <div className="form-group">
-          <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Win Type:</label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.25rem' }}>
+          <label className="form-label text-sm text-secondary">Win Type:</label>
+          <div className="flex-center gap-sm mt-xs w-full">
             <button
               type="button"
-              className="btn"
+              className="btn flex-1"
               style={{
                 padding: '0.55rem',
                 fontSize: '0.8rem',
@@ -63,12 +92,14 @@ export default function QuickLogWinForm({
                 cursor: 'pointer'
               }}
               onClick={() => setWinType('pm')}
+              data-testid="win-form-pm"
+              disabled={isSubmitting}
             >
               Membership (PM) 🚀
             </button>
             <button
               type="button"
-              className="btn"
+              className="btn flex-1"
               style={{
                 padding: '0.55rem',
                 fontSize: '0.8rem',
@@ -81,6 +112,8 @@ export default function QuickLogWinForm({
                 cursor: 'pointer'
               }}
               onClick={() => setWinType('app')}
+              data-testid="win-form-app"
+              disabled={isSubmitting}
             >
               Best Buy Card 💳
             </button>
@@ -88,12 +121,13 @@ export default function QuickLogWinForm({
         </div>
 
         <button 
-          className="btn btn-primary"
-          style={{ padding: '0.65rem', fontSize: '0.85rem', fontWeight: 700, width: '100%', marginTop: '0.25rem' }}
-          onClick={handleLogFloorWin}
-          disabled={!selectedEmpId}
+          className="btn btn-primary mt-xs w-full"
+          style={{ padding: '0.65rem', fontSize: '0.85rem', fontWeight: 700 }}
+          onClick={handleLogClick}
+          disabled={!selectedEmpId || isSubmitting}
+          data-testid="win-form-submit"
         >
-          Log Floor Win! 🚀
+          {isSubmitting ? 'Logging...' : 'Log Floor Win! 🚀'}
         </button>
       </div>
     </div>

@@ -92,6 +92,7 @@ export default function ImportScheduleModal({ isOpen, onClose, roster = [], onIm
               setCsvMappings={setCsvMappings}
               generatePreviewFromCsv={generatePreviewFromCsv}
               runDemoParse={runDemoParse}
+              isProcessing={isParsing}
             />
           ) : isParsing ? (
             /* LOADING PARSE STATE */

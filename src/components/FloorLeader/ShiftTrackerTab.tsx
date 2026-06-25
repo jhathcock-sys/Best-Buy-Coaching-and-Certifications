@@ -85,25 +85,7 @@ export default function ShiftTrackerTab({ activeShift, setActiveShift, roster = 
             /* Hourly Tracker Log Form */
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               
-          <ShiftTrackerGoals 
-  activeSummary={activeSummary}
-  activeShift={activeShift}
-  setActiveShift={setActiveShift}
-  currentHourKey={currentHourKey}
-  selectedLog={selectedLog}
-  setSelectedLog={setSelectedLog}
-  newObservation={newObservation}
-  setNewObservation={setNewObservation}
-  newWinMsg={newWinMsg}
-  setNewWinMsg={setNewWinMsg}
-  winFeed={winFeed}
-  setWinFeed={setWinFeed}
-  handleSaveHourlyLog={handleSaveHourlyLog}
-  handleSaveObservation={handleSaveObservation}
-  handleLogWin={handleLogWin}
-  renderPaceIndicator={renderPaceIndicator}
-  handleUndoWin={handleUndoWin}
- />
+          <ShiftTrackerGoals activeSummary={activeSummary} />
           <ShiftTrackerHourlyLog 
   activeSummary={activeSummary}
   activeShift={activeShift}

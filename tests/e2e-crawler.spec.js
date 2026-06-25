@@ -23,11 +23,11 @@ test('Autonomous QA Crawler', async ({ page }) => {
   // Real authentication using data-testids
   await page.getByTestId('persona-supervisor-btn').click();
   
-  // Wait for keypad and enter PIN 1234
+  // Wait for keypad and enter PIN 1022
   await page.getByTestId('keypad-1').click();
+  await page.getByTestId('keypad-0').click();
   await page.getByTestId('keypad-2').click();
-  await page.getByTestId('keypad-3').click();
-  await page.getByTestId('keypad-4').click();
+  await page.getByTestId('keypad-2').click();
 
   // Wait for the app to settle by asserting the dashboard nav item is visible
   const dashboardNav = page.getByTestId('nav-dashboard');

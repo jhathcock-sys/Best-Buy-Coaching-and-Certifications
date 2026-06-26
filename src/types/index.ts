@@ -199,3 +199,4 @@ export interface ShiftSummary { totalPms: number; totalApps: number; totalRevenu
 export interface BreakEntry { id: string; empId: string; name: string; time: string; type: string; completed: boolean; }
 export interface HistoricalShift { id: string; date: string; leaderName: string; isWeekend: boolean; totalHours: number; totalRevenue: number; totalPms: number; totalApps: number; onTrackRatio: number; }
 
+export * from './analytics';

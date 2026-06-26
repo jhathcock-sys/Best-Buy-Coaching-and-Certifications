@@ -1,24 +1,45 @@
-import React from 'react';
-import { Key, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { Key, Sparkles, Check } from 'lucide-react';
+import { useStore } from '../../store/useStore';
 
-export interface AiEngineTabProps {
-  aiMode: 'local' | 'flash' | 'pro';
-  setAiMode: (mode: 'local' | 'flash' | 'pro') => void;
-  localApiKey: string;
-  setLocalApiKey: (key: string) => void;
-  playbookSettings?: any;
-  storePin?: string;
-  setStorePin?: (pin: string) => void;
-}
+export default function AiEngineTab() {
+  const apiKey = useStore((state) => state.apiKey);
+  const playbookSettings = useStore(state => state.playbookSettings);
+  const onSaveSettings = useStore(state => state.saveSettings);
 
-export default function AiEngineTab({ aiMode, setAiMode, localApiKey, setLocalApiKey, playbookSettings, storePin, setStorePin }: AiEngineTabProps) {
+  const [aiMode, setAiMode] = useState<'local' | 'flash' | 'pro'>((playbookSettings?.aiMode as 'local' | 'flash' | 'pro') || (playbookSettings?.useGemini ? 'flash' : 'local'));
+  const [localApiKey, setLocalApiKey] = useState(apiKey || '');
+
   return (
     <>
       <div className="w-full max-w-[800px] mx-auto">
         <div className="glass-card">
-          <h3 className="flex-center-y gap-sm text-lg mb-lg">
-            <Key size={20} color="var(--bby-blue)" /> Simulation Engine Strategy
-          </h3>
+          <div className="flex-between align-center mb-lg">
+            <h3 className="flex-center-y gap-sm text-lg m-0">
+              <Key size={20} color="var(--bby-blue)" /> Simulation Engine Strategy
+            </h3>
+            
+            <button 
+              className="btn btn-primary flex-center gap-sm px-md py-sm font-bold cursor-pointer" 
+              data-testid="save-platform-config-btn"
+              onClick={() => {
+                const nextMode = aiMode === 'local' ? 'local' : aiMode;
+                if (playbookSettings) {
+                  onSaveSettings({
+                    apiKey: localApiKey,
+                    playbookSettings: {
+                      ...playbookSettings,
+                      aiMode: nextMode
+                    }
+                  });
+                  alert('Settings saved globally! Changes will apply immediately.');
+                }
+              }}
+            >
+              <Check size={16} />
+              Save Settings
+            </button>
+          </div>
 
           <div className="flex-column gap-lg">
             

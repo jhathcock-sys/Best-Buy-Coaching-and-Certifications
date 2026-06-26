@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldAlert, Sparkles, Key, Check, Plus, Trash2, BookOpen, Compass, Users, UserPlus, Edit2, Eye, EyeOff, Cpu, RefreshCw } from 'lucide-react';
+import { Key, Sparkles, BookOpen, Compass, Users, UserPlus, Cpu, RefreshCw } from 'lucide-react';
 
 import { useStore } from '../store/useStore';
 
@@ -11,8 +11,7 @@ import DepartmentTargetsTab from '../components/PlaybookStudio/DepartmentTargets
 import SyncDiagnosticsTab from '../components/PlaybookStudio/SyncDiagnosticsTab';
 import CustomScenariosTab from '../components/Playbook/CustomScenariosTab';
 
-const EMPTY_OBJ = {};
-const EMPTY_ARR: any[] = [];
+import { PlaybookSettings } from '../types';
 
 export default function PlaybookStudio() {
   const playbookSettings = useStore(state => state.playbookSettings);
@@ -28,40 +27,8 @@ export default function PlaybookStudio() {
   return <PlaybookStudioContent playbookSettings={playbookSettings} />;
 }
 
-function PlaybookStudioContent({ playbookSettings }: { playbookSettings: any }) {
-  const storeId = useStore((state) => state.storeId);
-  const apiKey = useStore((state) => state.apiKey);
-  const dbConnected = useStore((state) => state.dbConnected);
-  const handleSaveFirebaseConfig = useStore((state) => state.handleSaveFirebaseConfig);
-  
-  const onSaveSettings = useStore(state => state.saveSettings);
-  const deptGoals = useStore(state => state.deptGoals) || EMPTY_OBJ;
-  const onSaveDeptGoals = useStore(state => state.saveDeptGoals);
-  const customScenarios = useStore(state => state.customScenarios) || EMPTY_ARR;
-  const onAddCustomScenario = useStore(state => state.importCustomScenario);
-  const onDeleteCustomScenario = useStore(state => state.deleteCustomScenario);
-  const managers = useStore(state => state.managers) || EMPTY_ARR;
-  const onSaveManagers = useStore(state => state.saveManagers);
+function PlaybookStudioContent({ playbookSettings }: { playbookSettings: PlaybookSettings }) {
   const [activeTab, setActiveTab] = useState('engine');
-  
-  const [firebaseConfig, setFirebaseConfig] = useState({
-    apiKey: '', authDomain: '', projectId: '', storageBucket: '', messagingSenderId: '', appId: ''
-  });
-  
-  const [aiMode, setAiMode] = useState(playbookSettings.aiMode || (playbookSettings.useGemini ? 'flash' : 'local'));
-  const [localApiKey, setLocalApiKey] = useState(apiKey || '');
-  const [customSystemPrompt, setCustomSystemPrompt] = useState(playbookSettings.customSystemPrompt || '');
-  const [storePin, setStorePin] = useState(playbookSettings.storePin || '1234');
-
-  const [prevStorePin, setPrevStorePin] = useState(playbookSettings.storePin);
-  if (playbookSettings.storePin !== prevStorePin) {
-    setPrevStorePin(playbookSettings.storePin);
-    if (playbookSettings.storePin) {
-      setStorePin(playbookSettings.storePin);
-    }
-  }
-  
-  const [selectedDept, setSelectedDept] = useState('Front End');
 
   return (
     <div className="flex-column gap-2xl">
@@ -74,26 +41,6 @@ function PlaybookStudioContent({ playbookSettings }: { playbookSettings: any }) 
             Manage core AI simulation behavior, configure leader profiles, manage metric targets, and adjust store offline sync settings.
           </p>
         </div>
-        
-        <button 
-          className="btn btn-primary flex-center gap-sm px-md-lg py-sm font-bold" 
-          onClick={() => {
-            const nextMode = aiMode === 'local' ? 'local' : aiMode;
-              onSaveSettings({
-                apiKey: localApiKey,
-                playbookSettings: {
-                  ...playbookSettings,
-                  aiMode: nextMode,
-                  customSystemPrompt,
-                  storePin
-                }
-              });
-            alert('Settings saved globally! Changes will apply immediately.');
-          }}
-        >
-          <Check size={18} />
-          Save Platform Config
-        </button>
       </div>
 
       <div className="flex gap-xs overflow-x-auto pb-sm border-b-glass scrollbar-none">
@@ -122,10 +69,7 @@ function PlaybookStudioContent({ playbookSettings }: { playbookSettings: any }) 
       </div>
 
       {activeTab === 'engine' && (
-        <AiEngineTab 
-          aiMode={aiMode} setAiMode={setAiMode}
-          localApiKey={localApiKey} setLocalApiKey={setLocalApiKey}
-        />
+        <AiEngineTab />
       )}
 
       {activeTab === 'prompts' && (

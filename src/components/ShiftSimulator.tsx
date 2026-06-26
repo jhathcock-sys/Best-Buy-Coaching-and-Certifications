@@ -99,9 +99,9 @@ export default function ShiftSimulator() {
         
         {isSimulating && (
           <div className="glass-card flex-1 flex flex-col gap-xl p-2xl justify-center">
-            <div className="skeleton-pulse rounded-md" style={{ height: '24px', width: '40%', background: 'rgba(255,255,255,0.08)' }}></div>
-            <div className="skeleton-pulse rounded-sm" style={{ height: '14px', width: '90%', background: 'rgba(255,255,255,0.05)' }}></div>
-            <div className="skeleton-pulse rounded-sm" style={{ height: '14px', width: '85%', background: 'rgba(255,255,255,0.05)' }}></div>
+            <div className="skeleton-pulse rounded-md h-[24px] w-2/5 bg-white-alpha-10"></div>
+            <div className="skeleton-pulse rounded-sm h-[14px] w-[90%] bg-white-alpha-05"></div>
+            <div className="skeleton-pulse rounded-sm h-[14px] w-[85%] bg-white-alpha-05"></div>
             <div className="flex flex-col items-center gap-sm mt-xl text-secondary">
               <Sparkles size={24} className="typing-dots text-bby-yellow" />
               <span className="text-xs font-semibold">Simulating employee selling interactions hour-by-hour...</span>

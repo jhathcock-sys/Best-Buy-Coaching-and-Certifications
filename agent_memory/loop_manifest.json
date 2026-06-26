@@ -1,6 +1,5 @@
 {
     "remaining_queue": [
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/scenarioGenerator.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai.d.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/firebase.ts",
@@ -162,12 +161,13 @@
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/geminiCoaching.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/geminiDocumentParsers.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/geminiSmartZoning.ts",
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/offlineSimulators.ts"
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/offlineSimulators.ts",
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/scenarioGenerator.ts"
     ],
     "current_checkpoint": {
-        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/scenarioGenerator.ts"
+        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai.d.ts"
     },
-    "file_index": 109,
+    "file_index": 110,
     "status": "ACTIVE",
     "agent_feed": [
         {

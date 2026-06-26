@@ -1,6 +1,5 @@
 {
     "remaining_queue": [
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/StoreRosterPage.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/TrendReportingPage.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/schemas/index.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/auraEngine.ts",
@@ -162,12 +161,13 @@
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/FloorLeaderTrackerPage.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/LiveFloorShadowPage.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/PlaybookStudioPage.tsx",
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/RoleplayCenterPage.tsx"
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/RoleplayCenterPage.tsx",
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/StoreRosterPage.tsx"
     ],
     "current_checkpoint": {
-        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/StoreRosterPage.tsx"
+        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/TrendReportingPage.tsx"
     },
-    "file_index": 95,
+    "file_index": 96,
     "status": "ACTIVE",
     "agent_feed": [
         {

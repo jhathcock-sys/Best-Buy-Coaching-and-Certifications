@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Users, Search, AlertTriangle, CheckCircle, Clock, HelpCircle, Sliders } from 'lucide-react';
+import React from 'react';
+import { AlertTriangle, Clock } from 'lucide-react';
 import AddEmployeeModal from '../components/AddEmployeeModal';
 import PerformanceWizardModal from '../components/PerformanceWizardModal';
 import RosterImporterModal from '../components/RosterImporterModal';
@@ -15,28 +15,21 @@ import RentsDueAuditor from '../components/RentsDueAuditor';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 
 import { useStore } from '../store/useStore';
-import { DeptGoal } from '../types';
+import { DeptGoal, Employee, CoachingLog } from '../types';
 
-const EMPTY_OBJ = {};
-const EMPTY_ARR = [];
+export interface StoreRosterProps {
+  onCoachEmployee?: (employee: Employee & { gap?: string }) => void;
+  onCreateLog?: (employee: Employee & { gap?: string }) => void;
+}
 
 export default function StoreRoster({ 
   onCoachEmployee, 
   onCreateLog
-}: any) {
-  const apiKey = useStore((state) => state.apiKey);
-
-  const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
+}: StoreRosterProps) {
   const activePeriod = useStore((state) => state.activePeriod);
-  const coachingLogs = useStore((state) => state.coachingLogs) || EMPTY_ARR;
-  const followUpTasks = useStore((state) => state.followUpTasks) || EMPTY_ARR;
+  const rosterHistory = useStore((state) => state.rosterHistory);
   
-  const [showGoals, setShowGoals] = useState(false);
-  const [editingDept, setEditingDept] = useState<string | null>(null);
   const deptGoals = useStore((state) => state.deptGoals);
-  
-  const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
-  const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
 
   const addEmployee = useStore((state) => state.addEmployee);
   const editEmployee = useStore((state) => state.editEmployee);
@@ -49,13 +42,11 @@ export default function StoreRoster({
 
   const onAddEmployee = addEmployee;
   const onEditEmployee = editEmployee;
-  const onDeleteEmployee = deleteEmployee;
   const onChangePeriod = changePeriod;
   const onCreatePeriod = createPeriodArchive;
   const onBulkImportEmployees = bulkImportEmployees;
   const {
     selectedProfileEmployee, setSelectedProfileEmployee,
-    searchTerm, setSearchTerm,
     tempSearch, setTempSearch,
     activeDept, setActiveDept,
     showAddForm, setShowAddForm,
@@ -71,7 +62,7 @@ export default function StoreRoster({
     filteredRoster
   } = useStoreRoster();
 
-  const handleSaveEdit = (updatedMetrics) => {
+  const handleSaveEdit = (updatedMetrics: Partial<Employee>) => {
     if (onEditEmployee && editingEmployee) {
       onEditEmployee(editingEmployee.id, updatedMetrics);
     }
@@ -103,6 +94,7 @@ export default function StoreRoster({
               value={activePeriod} 
               onChange={(e) => onChangePeriod && onChangePeriod(e.target.value)}
               className="select-minimal"
+              data-testid="active-period-select"
             >
               {Object.keys(rosterHistory || {}).map(p => (
                 <option key={p} value={p}>{p}</option>
@@ -117,18 +109,21 @@ export default function StoreRoster({
         <button
           className={`subview-tab-btn ${activeSubView === 'list' ? 'active' : ''}`}
           onClick={() => setActiveSubView('list')}
+          data-testid="tab-list"
         >
           Performance Ledger
         </button>
         <button
           className={`subview-tab-btn ${activeSubView === 'audit' ? 'active' : ''}`}
           onClick={() => setActiveSubView('audit')}
+          data-testid="tab-audit"
         >
           AI Metrics Auditor
         </button>
         <button
           className={`subview-tab-btn ${activeSubView === 'rentsDue' ? 'active' : ''}`}
           onClick={() => setActiveSubView('rentsDue')}
+          data-testid="tab-rentsDue"
         >
           Rents Due Auditor
         </button>
@@ -219,7 +214,7 @@ export default function StoreRoster({
               <AlertTriangle size={16} color="var(--bby-blue)" /> Department Standards
             </h3>
             <div className="target-grid">
-              {Object.entries(deptGoals as Record<string, DeptGoal>).map(([dept, targets]) => (
+              {Object.entries((deptGoals || {}) as Record<string, DeptGoal>).map(([dept, targets]) => (
                 <div 
                   key={dept} 
                   className="target-card"

@@ -17,6 +17,7 @@ const FloorLeaderTrackerPage = lazy(() => import('./pages/FloorLeaderTrackerPage
 const TrendReportingPage = lazy(() => import('./pages/TrendReportingPage'));
 const BreakroomTVPage = lazy(() => import('./pages/BreakroomTVPage'));
 const DailyLineupBuilderPage = lazy(() => import('./pages/DailyLineupBuilderPage'));
+const MemberDealsPage = lazy(() => import('./pages/MemberDealsPage').then(m => ({ default: m.MemberDealsPage })));
 import { Compass, Users, BookOpen, LayoutDashboard, Sparkles, ShieldCheck, ClipboardList, Archive, Clock, ChevronDown, ChevronRight, TrendingUp } from 'lucide-react';
 import AssociateProfileHeader from './components/AssociateProfile/AssociateProfileHeader';
 import { subscribeToActivePeriod } from './services/firebase';
@@ -188,6 +189,7 @@ function AppContent() {
             <Route path="/dailyLineup" element={<DailyLineupBuilderPage />} />
             <Route path="/floorLeader" element={<FloorLeaderTrackerPage />} />
             <Route path="/trends" element={<TrendReportingPage />} />
+            <Route path="/deals" element={<MemberDealsPage />} />
             <Route path="/tv" element={
               <BreakroomTVPage onClose={() => setActiveView('dashboard')} />
             } />

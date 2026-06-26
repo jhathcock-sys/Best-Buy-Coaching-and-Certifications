@@ -149,6 +149,15 @@ export function useFloorScheduling() {
     });
   };
 
+  const handleOptimizeBreaks = (optimizedBreaks: BreakEntry[]) => {
+    const { activeShift, setActiveShift } = useStore.getState();
+    if (!activeShift) return;
+    setActiveShift({
+      ...activeShift,
+      breakSchedule: optimizedBreaks
+    });
+  };
+
   return {
     handleAssignZone,
     handleUnassignZone,
@@ -156,6 +165,7 @@ export function useFloorScheduling() {
     handleToggleBreak,
     handleDeleteBreak,
     handleToggleBreakState,
-    handleImportSchedule
+    handleImportSchedule,
+    handleOptimizeBreaks
   };
 }

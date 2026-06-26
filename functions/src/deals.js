@@ -27,7 +27,7 @@ exports.scrapeDeals = functions.https.onCall(async (data, context) => {
     const result = await parser.parseStringPromise(xmlData);
 
     // Extract items
-    const channel = result.rss?.channel;
+    const channel = result?.rss?.channel;
     if (!channel) {
       return [];
     }

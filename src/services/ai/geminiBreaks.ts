@@ -15,7 +15,7 @@ Your task is to generate an optimized break schedule for the current roster of e
 We want to avoid overlapping breaks for employees working in the same zone.
 
 Here is the current roster:
-${JSON.stringify(roster, null, 2)}
+${JSON.stringify(roster.map(e => ({ id: e.id, name: e.name })), null, 2)}
 
 Here are the current zone assignments (Zone -> Array of Employee IDs):
 ${JSON.stringify(zoneAssignments, null, 2)}
@@ -45,13 +45,19 @@ Return ONLY valid JSON.
     }
   };
 
-  const response = await executeWithRetry(async () => {
-    const res = await model.generateContent(request);
-    return res.response.text();
-  });
+  let responseText = '';
+  try {
+    responseText = await executeWithRetry(async () => {
+      const res = await model.generateContent(request);
+      return res.response.text();
+    });
+  } catch (error) {
+    console.error('Failed to generate breaks via AI:', error);
+    return [];
+  }
 
   try {
-    const breaks = JSON.parse(response);
+    const breaks = JSON.parse(responseText);
     return Array.isArray(breaks) ? breaks : (breaks.breaks || []);
   } catch (error) {
     console.error('Failed to parse AI break schedule:', error);

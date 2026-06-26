@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   Compass, Users, BookOpen, LayoutDashboard, Sparkles, 
   ShieldCheck, ClipboardList, Archive, Clock, 
-  ChevronDown, ChevronRight, TrendingUp, MonitorPlay, CalendarDays, Radar
+  ChevronDown, ChevronRight, TrendingUp, MonitorPlay, CalendarDays, Radar, Tag
 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { useShallow } from 'zustand/react/shallow';
@@ -135,6 +135,13 @@ export default function Sidebar() {
               data-testid="nav-tv"
             >
               <MonitorPlay className="menu-item-icon" /> Breakroom TV (Kiosk)
+            </li>
+            <li 
+              className={`menu-item cursor-pointer transition-all ${activeView === 'deals' ? 'active' : ''}`}
+              onClick={() => setActiveView('deals')}
+              data-testid="nav-deals"
+            >
+              <Tag className="menu-item-icon" /> Member Deals
             </li>
           </>
         )}

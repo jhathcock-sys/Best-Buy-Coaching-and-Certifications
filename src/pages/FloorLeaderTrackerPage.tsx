@@ -41,7 +41,8 @@ export default function FloorLeaderTracker() {
     handleToggleBreak,
     handleDeleteBreak,
     handleToggleBreakState,
-    handleImportSchedule
+    handleImportSchedule,
+    handleOptimizeBreaks
   } = useFloorLeaderTracker(activeManager, roster, onSaveShift);
 
   return (
@@ -105,6 +106,7 @@ export default function FloorLeaderTracker() {
                 onAddBreak={handleAddBreak}
                 onToggleBreak={handleToggleBreak}
                 onDeleteBreak={handleDeleteBreak}
+                onOptimizeBreaks={handleOptimizeBreaks}
               />
             </div>
           )}

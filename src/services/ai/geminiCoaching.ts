@@ -1,12 +1,22 @@
-import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
-import { getGeminiModel, isGeminiAvailable, executeWithRetry } from './core.js';
+import { GoogleGenerativeAI, SchemaType, type Schema } from '@google/generative-ai';
+import { getGeminiModel, isGeminiAvailable, executeWithRetry } from './core';
+import type { PlaybookSettings, Employee, CoachingLog } from '../../types';
 
-export async function generateCoachingLogGemini(apiKey, name, gapType, gapDetails, positives, rawObservation, playbookSettings, selectedDiscSteps) {
+export async function generateCoachingLogGemini(
+  apiKey: string | undefined, 
+  name: string, 
+  gapType: string, 
+  gapDetails: string, 
+  positives: string, 
+  rawObservation: string, 
+  playbookSettings: PlaybookSettings, 
+  selectedDiscSteps: string | string[]
+) {
   try {
     const model = getGeminiModel(apiKey, playbookSettings);
     
     let fewShotTrainingText = '';
-    if (playbookSettings && playbookSettings.trainingLogs && playbookSettings.trainingLogs.length > 0) {
+    if (playbookSettings?.trainingLogs && playbookSettings.trainingLogs.length > 0) {
       fewShotTrainingText = `
         MATCH THESE EXEMPLARY COACHING LOGS EXACTLY:
         Below are actual examples of high-quality coaching logs previously written by this store's leadership. You must replicate their exact tone of voice, formatting structures, depth of explanation, Best Buy terminology (like "human" and "make it easy"), and overall layout:
@@ -29,7 +39,7 @@ export async function generateCoachingLogGemini(apiKey, name, gapType, gapDetail
       
       ${fewShotTrainingText}
 
-      ${playbookSettings && playbookSettings.customSystemPrompt ? `ADDITIONAL CUSTOM COACHING GUIDELINES:\n${playbookSettings.customSystemPrompt}` : ''}
+      ${playbookSettings?.customSystemPrompt ? `ADDITIONAL CUSTOM COACHING GUIDELINES:\n${playbookSettings.customSystemPrompt}` : ''}
       
       ### 1. THE SALES FRAMEWORK (DISC):
       When analyzing the scenario or coaching focus, you must ground your recommendations in the DISC selling process defined below. Pay specific attention to the steps selected by the supervisor (${stepsText}):
@@ -67,7 +77,7 @@ export async function generateCoachingLogGemini(apiKey, name, gapType, gapDetail
       }
     `;
     
-    const responseSchema: any = {
+    const responseSchema: Schema = {
       type: SchemaType.OBJECT,
       properties: {
         what: { type: SchemaType.STRING },
@@ -92,14 +102,14 @@ export async function generateCoachingLogGemini(apiKey, name, gapType, gapDetail
     
     const parsed = JSON.parse(result.response.text());
     return {
-      what: parsed.what || "Provide a complete solution.",
-      how: parsed.how || "Follow the appropriate framework.",
-      why: parsed.why || "To ensure a quality customer experience.",
-      strengths: parsed.strengths || positives || "Demonstrates good core competencies.",
-      metricGap: parsed.metricGap || gapDetails || gapType || "Needs focused development.",
-      expectation: parsed.expectation || "Improve performance in the focus area.",
-      validation: parsed.validation || "Leader will follow up next week.",
-      discStep: parsed.discStep || stepsText || "Solve"
+      what: parsed?.what || "Provide a complete solution.",
+      how: parsed?.how || "Follow the appropriate framework.",
+      why: parsed?.why || "To ensure a quality customer experience.",
+      strengths: parsed?.strengths || positives || "Demonstrates good core competencies.",
+      metricGap: parsed?.metricGap || gapDetails || gapType || "Needs focused development.",
+      expectation: parsed?.expectation || "Improve performance in the focus area.",
+      validation: parsed?.validation || "Leader will follow up next week.",
+      discStep: parsed?.discStep || stepsText || "Solve"
     };
   } catch (e) {
     console.error('Gemini Coaching Log generation error:', e);
@@ -109,37 +119,37 @@ export async function generateCoachingLogGemini(apiKey, name, gapType, gapDetail
 
 // Parse daily schedule image using Gemini Flash Vision
 
-export const generateMonthlyOneOnOne = async (employeeData, logs, apiKey) => {
+export const generateMonthlyOneOnOne = async (employeeData: Employee, logs: CoachingLog[], apiKey: string | undefined) => {
   try {
     const isAvailable = isGeminiAvailable(apiKey);
     if (!isAvailable) {
       throw new Error("Gemini API Key is not available");
     }
 
-    const model = getGeminiModel(apiKey, { aiMode: 'pro' });
+    const model = getGeminiModel(apiKey, { aiMode: 'pro' } as PlaybookSettings);
 
     const prompt = `
       You are an expert Best Buy Store Leader writing a formal 1-on-1 monthly performance appraisal for your associate.
       
       ASSOCIATE DATA:
-      Name: ${employeeData.name}
-      Department: ${employeeData.dept}
-      Memberships: ${employeeData.memberships || 0}
-      Credit Cards: ${employeeData.creditCards || 0}
-      Protection/Warranty Attach: ${employeeData.warranty || 0}%
-      RPH (Revenue Per Hour): $${employeeData.rph || 0}
-      CSAT (Surveys): ${employeeData.surveys || 0}/5
+      Name: ${employeeData?.name || 'Unknown'}
+      Department: ${employeeData?.dept || 'Unknown'}
+      Memberships: ${employeeData?.memberships || 0}
+      Credit Cards: ${employeeData?.creditCards || 0}
+      Protection/Warranty Attach: ${employeeData?.warranty || 0}%
+      RPH (Revenue Per Hour): $${employeeData?.rph || 0}
+      CSAT (Surveys): ${employeeData?.surveys || 0}/5
       
       RECENT COACHING LOGS (Last 30 Days):
-      ${JSON.stringify(logs, null, 2)}
+      ${JSON.stringify(logs || [], null, 2)}
       
       Please write a professional, firm but supportive 1-on-1 document using the Start / Stop / Continue framework. 
       Format the output in strict Markdown.
       Use the following structure:
       
-      # Monthly 1-on-1 Performance Review: ${employeeData.name}
+      # Monthly 1-on-1 Performance Review: ${employeeData?.name || 'Unknown'}
       **Date:** Current Month
-      **Department:** ${employeeData.dept}
+      **Department:** ${employeeData?.dept || 'Unknown'}
       
       ## Performance Snapshot
       Summarize their hard metrics. Celebrate their wins and clearly state what metrics they are missing based on store standards.
@@ -164,7 +174,7 @@ export const generateMonthlyOneOnOne = async (employeeData, logs, apiKey) => {
 
   } catch (error) {
     console.error("1-on-1 Generation Error:", error);
-    return `# Monthly 1-on-1 Performance Review: ${employeeData.name}
+    return `# Monthly 1-on-1 Performance Review: ${employeeData?.name || 'Unknown'}
 
 *Note: AI generation failed or API key missing. This is a fallback template.*
 
@@ -182,28 +192,28 @@ I commit to: ___________________________`;
   }
 };
 
-export const generateActionPlan = async (employeeData, logs, apiKey) => {
+export const generateActionPlan = async (employeeData: Employee, logs: CoachingLog[], apiKey: string | undefined) => {
   try {
     const isAvailable = isGeminiAvailable(apiKey);
     if (!isAvailable) {
       throw new Error("Gemini API Key is not available");
     }
 
-    const aiInstance = new GoogleGenerativeAI(apiKey);
+    const aiInstance = new GoogleGenerativeAI(apiKey!);
     const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-pro' });
 
     const prompt = `
       You are an expert Best Buy Store Manager tasked with creating a 30-Day Performance Improvement Plan (Action Plan) for an associate.
       
       ASSOCIATE DATA:
-      Name: ${employeeData.name}
-      Department: ${employeeData.dept}
-      Memberships: ${employeeData.memberships || 0}
-      Credit Cards: ${employeeData.creditCards || 0}
-      RPH: $${employeeData.rph || 0}
+      Name: ${employeeData?.name || 'Unknown'}
+      Department: ${employeeData?.dept || 'Unknown'}
+      Memberships: ${employeeData?.memberships || 0}
+      Credit Cards: ${employeeData?.creditCards || 0}
+      RPH: $${employeeData?.rph || 0}
       
       RECENT COACHING LOGS:
-      ${JSON.stringify(logs, null, 2)}
+      ${JSON.stringify(logs || [], null, 2)}
       
       Create a strict, structured 4-week action plan.
       Output format must be a JSON object matching this exact schema:
@@ -216,7 +226,7 @@ export const generateActionPlan = async (employeeData, logs, apiKey) => {
       }
     `;
 
-    const responseSchema: any = {
+    const responseSchema: Schema = {
       type: SchemaType.OBJECT,
       properties: {
         type: { type: SchemaType.STRING },
@@ -238,11 +248,11 @@ export const generateActionPlan = async (employeeData, logs, apiKey) => {
     
     const parsed = JSON.parse(result.response.text());
     return {
-      type: parsed.type || "30-Day Action Plan: Focus Area",
-      status: parsed.status || "Active",
-      reason: parsed.reason || "Action plan generated based on metrics",
-      dateCreated: parsed.dateCreated || new Date().toLocaleDateString(),
-      planText: parsed.planText || "Plan details could not be generated."
+      type: parsed?.type || "30-Day Action Plan: Focus Area",
+      status: parsed?.status || "Active",
+      reason: parsed?.reason || "Action plan generated based on metrics",
+      dateCreated: parsed?.dateCreated || new Date().toLocaleDateString(),
+      planText: parsed?.planText || "Plan details could not be generated."
     };
   } catch (error) {
     console.error("Action Plan Generation Error:", error);
@@ -250,26 +260,26 @@ export const generateActionPlan = async (employeeData, logs, apiKey) => {
   }
 };
 
-export const generatePerformanceGap = async (apiKey: string, employeeName: string, currentMetrics: any, historyMetrics: any[], departmentGoals: any) => {
+export const generatePerformanceGap = async (apiKey: string | undefined, employeeName: string, currentMetrics: Record<string, any>, historyMetrics: Record<string, any>[], departmentGoals: Record<string, any>) => {
   try {
     const isAvailable = isGeminiAvailable(apiKey);
     if (!isAvailable) {
       throw new Error("Gemini API Key is not available");
     }
 
-    const model = getGeminiModel(apiKey, { aiMode: 'flash' });
+    const model = getGeminiModel(apiKey, { aiMode: 'flash' } as PlaybookSettings);
 
     const prompt = `
       You are an expert Best Buy Sales Manager analyzing an employee's weekly performance metrics.
       
       Employee Name: ${employeeName}
-      Department Goals: ${JSON.stringify(departmentGoals)}
+      Department Goals: ${JSON.stringify(departmentGoals || {})}
       
       Current Week Metrics:
-      ${JSON.stringify(currentMetrics, null, 2)}
+      ${JSON.stringify(currentMetrics || {}, null, 2)}
       
       Historical Performance Data (Previous Weeks):
-      ${JSON.stringify(historyMetrics, null, 2)}
+      ${JSON.stringify(historyMetrics || [], null, 2)}
       
       Compare the current metrics against the department goals. Look at the historical data to determine if the current performance is an anomaly or a downward trend.
       

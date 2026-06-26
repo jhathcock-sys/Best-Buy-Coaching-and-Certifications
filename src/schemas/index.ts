@@ -1,5 +1,22 @@
 import { z } from 'zod';
 
+export const TrophySchema = z.object({
+  id: z.string().optional(),
+  type: z.string(),
+  category: z.string(),
+  date: z.string(),
+  icon: z.string()
+}).passthrough();
+
+export const ActionPlanSchema = z.object({
+  id: z.string().optional(),
+  type: z.string(),
+  status: z.string(),
+  reason: z.string(),
+  dateCreated: z.string(),
+  planText: z.string().optional()
+}).passthrough();
+
 export const EmployeeSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -18,8 +35,8 @@ export const EmployeeSchema = z.object({
   audio: z.number().optional().default(0),
   opportunityGap: z.string().optional(),
   lastUpdated: z.number().optional(),
-  trophies: z.array(z.any()).optional().default([]),
-  actionPlans: z.array(z.any()).optional().default([])
+  trophies: z.array(TrophySchema).optional().default([]),
+  actionPlans: z.array(ActionPlanSchema).optional().default([])
 }).passthrough();
 
 export const ShiftHourSchema = z.object({
@@ -76,3 +93,5 @@ export type ZoneAssignmentsType = z.infer<typeof ZoneAssignmentsSchema>;
 export type ShiftType = z.infer<typeof ShiftSchema>;
 export type CoachingLogType = z.infer<typeof CoachingLogSchema>;
 export type RosterType = z.infer<typeof RosterSchema>;
+export type TrophyType = z.infer<typeof TrophySchema>;
+export type ActionPlanType = z.infer<typeof ActionPlanSchema>;

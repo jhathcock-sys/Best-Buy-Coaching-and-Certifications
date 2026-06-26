@@ -1,3 +1,20 @@
+export interface Trophy {
+  id?: string;
+  type: string;
+  category: string;
+  date: string;
+  icon: string;
+}
+
+export interface ActionPlan {
+  id?: string;
+  type: string;
+  status: string;
+  reason: string;
+  dateCreated: string;
+  planText?: string;
+}
+
 export interface Employee {
   id: string;
   name: string;
@@ -18,8 +35,8 @@ export interface Employee {
   m365?: number;
   audio?: number;
   focus5?: boolean;
-  trophies?: any[];
-  actionPlans?: any[];
+  trophies?: Trophy[];
+  actionPlans?: ActionPlan[];
   description?: string;
   initialGreeting?: string;
   personality?: string;

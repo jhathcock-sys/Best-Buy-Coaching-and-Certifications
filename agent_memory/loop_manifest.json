@@ -1,6 +1,5 @@
 {
     "remaining_queue": [
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/ServiceWorkerBanner.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/ShiftSimulator.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/SyncManager.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/ZoneScheduler.tsx",
@@ -162,12 +161,13 @@
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/PerformanceWizardModal.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/RentsDueAuditor.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/RosterAuditor.tsx",
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/RosterImporterModal.tsx"
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/RosterImporterModal.tsx",
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/ServiceWorkerBanner.tsx"
     ],
     "current_checkpoint": {
-        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/ServiceWorkerBanner.tsx"
+        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/ShiftSimulator.tsx"
     },
-    "file_index": 68,
+    "file_index": 69,
     "status": "ACTIVE",
     "agent_feed": [
         {

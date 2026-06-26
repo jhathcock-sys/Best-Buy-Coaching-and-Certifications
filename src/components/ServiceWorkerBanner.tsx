@@ -12,14 +12,10 @@ export default function ServiceWorkerBanner() {
   if (!swUpdateAvailable) return null;
 
   return (
-    <div className="glass-card flex-column gap-sm animate-fade-in" style={{
-      position: 'fixed',
-      bottom: '24px',
-      right: '24px',
-      padding: '1.25rem',
-      zIndex: 9999,
-      maxWidth: '320px',
-    }}>
+    <div 
+      className="glass-card flex-column gap-sm animate-fade-in fixed bottom-6 right-6 p-5 z-[9999] max-w-[320px]"
+      data-testid="sw-update-banner"
+    >
       <div>
         <h4 className="m-0 text-base font-bold text-white">App Update Available</h4>
         <p className="m-0 mt-xs text-sm text-secondary">
@@ -28,14 +24,14 @@ export default function ServiceWorkerBanner() {
       </div>
       <div className="flex-center gap-sm">
         <button 
-          className="btn btn-primary w-full p-sm text-sm" 
+          className="btn btn-primary w-full p-sm text-sm cursor-pointer" 
           data-testid="sw-update-reload-btn"
           onClick={() => window.location.reload()}
         >
           Reload Page
         </button>
         <button 
-          className="btn btn-secondary px-md py-sm text-sm" 
+          className="btn btn-secondary px-md py-sm text-sm cursor-pointer" 
           data-testid="sw-update-dismiss-btn"
           onClick={() => setSwUpdateAvailable(false)}
         >

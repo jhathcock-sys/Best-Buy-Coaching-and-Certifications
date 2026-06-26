@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Trash2, Volume2, BookOpen, Clock } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { CoachingLog } from '../types';
 
-const EMPTY_ARR: any[] = [];
+const EMPTY_ARR: CoachingLog[] = [];
 
 export default function CoachingHistory() {
   const coachingLogs = useStore(state => state.coachingLogs) || EMPTY_ARR;
   const onDeleteLog = useStore(state => state.deleteCoachingLog);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
-  const [selectedSession, setSelectedSession] = useState(null);
+  const [selectedSession, setSelectedSession] = useState<CoachingLog | null>(null);
   
   // Speech synthesis states
   const [isPlayingSpeech, setIsPlayingSpeech] = useState(false);
@@ -23,7 +24,7 @@ export default function CoachingHistory() {
     };
   }, []);
 
-  const handleSpeech = (text) => {
+  const handleSpeech = (text: string) => {
     if (!window.speechSynthesis) {
       alert("Text-to-speech is not supported in this browser.");
       return;
@@ -71,29 +72,31 @@ export default function CoachingHistory() {
     setIsPausedSpeech(false);
   };
 
-  const filteredSessions = coachingLogs.filter(session => {
-    const name = (session.employeeName || session.customerName || '').toLowerCase();
-    const notes = (session.notes || '').toLowerCase();
-    const matchesSearch = name.includes(searchTerm.toLowerCase()) || notes.includes(searchTerm.toLowerCase());
-    
-    // Normalize category filters
-    const cat = (session.category || '').toLowerCase();
-    let matchesCategory = true;
-    if (categoryFilter === 'Roleplay') {
-      matchesCategory = cat.includes('roleplay') || cat.includes('consult');
-    } else if (categoryFilter === 'Practice') {
-      matchesCategory = cat.includes('practice') || cat.includes('grow');
-    } else if (categoryFilter === 'Observation') {
-      matchesCategory = cat.includes('observation') || cat.includes('floor');
-    }
-    
-    return matchesSearch && matchesCategory;
-  });
+  const filteredSessions = useMemo(() => {
+    return coachingLogs.filter(session => {
+      const name = (session.employeeName || session.customerName || '').toLowerCase();
+      const notes = (session.notes || '').toLowerCase();
+      const matchesSearch = name.includes(searchTerm.toLowerCase()) || notes.includes(searchTerm.toLowerCase());
+      
+      // Normalize category filters
+      const cat = (session.category || '').toLowerCase();
+      let matchesCategory = true;
+      if (categoryFilter === 'Roleplay') {
+        matchesCategory = cat.includes('roleplay') || cat.includes('consult');
+      } else if (categoryFilter === 'Practice') {
+        matchesCategory = cat.includes('practice') || cat.includes('grow');
+      } else if (categoryFilter === 'Observation') {
+        matchesCategory = cat.includes('observation') || cat.includes('floor');
+      }
+      
+      return matchesSearch && matchesCategory;
+    });
+  }, [coachingLogs, searchTerm, categoryFilter]);
 
-  const handleDelete = (logToDelete, e) => {
+  const handleDelete = (logToDelete: CoachingLog, e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm(`Are you sure you want to delete this coaching log for ${logToDelete.employeeName || logToDelete.customerName}?`)) {
-      const logId = logToDelete.id || logToDelete.timestamp;
+      const logId = logToDelete.id || logToDelete.timestamp.toString();
       if (logId && onDeleteLog) {
         onDeleteLog(logId);
         if (selectedSession === logToDelete) {
@@ -121,6 +124,7 @@ export default function CoachingHistory() {
           {['All', 'Observation', 'Practice', 'Roleplay'].map(cat => (
             <button 
               key={cat} 
+              data-testid={`category-filter-${cat.toLowerCase()}`}
               className={`tag-pill cursor-pointer px-md py-sm text-sm ${categoryFilter === cat ? 'tag-pill-active' : ''}`}
               onClick={() => setCategoryFilter(cat)}
             >
@@ -132,6 +136,7 @@ export default function CoachingHistory() {
         <div className="relative w-250px">
           <input 
             type="text" 
+            data-testid="search-input"
             className="form-control search-input text-sm"
             placeholder="Search by associate or topic..."
             value={searchTerm}
@@ -152,7 +157,8 @@ export default function CoachingHistory() {
           filteredSessions.map((session, index) => (
             <div 
               key={index} 
-              className="glass-card session-card"
+              data-testid={`session-card-${index}`}
+              className="glass-card session-card cursor-pointer"
               onClick={() => {
                 setSelectedSession(session);
                 handleStopSpeech();
@@ -176,7 +182,8 @@ export default function CoachingHistory() {
                     </div>
                   </div>
                   <button 
-                    className="btn btn-secondary btn-icon btn-icon-transparent"
+                    data-testid={`delete-session-btn-${index}`}
+                    className="btn btn-secondary btn-icon btn-icon-transparent cursor-pointer"
                     onClick={(e) => handleDelete(session, e)}
                   >
                     <Trash2 size={14} color="var(--error)" />
@@ -204,8 +211,8 @@ export default function CoachingHistory() {
 
       {/* Details Modal */}
       {selectedSession && (
-        <div className="modal-overlay" onClick={() => setSelectedSession(null)}>
-          <div className="modal-content modal-border-bby" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay cursor-pointer" onClick={() => setSelectedSession(null)}>
+          <div className="modal-content modal-border-bby cursor-auto" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="flex-row align-center gap-sm">
                 <img src={selectedSession.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'} alt="" className="avatar-sm" />
@@ -219,7 +226,8 @@ export default function CoachingHistory() {
                 </div>
               </div>
               <button 
-                className="btn-close-transparent" 
+                data-testid="modal-close-icon"
+                className="btn-close-transparent cursor-pointer" 
                 onClick={() => setSelectedSession(null)}
               >
                 &times;
@@ -238,14 +246,16 @@ export default function CoachingHistory() {
                 </h4>
                 <div className="flex-row gap-sm mt-xs">
                   <button 
-                    className={`btn btn-tts ${isPlayingSpeech && !isPausedSpeech ? 'btn-secondary' : 'btn-accent'}`} 
+                    data-testid="tts-play-btn"
+                    className={`btn btn-tts cursor-pointer ${isPlayingSpeech && !isPausedSpeech ? 'btn-secondary' : 'btn-accent'}`} 
                     onClick={() => handleSpeech(selectedSession.notes)}
                   >
                     <Volume2 size={13} /> {isPlayingSpeech ? (isPausedSpeech ? 'Resume' : 'Pause') : 'Read Plan Aloud'}
                   </button>
                   {isPlayingSpeech && (
                     <button 
-                      className="btn btn-secondary btn-tts-stop" 
+                      data-testid="tts-stop-btn"
+                      className="btn btn-secondary btn-tts-stop cursor-pointer" 
                       onClick={handleStopSpeech}
                     >
                       Stop
@@ -261,7 +271,11 @@ export default function CoachingHistory() {
               </div>
 
               <div className="flex-end">
-                <button className="btn btn-secondary btn-close-modal" onClick={() => setSelectedSession(null)}>
+                <button 
+                  data-testid="modal-close-btn"
+                  className="btn btn-secondary btn-close-modal cursor-pointer" 
+                  onClick={() => setSelectedSession(null)}
+                >
                   Close
                 </button>
               </div>

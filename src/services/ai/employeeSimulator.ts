@@ -1,15 +1,30 @@
-import { SchemaType } from '@google/generative-ai';
-import { getGeminiModel, executeWithRetry } from './core.js';
+import { SchemaType, type Schema } from '@google/generative-ai';
+import { getGeminiModel, executeWithRetry } from './core';
+import type { PlaybookScenario } from './constants';
+import type { PlaybookSettings } from '../../types';
 
-export function runOfflineEmployeeCoachingStep(message, history, scenario) {
-  const lowercaseMsg = message.toLowerCase();
-  let responseText;
+export interface CoachingMessage {
+  sender: string;
+  text: string;
+}
+
+export interface CoachingHistory {
+  completedCoachSteps?: Record<string, boolean>;
+  currentCoachStep?: string;
+  messages?: CoachingMessage[];
+}
+
+export function runOfflineEmployeeCoachingStep(message: string, history: CoachingHistory, scenario: PlaybookScenario) {
+  if (!history || !scenario) return { messages: [], completedCoachSteps: {}, currentCoachStep: 'goal' };
+  
+  const lowercaseMsg = (message || '').toLowerCase();
+  let responseText = '';
   
   // Simulate GROW Model Coaching Flow: Goal -> Reality -> Options -> Will
-  let currentCoachStep = history.currentCoachStep || 'goal';
-  const completedCoachSteps = { ...history.completedCoachSteps };
-  const isVictor = scenario.id && (scenario.id.includes('victor') || scenario.id.includes('survey'));
-  const isDaniel = scenario.id && (scenario.id.includes('daniel') || scenario.id.includes('gsp') || scenario.id.includes('warranty'));
+  let currentCoachStep = history?.currentCoachStep || 'goal';
+  const completedCoachSteps = { ...(history?.completedCoachSteps || {}) };
+  const isVictor = scenario?.id && (scenario.id.includes('victor') || scenario.id.includes('survey'));
+  const isDaniel = scenario?.id && (scenario.id.includes('daniel') || scenario.id.includes('gsp') || scenario.id.includes('warranty'));
 
   if (currentCoachStep === 'goal') {
     // Check if manager is asking open questions about their goals
@@ -96,8 +111,8 @@ export function runOfflineEmployeeCoachingStep(message, history, scenario) {
   }
   
   const updatedHistory = [
-    ...history.messages,
-    { sender: 'coach', text: message },
+    ...(history?.messages || []),
+    { sender: 'coach', text: message || '' },
     { sender: 'employee', text: responseText }
   ];
   
@@ -110,8 +125,9 @@ export function runOfflineEmployeeCoachingStep(message, history, scenario) {
 
 // Evaluate Manager's Coaching Session
 
-export function evaluateCoachingSession(history) {
-  const steps = history.completedCoachSteps || {};
+export function evaluateCoachingSession(history: CoachingHistory) {
+  if (!history) return { score: 0, passed: false, feedback: "No coaching history provided.", details: { empathy: 0, structure: 0, actionable: 0 } };
+  const steps = history?.completedCoachSteps || {};
   
   const score = Math.round(
     (steps.goal ? 25 : 0) +
@@ -147,19 +163,19 @@ export function evaluateCoachingSession(history) {
 
 // Helper to check if API key is active
 
-export function generateCoachingLogLocal(name, gapType, gapDetails, positives, rawObservation, selectedDiscSteps) {
+export function generateCoachingLogLocal(name: string, gapType: string, gapDetails: string, positives: string, rawObservation: string, selectedDiscSteps: string[] | string) {
   const stepsText = Array.isArray(selectedDiscSteps) ? selectedDiscSteps.join(', ') : (selectedDiscSteps || 'Solve');
   const formattedObs = rawObservation ? ` Based on observation: "${rawObservation}".` : '';
 
-  let what;
-  let how;
-  let why;
+  let what = '';
+  let how = '';
+  let why = '';
   let strengths = positives || `Demonstrates high professionalism, warm customer connections, and maintains good checkout pace.`;
-  let calculatedGapDetails = gapDetails || `Needs focused development in ${gapType} attachment/objection handling to meet standard benchmarks.`;
-  let expectation;
-  let validation;
+  let calculatedGapDetails = gapDetails || `Needs focused development in ${gapType || 'general'} attachment/objection handling to meet standard benchmarks.`;
+  let expectation = '';
+  let validation = '';
 
-  const cleanGapType = String(gapType).toLowerCase();
+  const cleanGapType = String(gapType || '').toLowerCase();
 
   if (cleanGapType.includes('membership')) {
     what = `Uncover customer membership status early in the conversation and pitch My Best Buy Plus/Total benefits. Focus on ${stepsText} steps.`;
@@ -207,12 +223,13 @@ export function generateCoachingLogLocal(name, gapType, gapDetails, positives, r
 
 // Audit store floor layout and queue metrics using Gemini Vision
 
-export async function runGeminiEmployeeCoachingStep(apiKey, message, history, employeeScenario, playbookSettings, pastCoachingSummary, onStream?: (text: string) => void) {
+export async function runGeminiEmployeeCoachingStep(apiKey: string | undefined, message: string, history: CoachingHistory, employeeScenario: PlaybookScenario, playbookSettings: PlaybookSettings, pastCoachingSummary: string, onStream?: (text: string) => void) {
   try {
+    if (!history || !employeeScenario) return runOfflineEmployeeCoachingStep(message, history, employeeScenario);
     const model = getGeminiModel(apiKey, playbookSettings);
     
     // Format conversation history
-    const historyString = history.messages.map(m => {
+    const historyString = (history?.messages || []).map(m => {
       const roleName = m.sender === 'coach' ? 'Store Supervisor (User)' : 'Employee (Gemini)';
       return `${roleName}: ${m.text}`;
     }).join('\n');
@@ -222,10 +239,10 @@ export async function runGeminiEmployeeCoachingStep(apiKey, message, history, em
       You are roleplaying as a Best Buy Retail Employee being coached by your Store Supervisor/Manager.
       
       Your Employee Profile:
-      - Name: ${employeeScenario.name}
-      - Personality / Behavior Type: ${employeeScenario.personality}
-      - Description: ${employeeScenario.description}
-      - Performance Gap Focus: ${employeeScenario.metricGap}
+      - Name: ${employeeScenario?.name || 'Employee'}
+      - Personality / Behavior Type: ${employeeScenario?.personality || 'Normal'}
+      - Description: ${employeeScenario?.description || 'Retail employee'}
+      - Performance Gap Focus: ${employeeScenario?.metricGap || 'General'}
       
       Your Historical Coaching Logs (Long-Term Memory):
       ${pastCoachingSummary || 'No previous coaching logs recorded.'}
@@ -248,7 +265,7 @@ export async function runGeminiEmployeeCoachingStep(apiKey, message, history, em
       - Custom Instructions: ${playbookSettings?.customSystemPrompt || 'Ground coaching responses in store sales floor experiences.'}
 
       INSTRUCTION:
-      Respond to the Store Supervisor's last message: "${message}".
+      Respond to the Store Supervisor's last message: "${message || ''}".
       Keep your response natural, store-grounded, and professional yet realistic.
       
       You must reply strictly in a structured JSON format to allow client-side tracking of GROW coaching progress.
@@ -270,12 +287,12 @@ export async function runGeminiEmployeeCoachingStep(apiKey, message, history, em
       ${historyString}
       
       Supervisor's New Message:
-      "${message}"
+      "${message || ''}"
       
       Provide your JSON response matching the employee role:
     `;
 
-    const responseSchema: any = {
+    const responseSchema: Schema = {
       type: SchemaType.OBJECT,
       properties: {
         responseText: { type: SchemaType.STRING },
@@ -353,17 +370,17 @@ export async function runGeminiEmployeeCoachingStep(apiKey, message, history, em
       finalResponseText = result.response.text();
     }
 
-    let data;
+    let data: any;
     try {
       const parsedData = JSON.parse(finalResponseText);
       data = {
-        responseText: parsedData.responseText || "I'm not sure what to say to that.",
-        currentCoachStep: parsedData.currentCoachStep || history.currentCoachStep || 'goal',
+        responseText: parsedData?.responseText || "I'm not sure what to say to that.",
+        currentCoachStep: parsedData?.currentCoachStep || history?.currentCoachStep || 'goal',
         completedCoachSteps: {
-          goal: parsedData.completedCoachSteps?.goal ?? !!history.completedCoachSteps?.goal,
-          reality: parsedData.completedCoachSteps?.reality ?? !!history.completedCoachSteps?.reality,
-          options: parsedData.completedCoachSteps?.options ?? !!history.completedCoachSteps?.options,
-          will: parsedData.completedCoachSteps?.will ?? !!history.completedCoachSteps?.will
+          goal: parsedData?.completedCoachSteps?.goal ?? !!history?.completedCoachSteps?.goal,
+          reality: parsedData?.completedCoachSteps?.reality ?? !!history?.completedCoachSteps?.reality,
+          options: parsedData?.completedCoachSteps?.options ?? !!history?.completedCoachSteps?.options,
+          will: parsedData?.completedCoachSteps?.will ?? !!history?.completedCoachSteps?.will
         }
       };
     } catch (parseError) {
@@ -382,8 +399,8 @@ export async function runGeminiEmployeeCoachingStep(apiKey, message, history, em
       
       data = {
         responseText: extractedText,
-        currentCoachStep: history.currentCoachStep || 'goal',
-        completedCoachSteps: { ...(history.completedCoachSteps || {}) }
+        currentCoachStep: history?.currentCoachStep || 'goal',
+        completedCoachSteps: { ...(history?.completedCoachSteps || {}) }
       };
       
       const stepMatch = finalResponseText.match(/"currentCoachStep"\s*:\s*"([^"]+)"/);
@@ -403,8 +420,8 @@ export async function runGeminiEmployeeCoachingStep(apiKey, message, history, em
     }
     
     const updatedMessages = [
-      ...history.messages,
-      { sender: 'coach', text: message },
+      ...(history?.messages || []),
+      { sender: 'coach', text: message || '' },
       { sender: 'employee', text: data.responseText }
     ];
     
@@ -422,14 +439,15 @@ export async function runGeminiEmployeeCoachingStep(apiKey, message, history, em
 
 // Evaluate coaching session using Gemini
 
-export async function evaluateCoachingSessionGemini(apiKey, history, scenario, playbookSettings) {
+export async function evaluateCoachingSessionGemini(apiKey: string | undefined, history: CoachingHistory, scenario: PlaybookScenario, playbookSettings: PlaybookSettings) {
   try {
+    if (!history || !scenario) return evaluateCoachingSession(history);
     const model = getGeminiModel(apiKey, playbookSettings);
     
-    const dialogueStr = history.messages.map(m => `${m.sender === 'coach' ? 'Supervisor' : 'Employee'}: ${m.text}`).join('\n');
+    const dialogueStr = (history?.messages || []).map(m => `${m.sender === 'coach' ? 'Supervisor' : 'Employee'}: ${m.text}`).join('\n');
     
     const evaluationPrompt = `
-      You are a Best Buy Store General Manager. Evaluate the following coaching conversation between a Store Supervisor and a Retail Employee (${scenario.name}).
+      You are a Best Buy Store General Manager. Evaluate the following coaching conversation between a Store Supervisor and a Retail Employee (${scenario?.name || 'Employee'}).
       
       Coaching Transcript:
       ${dialogueStr}
@@ -461,7 +479,7 @@ export async function evaluateCoachingSessionGemini(apiKey, history, scenario, p
       }
     `;
 
-    const responseSchema: any = {
+    const responseSchema: Schema = {
       type: SchemaType.OBJECT,
       properties: {
         score: { type: SchemaType.NUMBER },
@@ -489,13 +507,13 @@ export async function evaluateCoachingSessionGemini(apiKey, history, scenario, p
     }));
     const parsed = JSON.parse(result.response.text());
     return {
-      score: parsed.score || 0,
-      passed: parsed.passed ?? false,
-      feedback: parsed.feedback || "Feedback could not be generated.",
+      score: parsed?.score || 0,
+      passed: parsed?.passed ?? false,
+      feedback: parsed?.feedback || "Feedback could not be generated.",
       details: {
-        empathy: parsed.details?.empathy || 0,
-        structure: parsed.details?.structure || 0,
-        actionable: parsed.details?.actionable || 0
+        empathy: parsed?.details?.empathy || 0,
+        structure: parsed?.details?.structure || 0,
+        actionable: parsed?.details?.actionable || 0
       }
     };
   } catch (error) {

@@ -1,6 +1,6 @@
 import { StateCreator } from 'zustand';
 import { StoreState, MetricsSlice } from '../../types/store';
-import { Employee } from '../../types';
+import { Employee, Trophy } from '../../types';
 import { EmployeeSchema } from '../../schemas';
 import { 
   saveActivePeriodToCloud,
@@ -134,7 +134,7 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       if (!targetEmp) return;
 
       const currentTrophies = targetEmp.trophies || [];
-      const updatedTrophies = currentTrophies.filter((t: any) => t.id !== trophyId);
+      const updatedTrophies = currentTrophies.filter((t: Trophy) => t.id !== trophyId);
       
       get().editEmployee(empId, { trophies: updatedTrophies });
     },
@@ -169,10 +169,10 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
         let candidateEmp;
         
         // Find existing emp by name or create new one
-        const existingEmp = Object.values(rosterMap).find((e: any) => e.name.toLowerCase().trim() === nameKey);
+        const existingEmp = Object.values(rosterMap).find((e: Employee) => e.name.toLowerCase().trim() === nameKey);
 
         if (existingEmp) {
-          candidateEmp = { ...(existingEmp as any), ...newEmp, lastUpdated: Date.now() };
+          candidateEmp = { ...(existingEmp as Employee), ...newEmp, lastUpdated: Date.now() };
         } else {
           candidateEmp = { id: 'emp_' + Math.random().toString(36).substring(2, 11), ...newEmp, lastUpdated: Date.now() };
         }
@@ -208,13 +208,13 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       const now = Date.now();
       
       if (copyOption === 'roster-only') {
-        Object.values(currentRoster).forEach((emp: any) => {
+        Object.values(currentRoster).forEach((emp: Employee) => {
           newRoster[emp.id] = {
             ...emp, hours: 0, memberships: 0, creditCards: 0, warranty: 0, surveys: 0, rph: 0, transactions: 0, basket: 0, m365: 0, audio: 0, gap: 'None', lastUpdated: now
           };
         });
       } else if (copyOption === 'roster-and-metrics') {
-        Object.values(currentRoster).forEach((emp: any) => {
+        Object.values(currentRoster).forEach((emp: Employee) => {
           newRoster[emp.id] = { ...emp, lastUpdated: now };
         });
       }

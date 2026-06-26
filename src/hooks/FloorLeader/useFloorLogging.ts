@@ -1,13 +1,8 @@
 import { useState } from 'react';
 import { useStore } from '../../store/useStore';
-import { Employee, CoachingLog } from '../../types';
+import { Employee, CoachingLog, ShiftWin } from '../../types';
 
 export function useFloorLogging(roster: Employee[]) {
-  const activeShift = useStore((state) => state.activeShift);
-  const setActiveShift = useStore((state) => state.setActiveShift);
-  const logCoachingSession = useStore((state) => state.logCoachingSession);
-  const editEmployee = useStore((state) => state.editEmployee);
-
   const [selectedEmpId, setSelectedEmpId] = useState('');
   const [winType, setWinType] = useState<'pm' | 'app'>('pm');
 
@@ -34,19 +29,23 @@ export function useFloorLogging(roster: Employee[]) {
 **Supervisor observations & feedback:**
 ${notes || 'No specific observation notes logged.'}`;
 
+    const { logCoachingSession } = useStore.getState();
+
     logCoachingSession({
       customerName: emp.name,
+      employeeName: emp.name,
       employeeId: emp.id,
       category: 'OCV Observation',
       score: score,
       avatar: emp.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
       notes: notesText
-    } as CoachingLog);
+    });
 
     return Promise.resolve();
   };
 
   const handleLogFloorWin = () => {
+    const { activeShift, setActiveShift, editEmployee, addTrophy } = useStore.getState();
     if (!activeShift) return;
     if (!selectedEmpId) {
       alert("Please select an associate first!");
@@ -65,26 +64,33 @@ ${notes || 'No specific observation notes logged.'}`;
     }
 
     const latestIdx = activeShift.hours && activeShift.hours.length > 0 ? activeShift.hours.length - 1 : 0;
-    const newWin = {
+    const trophyId = `trophy-${Date.now()}`;
+    
+    const newWin: ShiftWin & { trophyId?: string } = {
       id: `win-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       empId: emp.id,
       empName: emp.name,
       zone: empZone,
       type: winType,
       timestamp: Date.now(),
-      hourIndex: latestIdx
+      hourIndex: latestIdx,
+      trophyId
     };
 
     const updatedHours = [...(activeShift.hours || [])];
-    if (updatedHours[latestIdx]) {
-      const targetHour = { ...updatedHours[latestIdx] };
-      if (winType === 'pm') {
-        targetHour.pms = (targetHour.pms || 0) + 1;
-      } else {
-        targetHour.apps = (targetHour.apps || 0) + 1;
-      }
-      updatedHours[latestIdx] = targetHour;
+    
+    // QA VETO Fix: Implement an initialization fallback if undefined
+    if (!updatedHours[latestIdx]) {
+      updatedHours[latestIdx] = { hourNumber: latestIdx + 1, pms: 0, apps: 0, revenue: 0 };
     }
+    
+    const targetHour = { ...updatedHours[latestIdx] };
+    if (winType === 'pm') {
+      targetHour.pms = (targetHour.pms || 0) + 1;
+    } else {
+      targetHour.apps = (targetHour.apps || 0) + 1;
+    }
+    updatedHours[latestIdx] = targetHour;
 
     const updatedWins = [...(activeShift.wins || []), newWin];
 
@@ -99,8 +105,8 @@ ${notes || 'No specific observation notes logged.'}`;
       creditCards: (emp.creditCards || 0) + (winType === 'app' ? 1 : 0)
     });
 
-    useStore.getState().addTrophy(emp.id, {
-      id: `trophy-${Date.now()}`,
+    addTrophy(emp.id, {
+      id: trophyId,
       type: winType === 'pm' ? 'Plus/Total Membership' : 'Best Buy Credit Card',
       category: 'Floor Win',
       date: new Date().toLocaleDateString(),
@@ -111,15 +117,16 @@ ${notes || 'No specific observation notes logged.'}`;
   };
 
   const handleUndoWin = (winId: string) => {
+    const { activeShift, setActiveShift, editEmployee, removeTrophy } = useStore.getState();
     if (!activeShift) return;
-    const win = (activeShift.wins || []).find((w: any) => w.id === winId);
+    const win = (activeShift.wins || []).find((w: ShiftWin) => w.id === winId) as ShiftWin & { trophyId?: string };
     if (!win) return;
 
     const emp = roster.find(e => e.id === win.empId);
 
     const updatedHours = [...(activeShift.hours || [])];
     const hourIdx = win.hourIndex;
-    if (updatedHours[hourIdx]) {
+    if (hourIdx !== undefined && updatedHours[hourIdx]) {
       const targetHour = { ...updatedHours[hourIdx] };
       if (win.type === 'pm') {
         targetHour.pms = Math.max(0, (targetHour.pms || 0) - 1);
@@ -129,7 +136,7 @@ ${notes || 'No specific observation notes logged.'}`;
       updatedHours[hourIdx] = targetHour;
     }
 
-    const updatedWins = (activeShift.wins || []).filter((w: any) => w.id !== winId);
+    const updatedWins = (activeShift.wins || []).filter((w: ShiftWin) => w.id !== winId);
 
     setActiveShift({
       ...activeShift,
@@ -142,6 +149,11 @@ ${notes || 'No specific observation notes logged.'}`;
         memberships: Math.max(0, (emp.memberships || 0) - (win.type === 'pm' ? 1 : 0)),
         creditCards: Math.max(0, (emp.creditCards || 0) - (win.type === 'app' ? 1 : 0))
       });
+      
+      // QA VETO Fix: Remove orphaned trophy on undo
+      if (win.trophyId) {
+        removeTrophy(emp.id, win.trophyId);
+      }
     }
   };
 

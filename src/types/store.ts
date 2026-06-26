@@ -91,6 +91,7 @@ export interface MetricsSlice {
   changePeriod: (p: string) => void;
   createPeriodArchive: (newPeriodName: string, copyOption: string) => void;
   addTrophy: (empId: string, trophy: any) => void;
+  removeTrophy: (empId: string, trophyId: string) => void;
   addActionPlan: (empId: string, plan: any) => void;
 }
 

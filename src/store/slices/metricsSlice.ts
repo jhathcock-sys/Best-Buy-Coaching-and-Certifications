@@ -126,6 +126,19 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       get().editEmployee(empId, { trophies: updatedTrophies });
     },
 
+    removeTrophy: (empId, trophyId) => {
+      const activePeriod = get().activePeriod;
+      const rosterHistory = get().rosterHistory || {};
+      const currentRoster = rosterHistory[activePeriod] || {};
+      const targetEmp = currentRoster[empId];
+      if (!targetEmp) return;
+
+      const currentTrophies = targetEmp.trophies || [];
+      const updatedTrophies = currentTrophies.filter((t: any) => t.id !== trophyId);
+      
+      get().editEmployee(empId, { trophies: updatedTrophies });
+    },
+
     addActionPlan: (empId, plan) => {
       const activePeriod = get().activePeriod;
       const rosterHistory = get().rosterHistory || {};

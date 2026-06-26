@@ -8,16 +8,25 @@ import DashboardLeaderboard from '../components/Dashboard/DashboardLeaderboard';
 import MetricCards from '../components/Dashboard/MetricCards';
 import { useCalculatedMetrics } from '../hooks/useCalculatedMetrics';
 
+import { Employee } from '../types';
+
+interface DashboardPageProps {
+  onNavigate: (path: string) => void;
+  onCompleteFollowUpTask?: (taskId: string) => void;
+  onCoachEmployee?: (emp: Employee) => void;
+  onShadowEmployee?: (emp: Employee) => void;
+}
+
 export default function DashboardPage({ 
   onNavigate, 
   onCompleteFollowUpTask, 
   onCoachEmployee, 
   onShadowEmployee
-}: any) {
+}: DashboardPageProps) {
   const { calculatedMetrics, recentSessions } = useCalculatedMetrics();
 
   return (
-    <div className="flex-column gap-xl">
+    <div className="flex-column gap-xl" data-testid="dashboard-page">
       <DashboardHeader />
 
       <DashboardSystemAlerts 

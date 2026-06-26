@@ -1,7 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
-import { toast } from 'react-hot-toast';
-import { Clock, Plus, Minus, Power, Trash2, Calendar, User, CheckCircle2, XCircle, Upload, Flame, Trophy, Undo } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import { useFloorLeaderTracker } from '../hooks/useFloorLeaderTracker';
 import FloorLeaderHeader from '../components/FloorLeaderTracker/FloorLeaderHeader';
 import FloorLeaderTabs from '../components/FloorLeaderTracker/FloorLeaderTabs';
@@ -18,27 +17,21 @@ import ShiftTrackerTab from '../components/FloorLeader/ShiftTrackerTab';
 import HandoffReportModal from '../components/FloorLeaderTracker/HandoffReportModal';
 import { Employee } from '../types';
 
-
 const EMPTY_OBJ = {};
-const EMPTY_ARR: any[] = [];
 
 export default function FloorLeaderTracker() {
   const activeManager = useStore((state) => state.activeManager);
   const activePeriod = useStore((state) => state.activePeriod);
   const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
   const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
-  const roster = React.useMemo(() => (Object.values(_rawroster) as Employee[]).sort((a: Employee, b: Employee) => a.name.localeCompare(b.name)), [_rawroster]);
+  const roster = React.useMemo(() => (Object.values(_rawroster) as Employee[]).sort((a: Employee, b: Employee) => (a?.name || '').localeCompare(b?.name || '')), [_rawroster]);
 
   const onSaveShift = useStore((state) => state.saveFloorLeaderShift);
-
-  const onAddEmployee = useStore((state) => state.addEmployee);
-  const apiKey = useStore((state) => state.apiKey);
   const [isHandoffModalOpen, setIsHandoffModalOpen] = useState(false);
   
   const {
-    activeShift, setActiveShift,
+    activeShift,
     activeSummary,
-    leaderMetrics,
     leaderTab, setLeaderTab,
     isImportModalOpen, setIsImportModalOpen,
     handleEndShift,
@@ -48,12 +41,11 @@ export default function FloorLeaderTracker() {
     handleToggleBreak,
     handleDeleteBreak,
     handleToggleBreakState,
-    handleImportSchedule,
-    getEmployeesOnShift
+    handleImportSchedule
   } = useFloorLeaderTracker(activeManager, roster, onSaveShift);
 
   return (
-    <div className="flex-column gap-xl">
+    <div data-testid="floor-leader-tracker-page" className="flex-column gap-xl">
       {/* Header Panel */}
       <div>
         <h1 className="text-3xl mb-sm">Floor Leader Tracker</h1>
@@ -91,6 +83,7 @@ export default function FloorLeaderTracker() {
             <div className="flex-column gap-xl">
               <div className="flex-end mb-neg-md">
                 <button 
+                  data-testid="import-schedule-btn"
                   className="btn btn-primary flex-center gap-sm"
                   onClick={() => setIsImportModalOpen(true)}
                 >

@@ -1,16 +1,16 @@
 import { toast } from 'react-hot-toast';
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, onSnapshot, setDoc, getDoc, collection, addDoc, query, orderBy, limit, deleteDoc, getDocs, getDocsFromCache, where } from 'firebase/firestore';
-import { getAuth, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, onSnapshot, setDoc, getDoc, collection, addDoc, query, orderBy, limit, deleteDoc, getDocs, getDocsFromCache, type Firestore, type DocumentData, type DocumentReference, type QuerySnapshot, type DocumentSnapshot } from 'firebase/firestore';
+import { getAuth, signInWithEmailAndPassword, signOut, type Auth } from 'firebase/auth';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import bcrypt from 'bcryptjs';
 
-export let app: any = null;
-let db: any = null;
-let auth: any = null;
+export let app: FirebaseApp | null = null;
+let db: Firestore | null = null;
+let auth: Auth | null = null;
 
 // Get config from localStorage or env variables
-export const getSavedFirebaseConfig = () => {
+export const getSavedFirebaseConfig = (): Record<string, string> | null => {
   try {
     if (typeof localStorage !== 'undefined') {
       const saved = localStorage.getItem('bby_firebase_config');
@@ -35,7 +35,7 @@ export const getSavedFirebaseConfig = () => {
   return null;
 };
 
-export const initFirebase = (customConfig = null) => {
+export const initFirebase = (customConfig: Record<string, string> | null = null) => {
   const config = customConfig || getSavedFirebaseConfig();
   
   if (!config || !config.apiKey || !config.projectId) {
@@ -110,7 +110,7 @@ export const getStoreGuestPin = async (storeId: string): Promise<string | null> 
     const docRef = doc(db, 'stores', storeId, 'settings', 'playbook');
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      return docSnap.data().storePin || null;
+      return docSnap.data()?.storePin || null;
     }
   } catch (e) {
     console.error('Failed to get store guest pin', e);
@@ -129,19 +129,19 @@ export const signOutTenant = async () => {
 };
 
 // Helper: Get document reference for store-1
-const getStoreDocRef = (storeId: string, subpath: string): any => {
+const getStoreDocRef = (storeId: string, subpath: string): DocumentReference<DocumentData> | null => {
   if (!db) return null;
   // We use store-1 as the default corporate store ID.
   return doc(db, 'stores', storeId, 'data', subpath);
 };
 
 // Subscribe to Active Period
-export const subscribeToActivePeriod = (storeId: string, onUpdate: any) => {
+export const subscribeToActivePeriod = (storeId: string, onUpdate: (data: string | null) => void) => {
   const ref = getStoreDocRef(storeId, 'activePeriod');
   if (!ref) return null;
-  return onSnapshot(ref, (snap: any) => {
+  return onSnapshot(ref, (snap: DocumentSnapshot<DocumentData>) => {
     if (snap.exists()) {
-      onUpdate(snap.data().activePeriod);
+      onUpdate(snap.data()?.activePeriod || null);
     } else {
       onUpdate(null);
     }
@@ -149,33 +149,33 @@ export const subscribeToActivePeriod = (storeId: string, onUpdate: any) => {
 };
 
 // Subscribe to Roster History (Periods Collection Split)
-export const subscribeToRosterHistory = (storeId: string, onUpdate: any) => {
+export const subscribeToRosterHistory = (storeId: string, onUpdate: (data: Record<string, any>) => void) => {
   if (!db) return null;
   try {
     const colRef = collection(db, 'stores', storeId, 'periods');
-    return onSnapshot(colRef, (snap: any) => {
-      const periods: any = {};
-      snap.forEach((doc: any) => {
-        const rawRoster = doc.data().roster;
+    return onSnapshot(colRef, (snap: QuerySnapshot<DocumentData>) => {
+      const periods: Record<string, any> = {};
+      snap.forEach((d: DocumentSnapshot<DocumentData>) => {
+        const rawRoster = d.data()?.roster;
         
         // Auto-migration from legacy Array to Dictionary
         if (Array.isArray(rawRoster)) {
-          console.warn(`Migrating legacy array roster for period ${doc.id}`);
+          console.warn(`Migrating legacy array roster for period ${d.id}`);
           const migratedRoster: Record<string, any> = {};
-          rawRoster.forEach(emp => {
+          rawRoster.forEach((emp: any) => {
             if (!emp.id) {
                emp.id = 'emp_' + Math.random().toString(36).substring(2, 11);
             }
             migratedRoster[emp.id] = emp;
           });
-          periods[doc.id] = migratedRoster;
+          periods[d.id] = migratedRoster;
           
           // Prevent local cache from overwriting live data; only migrate if online
           if (typeof window !== 'undefined' && navigator.onLine) {
-            saveRosterHistoryToCloud(storeId, migratedRoster, doc.id);
+            saveRosterHistoryToCloud(storeId, migratedRoster, d.id);
           }
         } else {
-          periods[doc.id] = rawRoster || {};
+          periods[d.id] = rawRoster || {};
         }
       });
       onUpdate(periods);
@@ -187,12 +187,12 @@ export const subscribeToRosterHistory = (storeId: string, onUpdate: any) => {
 };
 
 // Subscribe to Playbook Settings
-export const subscribeToPlaybookSettings = (storeId: string, onUpdate: any) => {
+export const subscribeToPlaybookSettings = (storeId: string, onUpdate: (data: Record<string, any>) => void) => {
   const ref = getStoreDocRef(storeId, 'playbookSettings');
   if (!ref) return null;
-  return onSnapshot(ref, (snap: any) => {
+  return onSnapshot(ref, (snap: DocumentSnapshot<DocumentData>) => {
     if (snap.exists()) {
-      onUpdate(snap.data().settings);
+      onUpdate(snap.data()?.settings || { useGemini: false, storePin: '1234' });
     } else {
       onUpdate({ useGemini: false, storePin: '1234' });
     }
@@ -204,12 +204,12 @@ export const subscribeToPlaybookSettings = (storeId: string, onUpdate: any) => {
 };
 
 // Subscribe to Managers Settings (Legacy)
-export const subscribeToManagers = (storeId: string, onUpdate: any) => {
+export const subscribeToManagers = (storeId: string, onUpdate: (data: any[]) => void) => {
   const ref = getStoreDocRef(storeId, 'managersSettings');
   if (!ref) return null;
-  return onSnapshot(ref, (snap: any) => {
+  return onSnapshot(ref, (snap: DocumentSnapshot<DocumentData>) => {
     if (snap.exists()) {
-      onUpdate(snap.data().managers || []);
+      onUpdate(snap.data()?.managers || []);
     } else {
       onUpdate([]);
     }
@@ -233,7 +233,7 @@ export const getUserByPin = async (storeId: string, pin: string) => {
   try {
     const usersRef = collection(db, 'stores', storeId, 'users');
     
-    let snap: any;
+    let snap: QuerySnapshot<DocumentData>;
     try {
       snap = await withTimeout(getDocs(usersRef));
     } catch (err: any) {
@@ -248,7 +248,7 @@ export const getUserByPin = async (storeId: string, pin: string) => {
     if (!snap.empty) {
       for (const d of snap.docs) {
         const data = d.data();
-        if (data.pin) {
+        if (data?.pin) {
           // Check if it's already a bcrypt hash (starts with $2a$ or $2b$) or plain text
           const isHashed = data.pin.startsWith('$2a$') || data.pin.startsWith('$2b$');
           if (isHashed) {
@@ -267,7 +267,9 @@ export const getUserByPin = async (storeId: string, pin: string) => {
     
     // Phase 1 Auth Lazy Migration: check legacy managersSettings if not found
     const legacyRef = getStoreDocRef(storeId, 'managersSettings');
-    let legacySnap: any;
+    if (!legacyRef) return null;
+    
+    let legacySnap: DocumentSnapshot<DocumentData> | null = null;
     try {
       legacySnap = await withTimeout(getDoc(legacyRef));
     } catch (err: any) {
@@ -276,7 +278,7 @@ export const getUserByPin = async (storeId: string, pin: string) => {
     }
     
     if (legacySnap && legacySnap.exists()) {
-      const legacyManagers = legacySnap.data().managers || [];
+      const legacyManagers = legacySnap.data()?.managers || [];
       const legacyUser = legacyManagers.find((m: any) => {
         if (!m.pin) return false;
         const isHashed = m.pin.startsWith('$2a$') || m.pin.startsWith('$2b$');
@@ -309,12 +311,12 @@ export const getUserByPin = async (storeId: string, pin: string) => {
 };
 
 // Subscribe to Department Goals
-export const subscribeToDeptGoals = (storeId: string, onUpdate: any) => {
+export const subscribeToDeptGoals = (storeId: string, onUpdate: (data: Record<string, any>) => void) => {
   const ref = getStoreDocRef(storeId, 'deptGoals');
   if (!ref) return null;
-  return onSnapshot(ref, (snap: any) => {
+  return onSnapshot(ref, (snap: DocumentSnapshot<DocumentData>) => {
     if (snap.exists()) {
-      onUpdate(snap.data().goals);
+      onUpdate(snap.data()?.goals || {});
     } else {
       onUpdate({});
     }
@@ -336,14 +338,14 @@ export const saveActivePeriodToCloud = async (storeId: string, activePeriod: str
 };
 
 // Subscribe to Daily Snapshots (Trend Reporting)
-export const subscribeToDailySnapshots = (storeId: string, onUpdate: any) => {
+export const subscribeToDailySnapshots = (storeId: string, onUpdate: (data: Record<string, any>) => void) => {
   if (!db) return null;
   try {
     const colRef = collection(db, 'stores', storeId, 'dailySnapshots');
-    return onSnapshot(colRef, (snap: any) => {
-      const snapshots: any = {};
-      snap.forEach((doc: any) => {
-        snapshots[doc.id as keyof typeof snapshots] = doc.data().metrics || [];
+    return onSnapshot(colRef, (snap: QuerySnapshot<DocumentData>) => {
+      const snapshots: Record<string, any> = {};
+      snap.forEach((d: DocumentSnapshot<DocumentData>) => {
+        snapshots[d.id] = d.data()?.metrics || [];
       });
       onUpdate(snapshots);
     });
@@ -368,7 +370,7 @@ export const saveDailySnapshotToCloud = async (storeId: string, dateKey: string,
 };
 
 // Write Roster History (Period Document Split)
-export const saveRosterHistoryToCloud = async (storeId: string, roster: any, periodId: string) => {
+export const saveRosterHistoryToCloud = async (storeId: string, roster: Record<string, any>, periodId: string) => {
   if (!db || !periodId) return false;
   try {
     const ref = doc(db, 'stores', storeId, 'periods', periodId);
@@ -382,7 +384,7 @@ export const saveRosterHistoryToCloud = async (storeId: string, roster: any, per
 };
 
 // Write Playbook Settings
-export const savePlaybookSettingsToCloud = async (storeId: string, settings: any) => {
+export const savePlaybookSettingsToCloud = async (storeId: string, settings: Record<string, any>) => {
   const ref = getStoreDocRef(storeId, 'playbookSettings');
   if (!ref) return false;
   try {
@@ -396,9 +398,9 @@ export const savePlaybookSettingsToCloud = async (storeId: string, settings: any
 };
 
 // Write Managers Settings
-export const saveManagersToCloud = async (storeId: string, managers: any) => {
+export const saveManagersToCloud = async (storeId: string, managers: any[]) => {
   const ref = getStoreDocRef(storeId, 'managersSettings');
-  if (!ref) return false;
+  if (!ref || !db) return false;
   try {
     // Hash PINs securely using bcrypt before saving
     const hashedManagers = managers.map((m: any) => {
@@ -418,11 +420,6 @@ export const saveManagersToCloud = async (storeId: string, managers: any) => {
     
     for (const manager of hashedManagers) {
       if (!manager.pin) continue;
-      // If we don't have the original plaintext PIN, the ID generation below is flawed since it uses the hashed PIN if m.id is missing.
-      // But the UI generates an ID when adding a manager. Let's make sure docId is stable.
-      // The original code used `manager.id || user_${manager.pin}`.
-      // We will preserve this but warn that using a hashed PIN as an ID is not ideal, but it's what was there.
-      // Actually, since hashedManagers contains the HASHED pin, we'll try to find the plaintext pin from the original array for the ID fallback.
       const originalManager = managers.find((om: any) => om.name === manager.name);
       const docId = manager.id || `user_${originalManager?.pin || manager.pin}`;
       activeIds.push(docId);
@@ -452,7 +449,7 @@ export const saveManagersToCloud = async (storeId: string, managers: any) => {
 };
 
 // Write Department Goals
-export const saveDeptGoalsToCloud = async (storeId: string, goals: any) => {
+export const saveDeptGoalsToCloud = async (storeId: string, goals: Record<string, any>) => {
   const ref = getStoreDocRef(storeId, 'deptGoals');
   if (!ref) return false;
   try {
@@ -466,12 +463,12 @@ export const saveDeptGoalsToCloud = async (storeId: string, goals: any) => {
 };
 
 // Subscribe to Recent Sessions
-export const subscribeToRecentSessions = (storeId: string, onUpdate: any) => {
+export const subscribeToRecentSessions = (storeId: string, onUpdate: (data: any[]) => void) => {
   const ref = getStoreDocRef(storeId, 'recentSessions');
   if (!ref) return null;
-  return onSnapshot(ref, (snap: any) => {
+  return onSnapshot(ref, (snap: DocumentSnapshot<DocumentData>) => {
     if (snap.exists()) {
-      onUpdate(snap.data().sessions || []);
+      onUpdate(snap.data()?.sessions || []);
     } else {
       onUpdate([]);
     }
@@ -479,7 +476,7 @@ export const subscribeToRecentSessions = (storeId: string, onUpdate: any) => {
 };
 
 // Write Recent Sessions
-export const saveRecentSessionsToCloud = async (storeId: string, sessions: any) => {
+export const saveRecentSessionsToCloud = async (storeId: string, sessions: any[]) => {
   const ref = getStoreDocRef(storeId, 'recentSessions');
   if (!ref) return false;
   try {
@@ -493,12 +490,12 @@ export const saveRecentSessionsToCloud = async (storeId: string, sessions: any) 
 };
 
 // Subscribe to Metrics
-export const subscribeToMetrics = (storeId: string, onUpdate: any) => {
+export const subscribeToMetrics = (storeId: string, onUpdate: (data: Record<string, any>) => void) => {
   const ref = getStoreDocRef(storeId, 'metrics');
   if (!ref) return null;
-  return onSnapshot(ref, (snap: any) => {
+  return onSnapshot(ref, (snap: DocumentSnapshot<DocumentData>) => {
     if (snap.exists()) {
-      onUpdate(snap.data().metrics);
+      onUpdate(snap.data()?.metrics || { memberships: 0, creditCards: 0, warranty: 0, surveys: 0, rph: 0, totalRevenue: 0, totalHours: 0 });
     } else {
       onUpdate({ memberships: 0, creditCards: 0, warranty: 0, surveys: 0, rph: 0, totalRevenue: 0, totalHours: 0 });
     }
@@ -506,7 +503,7 @@ export const subscribeToMetrics = (storeId: string, onUpdate: any) => {
 };
 
 // Write Metrics
-export const saveMetricsToCloud = async (storeId: string, metrics: any) => {
+export const saveMetricsToCloud = async (storeId: string, metrics: Record<string, any>) => {
   const ref = getStoreDocRef(storeId, 'metrics');
   if (!ref) return false;
   try {
@@ -520,15 +517,15 @@ export const saveMetricsToCloud = async (storeId: string, metrics: any) => {
 };
 
 // Subscribe to Follow-Up Tasks
-export const subscribeToFollowUpTasks = (storeId: string, onUpdate: any) => {
+export const subscribeToFollowUpTasks = (storeId: string, onUpdate: (data: any[]) => void) => {
   if (!db) return null;
   try {
     const colRef = collection(db, 'stores', storeId, 'followUpTasks');
     const q = query(colRef, orderBy('timestamp', 'desc'), limit(50));
-    return onSnapshot(q, (snap: any) => {
+    return onSnapshot(q, (snap: QuerySnapshot<DocumentData>) => {
       const tasks: any[] = [];
-      snap.forEach((doc: any) => {
-        tasks.push({ id: doc.id, ...doc.data() });
+      snap.forEach((d: DocumentSnapshot<DocumentData>) => {
+        tasks.push({ id: d.id, ...d.data() });
       });
       onUpdate(tasks);
     });
@@ -570,15 +567,15 @@ export const deleteFollowUpTaskFromCloud = async (storeId: string, taskId: strin
 };
 
 // Subscribe to Floor Leader Shifts
-export const subscribeToFloorLeaderShifts = (storeId: string, onUpdate: any) => {
+export const subscribeToFloorLeaderShifts = (storeId: string, onUpdate: (data: any[]) => void) => {
   if (!db) return null;
   try {
     const colRef = collection(db, 'stores', storeId, 'floorLeaderShifts');
     const q = query(colRef, orderBy('timestamp', 'desc'), limit(50));
-    return onSnapshot(q, (snap: any) => {
+    return onSnapshot(q, (snap: QuerySnapshot<DocumentData>) => {
       const shifts: any[] = [];
-      snap.forEach((doc: any) => {
-        shifts.push({ id: doc.id, ...doc.data() });
+      snap.forEach((d: DocumentSnapshot<DocumentData>) => {
+        shifts.push({ id: d.id, ...d.data() });
       });
       onUpdate(shifts);
     });
@@ -625,10 +622,12 @@ export const pushOfflineDataToCloud = async (storeId: string, offlineData: any) 
   try {
     const { activePeriod, rosterHistory, playbookSettings, deptGoals, recentSessions, metrics, followUpTasks, floorLeaderShifts, managers } = offlineData;
     
-    // Check if cloud data exists first to avoid blindly overwriting existing cloud data!
-    const activePeriodSnap = await getDoc(getStoreDocRef(storeId, 'activePeriod'));
-    if (!activePeriodSnap.exists() && activePeriod) {
-      await saveActivePeriodToCloud(storeId, activePeriod);
+    const activePeriodRef = getStoreDocRef(storeId, 'activePeriod');
+    if (activePeriodRef) {
+      const activePeriodSnap = await getDoc(activePeriodRef);
+      if (!activePeriodSnap.exists() && activePeriod) {
+        await saveActivePeriodToCloud(storeId, activePeriod);
+      }
     }
     
     // Seed periods collection if empty
@@ -640,29 +639,44 @@ export const pushOfflineDataToCloud = async (storeId: string, offlineData: any) 
       }
     }
 
-    const playbookSnap = await getDoc(getStoreDocRef(storeId, 'playbookSettings'));
-    if (!playbookSnap.exists() && playbookSettings) {
-      await savePlaybookSettingsToCloud(storeId, playbookSettings);
+    const playbookRef = getStoreDocRef(storeId, 'playbookSettings');
+    if (playbookRef) {
+      const playbookSnap = await getDoc(playbookRef);
+      if (!playbookSnap.exists() && playbookSettings) {
+        await savePlaybookSettingsToCloud(storeId, playbookSettings);
+      }
     }
 
-    const managersSnap = await getDoc(getStoreDocRef(storeId, 'managersSettings'));
-    if (!managersSnap.exists() && managers) {
-      await saveManagersToCloud(storeId, managers);
+    const managersRef = getStoreDocRef(storeId, 'managersSettings');
+    if (managersRef) {
+      const managersSnap = await getDoc(managersRef);
+      if (!managersSnap.exists() && managers) {
+        await saveManagersToCloud(storeId, managers);
+      }
     }
 
-    const goalsSnap = await getDoc(getStoreDocRef(storeId, 'deptGoals'));
-    if (!goalsSnap.exists() && deptGoals) {
-      await saveDeptGoalsToCloud(storeId, deptGoals);
+    const goalsRef = getStoreDocRef(storeId, 'deptGoals');
+    if (goalsRef) {
+      const goalsSnap = await getDoc(goalsRef);
+      if (!goalsSnap.exists() && deptGoals) {
+        await saveDeptGoalsToCloud(storeId, deptGoals);
+      }
     }
 
-    const sessionsSnap = await getDoc(getStoreDocRef(storeId, 'recentSessions'));
-    if (!sessionsSnap.exists() && recentSessions) {
-      await saveRecentSessionsToCloud(storeId, recentSessions);
+    const sessionsRef = getStoreDocRef(storeId, 'recentSessions');
+    if (sessionsRef) {
+      const sessionsSnap = await getDoc(sessionsRef);
+      if (!sessionsSnap.exists() && recentSessions) {
+        await saveRecentSessionsToCloud(storeId, recentSessions);
+      }
     }
 
-    const metricsSnap = await getDoc(getStoreDocRef(storeId, 'metrics'));
-    if (!metricsSnap.exists() && metrics) {
-      await saveMetricsToCloud(storeId, metrics);
+    const metricsRef = getStoreDocRef(storeId, 'metrics');
+    if (metricsRef) {
+      const metricsSnap = await getDoc(metricsRef);
+      if (!metricsSnap.exists() && metrics) {
+        await saveMetricsToCloud(storeId, metrics);
+      }
     }
 
     // Seed followUpTasks sub-collection
@@ -718,15 +732,15 @@ export const saveCoachingLogToCloud = async (storeId: string, log: any) => {
 };
 
 // Subscribe to coaching logs
-export const subscribeToCoachingLogs = (storeId: string, onUpdate: any) => {
+export const subscribeToCoachingLogs = (storeId: string, onUpdate: (data: any[]) => void) => {
   if (!db) return null;
   try {
     const colRef = collection(db, 'stores', storeId, 'coachingLogs');
     const q = query(colRef, orderBy('timestamp', 'desc'), limit(50));
-    return onSnapshot(q, (snap: any) => {
+    return onSnapshot(q, (snap: QuerySnapshot<DocumentData>) => {
       const logs: any[] = [];
-      snap.forEach((doc: any) => {
-        logs.push({ id: doc.id, ...doc.data() });
+      snap.forEach((d: DocumentSnapshot<DocumentData>) => {
+        logs.push({ id: d.id, ...d.data() });
       });
       onUpdate(logs);
     });
@@ -765,4 +779,3 @@ export const testLatency = async (storeId: string) => {
   }
   return -1;
 };
-

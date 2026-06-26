@@ -1,4 +1,4 @@
-export const INITIAL_ROSTER: Record<string, any> = {
+export const INITIAL_ROSTER: Record<string, Employee> = {
   'yinel': { id: 'yinel', name: 'Yinel', dept: 'Front End', hours: 34.5, memberships: 10, creditCards: 1, warranty: 22.2, surveys: 2, rph: 744, gap: 'BBY Credit Cards (1 App)' },
   'julianna': { id: 'julianna', name: 'Julianna', dept: 'Computing', hours: 78.0, memberships: 6, creditCards: 2, warranty: 11.2, surveys: 1, rph: 1049, gap: 'None' },
   'muntarin': { id: 'muntarin', name: 'Muntarin', dept: 'Home Theatre', hours: 51.4, memberships: 4, creditCards: 0, warranty: 17.1, surveys: 1, rph: 868, gap: 'BBY Credit Cards (0 Apps)' },
@@ -11,7 +11,7 @@ export const INITIAL_ROSTER: Record<string, any> = {
   'avneet': { id: 'avneet', name: 'Avneet', dept: 'Mobile', hours: 26.7, memberships: 2, creditCards: 1, warranty: 3.7, surveys: 1, rph: 404, gap: 'Multiple Gaps (1 Category)' }
 };
 
-import { DeptGoal } from '../../types';
+import { DeptGoal, Employee } from '../../types';
 
 export const DEFAULT_DEPT_GOALS: Record<string, DeptGoal> = {
   'Front End': { memberships: 8.0, membershipsType: 'Hours', creditCards: 12.5, creditCardsType: 'Hours', warranty: 11.0, surveys: 1.0, rph: 640 },
@@ -56,10 +56,10 @@ export const MANAGERS = [
   { name: 'Will C.', role: 'GM', pin: '2007' }
 ];
 
-export const safeJsonParse = (str, fallback) => {
+export const safeJsonParse = <T>(str: string | null | undefined, fallback: T): T => {
   if (!str) return fallback;
   try {
-    return JSON.parse(str);
+    return JSON.parse(str) as T;
   } catch (e) {
     console.error('JSON parsing failed:', e);
     return fallback;

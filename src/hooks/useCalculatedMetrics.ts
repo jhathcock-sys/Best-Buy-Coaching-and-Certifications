@@ -3,8 +3,8 @@ import { useStore } from '../store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import { Employee, CoachingLog, ShiftEvent, FollowUpTask, DeptGoal } from '../types';
 
-const EMPTY_OBJ = {};
-const EMPTY_ARR: any[] = [];
+const EMPTY_OBJ: Record<string, never> = {};
+const EMPTY_ARR: never[] = [];
 
 export interface CalculatedMetrics {
   memberships: number;
@@ -37,7 +37,7 @@ export function useCalculatedMetrics() {
     activeManager: state.activeManager
   })));
 
-  const _rawroster = (rosterHistory || EMPTY_OBJ)[activePeriod as string] || EMPTY_OBJ;
+  const _rawroster = activePeriod ? ((rosterHistory || EMPTY_OBJ)[activePeriod] || EMPTY_OBJ) : EMPTY_OBJ;
   
   const roster = useMemo(() => {
     return (Object.values(_rawroster) as Employee[]).sort((a, b) => a.name.localeCompare(b.name));
@@ -99,21 +99,22 @@ export function useCalculatedMetrics() {
   }, [roster]);
 
   const activeFocus5Alerts = useMemo(() => {
-    if (!floorLeaderShifts || floorLeaderShifts.length === 0) return [];
+    if (!floorLeaderShifts || floorLeaderShifts.length === 0) return EMPTY_ARR;
     
     const sortedShifts = [...floorLeaderShifts].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     const mostRecentShift = sortedShifts[0];
     
-    const todayStr = new Date().toLocaleDateString();
-    if (mostRecentShift.date !== todayStr) return [];
+    const todayStart = new Date();
+    todayStart.setHours(0,0,0,0);
+    
+    if ((mostRecentShift.timestamp || 0) < todayStart.getTime()) return EMPTY_ARR;
     
     const zoneAssignments = mostRecentShift.zoneAssignments || {};
     const alerts: { employee: Employee; zone: string }[] = [];
     
-    const todayStart = new Date().setHours(0,0,0,0);
     const todayLogs = (coachingLogs || EMPTY_ARR).filter((log) => {
       const logTime = log.timestamp || 0;
-      return logTime >= todayStart;
+      return logTime >= todayStart.getTime();
     });
 
     Object.keys(zoneAssignments).forEach(zone => {
@@ -129,21 +130,41 @@ export function useCalculatedMetrics() {
       });
     });
     
-    return alerts;
+    return alerts.length > 0 ? alerts : EMPTY_ARR;
   }, [floorLeaderShifts, coachingLogs, roster]);
 
   const activePeriodLogs = useMemo(() => {
     if (!activePeriod) return coachingLogs || EMPTY_ARR;
-    const [activeMonthStr, activeYearStr] = activePeriod.split(' ');
+    const parts = activePeriod.split(' ');
+    const activeMonthStr = parts[0] || '';
+    const activeYearStr = parts[1] || '';
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const activeMonthIdx = months.findIndex(m => activeMonthStr.startsWith(m));
     
-    return (coachingLogs || EMPTY_ARR).filter((log) => {
-      const logDate = log.timestamp ? new Date(log.timestamp) : new Date(log.date);
+    const filtered = (coachingLogs || EMPTY_ARR).filter((log) => {
+      let logDate = new Date();
+      if (log.timestamp) {
+        logDate = new Date(log.timestamp);
+      } else if (log.date) {
+        const dParts = log.date.split(/[-/]/);
+        if (dParts.length === 3) {
+           if (dParts[0].length === 4) {
+               logDate = new Date(parseInt(dParts[0]), parseInt(dParts[1]) - 1, parseInt(dParts[2]));
+           } else {
+               logDate = new Date(parseInt(dParts[2]), parseInt(dParts[0]) - 1, parseInt(dParts[1]));
+           }
+        } else {
+           logDate = new Date(log.date);
+        }
+      } else {
+        return true;
+      }
+      
       if (isNaN(logDate.getTime())) return true;
       const parsedYear = activeYearStr ? parseInt(activeYearStr) : NaN;
       return logDate.getMonth() === activeMonthIdx && (!isNaN(parsedYear) ? logDate.getFullYear() === parsedYear : true);
     });
+    return filtered.length > 0 ? filtered : EMPTY_ARR;
   }, [coachingLogs, activePeriod]);
 
   const shadowingHeatmapData = useMemo(() => {
@@ -153,8 +174,8 @@ export function useCalculatedMetrics() {
     const deptLookup: Record<string, string> = {};
     
     // First fill from all history (older to newer, so active overwrites)
-    Object.values(rosterHistory || EMPTY_OBJ).forEach((empMap: any) => {
-      Object.values(empMap || EMPTY_OBJ).forEach((emp: any) => {
+    Object.values(rosterHistory || EMPTY_OBJ).forEach((empMap) => {
+      Object.values(empMap || EMPTY_OBJ).forEach((emp) => {
         if (emp.id && emp.dept) deptLookup[emp.id] = emp.dept;
         if (emp.name && emp.dept) deptLookup[emp.name] = emp.dept;
       });
@@ -171,7 +192,8 @@ export function useCalculatedMetrics() {
   }, [activePeriodLogs, rosterHistory]);
 
   const pendingTasks = useMemo(() => {
-    return (followUpTasks || EMPTY_ARR).filter((task) => !task.completed);
+    const filtered = (followUpTasks || EMPTY_ARR).filter((task) => !task.completed);
+    return filtered.length > 0 ? filtered : EMPTY_ARR;
   }, [followUpTasks]);
 
   return {

@@ -13,7 +13,15 @@ import {
   subscribeToManagers,
   subscribeToDailySnapshots
 } from '../services/firebase';
-
+import {
+  PlaybookSettings,
+  Manager,
+  DeptGoal,
+  CoachingLog,
+  FollowUpTask,
+  ShiftEvent,
+  MetricAverages
+} from '../types';
 
 export default function SyncManager() {
   const dbConnected = useStore((state) => state.dbConnected);
@@ -36,21 +44,25 @@ export default function SyncManager() {
   useEffect(() => {
     if (!dbConnected || !storeId) return;
 
-    const unsubPlaybook = subscribeToPlaybookSettings(storeId, (s) => {
+    const unsubPlaybook = subscribeToPlaybookSettings(storeId, (s: PlaybookSettings | null) => {
       if (s) {
         const hasEnvKey = !!(import.meta.env.VITE_GEMINI_API_KEY && import.meta.env.VITE_GEMINI_API_KEY.trim().length > 10);
         const savedKey = localStorage.getItem('bby_api_key');
+        
+        // Clone object before mutating
+        const updatedSettings: PlaybookSettings = { ...s };
+        
         if (hasEnvKey && (!savedKey || savedKey.trim().length < 10)) {
-          s.useGemini = true;
+          updatedSettings.useGemini = true;
         }
-        if (!s.storePin) {
-          s.storePin = '1234';
+        if (!updatedSettings.storePin) {
+          updatedSettings.storePin = '1234';
         }
-        setPlaybookSettings(s);
+        setPlaybookSettings(updatedSettings);
       }
     });
 
-    const unsubManagers = subscribeToManagers(storeId, (m) => {
+    const unsubManagers = subscribeToManagers(storeId, (m: Manager[] | null) => {
       if (m) setManagers(m);
     });
 
@@ -58,49 +70,49 @@ export default function SyncManager() {
       if (unsubPlaybook) unsubPlaybook();
       if (unsubManagers) unsubManagers();
     };
-  }, [dbConnected, storeId, setPlaybookSettings, setManagers, setActivePeriod, setRosterHistory]);
+  }, [dbConnected, storeId, setPlaybookSettings, setManagers]);
 
   // Post-Auth Listeners (Tenant Data)
   useEffect(() => {
     if (!dbConnected || !storeId || !isAuthenticated) return;
 
-    const unsubPeriod = subscribeToActivePeriod(storeId, (p) => {
+    const unsubPeriod = subscribeToActivePeriod(storeId, (p: string | null) => {
       if (p) setActivePeriod(p);
     });
 
-    const unsubRoster = subscribeToRosterHistory(storeId, (h) => {
+    const unsubRoster = subscribeToRosterHistory(storeId, (h: Record<string, any> | null) => {
       if (h) setRosterHistory(h);
     });
 
-    const unsubGoals = subscribeToDeptGoals(storeId, (g) => {
+    const unsubGoals = subscribeToDeptGoals(storeId, (g: Record<string, DeptGoal> | null) => {
       if (g) setDeptGoals(g);
     });
 
-    const unsubSessions = subscribeToRecentSessions(storeId, (s) => {
+    const unsubSessions = subscribeToRecentSessions(storeId, (s: any[] | null) => {
       if (s) setRecentSessions(s);
     });
 
-    const unsubMetrics = subscribeToMetrics(storeId, (m) => {
+    const unsubMetrics = subscribeToMetrics(storeId, (m: MetricAverages | null) => {
       if (m) setMetrics(m);
     });
 
-    const unsubFollowUp = subscribeToFollowUpTasks(storeId, (tasks) => {
+    const unsubFollowUp = subscribeToFollowUpTasks(storeId, (tasks: FollowUpTask[] | null) => {
       if (tasks) setFollowUpTasks(tasks);
     });
 
-    const unsubFloorLeader = subscribeToFloorLeaderShifts(storeId, (shifts) => {
+    const unsubFloorLeader = subscribeToFloorLeaderShifts(storeId, (shifts: ShiftEvent[] | null) => {
       if (shifts) {
         setFloorLeaderShifts(shifts);
       }
     });
 
-    const unsubCoachingLogs = subscribeToCoachingLogs(storeId, (logs) => {
+    const unsubCoachingLogs = subscribeToCoachingLogs(storeId, (logs: CoachingLog[] | null) => {
       if (logs) {
         setCoachingLogs(logs);
       }
     });
 
-    const unsubDailySnapshots = subscribeToDailySnapshots(storeId, (s) => {
+    const unsubDailySnapshots = subscribeToDailySnapshots(storeId, (s: Record<string, any> | null) => {
       if (s) setDailySnapshots(s);
     });
 
@@ -115,7 +127,20 @@ export default function SyncManager() {
       if (unsubCoachingLogs) unsubCoachingLogs();
       if (unsubDailySnapshots) unsubDailySnapshots();
     };
-  }, [dbConnected, isAuthenticated, storeId, setActivePeriod, setRosterHistory, setDeptGoals, setRecentSessions, setMetrics, setFollowUpTasks, setFloorLeaderShifts, setCoachingLogs, setDailySnapshots]);
+  }, [
+    dbConnected, 
+    isAuthenticated, 
+    storeId, 
+    setActivePeriod, 
+    setRosterHistory, 
+    setDeptGoals, 
+    setRecentSessions, 
+    setMetrics, 
+    setFollowUpTasks, 
+    setFloorLeaderShifts, 
+    setCoachingLogs, 
+    setDailySnapshots
+  ]);
 
   return null;
 }

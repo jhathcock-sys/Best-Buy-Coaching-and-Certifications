@@ -1,6 +1,5 @@
 {
     "remaining_queue": [
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/ZoneScheduler.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/data/mockRentsDue.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/hooks/FloorLeader/useFloorLogging.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/hooks/FloorLeader/useFloorScheduling.ts",
@@ -162,12 +161,13 @@
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/RosterImporterModal.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/ServiceWorkerBanner.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/ShiftSimulator.tsx",
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/SyncManager.tsx"
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/SyncManager.tsx",
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/ZoneScheduler.tsx"
     ],
     "current_checkpoint": {
-        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/components/ZoneScheduler.tsx"
+        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/data/mockRentsDue.ts"
     },
-    "file_index": 71,
+    "file_index": 72,
     "status": "ACTIVE",
     "agent_feed": [
         {

@@ -5,27 +5,50 @@ import ZoneTimeline from './ZoneScheduler/ZoneTimeline';
 import { useStore } from '../store/useStore';
 import { generateSmartZoning } from '../services/ai/geminiSmartZoning';
 import toast from 'react-hot-toast';
+import { Employee, BreakEntry } from '../types';
+
+const EMPTY_OBJ: any = {};
+const EMPTY_ARR: any[] = [];
+const ZONES = ['Computing', 'Mobile', 'Home Theatre', 'Front End', 'Geek Squad', 'Appliances'];
+const TIME_SLOTS = ['10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM'];
+
+interface ZoneSchedulerProps {
+  zoneAssignments?: Record<string, string[]>;
+  roster?: Employee[];
+  onAssignZone: (zone: string, empId: string) => void;
+  onUnassignZone: (zone: string, empId: string) => void;
+  activeBreaks?: Record<string, string>;
+  onToggleBreakState: (empId: string, state: string) => void;
+  onImportSchedule: (schedule: { zoneAssignments: Record<string, string[]>, breakSchedule: BreakEntry[] }) => void;
+}
 
 export default function ZoneScheduler({ 
-  zoneAssignments = {}, 
-  roster = [], 
+  zoneAssignments = EMPTY_OBJ, 
   onAssignZone, 
   onUnassignZone,
-  activeBreaks = {},
+  activeBreaks = EMPTY_OBJ,
   onToggleBreakState,
   onImportSchedule
-}) {
-  const zones = ['Computing', 'Mobile', 'Home Theatre', 'Front End', 'Geek Squad', 'Appliances'];
-  const safeZoneAssignments = zoneAssignments || {};
-  const safeRoster = roster || [];
-  const assignedEmpIds = Object.values(safeZoneAssignments).flat() as string[];
-  const unassignedEmps = safeRoster.filter(emp => !assignedEmpIds.includes(emp.id));
+}: ZoneSchedulerProps) {
+  // Use stable constants for fallbacks to prevent unnecessary re-renders
+  const safeZoneAssignments = zoneAssignments || EMPTY_OBJ;
+  
+  // Pull roster globally instead of prop drilling
+  const activePeriod = useStore((state) => state.activePeriod);
+  const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
+  const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
+  const roster = React.useMemo(() => {
+    const rawArr = Object.values(_rawroster) as Employee[];
+    return rawArr.sort((a, b) => a.name.localeCompare(b.name));
+  }, [_rawroster]);
+
+  const assignedEmpIds = (Object.values(safeZoneAssignments) as string[][]).flat();
+  const unassignedEmps = roster.filter(emp => !assignedEmpIds.includes(emp.id));
   const apiKey = useStore(state => state.apiKey);
   const playbookSettings = useStore(state => state.playbookSettings);
 
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'timeline'
+  const [viewMode, setViewMode] = useState<'grid' | 'timeline'>('grid');
   const [isDeploying, setIsDeploying] = useState(false);
-  const timeSlots = ['10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM'];
 
   const handleAutoDeploy = async () => {
     if (!apiKey) {
@@ -37,10 +60,10 @@ export default function ZoneScheduler({
     try {
       setIsDeploying(true);
       toastId = toast.loading('Gemini is analyzing floor traffic and optimizing roster...');
-      const assignments = await generateSmartZoning(safeRoster, zones, apiKey, playbookSettings);
+      const assignments = await generateSmartZoning(roster, ZONES, apiKey, playbookSettings);
       
       if (onImportSchedule) {
-        onImportSchedule({ zoneAssignments: assignments, breakSchedule: [] });
+        onImportSchedule({ zoneAssignments: assignments, breakSchedule: EMPTY_ARR });
       }
       toast.success('Roster optimized and Auto-Deployed!', { id: toastId });
     } catch (err) {
@@ -52,74 +75,39 @@ export default function ZoneScheduler({
   };
 
   return (
-    <div className="glass-card" style={{ padding: '2rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+    <div className="glass-card p-xl" data-testid="zone-scheduler-container">
+      <div className="flex justify-between items-start mb-xl gap-lg">
         <div>
-          <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--bby-yellow)' }}>
+          <h3 className="text-xl mb-sm flex items-center gap-sm text-bby-yellow font-bold">
             <Users size={20} /> Sales Floor Zone Assignments
           </h3>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: 0 }}>
+          <p className="text-secondary text-sm m-0">
             Zoning sheet scheduler: visually drag and drop associates or auto-deploy.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        
+        <div className="flex items-center gap-sm flex-wrap">
           <button
             data-testid="auto-deploy-btn"
             onClick={handleAutoDeploy}
             disabled={isDeploying}
-            style={{
-              background: 'rgba(0, 70, 190, 0.2)',
-              color: 'var(--bby-blue)',
-              border: '1px solid var(--bby-blue)',
-              padding: '0.5rem 1rem',
-              borderRadius: '6px',
-              fontSize: '0.85rem',
-              cursor: isDeploying ? 'wait' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              transition: 'all 0.2s',
-              marginRight: '1rem',
-              boxShadow: '0 0 10px rgba(0, 70, 190, 0.3)'
-            }}
+            className={`btn bg-bby-blue/20 text-bby-blue border border-bby-blue py-sm px-md rounded-md text-sm flex items-center gap-xs transition-all shadow-[0_0_10px_rgba(0,70,190,0.3)] mr-md ${isDeploying ? 'cursor-wait opacity-70' : 'cursor-pointer hover:bg-bby-blue hover:text-white'}`}
           >
             <Zap size={16} /> {isDeploying ? 'Optimizing...' : 'Auto-Deploy (AI)'}
           </button>
 
-          <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(0,0,0,0.2)', padding: '0.25rem', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
+          <div className="flex gap-xs bg-black/20 p-xs rounded-lg border border-glass">
             <button
               onClick={() => setViewMode('grid')}
-              style={{
-                background: viewMode === 'grid' ? 'var(--bby-blue)' : 'transparent',
-                color: viewMode === 'grid' ? '#fff' : 'var(--text-secondary)',
-                border: 'none',
-                padding: '0.5rem 1rem',
-                borderRadius: '6px',
-                fontSize: '0.8rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                transition: 'all 0.2s'
-              }}
+              data-testid="view-mode-grid"
+              className={`py-sm px-md rounded-md text-sm flex items-center gap-xs transition-all cursor-pointer border-none ${viewMode === 'grid' ? 'bg-bby-blue text-white shadow-md' : 'bg-transparent text-secondary hover:text-white'}`}
             >
               <LayoutGrid size={16} /> Zones
             </button>
             <button
               onClick={() => setViewMode('timeline')}
-              style={{
-                background: viewMode === 'timeline' ? 'var(--bby-blue)' : 'transparent',
-                color: viewMode === 'timeline' ? '#fff' : 'var(--text-secondary)',
-                border: 'none',
-                padding: '0.5rem 1rem',
-                borderRadius: '6px',
-                fontSize: '0.8rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                transition: 'all 0.2s'
-              }}
+              data-testid="view-mode-timeline"
+              className={`py-sm px-md rounded-md text-sm flex items-center gap-xs transition-all cursor-pointer border-none ${viewMode === 'timeline' ? 'bg-bby-blue text-white shadow-md' : 'bg-transparent text-secondary hover:text-white'}`}
             >
               <Clock size={16} /> Timeline
             </button>
@@ -129,16 +117,16 @@ export default function ZoneScheduler({
 
       {viewMode === 'grid' ? (
         <ZoneGrid 
-          zones={zones}
+          zones={ZONES}
           unassignedEmps={unassignedEmps}
-          roster={safeRoster}
+          roster={roster}
           onAssignZone={onAssignZone}
           onUnassignZone={onUnassignZone}
           onToggleBreakState={onToggleBreakState}
         />
       ) : (
         <ZoneTimeline 
-          timeSlots={timeSlots}
+          timeSlots={TIME_SLOTS}
         />
       )}
     </div>

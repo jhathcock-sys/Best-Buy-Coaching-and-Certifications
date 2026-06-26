@@ -1,9 +1,10 @@
-import { GoogleGenerativeAI, SchemaType, Schema } from '@google/generative-ai';
-import { getGeminiModel, isGeminiAvailable, executeWithRetry } from './core.js';
+import { GoogleGenerativeAI, SchemaType, type Schema } from '@google/generative-ai';
+import { getGeminiModel, isGeminiAvailable, executeWithRetry } from './core';
+import type { PlaybookSettings } from '../../types';
 
-export async function auditStoreFloorGemini(apiKey, base64Image, mimeType) {
+export async function auditStoreFloorGemini(apiKey: string | undefined, base64Image: string, mimeType: string) {
   try {
-    const model = getGeminiModel(apiKey, { aiMode: 'pro' });
+    const model = getGeminiModel(apiKey, { aiMode: 'pro' } as PlaybookSettings);
     
     const systemPrompt = `
       You are a Best Buy Store General Manager.
@@ -44,10 +45,10 @@ export async function auditStoreFloorGemini(apiKey, base64Image, mimeType) {
 
     const parsed = JSON.parse(result.response.text());
     return {
-      status: parsed.status || "Unknown",
-      statusDetails: parsed.statusDetails || "No details generated.",
-      observations: Array.isArray(parsed.observations) ? parsed.observations : [],
-      actionPlan: Array.isArray(parsed.actionPlan) ? parsed.actionPlan : []
+      status: parsed?.status || "Unknown",
+      statusDetails: parsed?.statusDetails || "No details generated.",
+      observations: Array.isArray(parsed?.observations) ? parsed.observations : [],
+      actionPlan: Array.isArray(parsed?.actionPlan) ? parsed.actionPlan : []
     };
   } catch (error) {
     console.error('Vision Store Floor Audit Error:', error);
@@ -71,7 +72,7 @@ export async function auditStoreFloorGemini(apiKey, base64Image, mimeType) {
 
 // Audit performance workbook metrics using Gemini Pro/Ultra
 
-export async function auditPerformanceWorkbookGemini(apiKey, workbookText, playbookSettings) {
+export async function auditPerformanceWorkbookGemini(apiKey: string | undefined, workbookText: string, playbookSettings: PlaybookSettings) {
   try {
     const model = getGeminiModel(apiKey, playbookSettings);
     
@@ -108,7 +109,7 @@ export async function auditPerformanceWorkbookGemini(apiKey, workbookText, playb
     };
 
     const result = await executeWithRetry(() => model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: systemPrompt + '\n\nData:\n' + workbookText }] }],
+      contents: [{ role: 'user', parts: [{ text: systemPrompt + '\n\nData:\n' + (workbookText || '') }] }],
       generationConfig: {
         responseMimeType: 'application/json',
         responseSchema: responseSchema
@@ -117,10 +118,10 @@ export async function auditPerformanceWorkbookGemini(apiKey, workbookText, playb
 
     const parsed = JSON.parse(result.response.text());
     return {
-      overallSummary: parsed.overallSummary || "No summary provided.",
-      topPerformers: Array.isArray(parsed.topPerformers) ? parsed.topPerformers : [],
-      gapClusters: Array.isArray(parsed.gapClusters) ? parsed.gapClusters : [],
-      recommendedActionTimeline: parsed.recommendedActionTimeline || "No timeline provided."
+      overallSummary: parsed?.overallSummary || "No summary provided.",
+      topPerformers: Array.isArray(parsed?.topPerformers) ? parsed.topPerformers : [],
+      gapClusters: Array.isArray(parsed?.gapClusters) ? parsed.gapClusters : [],
+      recommendedActionTimeline: parsed?.recommendedActionTimeline || "No timeline provided."
     };
   } catch (error) {
     console.error('Workbook Audit Error:', error);
@@ -151,7 +152,7 @@ export async function auditPerformanceWorkbookGemini(apiKey, workbookText, playb
 
 // Run 8-Hour staff shift simulation using Gemini
 
-export async function auditFiveStarSurveyGemini(apiKey, base64Image, mimeType, textInput, playbookSettings) {
+export async function auditFiveStarSurveyGemini(apiKey: string | undefined, base64Image: string | undefined, mimeType: string | undefined, textInput: string, playbookSettings: PlaybookSettings) {
   try {
     const isAvailable = isGeminiAvailable(apiKey);
     if (!isAvailable) {
@@ -189,7 +190,7 @@ export async function auditFiveStarSurveyGemini(apiKey, base64Image, mimeType, t
     };
 
     let result;
-    if (base64Image) {
+    if (base64Image && mimeType) {
       const imagePart = {
         inlineData: {
           data: base64Image,
@@ -206,7 +207,7 @@ export async function auditFiveStarSurveyGemini(apiKey, base64Image, mimeType, t
       }));
     } else {
       result = await executeWithRetry(() => model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: systemPrompt + '\nAnalyze this customer survey feedback: "' + textInput + '"' }] }],
+        contents: [{ role: 'user', parts: [{ text: systemPrompt + '\nAnalyze this customer survey feedback: "' + (textInput || '') + '"' }] }],
         generationConfig: {
           responseMimeType: 'application/json',
           responseSchema: responseSchema
@@ -216,13 +217,13 @@ export async function auditFiveStarSurveyGemini(apiKey, base64Image, mimeType, t
 
     const parsed = JSON.parse(result.response.text());
     return {
-      rating: parsed.rating || 0,
-      comment: parsed.comment || "No comment provided.",
-      associateName: parsed.associateName || "Unknown",
-      department: parsed.department || "General Sales",
-      rootCause: parsed.rootCause || "Unknown cause.",
-      coachingScript: parsed.coachingScript || "No script provided.",
-      checkItems: Array.isArray(parsed.checkItems) ? parsed.checkItems : []
+      rating: parsed?.rating || 0,
+      comment: parsed?.comment || "No comment provided.",
+      associateName: parsed?.associateName || "Unknown",
+      department: parsed?.department || "General Sales",
+      rootCause: parsed?.rootCause || "Unknown cause.",
+      coachingScript: parsed?.coachingScript || "No script provided.",
+      checkItems: Array.isArray(parsed?.checkItems) ? parsed.checkItems : []
     };
   } catch (error) {
     console.error('5-Star Detractor Survey Audit Error:', error);
@@ -244,4 +245,3 @@ export async function auditFiveStarSurveyGemini(apiKey, base64Image, mimeType, t
 }
 
 // Parse Rents Due Document (CSV or Image OCR)
-

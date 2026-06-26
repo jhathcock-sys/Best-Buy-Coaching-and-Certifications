@@ -1,39 +1,32 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { STANDARD_SCENARIOS, runOfflineSimulationStep, runGeminiSimulationStep, evaluateSessionOffline, evaluateSessionGemini } from '../services/ai';
-import { ShieldAlert, Sparkles, Key, Check, Plus, Trash2, BookOpen, Compass, Users, UserPlus, Edit2, Eye, EyeOff, Cpu, RefreshCw, ArrowLeft, Send, CheckCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useMemo } from 'react';
+import { STANDARD_SCENARIOS } from '../services/ai';
 import { useStore } from '../store/useStore';
-import RoleplayConfiguration from '../components/RoleplayCenter/RoleplayConfiguration';
+import RoleplayConfiguration, { Scenario } from '../components/RoleplayCenter/RoleplayConfiguration';
 import RoleplayActiveSession from '../components/RoleplayCenter/RoleplayActiveSession';
-import RoleplayResults from '../components/RoleplayCenter/RoleplayResults';
+import RoleplayResults, { RoleplayEvaluation } from '../components/RoleplayCenter/RoleplayResults';
 
-const EMPTY_ARR: any[] = [];
+const EMPTY_ARR: Scenario[] = [];
 
 export default function RoleplayCenter() {
-  const navigate = useNavigate();
-  const setActiveView = (view: string) => navigate(view === 'dashboard' ? '/' : `/${view}`);
-const apiKey = useStore((state) => state.apiKey);
   const customScenarios = useStore((state) => state.customScenarios) || EMPTY_ARR;
-  const playbookSettings = useStore((state) => state.playbookSettings);
   const completeRoleplay = useStore((state) => state.completeRoleplay);
-  const onCompleteRoleplay = completeRoleplay; // Alias to match existing calls
   
-  const [selectedScenario, setSelectedScenario] = useState<any>(null);
+  const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(null);
   const [sessionActive, setSessionActive] = useState(false);
   const [complexity, setComplexity] = useState('Standard');
   const [customerTone, setCustomerTone] = useState('Neutral');
-  const [evaluation, setEvaluation] = useState<any>(null);
+  const [evaluation, setEvaluation] = useState<RoleplayEvaluation | null>(null);
   
-  const allScenarios = useMemo(() => [...STANDARD_SCENARIOS, ...customScenarios], [customScenarios]);
+  const allScenarios = useMemo(() => [...STANDARD_SCENARIOS, ...customScenarios] as Scenario[], [customScenarios]);
 
-  const startRoleplay = (scenario: any) => {
+  const startRoleplay = (scenario: Scenario) => {
     setSelectedScenario(scenario);
     setSessionActive(true);
     setEvaluation(null);
   };
 
   return (
-    <div>
+    <div data-testid="roleplay-center-page" className="flex-column gap-xl h-full w-full">
       {/* 1. SCENARIOS SELECTOR VIEW */}
           {!sessionActive && (
             <RoleplayConfiguration 
@@ -48,10 +41,10 @@ const apiKey = useStore((state) => state.apiKey);
               complexity={complexity}
               customerTone={customerTone}
               onExit={() => setSessionActive(false)}
-              onEvaluationComplete={(result) => {
-                setEvaluation(result);
-                if (result) {
-                  onCompleteRoleplay({
+              onEvaluationComplete={(result: any) => {
+                setEvaluation(result as RoleplayEvaluation);
+                if (result && selectedScenario) {
+                  completeRoleplay({
                     scenarioId: selectedScenario.id,
                     category: selectedScenario.category,
                     customerName: selectedScenario.name,

@@ -1,14 +1,15 @@
 import { StateCreator } from 'zustand';
+import { Employee } from '../../types';
 
 export interface UiSlice {
-  selectedCoachingRosterEmployee: any | null;
-  setSelectedCoachingRosterEmployee: (emp: any | null) => void;
+  selectedCoachingRosterEmployee: Employee | null;
+  setSelectedCoachingRosterEmployee: (emp: Employee | null) => void;
   
-  prefillBuilderData: any | null;
-  setPrefillBuilderData: (data: any | null) => void;
+  prefillBuilderData: Employee | null;
+  setPrefillBuilderData: (data: Employee | null) => void;
   
-  prefillShadowEmployee: any | null;
-  setPrefillShadowEmployee: (emp: any | null) => void;
+  prefillShadowEmployee: Employee | null;
+  setPrefillShadowEmployee: (emp: Employee | null) => void;
   
   collapsedCategories: {
     overview: boolean;
@@ -17,7 +18,7 @@ export interface UiSlice {
     recordsSetup: boolean;
     [key: string]: boolean;
   };
-  setCollapsedCategories: (cats: any) => void;
+  setCollapsedCategories: (cats: Partial<UiSlice['collapsedCategories']> | ((prev: UiSlice['collapsedCategories']) => Partial<UiSlice['collapsedCategories']>)) => void;
   toggleCategory: (cat: string) => void;
 }
 
@@ -38,8 +39,8 @@ export const createUiSlice: StateCreator<UiSlice> = (set) => ({
     recordsSetup: false
   },
   setCollapsedCategories: (cats) => typeof cats === 'function' 
-    ? set((state) => ({ collapsedCategories: cats(state.collapsedCategories) }))
-    : set({ collapsedCategories: cats }),
+    ? set((state) => ({ collapsedCategories: { ...state.collapsedCategories, ...cats(state.collapsedCategories) } }))
+    : set((state) => ({ collapsedCategories: { ...state.collapsedCategories, ...cats } })),
   toggleCategory: (cat) => set((state) => ({
     collapsedCategories: {
       ...state.collapsedCategories,

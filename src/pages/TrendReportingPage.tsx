@@ -1,10 +1,68 @@
 import { useState, useMemo } from 'react';
 import { TrendingUp, Calendar, DollarSign, Award, CreditCard, ChevronDown } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { Employee } from '../types';
+
+interface TrendDataPoint {
+  key: string;
+  revenue: number;
+  apps: number;
+  memberships: number;
+  hours: number;
+  surveys: number;
+}
+
+interface TrendBarChartProps {
+  title: React.ReactNode;
+  data: TrendDataPoint[];
+  maxValue: number;
+  valueAccessor: (d: TrendDataPoint) => number;
+  gradientColors: [string, string];
+  formatLabel: (val: number) => string;
+  formatTooltip: (val: number) => string;
+}
+
+const TrendBarChart = ({ title, data, maxValue, valueAccessor, gradientColors, formatLabel, formatTooltip }: TrendBarChartProps) => (
+  <div className="glass-card p-xl">
+    <h3 className="flex-row align-center gap-sm mb-lg text-white text-xl">
+      {title}
+    </h3>
+    <div className="flex-row align-end gap-md pt-xl mt-md" style={{ height: '200px' }}>
+      {data.map(d => {
+        const value = valueAccessor(d);
+        const heightPct = Math.max(5, (value / (maxValue || 1)) * 100);
+        return (
+          <div key={d.key} className="flex-1 flex-column align-center gap-sm h-full">
+            <div className="relative w-full h-full flex-row align-end justify-center">
+              <div 
+                className="w-full rounded-t-md transition-all duration-500"
+                style={{ 
+                  maxWidth: '60px',
+                  height: `${heightPct}%`, 
+                  background: `linear-gradient(to top, ${gradientColors[0]}, ${gradientColors[1]})`
+                }} 
+                title={formatTooltip(value)}
+              />
+              <span 
+                className="absolute text-xs font-bold text-white" 
+                style={{ top: `calc(${100 - heightPct}% - 1.5rem)` }}
+              >
+                {formatLabel(value)}
+              </span>
+            </div>
+            <span className="text-xs text-muted text-center whitespace-nowrap overflow-hidden text-ellipsis w-full">
+              {d.key}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+);
 
 export default function TrendReporting() {
-  const dailySnapshotsRaw = useStore(state => state.dailySnapshots);
-  const dailySnapshots = dailySnapshotsRaw || {};
+  const dailySnapshots = useStore(state => state.dailySnapshots) || {};
+  const isPlaybookHydrated = useStore(state => state.isPlaybookHydrated);
   
   const [viewLevel, setViewLevel] = useState('daily'); // daily, weekly, monthly
   const [targetEntity, setTargetEntity] = useState('Store Total'); // 'Store Total' or Employee Name
@@ -12,10 +70,12 @@ export default function TrendReporting() {
   // 1. Get all unique employee names from all snapshots for the dropdown
   const allEmployees = useMemo(() => {
     const names = new Set<string>();
-    Object.values(dailySnapshots).forEach((snapshotArray: any) => {
-      snapshotArray.forEach(emp => {
-        if (emp.name) names.add(emp.name);
-      });
+    Object.values(dailySnapshots).forEach((snapshotArray) => {
+      if (Array.isArray(snapshotArray)) {
+        snapshotArray.forEach((emp: Employee) => {
+          if (emp.name) names.add(emp.name);
+        });
+      }
     });
     return Array.from(names).sort();
   }, [dailySnapshots]);
@@ -25,7 +85,7 @@ export default function TrendReporting() {
     const sortedDates = Object.keys(dailySnapshots).sort();
     if (sortedDates.length === 0) return [];
 
-    const aggregated: Record<string, { key: string, revenue: number, apps: number, memberships: number, hours: number, surveys: number }> = {}; // Key will be date/week/month string
+    const aggregated: Record<string, TrendDataPoint> = {}; // Key will be date/week/month string
 
     sortedDates.forEach(dateStr => {
       const snapshotArray = dailySnapshots[dateStr];
@@ -50,7 +110,7 @@ export default function TrendReporting() {
       }
 
       // Sum up the data for the target entity
-      snapshotArray.forEach(emp => {
+      snapshotArray.forEach((emp: Employee) => {
         if (targetEntity === 'Store Total' || emp.name === targetEntity) {
           aggregated[groupKey].revenue += (emp.rph * emp.hours || 0);
           aggregated[groupKey].hours += (emp.hours || 0);
@@ -69,43 +129,43 @@ export default function TrendReporting() {
   const maxApps = Math.max(1, ...chartData.map(d => d.apps));
   const maxPms = Math.max(1, ...chartData.map(d => d.memberships));
   const maxRph = Math.max(1, ...chartData.map(d => d.hours > 0 ? (d.revenue / d.hours) : 0));
-  const maxSurveys = Math.max(1, ...chartData.map(d => d.surveys));
+
+  if (!isPlaybookHydrated) {
+    return (
+      <div className="flex-center flex-column w-full h-full gap-md min-h-screen">
+        <div className="w-50px h-50px border-4 border-solid border-white-alpha-10 border-bby-yellow-t-4 rounded-full animate-spin"></div>
+        <span className="text-secondary text-sm font-semibold uppercase tracking-widest animate-fade-in">Loading Trends...</span>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '3rem' }}>
+    <div className="flex-column mx-auto w-full pb-3xl" style={{ maxWidth: '1200px' }}>
       
       {/* Header */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2.5rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 800 }}>
+      <div className="flex-column gap-sm mb-xl">
+        <h1 className="text-4xl m-0 flex-row align-center gap-md font-bold text-white">
           <TrendingUp size={36} color="var(--bby-blue)" />
           Trend Reporting
         </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', margin: 0 }}>
+        <p className="text-secondary text-lg m-0">
           Track daily, weekly, and monthly performance trends based on Rents Due snapshots.
         </p>
       </div>
 
       {/* Controls */}
-      <div className="glass-card" style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', padding: '1.5rem', marginBottom: '2rem', alignItems: 'center' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: '1 1 200px' }}>
-          <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Aggregation Level</label>
-          <div style={{ display: 'flex', background: 'rgba(0,0,0,0.3)', padding: '0.25rem', borderRadius: '8px' }}>
+      <div className="glass-card flex-row flex-wrap gap-xl p-xl mb-xl align-center">
+        <div className="flex-column gap-sm flex-1" style={{ minWidth: '200px' }}>
+          <label className="text-sm font-bold text-secondary">Aggregation Level</label>
+          <div className="flex-row bg-black-alpha-30 p-xs rounded-lg">
             {['daily', 'weekly', 'monthly'].map(level => (
               <button
                 key={level}
                 onClick={() => setViewLevel(level)}
-                style={{
-                  flex: 1,
-                  padding: '0.5rem 1rem',
-                  border: 'none',
-                  background: viewLevel === level ? 'var(--bby-blue)' : 'transparent',
-                  color: viewLevel === level ? '#fff' : 'var(--text-muted)',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: viewLevel === level ? 700 : 500,
-                  textTransform: 'capitalize',
-                  transition: 'all 0.2s ease'
-                }}
+                data-testid={`agg-level-${level}`}
+                className={`flex-1 py-sm px-md border-none rounded-md cursor-pointer font-semibold capitalize transition-all ${
+                  viewLevel === level ? 'bg-bby-blue text-white' : 'bg-transparent text-muted'
+                }`}
               >
                 {level}
               </button>
@@ -113,167 +173,75 @@ export default function TrendReporting() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: '1 1 250px' }}>
-          <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Target Entity</label>
-          <div style={{ position: 'relative' }}>
+        <div className="flex-column gap-sm flex-1" style={{ minWidth: '250px' }}>
+          <label className="text-sm font-bold text-secondary">Target Entity</label>
+          <div className="relative w-full">
             <select
-              className="form-input"
+              className="form-input w-full pr-xl appearance-none"
               value={targetEntity}
               onChange={(e) => setTargetEntity(e.target.value)}
-              style={{ paddingRight: '2rem', appearance: 'none', width: '100%' }}
+              data-testid="target-entity-select"
             >
               <option value="Store Total">Store Total</option>
               {allEmployees.map(name => (
                 <option key={name} value={name}>{name}</option>
               ))}
             </select>
-            <ChevronDown size={16} color="var(--text-secondary)" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+            <ChevronDown size={16} color="var(--text-secondary)" className="absolute right-md top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
         </div>
       </div>
 
       {/* Charts / Data */}
       {chartData.length === 0 ? (
-        <div className="glass-card" style={{ padding: '4rem 2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+        <div className="glass-card p-3xl text-center flex-column align-center gap-md">
           <Calendar size={48} color="rgba(255,255,255,0.1)" />
-          <h3 style={{ margin: 0, fontSize: '1.25rem' }}>No Snapshot Data Found</h3>
-          <p style={{ color: 'var(--text-muted)', maxWidth: '400px' }}>
+          <h3 className="m-0 text-xl text-white">No Snapshot Data Found</h3>
+          <p className="text-muted" style={{ maxWidth: '400px' }}>
             There are no saved "Rents Due" snapshots. Upload a Rents Due sheet in the Auditor to start tracking trends!
           </p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          {/* REVENUE TREND */}
-          <div className="glass-card" style={{ padding: '1.5rem' }}>
-            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: '#fff', fontSize: '1.25rem' }}>
-              <DollarSign size={20} color="var(--bby-yellow)" /> Revenue Trend
-            </h3>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', height: '250px', paddingTop: '2rem' }}>
-              {chartData.map(data => {
-                const heightPct = Math.max(5, (data.revenue / maxRev) * 100);
-                return (
-                  <div key={data.key} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', height: '100%' }}>
-                    <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-                      <div 
-                        style={{ 
-                          width: '100%', 
-                          maxWidth: '60px', 
-                          height: `${heightPct}%`, 
-                          background: 'linear-gradient(to top, rgba(0, 70, 190, 0.4), var(--bby-blue))',
-                          borderRadius: '4px 4px 0 0',
-                          transition: 'height 0.5s ease'
-                        }} 
-                        title={`$${data.revenue.toLocaleString()}`}
-                      />
-                      <span style={{ position: 'absolute', top: `calc(${100 - heightPct}% - 1.5rem)`, fontSize: '0.75rem', fontWeight: 'bold', color: '#fff' }}>
-                        ${(data.revenue / 1000).toFixed(1)}k
-                      </span>
-                    </div>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%' }}>
-                      {data.key}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+        <div className="flex-column gap-2xl">
+          <TrendBarChart 
+            title={<><DollarSign size={24} color="var(--bby-yellow)" /> Revenue Trend</>}
+            data={chartData}
+            maxValue={maxRev}
+            valueAccessor={(d) => d.revenue}
+            gradientColors={['rgba(0, 70, 190, 0.4)', 'var(--bby-blue)']}
+            formatLabel={(val) => `$${(val / 1000).toFixed(1)}k`}
+            formatTooltip={(val) => `$${val.toLocaleString()}`}
+          />
+          
+          <TrendBarChart 
+            title={<><Award size={24} color="var(--success)" /> Memberships Trend</>}
+            data={chartData}
+            maxValue={maxPms}
+            valueAccessor={(d) => d.memberships}
+            gradientColors={['rgba(16, 185, 129, 0.4)', 'var(--success)']}
+            formatLabel={(val) => val.toString()}
+            formatTooltip={(val) => `${val} PMs`}
+          />
 
-          {/* MEMBERSHIPS TREND */}
-          <div className="glass-card" style={{ padding: '1.5rem' }}>
-            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: '#fff', fontSize: '1.25rem' }}>
-              <Award size={20} color="#10b981" /> Memberships Trend
-            </h3>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', height: '200px', paddingTop: '2rem' }}>
-              {chartData.map(data => {
-                const heightPct = Math.max(5, (data.memberships / maxPms) * 100);
-                return (
-                  <div key={data.key} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', height: '100%' }}>
-                    <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-                      <div 
-                        style={{ 
-                          width: '100%', 
-                          maxWidth: '60px', 
-                          height: `${heightPct}%`, 
-                          background: 'linear-gradient(to top, rgba(16, 185, 129, 0.4), #10b981)',
-                          borderRadius: '4px 4px 0 0',
-                          transition: 'height 0.5s ease'
-                        }} 
-                        title={`${data.memberships} PMs`}
-                      />
-                      <span style={{ position: 'absolute', top: `calc(${100 - heightPct}% - 1.5rem)`, fontSize: '0.75rem', fontWeight: 'bold', color: '#fff' }}>
-                        {data.memberships}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <TrendBarChart 
+            title={<><CreditCard size={24} color="var(--warning)" /> Credit Cards Trend</>}
+            data={chartData}
+            maxValue={maxApps}
+            valueAccessor={(d) => d.apps}
+            gradientColors={['rgba(245, 158, 11, 0.4)', 'var(--warning)']}
+            formatLabel={(val) => val.toString()}
+            formatTooltip={(val) => `${val} Apps`}
+          />
 
-          {/* CREDIT CARDS TREND */}
-          <div className="glass-card" style={{ padding: '1.5rem' }}>
-            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: '#fff', fontSize: '1.25rem' }}>
-              <CreditCard size={20} color="#f59e0b" /> Credit Cards Trend
-            </h3>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', height: '200px', paddingTop: '2rem' }}>
-              {chartData.map(data => {
-                const heightPct = Math.max(5, (data.apps / maxApps) * 100);
-                return (
-                  <div key={data.key} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', height: '100%' }}>
-                    <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-                      <div 
-                        style={{ 
-                          width: '100%', 
-                          maxWidth: '60px', 
-                          height: `${heightPct}%`, 
-                          background: 'linear-gradient(to top, rgba(245, 158, 11, 0.4), #f59e0b)',
-                          borderRadius: '4px 4px 0 0',
-                          transition: 'height 0.5s ease'
-                        }} 
-                        title={`${data.apps} Apps`}
-                      />
-                      <span style={{ position: 'absolute', top: `calc(${100 - heightPct}% - 1.5rem)`, fontSize: '0.75rem', fontWeight: 'bold', color: '#fff' }}>
-                        {data.apps}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* RPH TREND */}
-          <div className="glass-card" style={{ padding: '1.5rem' }}>
-            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: '#fff', fontSize: '1.25rem' }}>
-              <TrendingUp size={20} color="#8b5cf6" /> Revenue Per Hour (RPH) Trend
-            </h3>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', height: '200px', paddingTop: '2rem' }}>
-              {chartData.map(data => {
-                const rph = data.hours > 0 ? (data.revenue / data.hours) : 0;
-                const heightPct = Math.max(5, (rph / maxRph) * 100);
-                return (
-                  <div key={data.key} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', height: '100%' }}>
-                    <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-                      <div 
-                        style={{ 
-                          width: '100%', 
-                          maxWidth: '60px', 
-                          height: `${heightPct}%`, 
-                          background: 'linear-gradient(to top, rgba(139, 92, 246, 0.4), #8b5cf6)',
-                          borderRadius: '4px 4px 0 0',
-                          transition: 'height 0.5s ease'
-                        }} 
-                        title={`$${Math.round(rph)}/hr`}
-                      />
-                      <span style={{ position: 'absolute', top: `calc(${100 - heightPct}% - 1.5rem)`, fontSize: '0.75rem', fontWeight: 'bold', color: '#fff' }}>
-                        ${Math.round(rph)}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <TrendBarChart 
+            title={<><TrendingUp size={24} color="#8b5cf6" /> Revenue Per Hour (RPH) Trend</>}
+            data={chartData}
+            maxValue={maxRph}
+            valueAccessor={(d) => d.hours > 0 ? (d.revenue / d.hours) : 0}
+            gradientColors={['rgba(139, 92, 246, 0.4)', '#8b5cf6']}
+            formatLabel={(val) => `$${Math.round(val)}`}
+            formatTooltip={(val) => `$${Math.round(val)}/hr`}
+          />
         </div>
       )}
 

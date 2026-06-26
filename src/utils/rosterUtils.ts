@@ -1,37 +1,3 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Users, Search, AlertTriangle, CheckCircle, Clock, HelpCircle, Sliders } from 'lucide-react';
-import AddEmployeeModal from '../components/AddEmployeeModal';
-import PerformanceWizardModal from '../components/PerformanceWizardModal';
-import RosterImporterModal from '../components/RosterImporterModal';
-import AssociateProfileModal from '../components/AssociateProfileModal';
-import { calculateCVI } from '../store/cviHelper';
-import RosterAuditor from '../components/RosterAuditor';
-import RentsDueAuditor from '../components/RentsDueAuditor';
-
-
-export const getDeptStyle = (dept) => {
-  switch (dept) {
-    case 'Computing':
-      return { bg: 'rgba(59, 130, 246, 0.12)', color: '#60a5fa', border: 'rgba(59, 130, 246, 0.25)' };
-    case 'Mobile':
-      return { bg: 'rgba(249, 115, 22, 0.12)', color: '#fb923c', border: 'rgba(249, 115, 22, 0.25)' };
-    case 'Home Theatre':
-      return { bg: 'rgba(139, 92, 246, 0.12)', color: '#a78bfa', border: 'rgba(139, 92, 246, 0.25)' };
-    case 'Front End':
-      return { bg: 'rgba(6, 182, 212, 0.12)', color: '#22d3ee', border: 'rgba(6, 182, 212, 0.25)' };
-    case 'Geek Squad':
-      return { bg: 'rgba(239, 68, 68, 0.12)', color: '#f87171', border: 'rgba(239, 68, 68, 0.25)' };
-    case 'Appliances':
-      return { bg: 'rgba(16, 185, 129, 0.12)', color: '#34d399', border: 'rgba(16, 185, 129, 0.25)' };
-    case 'General Sales':
-      return { bg: 'rgba(236, 72, 153, 0.12)', color: '#f472b6', border: 'rgba(236, 72, 153, 0.25)' };
-    default:
-      return { bg: 'rgba(156, 163, 175, 0.12)', color: '#9ca3af', border: 'rgba(156, 163, 175, 0.25)' };
-  }
-};
-
-
-
 import { Employee, DeptGoal } from '../types';
 
 export const getMetricClass = (
@@ -42,10 +8,12 @@ export const getMetricClass = (
   deptGoals: Record<string, DeptGoal>
 ): string => {
   const goals = (deptGoals && (deptGoals[dept] || deptGoals['Front End'])) || {} as DeptGoal;
-  const target = (goals as any)[type] !== undefined ? (goals as any)[type] : 0;
-  const typeKey = type + 'Type';
-  const isHoursType = (goals as any)[typeKey] === 'Hours';
-  const isDollarsType = (goals as any)[typeKey] === 'Dollars';
+  const targetKey = type as keyof DeptGoal;
+  const target = goals[targetKey] !== undefined ? (goals[targetKey] as number) : 0;
+  
+  const typeKey = (type + 'Type') as keyof DeptGoal;
+  const isHoursType = goals[typeKey] === 'Hours';
+  const isDollarsType = goals[typeKey] === 'Dollars';
 
   const empHours = emp?.hours || 0;
   const empRph = emp?.rph || 0;
@@ -104,9 +72,9 @@ export const getPaceText = (
   deptGoals: Record<string, DeptGoal>
 ): string => {
   const goals = (deptGoals && (deptGoals[dept] || deptGoals['Front End'])) || {} as DeptGoal;
-  const typeKey = type + 'Type';
-  const isHoursType = (goals as any)[typeKey] === 'Hours';
-  const isDollarsType = (goals as any)[typeKey] === 'Dollars';
+  const typeKey = (type + 'Type') as keyof DeptGoal;
+  const isHoursType = goals[typeKey] === 'Hours';
+  const isDollarsType = goals[typeKey] === 'Dollars';
 
   if (!val || val === 0) return 'No pace';
 

@@ -58,7 +58,7 @@ export default function RoleplayCenter() {
                       warranty: result.overallScore >= 80 ? 100 : 0,
                       surveys: 5.0,
                       rph: 1380
-                    } : null
+                    } : undefined
                   });
                 }
               }}

@@ -6,6 +6,37 @@ export interface Trophy {
   icon: string;
 }
 
+export interface ScoreCategory {
+  id: string;
+  name: string;
+  maxScore: number;
+}
+
+export interface CustomScenario {
+  id: string;
+  title: string;
+  role: string;
+  name: string;
+  avatar: string;
+  description: string;
+  category: string;
+  difficulty: string;
+  initialGreeting: string;
+  needs: string;
+  objections: {
+    membership: string;
+    warranty: string;
+    card: string;
+  };
+  successKeywords: {
+    connect: string[];
+    discover: string[];
+    recommend: string[];
+    protect: string[];
+    close: string[];
+  };
+}
+
 export interface ActionPlan {
   id?: string;
   type: string;

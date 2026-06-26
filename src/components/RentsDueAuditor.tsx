@@ -8,7 +8,7 @@ import { mockRentsDuePayload } from '../data/mockRentsDue';
 import { mapParsedRentsToRoster, parseRentsDueCSVCloud } from '../utils/rentsDueUtils';
 import { Employee } from '../types';
 
-const EMPTY_OBJ = {};
+const EMPTY_OBJ: Record<string, any> = {};
 
 
 
@@ -20,7 +20,7 @@ export default function RentsDueAuditor() {
   const addDailySnapshot = useStore((state) => state.addDailySnapshot);
   
   const rawRoster = rosterHistory[activePeriod];
-  const roster = React.useMemo(() => rawRoster ? Object.values(rawRoster).sort((a: Employee, b: Employee) => a.name.localeCompare(b.name)) : [], [rawRoster]);
+  const roster = React.useMemo<Employee[]>(() => rawRoster ? Object.values(rawRoster as Record<string, Employee>).sort((a: Employee, b: Employee) => a.name.localeCompare(b.name)) : [], [rawRoster]);
 
   const [selectedPeriod, setSelectedPeriod] = useState(activePeriod);
   const [showNewPeriodInput, setShowNewPeriodInput] = useState(false);
@@ -46,10 +46,10 @@ export default function RentsDueAuditor() {
     };
   }, []);
 
-  const comparisonRoster = React.useMemo(() => {
+  const comparisonRoster = React.useMemo<Employee[]>(() => {
     if (selectedPeriod === activePeriod) return roster;
     const rawRoster = rosterHistory[selectedPeriod] || EMPTY_OBJ;
-    return Object.values(rawRoster).sort((a: Employee, b: Employee) => a.name.localeCompare(b.name));
+    return Object.values(rawRoster as Record<string, Employee>).sort((a: Employee, b: Employee) => a.name.localeCompare(b.name));
   }, [selectedPeriod, activePeriod, roster, rosterHistory]);
 
   // File drop/upload handlers

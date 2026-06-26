@@ -4,7 +4,7 @@ import CustomScenarioForm from './CustomScenarioForm';
 import { useStore } from '../../store/useStore';
 import { StoreState } from '../../types/store';
 import { useShallow } from 'zustand/react/shallow';
-import { CustomScenario } from './CustomScenarioForm';
+import { CustomScenario } from '../../types/index';
 
 export default function CustomScenariosTab() {
   const { customScenarios, deleteCustomScenario } = useStore(useShallow((state: StoreState) => ({

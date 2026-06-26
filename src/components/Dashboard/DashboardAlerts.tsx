@@ -79,7 +79,7 @@ export default function DashboardAlerts({
                 Pending Follow-up
               </h3>
               <p className="m-0 text-secondary text-sm">
-                {task?.title || 'Untitled Task'} <span className="opacity-50">• {task?.employeeName || 'Unknown Employee'}</span>
+                {task?.action || 'Untitled Task'} <span className="opacity-50">• {task?.employeeName || 'Unknown Employee'}</span>
               </p>
             </div>
           </div>

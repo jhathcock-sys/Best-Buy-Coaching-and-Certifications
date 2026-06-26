@@ -1,7 +1,18 @@
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { app } from '../services/firebase';
+import { Employee } from '../types';
 
-export const parseRentsDueCSVCloud = async (text: string): Promise<any[] | null> => {
+export interface ParsedRentsData {
+  name?: string;
+  rph?: number;
+  revenue?: number;
+  rphOwed?: number;
+  apps?: number;
+  memberships?: number;
+  warranty?: number;
+}
+
+export const parseRentsDueCSVCloud = async (text: string): Promise<ParsedRentsData[] | null> => {
   if (!text || (!text.includes(',') && !text.includes('\t'))) return null;
 
   try {
@@ -9,10 +20,8 @@ export const parseRentsDueCSVCloud = async (text: string): Promise<any[] | null>
     const parseCSV = httpsCallable(functions, 'parseRentsDueCSV');
     const result = await parseCSV({ csvText: text });
     
-    // @ts-ignore
-    if (result.data && result.data.parsedData) {
-      // @ts-ignore
-      return result.data.parsedData;
+    if (result.data && typeof result.data === 'object' && 'parsedData' in result.data) {
+      return (result.data as { parsedData: ParsedRentsData[] }).parsedData;
     }
     
     return null;
@@ -22,13 +31,13 @@ export const parseRentsDueCSVCloud = async (text: string): Promise<any[] | null>
   }
 };
 
-export const mapParsedRentsToRoster = (parsedEmployees: any[], comparisonRoster: any[]) => {
+export const mapParsedRentsToRoster = (parsedEmployees: ParsedRentsData[], comparisonRoster: Employee[]) => {
   let updatedCount = 0;
   let addedCount = 0;
   
   const importList = parsedEmployees.map(parsedEmp => {
-    const nameKey = parsedEmp.name.toLowerCase().trim();
-    const existing = comparisonRoster.find(r => r.name.toLowerCase().trim() === nameKey);
+    const nameKey = parsedEmp.name?.toLowerCase()?.trim() || '';
+    const existing = comparisonRoster.find(r => r.name?.toLowerCase()?.trim() === nameKey);
     
     const parsedRPH = parsedEmp.rph || (existing ? existing.rph : 640);
     const parsedRev = parsedEmp.revenue || (existing ? (existing.hours * existing.rph) : 0);
@@ -38,29 +47,25 @@ export const mapParsedRentsToRoster = (parsedEmployees: any[], comparisonRoster:
     if (existing) updatedCount++;
     else addedCount++;
 
-    const rphTarget = parsedEmp.rphOwed || 640;
-
     return {
       ...(existing || {
-        id: 'emp-' + Math.random().toString(36).substr(2, 9),
-        role: 'Sales Advisor',
-        zone: 'Sales Floor',
-        profileImage: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(parsedEmp.name)}&backgroundColor=0b0f19`
+        id: 'emp-' + Math.random().toString(36).substring(2, 11),
+        dept: 'Sales Floor',
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(parsedEmp.name || '')}&backgroundColor=0b0f19`,
+        surveys: 0
       }),
-      name: parsedEmp.name,
+      name: parsedEmp.name || 'Unknown Employee',
       hours: calculatedHours,
       rph: parsedRPH,
-      rphTarget: rphTarget,
       creditCards: parsedEmp.apps || 0,
       memberships: parsedEmp.memberships || 0,
       warranty: parsedEmp.warranty || 0,
-      metrics: {
-        ...(existing ? existing.metrics : { rev: 0, bp: 0, pm: 0, bby: 0 }),
-        rev: parsedRev,
-        bp: parsedEmp.apps || 0,
-        pm: parsedEmp.memberships || 0
-      }
-    };
+      revenue: parsedRev,
+      apps: parsedEmp.apps || 0,
+      revenueOwed: parsedRev,
+      appsOwed: parsedEmp.apps || 0,
+      membershipsOwed: parsedEmp.memberships || 0
+    } as Employee;
   });
   
   return { importList, updatedCount, addedCount };

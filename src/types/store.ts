@@ -5,7 +5,11 @@ import {
   PlaybookSettings, 
   Manager, 
   CoachingLog, 
-  ShiftEvent 
+  ShiftEvent,
+  FollowUpTask,
+  Trophy,
+  ActionPlan,
+  CustomScenario
 } from './index';
 import { UiSlice } from '../store/slices/uiSlice';
 
@@ -16,7 +20,7 @@ export interface AuthSlice {
   isAuthenticated: boolean;
   storePin: string;
   activeManager: Manager | null;
-  activeAdvisor: any;
+  activeAdvisor: Employee | null;
   managers: Manager[];
   storeId: string | null;
   
@@ -25,10 +29,10 @@ export interface AuthSlice {
   setDbConnected: (connected: boolean) => void;
   setIsAuthenticated: (authenticated: boolean) => void;
   setStorePin: (pin: string) => void;
-  loginAdvisor: (advisor: any) => void;
+  loginAdvisor: (advisor: Employee | null) => void;
   login: (pin: string, storeId: string) => Promise<boolean>;
   logout: () => Promise<void> | void;
-  handleSaveFirebaseConfig: (config: any) => void;
+  handleSaveFirebaseConfig: (config: Record<string, string> | null) => void;
   setManagers: (managers: Manager[]) => void;
   saveManagers: (newManagers: Manager[]) => void;
   setStoreId: (storeId: string | null) => void;
@@ -44,29 +48,40 @@ export interface ShiftSlice {
   deleteFloorLeaderShift: (shiftId: string) => void;
 }
 
+export interface RoleplayPayload {
+  category: string;
+  customerName: string;
+  avatar: string;
+  score: number;
+  passed: boolean;
+  growReport: { reality: string; [key: string]: unknown };
+  metrics?: Partial<Employee>;
+  scenarioId?: string;
+}
+
 export interface PlaybookSlice {
-  recentSessions: any[];
-  customScenarios: any[];
+  recentSessions: CoachingLog[];
+  customScenarios: CustomScenario[];
   playbookSettings: PlaybookSettings;
-  followUpTasks: any[];
+  followUpTasks: FollowUpTask[];
   coachingLogs: CoachingLog[];
   isPlaybookHydrated: boolean;
 
-  setRecentSessions: (sessions: any[]) => void;
-  setCustomScenarios: (scenarios: any[]) => void;
+  setRecentSessions: (sessions: CoachingLog[]) => void;
+  setCustomScenarios: (scenarios: CustomScenario[]) => void;
   setCoachingLogs: (logs: CoachingLog[]) => void;
-  setFollowUpTasks: (tasks: any[]) => void;
+  setFollowUpTasks: (tasks: FollowUpTask[]) => void;
   setPlaybookSettings: (settings: PlaybookSettings) => void;
   setIsPlaybookHydrated: (hydrated: boolean) => void;
   saveSettings: (payload: { apiKey: string, playbookSettings: PlaybookSettings }) => void;
-  importCustomScenario: (newScenario: any) => void;
+  importCustomScenario: (newScenario: CustomScenario) => void;
   deleteCustomScenario: (scenarioId: string) => void;
-  logCoachingSession: (session: any) => void;
+  logCoachingSession: (session: Partial<CoachingLog> & { customerName: string }) => void;
   deleteCoachingSession: (index: number) => void;
   deleteCoachingLog: (logId: string) => Promise<void>;
-  addFollowUpTask: (task: any) => void;
+  addFollowUpTask: (task: FollowUpTask) => void;
   completeFollowUpTask: (taskId: string) => void;
-  completeRoleplay: (payload: any) => Promise<void>;
+  completeRoleplay: (payload: RoleplayPayload) => Promise<void>;
 }
 
 export interface MetricsSlice {
@@ -90,9 +105,9 @@ export interface MetricsSlice {
   bulkImportEmployees: (importedEmployees: Partial<Employee>[], targetPeriod?: string) => void;
   changePeriod: (p: string) => void;
   createPeriodArchive: (newPeriodName: string, copyOption: string) => void;
-  addTrophy: (empId: string, trophy: any) => void;
+  addTrophy: (empId: string, trophy: Trophy) => void;
   removeTrophy: (empId: string, trophyId: string) => void;
-  addActionPlan: (empId: string, plan: any) => void;
+  addActionPlan: (empId: string, plan: ActionPlan) => void;
 }
 
 export type StoreState = AuthSlice & ShiftSlice & PlaybookSlice & MetricsSlice & UiSlice;

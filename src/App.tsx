@@ -20,9 +20,9 @@ const DailyLineupBuilderPage = lazy(() => import('./pages/DailyLineupBuilderPage
 import { Compass, Users, BookOpen, LayoutDashboard, Sparkles, ShieldCheck, ClipboardList, Archive, Clock, ChevronDown, ChevronRight, TrendingUp } from 'lucide-react';
 import AssociateProfileHeader from './components/AssociateProfile/AssociateProfileHeader';
 import { subscribeToActivePeriod } from './services/firebase';
+import { Employee } from './types';
 
 import { useStore } from './store/useStore';
-import { useShallow } from 'zustand/react/shallow';
 import ErrorBoundary from './components/ErrorBoundary';
 import Sidebar from './components/layout/Sidebar';
 import MobileNav from './components/layout/MobileNav';
@@ -37,6 +37,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <Toaster position="top-right" />
+      <SyncManager />
       <AppContent />
     </ErrorBoundary>
   );
@@ -60,44 +61,7 @@ function AppContent() {
   const storePin = useStore((state) => state.storePin);
   const activePeriod = useStore(state => state.activePeriod);
 
-  if (location.pathname === '/test-profile-header') {
-    return (
-      <div className="p-xl bg-obsidian min-h-screen">
-        <h1 className="text-white mb-md">Test Harness: AssociateProfileHeader</h1>
-        <div className="mb-xl border border-glass p-md rounded-lg">
-          <h2 className="text-white mb-sm">1. Null Employee</h2>
-          <AssociateProfileHeader employee={null as any} rosterHistory={{}} activePeriod="June 2026" onClose={() => {}} />
-        </div>
-        <div className="mb-xl border border-glass p-md rounded-lg">
-          <h2 className="text-white mb-sm">2. Focus 5 & Accelerating CVI</h2>
-          <AssociateProfileHeader 
-            employee={{ id: 'test1', name: 'Test Focus 5', dept: 'Computing', focus5: true, memberships: 2 } as any} 
-            rosterHistory={{ 'May 2026': { 'test1': { id: 'test1', memberships: 1 } as any }, 'June 2026': {} }} 
-            activePeriod="June 2026" 
-            onClose={() => {}} 
-          />
-        </div>
-        <div className="mb-xl border border-glass p-md rounded-lg">
-          <h2 className="text-white mb-sm">3. Needs Review CVI</h2>
-          <AssociateProfileHeader 
-            employee={{ id: 'test2', name: 'Test Needs Review', dept: 'Computing', focus5: false, memberships: 1 } as any} 
-            rosterHistory={{ 'May 2026': { 'test2': { id: 'test2', memberships: 2 } as any }, 'June 2026': {} }} 
-            activePeriod="June 2026" 
-            onClose={() => {}} 
-          />
-        </div>
-        <div className="mb-xl border border-glass p-md rounded-lg">
-          <h2 className="text-white mb-sm">4. Neutral CVI</h2>
-          <AssociateProfileHeader 
-            employee={{ id: 'test3', name: 'Test Neutral', dept: 'Computing', focus5: false, memberships: 1 } as any} 
-            rosterHistory={{ 'May 2026': { 'test3': { id: 'test3', memberships: 1 } as any }, 'June 2026': {} }} 
-            activePeriod="June 2026" 
-            onClose={() => {}} 
-          />
-        </div>
-      </div>
-    );
-  }
+
 
   // Zustand Store Actions
   const login = useStore((state) => state.login);
@@ -124,17 +88,17 @@ function AppContent() {
 
 
   // Roster Interactions
-  const handleCoachEmployeeFromRoster = useCallback((emp) => {
+  const handleCoachEmployeeFromRoster = useCallback((emp: Employee) => {
     setSelectedCoachingRosterEmployee(emp);
     setActiveView('coach');
   }, [setSelectedCoachingRosterEmployee, setActiveView]);
 
-  const handleCreateLogFromRoster = useCallback((emp) => {
+  const handleCreateLogFromRoster = useCallback((emp: Employee) => {
     setPrefillBuilderData(emp);
     setActiveView('builder');
   }, [setPrefillBuilderData, setActiveView]);
 
-  const handleShadowEmployeeFromRoster = useCallback((emp) => {
+  const handleShadowEmployeeFromRoster = useCallback((emp: Employee) => {
     setPrefillShadowEmployee(emp);
     setActiveView('shadow');
   }, [setPrefillShadowEmployee, setActiveView]);
@@ -142,7 +106,6 @@ function AppContent() {
   if (!isAuthenticated) {
     return (
       <>
-        <SyncManager />
         <LoginGate 
         correctPin={playbookSettings?.storePin || storePin}
         isHydrating={dbConnected && !isPlaybookHydrated}
@@ -177,55 +140,18 @@ function AppContent() {
   }
 
   return (
-    <div className="app-container">
-      <SyncManager />
+    <div className="app-container" data-testid="app-container">
       <Sidebar />
       {/* Main View Display Port */}
-      <main className="main-content">
+      <main className="main-content" data-testid="main-content">
         <Suspense fallback={
-          <div className="flex-center flex-column w-full h-full gap-md">
+          <div className="flex-center flex-column w-full h-full gap-md" data-testid="suspense-fallback">
             <div className="w-50px h-50px border-4 border-solid border-white-alpha-10 border-bby-yellow-t-4 rounded-full animate-spin"></div>
             <span className="text-secondary text-sm font-semibold uppercase tracking-widest animate-fade-in">Loading Module...</span>
           </div>
         }>
           <Routes>
           <Route path="/command-center" element={<CommandCenter />} />
-          <Route path="/test-profile-header" element={
-            <div className="p-xl bg-obsidian min-h-screen">
-              <h1 className="text-white mb-md">Test Harness: AssociateProfileHeader</h1>
-              <div className="mb-xl border border-glass p-md rounded-lg">
-                <h2 className="text-white mb-sm">1. Null Employee</h2>
-                <AssociateProfileHeader employee={null as any} rosterHistory={{}} activePeriod="June 2026" onClose={() => {}} />
-              </div>
-              <div className="mb-xl border border-glass p-md rounded-lg">
-                <h2 className="text-white mb-sm">2. Focus 5 & Accelerating CVI</h2>
-                <AssociateProfileHeader 
-                  employee={{ id: 'test1', name: 'Test Focus 5', dept: 'Computing', focus5: true, memberships: 2 } as any} 
-                  rosterHistory={{ 'May 2026': { 'test1': { id: 'test1', memberships: 1 } as any } }} 
-                  activePeriod="June 2026" 
-                  onClose={() => {}} 
-                />
-              </div>
-              <div className="mb-xl border border-glass p-md rounded-lg">
-                <h2 className="text-white mb-sm">3. Needs Review CVI</h2>
-                <AssociateProfileHeader 
-                  employee={{ id: 'test2', name: 'Test Needs Review', dept: 'Computing', focus5: false, memberships: 1 } as any} 
-                  rosterHistory={{ 'May 2026': { 'test2': { id: 'test2', memberships: 2 } as any } }} 
-                  activePeriod="June 2026" 
-                  onClose={() => {}} 
-                />
-              </div>
-              <div className="mb-xl border border-glass p-md rounded-lg">
-                <h2 className="text-white mb-sm">4. Neutral CVI</h2>
-                <AssociateProfileHeader 
-                  employee={{ id: 'test3', name: 'Test Neutral', dept: 'Computing', focus5: false, memberships: 1 } as any} 
-                  rosterHistory={{ 'May 2026': { 'test3': { id: 'test3', memberships: 1 } as any } }} 
-                  activePeriod="June 2026" 
-                  onClose={() => {}} 
-                />
-              </div>
-            </div>
-          } />
 
             <Route path="/" element={
               <DashboardPage 

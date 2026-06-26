@@ -63,21 +63,6 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       const activePeriod = get().activePeriod;
       const dbConnected = get().dbConnected;
 
-      const newSession = {
-        customerName: session.customerName,
-        category: session.category || 'Coaching',
-        avatar: session.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-        score: session.score || 100,
-        date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        notes: session.notes || ''
-      };
-      
-      const updatedSessions = [newSession, ...(Array.isArray(recentSessions) ? recentSessions : [])].slice(0, 15);
-      set({ recentSessions: updatedSessions });
-      if (dbConnected) {
-        saveRecentSessionsToCloud(get().storeId, updatedSessions);
-      }
-
       const periodMap1 = rosterHistory[activePeriod] || {};
       const empId = session.employeeId || Object.values(periodMap1).find((e: Employee) => e.name === session.customerName)?.id || `emp-${Date.now()}`;
       
@@ -86,12 +71,12 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
         newLog = CoachingLogSchema.parse({
           id: `log-${Date.now()}`,
           employeeId: empId,
-          employeeName: session.customerName,
-          customerName: session.customerName,
+          employeeName: session.customerName || 'Unknown',
+          customerName: session.customerName || 'Unknown',
           category: session.category || 'Coaching',
           avatar: session.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
           score: session.score || 100,
-          date: newSession.date,
+          date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           notes: session.notes || '',
           timestamp: Date.now(),
           coachName: get().activeManager?.name || 'Supervisor'
@@ -101,9 +86,14 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
         return;
       }
       
+      const updatedSessions = [newLog, ...(Array.isArray(recentSessions) ? recentSessions : [])].slice(0, 15);
+      set({ recentSessions: updatedSessions });
+      
       const updatedLogs = [newLog, ...(Array.isArray(coachingLogs) ? coachingLogs : [])];
       set({ coachingLogs: updatedLogs });
+      
       if (dbConnected) {
+        saveRecentSessionsToCloud(get().storeId, updatedSessions);
         saveCoachingLogToCloud(get().storeId, newLog);
       }
 
@@ -231,27 +221,32 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       const recentSessions = get().recentSessions || [];
       const metrics = get().metrics || { memberships: 0, creditCards: 0, warranty: 0, surveys: 0, rph: 0, totalRevenue: 0, totalHours: 0 };
       const dbConnected = get().dbConnected;
+      const activePeriod = get().activePeriod;
+      const rosterHistory = get().rosterHistory || {};
+      const periodMap3 = rosterHistory[activePeriod] || {};
+      const targetEmp = Object.values(periodMap3).find((e: Employee) => e.name === customerName);
+      const empId = targetEmp?.id || `emp-${Date.now()}`;
 
-      const newSession = {
-        customerName,
+      const newLog: CoachingLog = {
+        id: `log-${Date.now()}`,
+        employeeId: empId,
+        employeeName: customerName,
+        customerName: customerName,
         category,
         avatar,
         score,
         date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        notes: growReport.reality
+        notes: growReport.reality,
+        timestamp: Date.now(),
+        coachName: get().activeManager?.name || 'AI Coach'
       };
-      const updatedSessions = [newSession, ...(Array.isArray(recentSessions) ? recentSessions : [])].slice(0, 15);
+
+      const updatedSessions = [newLog, ...(Array.isArray(recentSessions) ? recentSessions : [])].slice(0, 15);
       set({ recentSessions: updatedSessions });
       if (dbConnected) {
         saveRecentSessionsToCloud(get().storeId, updatedSessions);
       }
 
-      // Check for PIP generation (3 consecutive fails) or Perfect Score Trophies
-      const activePeriod = get().activePeriod;
-      const rosterHistory = get().rosterHistory || {};
-      const periodMap3 = rosterHistory[activePeriod] || {};
-      const targetEmp = Object.values(periodMap3).find((e: Employee) => e.name === customerName);
-      
       if (targetEmp) {
         if (score === 100) {
           get().addTrophy(targetEmp.id, {
@@ -313,7 +308,7 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       if (passed && newMetrics) {
         const prevTotalRev = metrics.totalRevenue || (metrics.rph * 40); // fallback
         const prevTotalHours = metrics.totalHours || 40;
-        const newTotalRev = prevTotalRev + (newMetrics.revenue || (newMetrics.rph * 8)); // simulated 8hr shift
+        const newTotalRev = prevTotalRev + (newMetrics.revenue || ((newMetrics.rph || 0) * 8)); // simulated 8hr shift
         const newTotalHours = prevTotalHours + 8;
         const trueRph = newTotalHours > 0 ? Math.round(newTotalRev / newTotalHours) : 0;
 
@@ -323,10 +318,10 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
 
         const averagedMetrics = {
           ...metrics,
-          memberships: metrics.memberships + newMetrics.memberships,
-          creditCards: metrics.creditCards + newMetrics.creditCards,
+          memberships: metrics.memberships + (newMetrics.memberships || 0),
+          creditCards: metrics.creditCards + (newMetrics.creditCards || 0),
           warranty: trueWarranty,
-          surveys: metrics.surveys + newMetrics.surveys,
+          surveys: metrics.surveys + (newMetrics.surveys || 0),
           rph: trueRph,
           totalRevenue: newTotalRev,
           totalHours: newTotalHours

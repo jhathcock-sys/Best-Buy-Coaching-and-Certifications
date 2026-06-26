@@ -131,7 +131,9 @@ export default function ProfileTrophiesTab({ employee, associateLogs }: ProfileT
             <p className="text-sm text-secondary mb-md italic">
               {generatedPlan.reason}
             </p>
-            <div className="markdown-body text-sm text-primary" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(renderMarkdown(generatedPlan.planText)) }} data-testid="generated-plan-markdown" />
+            <div className="markdown-body text-sm text-primary" data-testid="generated-plan-markdown">
+              {renderMarkdown(generatedPlan.planText)}
+            </div>
             <div className="mt-md flex-end gap-sm">
                <button className="btn btn-primary btn-sm cursor-pointer" data-testid="save-pip-btn">Save as Active PIP</button>
             </div>

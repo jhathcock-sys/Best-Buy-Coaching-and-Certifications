@@ -1,8 +1,7 @@
-import { useState, useRef } from 'react';
-import { parseScheduleImage } from '../services/ai';
+import { Employee, BreakEntry } from '../types';
 
-export const normalizeZone = (rawZone) => {
-  if (!rawZone) return 'Computing';
+export const normalizeZone = (rawZone: string | undefined | null): string => {
+  if (!rawZone || typeof rawZone !== 'string') return 'Computing';
   const clean = rawZone.toLowerCase().trim();
   if (clean.includes('comp') || clean.includes('pc') || clean.includes('laptop') || clean.includes('sales')) return 'Computing';
   if (clean.includes('mob') || clean.includes('phone') || clean.includes('wireless') || clean.includes('mobile')) return 'Mobile';
@@ -14,14 +13,14 @@ export const normalizeZone = (rawZone) => {
 };
 
 // Fuzzy match name string to active roster list
-export const fuzzyMatchName = (nameStr, roster) => {
+export const fuzzyMatchName = (nameStr: string | undefined | null, roster: Employee[]): Employee | null => {
   if (!nameStr) return null;
-  const cleanStr = (s: any) => s.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+  const cleanStr = (s: string) => (!s || typeof s !== 'string') ? '' : s.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
   const target = cleanStr(nameStr);
   if (!target) return null;
 
   // 1. Exact match
-  let match = roster.find(emp => cleanStr(emp.name) === target);
+  const match = roster.find(emp => cleanStr(emp.name) === target);
   if (match) return match;
 
   // 2. Contains match
@@ -50,18 +49,18 @@ export const fuzzyMatchName = (nameStr, roster) => {
 };
 
 // Shift time parser
-export const parseShiftHours = (shiftStr) => {
+export const parseShiftHours = (shiftStr: string | undefined | null): { duration: number, startTimeStr: string } => {
   if (!shiftStr) return { duration: 0, startTimeStr: '9:00 AM' };
   
   // Clean string and split by separators
   const parts = shiftStr.split(/[-—to]/).map(p => p.trim());
   if (parts.length < 2) return { duration: 0, startTimeStr: '9:00 AM' };
 
-  const toMinutes = (timeStr) => {
+  const toMinutes = (timeStr: string): number | null => {
     const match = timeStr.match(/(\d+):?(\d+)?\s*(AM|PM|am|pm)?/i);
     if (!match) return null;
     let h = parseInt(match[1], 10);
-    let m = match[2] ? parseInt(match[2], 10) : 0;
+    const m = match[2] ? parseInt(match[2], 10) : 0;
     let ampm = match[3] ? match[3].toUpperCase() : '';
 
     if (!ampm) {
@@ -90,9 +89,9 @@ export const parseShiftHours = (shiftStr) => {
 
   const duration = (endMin - startMin) / 60;
 
-  const formatMins = (totalMins) => {
+  const formatMins = (totalMins: number): string => {
     let h = Math.floor(totalMins / 60) % 24;
-    let m = totalMins % 60;
+    const m = totalMins % 60;
     const ampm = h >= 12 ? 'PM' : 'AM';
     h = h % 12;
     if (h === 0) h = 12;
@@ -107,10 +106,11 @@ export const parseShiftHours = (shiftStr) => {
 };
 
 // Auto-generate break list based on shift duration
-export const generateBreaks = (empId, empName, startTimeStr, durationHours) => {
+export const generateBreaks = (empId: string, empName: string, startTimeStr: string, durationHours: number): BreakEntry[] => {
   if (durationHours < 4 || !empId) return [];
 
-  const parseToMins = (tStr) => {
+  const parseToMins = (tStr: string): number => {
+    if (!tStr || typeof tStr !== 'string') return 0;
     const [hm, ampm] = tStr.split(' ');
     let [h, m] = hm.split(':').map(Number);
     if (ampm === 'PM' && h !== 12) h += 12;
@@ -118,9 +118,9 @@ export const generateBreaks = (empId, empName, startTimeStr, durationHours) => {
     return h * 60 + m;
   };
 
-  const formatMins = (totalMins) => {
+  const formatMins = (totalMins: number): string => {
     let h = Math.floor(totalMins / 60) % 24;
-    let m = totalMins % 60;
+    const m = totalMins % 60;
     const ampm = h >= 12 ? 'PM' : 'AM';
     h = h % 12;
     if (h === 0) h = 12;
@@ -129,7 +129,7 @@ export const generateBreaks = (empId, empName, startTimeStr, durationHours) => {
   };
 
   const startMins = parseToMins(startTimeStr);
-  const breaks = [];
+  const breaks: BreakEntry[] = [];
   const baseTime = Date.now();
 
   if (durationHours >= 7.5) {
@@ -183,4 +183,3 @@ export const generateBreaks = (empId, empName, startTimeStr, durationHours) => {
 };
 
 export const WEEKDAY_KEYS = ['mon', 'monday', 'tue', 'tuesday', 'wed', 'wednesday', 'thu', 'thursday', 'fri', 'friday', 'sat', 'saturday', 'sun', 'sunday'];
-

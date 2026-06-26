@@ -3,32 +3,8 @@ import { Sparkles, Wand2, Loader2 } from 'lucide-react';
 import { generateCustomScenario } from '../../services/ai';
 import { useStore } from '../../store/useStore';
 import { StoreState } from '../../types/store';
+import { CustomScenario } from '../../types/index';
 import { useShallow } from 'zustand/react/shallow';
-
-export interface CustomScenario {
-  id: string;
-  title: string;
-  role: string;
-  name: string;
-  avatar: string;
-  description: string;
-  category: string;
-  difficulty: string;
-  initialGreeting: string;
-  needs: string;
-  objections: {
-    membership: string;
-    warranty: string;
-    card: string;
-  };
-  successKeywords: {
-    connect: string[];
-    discover: string[];
-    recommend: string[];
-    protect: string[];
-    close: string[];
-  };
-}
 
 export default function CustomScenarioForm() {
   const [scenTitle, setScenTitle] = useState('');
@@ -133,9 +109,7 @@ export default function CustomScenarioForm() {
     };
 
     if (importCustomScenario) {
-      // Need to cast newScenario to unknown then any because importCustomScenario takes PlaybookScenario
-      // Or we can assume it will work since CustomScenario is a subset/superset
-      importCustomScenario(newScenario as unknown as any);
+      importCustomScenario(newScenario);
       setFormSuccess(`Custom Scenario "${scenTitle}" created successfully!`);
       
       setScenTitle('');

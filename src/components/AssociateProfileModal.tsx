@@ -42,7 +42,7 @@ export default function AssociateProfileModal({
     associateLogs,
     associateTasks,
     activeGoals
-  } = useAssociateProfile(isOpen, employee, rosterHistory, coachingLogs, followUpTasks, deptGoals);
+  } = useAssociateProfile(isOpen, employee);
 
   if (!isOpen || !employee) return null;
 

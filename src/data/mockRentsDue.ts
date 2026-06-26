@@ -1,4 +1,23 @@
-export const mockRentsDuePayload =       [
+export interface MockRentDue {
+  name: string;
+  rph: number;
+  rphOwed: number;
+  rphStatus: 'on-track' | 'off-track' | 'none';
+  revenue: number;
+  revenueOwed: number;
+  revenueStatus: 'on-track' | 'off-track' | 'none';
+  apps: number;
+  appsOwed: number;
+  appsStatus: 'on-track' | 'off-track' | 'none';
+  memberships: number;
+  membershipsOwed: number;
+  membershipsStatus: 'on-track' | 'off-track' | 'none';
+  warranty: number;
+  warrantyGoal: number;
+  warrantyStatus: 'on-track' | 'off-track' | 'none';
+}
+
+export const mockRentsDuePayload: MockRentDue[] = [
         {
           name: "Ricky",
           rph: 649,

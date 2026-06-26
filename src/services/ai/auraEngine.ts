@@ -1,4 +1,5 @@
 import { getGeminiModel, executeWithRetry } from './core';
+import type { Employee, DeptGoal, PlaybookSettings } from '../../types';
 
 export type AuraStatus = 'excellent' | 'needs_coaching' | 'steady' | 'pending';
 
@@ -8,11 +9,18 @@ export interface AuraInsight {
   action: string;
 }
 
+interface AuraResponseItem {
+  id: string;
+  status: AuraStatus;
+  insight: string;
+  action: string;
+}
+
 export async function generateAuraBatchInsights(
-  roster: any[],
-  deptGoals: any,
+  roster: Employee[],
+  deptGoals: Record<string, DeptGoal>,
   apiKey: string,
-  playbookSettings: any
+  playbookSettings: PlaybookSettings
 ): Promise<Record<string, AuraInsight>> {
   if (!roster || roster.length === 0) return {};
   
@@ -23,10 +31,10 @@ export async function generateAuraBatchInsights(
   const rosterStats = roster.map(emp => ({
     id: emp.id,
     name: emp.name,
-    department: emp.department,
+    department: emp.dept || (emp as any).department,
     revenue: emp.revenue || 0,
     transactions: emp.transactions || 0,
-    apps: emp.applications || 0,
+    apps: emp.apps || (emp as any).applications || 0,
     memberships: emp.memberships || 0,
   }));
 
@@ -35,9 +43,12 @@ You are the AI engine powering the 'Aura' HUD for Best Buy Floor Leaders.
 Analyze this entire employee roster's current shift performance:
 ${JSON.stringify(rosterStats, null, 2)}
 
+Against these current department goals:
+${JSON.stringify(deptGoals, null, 2)}
+
 Provide a strict JSON response containing an array of objects. Each object must represent an employee and contain exactly these four fields:
 1. "id": The employee's exact id from the provided roster data.
-2. "status": Must be exactly one of: "excellent", "needs_coaching", or "steady". Use "needs_coaching" if they have 0 apps/memberships or very low revenue per transaction.
+2. "status": Must be exactly one of: "excellent", "needs_coaching", or "steady". Use "needs_coaching" if they have 0 apps/memberships or very low revenue per transaction relative to their department goals.
 3. "insight": A single concise sentence observing their performance (e.g., "High transactions but 0 memberships attached.").
 4. "action": A 3-4 word recommended action for the Floor Leader to take right now (e.g., "Roleplay Best Buy Total").
 
@@ -55,14 +66,14 @@ Do not include any other text, markdown formatting, or explanations. Only the ra
     const responseText = result.response.text();
     try {
       const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-      const parsedArray = JSON.parse(cleanJson);
+      const parsedArray = JSON.parse(cleanJson) as AuraResponseItem[];
       
       if (!Array.isArray(parsedArray)) {
         throw new Error('Aura Engine did not return an array');
       }
       
       const insightsMap: Record<string, AuraInsight> = {};
-      parsedArray.forEach((item: any) => {
+      parsedArray.forEach((item: AuraResponseItem) => {
         if (item.id && ['excellent', 'needs_coaching', 'steady'].includes(item.status) && item.insight && item.action) {
           insightsMap[item.id] = {
             status: item.status,

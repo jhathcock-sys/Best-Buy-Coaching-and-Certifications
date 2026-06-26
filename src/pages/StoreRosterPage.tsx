@@ -249,7 +249,7 @@ export default function StoreRoster({
       )}
 
       {activeSubView === 'audit' && (
-        <RosterAuditor roster={roster} />
+        <RosterAuditor />
       )}
 
       {activeSubView === 'rentsDue' && (

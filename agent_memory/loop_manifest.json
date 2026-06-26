@@ -1,6 +1,5 @@
 {
     "remaining_queue": [
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/hooks/useMediaQuery.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/hooks/useScheduleParser.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/hooks/useStoreRoster.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/AdvisorDashboardPage.tsx",
@@ -162,12 +161,13 @@
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/hooks/useCalculatedMetrics.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/hooks/useCategoryAutoExpand.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/hooks/useFloorLeaderTracker.ts",
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/hooks/useLiveFloorShadow.ts"
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/hooks/useLiveFloorShadow.ts",
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/hooks/useMediaQuery.ts"
     ],
     "current_checkpoint": {
-        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/hooks/useMediaQuery.ts"
+        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/hooks/useScheduleParser.ts"
     },
-    "file_index": 81,
+    "file_index": 82,
     "status": "ACTIVE",
     "agent_feed": [
         {

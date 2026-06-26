@@ -19,17 +19,14 @@ export default function LiveFloorShadow({
     department, setDepartment,
     isGenerating, setIsGenerating,
     checklist, setChecklist,
-    customerPersona, setCustomerPersona,
-    customPersona, setCustomPersona,
     notes, setNotes,
-    coachingInsight, setCoachingInsight,
     strengths, setStrengths,
     gapDetails, setGapDetails,
     followUpAction, setFollowUpAction,
     followUpDate, setFollowUpDate,
-    handleGenerateCoaching,
     handleComplete,
     toggleChecklistItem,
+    showSuccessOverlay,
     roster
   } = useLiveFloorShadow({
     onNavigate,
@@ -54,7 +51,7 @@ export default function LiveFloorShadow({
         </button>
       </div>
 
-      {!isGenerating && coachingInsight ? (
+      {!isGenerating && showSuccessOverlay ? (
         <div className="glass-card p-3rem text-center animate-scale-in">
           {/* Success Overlay Screen */}
           <div className="flex-center mb-lg">
@@ -137,6 +134,7 @@ export default function LiveFloorShadow({
               className="btn-secondary flex-center gap-sm" 
               onClick={() => setCurrentStep(prev => Math.max(1, prev - 1))}
               disabled={currentStep === 1 || isGenerating}
+              data-testid="back-button"
             >
               <ChevronLeft size={16} /> Back
             </button>
@@ -146,6 +144,7 @@ export default function LiveFloorShadow({
                 className="btn-primary flex-center gap-sm" 
                 onClick={() => setCurrentStep(prev => Math.min(3, prev + 1))}
                 disabled={currentStep === 1 && !selectedEmpId}
+                data-testid="next-button"
               >
                 Next <ChevronRight size={16} />
               </button>
@@ -154,6 +153,7 @@ export default function LiveFloorShadow({
                 className="btn-primary flex-center gap-sm" 
                 onClick={handleComplete}
                 disabled={isGenerating}
+                data-testid="compile-button"
               >
                 {isGenerating ? (
                   <>

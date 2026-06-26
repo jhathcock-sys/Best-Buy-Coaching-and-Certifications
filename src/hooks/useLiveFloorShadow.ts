@@ -30,8 +30,7 @@ export function useLiveFloorShadow({
   const [department, setDepartment] = useState('General Sales');
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  const [customerPersona, setCustomerPersona] = useState('');
-  const [customPersona, setCustomPersona] = useState('');
+
 
   useEffect(() => {
     if (preselectedEmployee) {
@@ -73,7 +72,6 @@ export function useLiveFloorShadow({
   const [followUpAction, setFollowUpAction] = useState('');
   const [followUpDate, setFollowUpDate] = useState('');
   const [notes, setNotes] = useState('');
-  const [coachingInsight, setCoachingInsight] = useState('');
 
   // UI status
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
@@ -357,17 +355,14 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
     department, setDepartment,
     isGenerating, setIsGenerating,
     checklist, setChecklist,
-    customerPersona, setCustomerPersona,
-    customPersona, setCustomPersona,
     notes, setNotes,
-    coachingInsight, setCoachingInsight,
     strengths, setStrengths,
     gapDetails, setGapDetails,
     followUpAction, setFollowUpAction,
     followUpDate, setFollowUpDate,
-    handleGenerateCoaching: generateGrowLog,
     handleComplete: handleCompileAndLog,
     toggleChecklistItem,
+    showSuccessOverlay,
     roster
   };
 }

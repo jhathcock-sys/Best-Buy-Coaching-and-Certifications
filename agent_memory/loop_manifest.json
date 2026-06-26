@@ -1,6 +1,5 @@
 {
     "remaining_queue": [
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/LiveFloorShadowPage.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/PlaybookStudioPage.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/RoleplayCenterPage.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/StoreRosterPage.tsx",
@@ -162,12 +161,13 @@
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/CoachSimulatorPage.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/DailyLineupBuilderPage.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/DashboardPage.tsx",
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/FloorLeaderTrackerPage.tsx"
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/FloorLeaderTrackerPage.tsx",
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/LiveFloorShadowPage.tsx"
     ],
     "current_checkpoint": {
-        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/LiveFloorShadowPage.tsx"
+        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/PlaybookStudioPage.tsx"
     },
-    "file_index": 92,
+    "file_index": 93,
     "status": "ACTIVE",
     "agent_feed": [
         {

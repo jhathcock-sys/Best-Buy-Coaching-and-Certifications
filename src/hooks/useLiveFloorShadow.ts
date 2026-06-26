@@ -1,16 +1,31 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { generateCoachingLogGemini } from '../services/ai';
+import { useStore } from '../store/useStore';
+import { Employee } from '../types';
+
+export interface UseLiveFloorShadowProps {
+  onNavigate?: (view: string) => void;
+  preselectedEmployee?: Employee | null;
+  clearPreselectedEmployee?: () => void;
+}
 
 export function useLiveFloorShadow({
-  roster,
-  onLogCoachingSession,
-  onAddFollowUpTask,
   onNavigate,
   preselectedEmployee,
-  clearPreselectedEmployee,
-  playbookSettings,
-  apiKey
-}) {
+  clearPreselectedEmployee
+}: UseLiveFloorShadowProps) {
+  const apiKey = useStore(state => state.apiKey);
+  const playbookSettings = useStore(state => state.playbookSettings);
+  const onLogCoachingSession = useStore(state => state.logCoachingSession);
+  const onAddFollowUpTask = useStore(state => state.addFollowUpTask);
+  
+  const activePeriod = useStore(state => state.activePeriod);
+  const rosterHistory = useStore(state => state.rosterHistory) || {};
+  const _rawroster = rosterHistory[activePeriod] || {};
+  const roster = useMemo(() => 
+    (Object.values(_rawroster) as Employee[]).sort((a, b) => a.name.localeCompare(b.name)), 
+  [_rawroster]);
+
   const [selectedEmpId, setSelectedEmpId] = useState('');
   const [department, setDepartment] = useState('General Sales');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -18,20 +33,15 @@ export function useLiveFloorShadow({
   const [customerPersona, setCustomerPersona] = useState('');
   const [customPersona, setCustomPersona] = useState('');
 
-  const [prevPreselectedEmployee, setPrevPreselectedEmployee] = useState(preselectedEmployee);
-
   useEffect(() => {
-    if (preselectedEmployee !== prevPreselectedEmployee) {
-      setPrevPreselectedEmployee(preselectedEmployee);
-      if (preselectedEmployee) {
-        setSelectedEmpId(preselectedEmployee.id || '');
-        const timer = setTimeout(() => {
-          if (clearPreselectedEmployee) clearPreselectedEmployee();
-        }, 50);
-        return () => clearTimeout(timer);
-      }
+    if (preselectedEmployee) {
+      setSelectedEmpId(preselectedEmployee.id || '');
+      const timer = setTimeout(() => {
+        if (clearPreselectedEmployee) clearPreselectedEmployee();
+      }, 50);
+      return () => clearTimeout(timer);
     }
-  }, [preselectedEmployee, prevPreselectedEmployee, clearPreselectedEmployee]);
+  }, [preselectedEmployee, clearPreselectedEmployee]);
   
   // DISC Checklist States
   const [checklist, setChecklist] = useState({
@@ -73,7 +83,7 @@ export function useLiveFloorShadow({
   const selectedEmployee = (roster || []).find(emp => emp.id === selectedEmpId);
 
   // Handle employee dropdown select
-  const handleSelectEmployee = useCallback((empId) => {
+  const handleSelectEmployee = useCallback((empId: string) => {
     setSelectedEmpId(empId);
     const emp = (roster || []).find(e => e.id === empId);
     if (emp) {
@@ -87,7 +97,7 @@ export function useLiveFloorShadow({
     }
   }, [roster]);
 
-  const toggleChecklistItem = useCallback((key) => {
+  const toggleChecklistItem = useCallback((key: keyof typeof checklist) => {
     setChecklist(prev => ({
       ...prev,
       [key]: !prev[key]
@@ -160,6 +170,7 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
   };
 
   const handleCompileAndLog = useCallback(async () => {
+    if (isGenerating) return;
     if (!selectedEmpId || !selectedEmployee) {
       alert("Please select an associate first.");
       return;
@@ -256,10 +267,12 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
     setCompiledLog(logText);
     setIsGenerating(false);
 
-    // 1. Copy to clipboard
-    navigator.clipboard.writeText(logText).catch(err => {
-      console.error("Failed to copy log to clipboard:", err);
-    });
+    // 1. Copy to clipboard safely
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(logText).catch(err => {
+        console.error("Failed to copy log to clipboard:", err);
+      });
+    }
 
     // 2. Add coaching log to history
     if (onLogCoachingSession) {
@@ -302,7 +315,8 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
     department,
     followUpAction,
     onLogCoachingSession,
-    onAddFollowUpTask
+    onAddFollowUpTask,
+    isGenerating
   ]);
 
   const handleResetForm = () => {
@@ -353,6 +367,7 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
     followUpDate, setFollowUpDate,
     handleGenerateCoaching: generateGrowLog,
     handleComplete: handleCompileAndLog,
-    toggleChecklistItem
+    toggleChecklistItem,
+    roster
   };
 }

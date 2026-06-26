@@ -4,31 +4,13 @@ import { ShieldCheck, ChevronLeft, ChevronRight, Check, Clipboard, Calendar, Use
 import ShadowStep1Employee from '../components/LiveFloorShadow/ShadowStep1Employee';
 import ShadowStep2Observation from '../components/LiveFloorShadow/ShadowStep2Observation';
 import ShadowStep3Coaching from '../components/LiveFloorShadow/ShadowStep3Coaching';
-import { useLiveFloorShadow } from '../hooks/useLiveFloorShadow';
-import { generateCoachingLogGemini } from '../services/ai';
-
-
-import { useStore } from '../store/useStore';
-import { Employee } from '../types';
-
-const EMPTY_OBJ = {};
+import { useLiveFloorShadow, UseLiveFloorShadowProps } from '../hooks/useLiveFloorShadow';
 
 export default function LiveFloorShadow({ 
   onNavigate, 
   preselectedEmployee, 
   clearPreselectedEmployee
-}: any) {
-  const apiKey = useStore((state) => state.apiKey);
-  
-  const playbookSettings = useStore((state) => state.playbookSettings);
-  const activePeriod = useStore((state) => state.activePeriod);
-  const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
-  const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
-  const roster = React.useMemo(() => (Object.values(_rawroster) as Employee[]).sort((a: Employee, b: Employee) => 
-    a.name.localeCompare(b.name)), [_rawroster]);
-  
-  const onLogCoachingSession = useStore((state) => state.logCoachingSession);
-  const onAddFollowUpTask = useStore((state) => state.addFollowUpTask);
+}: UseLiveFloorShadowProps) {
   const {
     currentStep, setCurrentStep,
     selectedEmpId, setSelectedEmpId,
@@ -47,16 +29,12 @@ export default function LiveFloorShadow({
     followUpDate, setFollowUpDate,
     handleGenerateCoaching,
     handleComplete,
-    toggleChecklistItem
+    toggleChecklistItem,
+    roster
   } = useLiveFloorShadow({
-    roster,
-    onLogCoachingSession,
-    onAddFollowUpTask,
     onNavigate,
     preselectedEmployee,
-    clearPreselectedEmployee,
-    playbookSettings,
-    apiKey
+    clearPreselectedEmployee
   });
   return (
     <div className="flex-column gap-2xl h-full min-h-600">
@@ -71,7 +49,7 @@ export default function LiveFloorShadow({
             Follow an advisor, log their behaviors, and auto-generate coaching notes.
           </p>
         </div>
-        <button onClick={onNavigate} className="btn-secondary flex-center gap-sm">
+        <button onClick={() => onNavigate && onNavigate('dashboard')} className="btn-secondary flex-center gap-sm">
           <Check size={16} /> Finish & Close
         </button>
       </div>
@@ -89,7 +67,7 @@ export default function LiveFloorShadow({
             The AI has successfully compiled your observations into actionable coaching notes and logged them to the employee's history.
           </p>
           <div className="flex-center gap-md">
-            <button onClick={onNavigate} className="btn-primary">
+            <button onClick={() => onNavigate && onNavigate('dashboard')} className="btn-primary">
               Return to Profile
             </button>
           </div>
@@ -101,15 +79,12 @@ export default function LiveFloorShadow({
             {[1, 2, 3].map((step) => (
               <div key={step} className="flex-center gap-md">
                 <div 
-                  className="w-8 h-8 rounded-full flex-center font-bold transition-normal"
-                  style={{ 
-                    background: currentStep >= step ? 'var(--bby-blue)' : 'rgba(255, 255, 255, 0.1)',
-                    color: currentStep >= step ? '#000' : 'var(--text-secondary)'
-                  }}>
+                  className={`w-8 h-8 rounded-full flex-center font-bold transition-normal ${currentStep >= step ? 'bg-bby-blue text-black' : 'bg-white/10 text-secondary'}`}
+                >
                   {step < currentStep ? <Check size={16} /> : step}
                 </div>
                 {step < 3 && (
-                  <div className="w-10 h-0-5" style={{ background: currentStep > step ? 'var(--bby-blue)' : 'rgba(255, 255, 255, 0.1)' }} />
+                  <div className={`w-10 h-0-5 ${currentStep > step ? 'bg-bby-blue' : 'bg-white/10'}`} />
                 )}
               </div>
             ))}

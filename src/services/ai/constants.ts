@@ -1,4 +1,32 @@
-export const STANDARD_SCENARIOS = [
+export interface PlaybookScenario {
+  id: string;
+  title: string;
+  role: 'Customer' | 'Employee';
+  name: string;
+  avatar: string;
+  description: string;
+  category?: string;
+  difficulty?: 'Easy' | 'Medium' | 'Hard';
+  initialGreeting: string;
+  needs?: string;
+  objections?: {
+    membership: string;
+    warranty: string;
+    card: string;
+  };
+  successKeywords?: {
+    connect: string[];
+    discover: string[];
+    recommend: string[];
+    protect: string[];
+    close: string[];
+  };
+  metricGap?: string;
+  personality?: string;
+  coachingGoal?: string;
+}
+
+export const STANDARD_SCENARIOS: PlaybookScenario[] = [
   {
     id: 'computing-college',
     title: 'Computing: College Prep',
@@ -75,7 +103,7 @@ export const STANDARD_SCENARIOS = [
 
 // Pre-defined Employee Scenarios (for Managers to practice coaching)
 
-export const EMPLOYEE_SCENARIOS = [
+export const EMPLOYEE_SCENARIOS: PlaybookScenario[] = [
   {
     id: 'victor-surveys',
     title: 'Coaching: Victor (Surveys Gap)',

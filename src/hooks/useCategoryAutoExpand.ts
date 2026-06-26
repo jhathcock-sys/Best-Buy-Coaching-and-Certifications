@@ -1,17 +1,21 @@
 import { useEffect } from 'react';
+import React from 'react';
 
-export function useCategoryAutoExpand(activeView: string, setCollapsedCategories: (updater: (prev: any) => any) => void) {
+export type CollapsedCategoriesState = Record<string, boolean>;
+
+export function useCategoryAutoExpand(
+  activeView: string,
+  setCollapsedCategories: React.Dispatch<React.SetStateAction<CollapsedCategoriesState>>
+) {
   useEffect(() => {
-    setTimeout(() => {
-      if (activeView === 'dashboard') {
-        setCollapsedCategories((prev: any) => ({ ...prev, overview: false }));
-      } else if (activeView === 'roster' || activeView === 'shadow' || activeView === 'floorLeader') {
-        setCollapsedCategories((prev: any) => ({ ...prev, floorOps: false }));
-      } else if (activeView === 'roleplay' || activeView === 'coach') {
-        setCollapsedCategories((prev: any) => ({ ...prev, coachingPractice: false }));
-      } else if (activeView === 'builder' || activeView === 'history' || activeView === 'playbook') {
-        setCollapsedCategories((prev: any) => ({ ...prev, recordsSetup: false }));
-      }
-    }, 0);
+    if (activeView === 'dashboard') {
+      setCollapsedCategories((prev) => ({ ...prev, overview: false }));
+    } else if (activeView === 'roster' || activeView === 'shadow' || activeView === 'floorLeader') {
+      setCollapsedCategories((prev) => ({ ...prev, floorOps: false }));
+    } else if (activeView === 'roleplay' || activeView === 'coach') {
+      setCollapsedCategories((prev) => ({ ...prev, coachingPractice: false }));
+    } else if (activeView === 'builder' || activeView === 'history' || activeView === 'playbook') {
+      setCollapsedCategories((prev) => ({ ...prev, recordsSetup: false }));
+    }
   }, [activeView, setCollapsedCategories]);
 }

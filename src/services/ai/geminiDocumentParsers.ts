@@ -2,7 +2,7 @@ import { GoogleGenerativeAI, SchemaType, Schema } from '@google/generative-ai';
 import { getGeminiModel, executeWithRetry } from './core.js';
 import DOMPurify from 'dompurify';
 
-export async function parseScheduleImage(base64Data, mimeType, apiKey) {
+export async function parseScheduleImage(base64Data: string, mimeType: string, apiKey: string | undefined) {
   try {
     const model = getGeminiModel(apiKey, { aiMode: 'flash' });
 
@@ -67,7 +67,7 @@ export async function parseScheduleImage(base64Data, mimeType, apiKey) {
 
 // Generate structured 4-Section Coaching Log Offline/Locally
 
-export const parseRentsDueDocumentGemini = async (base64Image, mimeType, textInput, apiKey) => {
+export const parseRentsDueDocumentGemini = async (base64Image: string | undefined, mimeType: string | undefined, textInput: string | undefined, apiKey: string | undefined) => {
   try {
     const keyToUse = apiKey || localStorage.getItem('bby_api_key') || import.meta.env.VITE_GEMINI_API_KEY;
     if (!keyToUse || keyToUse.trim().length < 10) {

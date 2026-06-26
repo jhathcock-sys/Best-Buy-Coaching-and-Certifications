@@ -2,24 +2,43 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Award, Trophy, Target, Star, Flame, MonitorPlay, TrendingUp, X } from 'lucide-react';
 
 import { useStore } from '../store/useStore';
-
-const EMPTY_OBJ = {};
-const EMPTY_ARR: any[] = [];
+import { Employee, CoachingLog } from '../types';
 
 import GoalsSlide from '../components/BreakroomTV/GoalsSlide';
 import LeaderboardSlide from '../components/BreakroomTV/LeaderboardSlide';
 import WinsSlide from '../components/BreakroomTV/WinsSlide';
 
-export default function BreakroomTV({ onClose }: any) {
+import './BreakroomTVPage.css';
+
+const EMPTY_OBJ = {};
+const EMPTY_ARR: CoachingLog[] = [];
+
+interface BreakroomTVProps {
+  onClose?: () => void;
+}
+
+export interface StoreGoals {
+  revenue: { actual: number; goal: number };
+  pms: { actual: number; goal: number };
+  apps: { actual: number; goal: number };
+}
+
+export interface RecentWin {
+  name: string;
+  win: string;
+  time: string;
+}
+
+export default function BreakroomTV({ onClose }: BreakroomTVProps) {
   const rawActivePeriod = useStore((state) => state.activePeriod);
   const activePeriod = rawActivePeriod || "Active Period";
   const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
   const _rawroster = rawActivePeriod ? (rosterHistory[rawActivePeriod] || EMPTY_OBJ) : EMPTY_OBJ;
   
-  const roster: any[] = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => (a?.name || '').localeCompare(b?.name || '')), [_rawroster]);
+  const roster = React.useMemo(() => (Object.values(_rawroster) as Employee[]).sort((a, b) => (a?.name || '').localeCompare(b?.name || '')), [_rawroster]);
   const recentSessions = useStore((state) => state.coachingLogs) || EMPTY_ARR;
-  const deptGoals = useStore((state) => state.deptGoals) || EMPTY_OBJ;
-  const apiKey = useStore((state) => state.apiKey);
+
+  // REMOVED: unused deptGoals and apiKey selectors per Tech Debt Analyst VETO
 
   const [activeSlide, setActiveSlide] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -39,7 +58,7 @@ export default function BreakroomTV({ onClose }: any) {
     };
   }, []);
 
-  const storeGoals = {
+  const storeGoals: StoreGoals = {
     revenue: { actual: 42500, goal: 50000 },
     pms: { actual: 18, goal: 20 },
     apps: { actual: 12, goal: 15 }
@@ -47,16 +66,16 @@ export default function BreakroomTV({ onClose }: any) {
 
   const topAdvisors = useMemo(() => {
     return [...roster]
-      .sort((a, b) => ((b.memberships || 0) + (b.creditCards || 0)) - ((a.memberships || 0) + (a.creditCards || 0)))
+      .sort((a, b) => ((b?.memberships || 0) + (b?.creditCards || 0)) - ((a?.memberships || 0) + (a?.creditCards || 0)))
       .slice(0, 3);
   }, [roster]);
 
   const recentWins = useMemo(() => {
-    if (recentSessions.length > 0) {
-      return recentSessions.slice(0, 4).map((s: any) => ({
-        name: roster.find((r: any) => r.id === s.empId)?.name || 'Advisor',
-        win: s.focus || 'Delivered an excellent customer experience',
-        time: s.date
+    if (recentSessions?.length > 0) {
+      return recentSessions.slice(0, 4).map((s) => ({
+        name: roster.find((r) => r?.id === s?.employeeId)?.name || 'Advisor',
+        win: s?.category || 'Delivered an excellent customer experience',
+        time: s?.date || 'Recently'
       }));
     }
     return [
@@ -68,9 +87,9 @@ export default function BreakroomTV({ onClose }: any) {
 
   if (!rawActivePeriod || Object.keys(_rawroster).length === 0) {
     return (
-      <div className="flex-center" style={{ width: '100vw', height: '100vh', background: 'var(--bg-space)', color: '#fff' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div className="spin" style={{ fontSize: '3rem', color: 'var(--bby-blue)', marginBottom: '1rem' }}>+</div>
+      <div className="flex-center bg-space text-white breakroom-fullscreen" data-testid="breakroom-loading">
+        <div className="text-center">
+          <div className="animate-spin text-bby-blue mb-md text-3xl">+</div>
           <p>Loading Dashboard...</p>
         </div>
       </div>
@@ -78,78 +97,47 @@ export default function BreakroomTV({ onClose }: any) {
   }
 
   return (
-    <div className="flex-column" style={{
-      width: '100vw',
-      height: '100vh',
-      background: 'radial-gradient(circle at center, #0d152b 0%, #060913 100%)',
-      color: '#fff',
-      overflow: 'hidden',
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      zIndex: 9999,
-      padding: '3rem 4rem'
-    }}>
-      <div style={{ position: 'absolute', top: '-10%', right: '-10%', width: '40vw', height: '40vw', background: 'radial-gradient(circle, rgba(0, 70, 190, 0.12) 0%, transparent 70%)', filter: 'blur(50px)', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', bottom: '-10%', left: '-10%', width: '50vw', height: '50vw', background: 'radial-gradient(circle, rgba(253, 216, 53, 0.04) 0%, transparent 70%)', filter: 'blur(50px)', pointerEvents: 'none' }} />
+    <div className="flex-column text-white breakroom-fullscreen breakroom-bg" data-testid="breakroom-tv-container">
+      <div className="breakroom-glow-blue" />
+      <div className="breakroom-glow-yellow" />
 
       {onClose && (
-        <button className="flex-center" style={{ position: 'absolute', top: '2rem', right: '2rem', background: 'var(--white-alpha-10)', border: 'none', color: '#fff', width: '48px', height: '48px', borderRadius: '50%', cursor: 'pointer', zIndex: 100 }} onClick={onClose}>
+        <button data-testid="close-breakroom-tv-btn" className="flex-center cursor-pointer border-none text-white transition-normal breakroom-close-btn" onClick={onClose}>
           <X size={24} />
         </button>
       )}
 
-      <div className="flex-between" style={{ alignItems: 'flex-start', zIndex: 10, borderBottom: '1px solid var(--white-alpha-10)', paddingBottom: '2rem' }}>
+      <div className="flex-between align-start breakroom-header">
         <div>
-          <div className="flex-center" style={{ justifyContent: 'flex-start', gap: '0.75rem', marginBottom: '0.5rem' }}>
+          <div className="flex-center justify-start gap-sm mb-sm">
             <MonitorPlay size={32} color="var(--bby-blue)" />
-            <h1 style={{ fontSize: '2.5rem', margin: 0, letterSpacing: '0.02em', fontWeight: 800 }}>BlueCoach Kiosk</h1>
+            <h1 className="m-0 tracking-tight font-bold text-3xl">BlueCoach Kiosk</h1>
           </div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1.25rem', margin: 0 }}>
+          <p className="text-secondary m-0 text-xl">
             {activePeriod} Performance Dashboard
           </p>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--bby-yellow)', lineHeight: 1 }}>
+        <div className="text-right">
+          <div className="text-bby-yellow font-bold text-3xl leading-none">
             {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </div>
-          <div style={{ fontSize: '1.2rem', color: 'var(--text-muted)', marginTop: '0.5rem', fontWeight: 600 }}>
+          <div className="text-muted mt-sm font-semibold text-xl">
             {currentTime.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}
           </div>
         </div>
       </div>
 
-      <div className="flex-column flex-center" style={{ flex: 1, zIndex: 10, position: 'relative' }}>
+      <div className="flex-column flex-center breakroom-content">
         {activeSlide === 0 && <GoalsSlide storeGoals={storeGoals} />}
         {activeSlide === 1 && <LeaderboardSlide topAdvisors={topAdvisors} />}
         {activeSlide === 2 && <WinsSlide recentWins={recentWins} />}
-        <style>{`
-          @keyframes slideInRight {
-            to { opacity: 1; transform: translateX(0); }
-          }
-          @keyframes slideUp {
-            from { opacity: 0; transform: translateY(100px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-          }
-        `}</style>
       </div>
 
-      <div className="flex-center" style={{ gap: '1.5rem', marginTop: '2.5rem', zIndex: 10 }}>
+      <div className="flex-center gap-lg mt-xl z-10">
         {[0, 1, 2].map((idx) => (
           <div 
             key={idx}
-            style={{
-              width: activeSlide === idx ? '80px' : '16px',
-              height: '16px',
-              borderRadius: '8px',
-              background: activeSlide === idx ? 'var(--bby-blue)' : 'var(--white-alpha-20)',
-              boxShadow: activeSlide === idx ? '0 0 15px rgba(0,70,190,0.8)' : undefined,
-              transition: 'var(--transition-normal)'
-            }}
+            className={`breakroom-dot ${activeSlide === idx ? 'active' : ''}`}
           />
         ))}
       </div>

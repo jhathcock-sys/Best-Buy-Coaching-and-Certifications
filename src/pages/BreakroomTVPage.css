@@ -1,0 +1,75 @@
+/* Breakroom TV Fullscreen Dashboard Styling */
+
+.breakroom-fullscreen {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+}
+
+.breakroom-bg {
+  background: radial-gradient(circle at center, #0d152b 0%, #060913 100%);
+  overflow: hidden;
+  padding: 3rem 4rem;
+}
+
+.breakroom-glow-blue {
+  position: absolute;
+  top: -10%;
+  right: -10%;
+  width: 40vw;
+  height: 40vw;
+  background: radial-gradient(circle, rgba(0, 70, 190, 0.12) 0%, transparent 70%);
+  filter: blur(50px);
+  pointer-events: none;
+}
+
+.breakroom-glow-yellow {
+  position: absolute;
+  bottom: -10%;
+  left: -10%;
+  width: 50vw;
+  height: 50vw;
+  background: radial-gradient(circle, rgba(253, 216, 53, 0.04) 0%, transparent 70%);
+  filter: blur(50px);
+  pointer-events: none;
+}
+
+.breakroom-close-btn {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  background: var(--white-alpha-10);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  z-index: 100;
+}
+
+.breakroom-header {
+  z-index: 10;
+  border-bottom: 1px solid var(--white-alpha-10);
+  padding-bottom: 2rem;
+}
+
+.breakroom-content {
+  flex: 1;
+  z-index: 10;
+  position: relative;
+}
+
+.breakroom-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  background: var(--white-alpha-20);
+  transition: var(--transition-normal);
+}
+
+.breakroom-dot.active {
+  width: 80px;
+  background: var(--bby-blue);
+  box-shadow: 0 0 15px rgba(0,70,190,0.8);
+}

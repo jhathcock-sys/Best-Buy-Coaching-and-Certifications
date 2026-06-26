@@ -19,3 +19,7 @@ exports.parseRentsDueCSV = csvModules.parseRentsDueCSV;
 const authModules = require('./src/auth');
 exports.verifyCertification = authModules.verifyCertification;
 exports.provisionTenantAccount = authModules.provisionTenantAccount;
+
+// 4. Deals Logic
+const dealsModules = require('./src/deals');
+exports.scrapeDeals = dealsModules.scrapeDeals;

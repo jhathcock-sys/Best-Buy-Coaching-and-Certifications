@@ -114,7 +114,7 @@ export interface ShiftHourEntry {
   revenue: string | number;
   startRevenue?: string | number;
   endRevenue?: string | number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ShiftEvent {
@@ -158,8 +158,8 @@ export interface FollowUpTask {
 
 declare global {
   interface Window {
-    SpeechRecognition: any;
-    webkitSpeechRecognition: any;
+    SpeechRecognition: unknown;
+    webkitSpeechRecognition: unknown;
   }
 }
 export interface ShiftWin { id: string; empId: string; empName: string; zone: string; type: 'pm' | 'card' | 'app'; timestamp: number; hourIndex?: number; }

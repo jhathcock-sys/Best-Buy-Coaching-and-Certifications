@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useStore } from '../store/useStore';
 import { EMPLOYEE_SCENARIOS } from '../services/ai';
+import { CoachingLog, Employee } from '../types';
 
 // Custom Hooks
 import { useAudioEngine } from '../components/CoachSimulator/useAudioEngine';
@@ -66,8 +67,15 @@ const TEMPLATES = {
   }
 };
 
-const EMPTY_OBJ = {};
-const EMPTY_ARR: any[] = [];
+const EMPTY_ARR: any[] = []; // Used for multiple array types, keeping flexible for now but restricting internal usages
+
+export interface CoachSimulatorProps {
+  preselectedEmployee?: Employee;
+  clearPreselectedEmployee?: () => void;
+  prefillBuilderData?: Employee;
+  clearPrefillBuilderData?: () => void;
+  initialTab?: string;
+}
 
 export default function CoachSimulator({ 
   preselectedEmployee, 
@@ -75,19 +83,15 @@ export default function CoachSimulator({
   prefillBuilderData, 
   clearPrefillBuilderData, 
   initialTab = 'sim'
-}: any) {
+}: CoachSimulatorProps) {
   const apiKey = useStore((state) => state.apiKey);
   
   const playbookSettings = useStore((state) => state.playbookSettings);
   const customScenarios = useStore((state) => state.customScenarios) || EMPTY_ARR;
   const importCustomScenario = useStore((state) => state.importCustomScenario);
   const logCoachingSession = useStore((state) => state.logCoachingSession);
-  const coachingLogs = useStore((state) => state.coachingLogs) || EMPTY_ARR;
-  const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
-  const activePeriod = useStore((state) => state.activePeriod);
+  const coachingLogs = useStore((state) => state.coachingLogs) || (EMPTY_ARR as CoachingLog[]);
   
-  const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
-  const roster = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
   const onImportScenario = importCustomScenario;
   const onLogCoachingSession = logCoachingSession;
 
@@ -151,12 +155,11 @@ export default function CoachSimulator({
       setActiveTab('sim');
       aiCoaching.startCoaching(dynamicScen, audioEngine.isVoiceMode, audioEngine.speakText);
       
-      const timer = setTimeout(() => {
-        if (clearPreselectedEmployee) clearPreselectedEmployee();
-      }, 50);
-      return () => clearTimeout(timer);
+      if (clearPreselectedEmployee) {
+        clearPreselectedEmployee();
+      }
     }
-  }, [preselectedEmployee]);
+  }, [preselectedEmployee, clearPreselectedEmployee]);
 
   // Handle prefilled Coaching Log Builder from Store Roster
   useEffect(() => {
@@ -186,12 +189,11 @@ export default function CoachSimulator({
       
       setActiveTab('builder');
       
-      const timer = setTimeout(() => {
-        if (clearPrefillBuilderData) clearPrefillBuilderData();
-      }, 50);
-      return () => clearTimeout(timer);
+      if (clearPrefillBuilderData) {
+        clearPrefillBuilderData();
+      }
     }
-  }, [prefillBuilderData]);
+  }, [prefillBuilderData, clearPrefillBuilderData]);
 
 
   return (
@@ -207,12 +209,14 @@ export default function CoachSimulator({
         {!aiCoaching.sessionActive && (
           <div className="flex-row gap-xs bg-white-alpha-02 p-xs rounded-xl border-glass">
             <button 
+              data-testid="tab-sim-btn"
               className={`btn btn-sm shadow-none ${activeTab === 'sim' ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => setActiveTab('sim')}
             >
               GROW Practice Simulator
             </button>
             <button 
+              data-testid="tab-builder-btn"
               className={`btn btn-sm shadow-none ${activeTab === 'builder' ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => setActiveTab('builder')}
             >

@@ -72,7 +72,7 @@ export const OFFLINE_DIALOGUES = {
 };
 
 
-export function runOfflineSimulationStep(message, history, scenario) {
+export function runOfflineSimulationStep(message: string, history: Record<string, any>, scenario: Record<string, any>) {
   const lowercaseMsg = message.toLowerCase();
   
   // Create a tracking object based on what keywords are found
@@ -198,7 +198,7 @@ export function runOfflineSimulationStep(message, history, scenario) {
 }
 
 // Offline Session Evaluator
-export function evaluateSessionOffline(history) {
+export function evaluateSessionOffline(history: Record<string, any>) {
   const steps = history.completedSteps || {};
   
   // Calculate scores
@@ -261,7 +261,7 @@ export function evaluateSessionOffline(history) {
 
 // MOCK employee response generator for Manager's Coaching practice
 
-export function runOfflineEmployeeCoachingStep(message, history, scenario) {
+export function runOfflineEmployeeCoachingStep(message: string, history: Record<string, any>, scenario: Record<string, any>) {
   const lowercaseMsg = message.toLowerCase();
   let responseText;
   
@@ -370,7 +370,7 @@ export function runOfflineEmployeeCoachingStep(message, history, scenario) {
 
 // Evaluate Manager's Coaching Session
 
-export function evaluateCoachingSession(history) {
+export function evaluateCoachingSession(history: Record<string, any>) {
   const steps = history.completedCoachSteps || {};
   
   const score = Math.round(
@@ -407,7 +407,7 @@ export function evaluateCoachingSession(history) {
 
 // Helper to check if API key is active
 
-export function generateCoachingLogLocal(name, gapType, gapDetails, positives, rawObservation, selectedDiscSteps) {
+export function generateCoachingLogLocal(name: string, gapType: string, gapDetails: string, positives: string, rawObservation: string, selectedDiscSteps: string | string[]) {
   const stepsText = Array.isArray(selectedDiscSteps) ? selectedDiscSteps.join(', ') : (selectedDiscSteps || 'Solve');
   const formattedObs = rawObservation ? ` Based on observation: "${rawObservation}".` : '';
 

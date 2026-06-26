@@ -15,7 +15,7 @@ export function DynamicChartRenderer({ config }: Props) {
 
   if (chartType === 'metric') {
     return (
-      <div className="glass-card p-xl flex-column gap-lg bg-obsidian-alpha">
+      <div className="border-glass rounded-xl p-lg flex-column gap-lg bg-black-alpha-20">
         <h3 className="text-2xl font-bold text-white m-0">{title}</h3>
         <p className="text-secondary text-lg m-0">{narrativeSummary}</p>
         <div className="flex-row flex-wrap gap-xl mt-md">
@@ -36,7 +36,7 @@ export function DynamicChartRenderer({ config }: Props) {
   const maxValue = Math.max(1, ...dataPoints.map(d => d.value));
 
   return (
-    <div className="glass-card p-xl bg-obsidian-alpha">
+    <div className="border-glass rounded-xl p-lg bg-black-alpha-20 w-full">
       <div className="mb-xl flex-column gap-sm">
         <h3 className="text-2xl font-bold text-white m-0">{title}</h3>
         <p className="text-secondary text-lg m-0">{narrativeSummary}</p>

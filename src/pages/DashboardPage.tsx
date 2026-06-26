@@ -3,7 +3,7 @@ import DashboardHeader from '../components/Dashboard/DashboardHeader';
 import DashboardAlerts from '../components/Dashboard/DashboardAlerts';
 import DashboardSystemAlerts from '../components/Dashboard/DashboardSystemAlerts';
 import DashboardCoachingEngine from '../components/Dashboard/DashboardCoachingEngine';
-import DashboardTrendChart from '../components/Dashboard/DashboardTrendChart';
+import { ConversationalAnalyticsWidget } from '../components/Analytics/ConversationalAnalyticsWidget';
 import DashboardLeaderboard from '../components/Dashboard/DashboardLeaderboard';
 import MetricCards from '../components/Dashboard/MetricCards';
 import { useCalculatedMetrics } from '../hooks/useCalculatedMetrics';
@@ -46,7 +46,7 @@ export default function DashboardPage({
           onShadowEmployee={onShadowEmployee} 
           onCoachEmployee={onCoachEmployee} 
         />
-        <DashboardTrendChart />
+        <ConversationalAnalyticsWidget compact={true} />
       </div>
 
       <DashboardLeaderboard onCoachEmployee={onCoachEmployee} />

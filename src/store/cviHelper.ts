@@ -27,7 +27,7 @@ export function calculateCVI(
   
   const prevPeriod = sortedPeriods[curIdx - 1];
   const prevMap = rosterHistory[prevPeriod] || {};
-  const prevEmp = prevMap[employee.id] || Object.values(prevMap).find((e: any) => e.name === employee.name);
+  const prevEmp = prevMap[employee.id] || Object.values(prevMap).find((e: Employee) => e.name === employee.name);
   if (!prevEmp) return '0% (Neutral)';
   
   // Compute deltas

@@ -1,26 +1,56 @@
-import React from 'react';
-import { ArrowLeft, Send, Users, ShieldCheck, Star, Award, CheckCircle2, ChevronRight, MessageSquare, PlusCircle, User, Loader2, Sparkles, RefreshCw, XCircle, BookOpen, Mic, MicOff } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { ArrowLeft, Send, Sparkles, RefreshCw, BookOpen, Mic, MicOff } from 'lucide-react';
+import { useStore } from '../../store/useStore';
+import { runOfflineSimulationStep, runGeminiSimulationStep, evaluateSessionOffline, evaluateSessionGemini } from '../../services/ai';
+
+export interface Message {
+  sender: 'customer' | 'advisor';
+  text: string;
+}
+
+export interface CompletedSteps {
+  connect: boolean;
+  discover: boolean;
+  recommend: boolean;
+  protect: boolean;
+  close: boolean;
+}
+
+export interface RoleplayActiveSessionProps {
+  selectedScenario: any;
+  complexity: string;
+  customerTone: string;
+  onExit: () => void;
+  onEvaluationComplete: (result: any) => void;
+}
 
 export default function RoleplayActiveSession({ 
-  apiKey,
   selectedScenario,
   complexity,
   customerTone,
-  messages,
-  inputText,
-  setInputText,
-  completedSteps,
-  currentActiveStep,
-  isEvaluating,
-  setSessionActive,
-  stepHint,
-  sendMessage,
-  isLoading,
-  messagesEndRef,
-  endRoleplay,
-  startRoleplay
- }: any) {
-  const [isListening, setIsListening] = React.useState(false);
+  onExit,
+  onEvaluationComplete
+}: RoleplayActiveSessionProps) {
+  const apiKey = useStore((state) => state.apiKey);
+  const playbookSettings = useStore((state) => state.playbookSettings);
+  
+  const [messages, setMessages] = useState<Message[]>([
+    { sender: 'customer', text: selectedScenario?.initialGreeting || 'Hello.' }
+  ]);
+  const [inputText, setInputText] = useState('');
+  const [currentActiveStep, setCurrentActiveStep] = useState('connect');
+  const [completedSteps, setCompletedSteps] = useState<CompletedSteps>({
+    connect: false, discover: false, recommend: false, protect: false, close: false
+  });
+  
+  const [isLoading, setIsLoading] = useState(false);
+  const [isEvaluating, setIsEvaluating] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isLoading]);
 
   const toggleMic = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -34,7 +64,7 @@ export default function RoleplayActiveSession({
       setIsListening(true);
       const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
-      recognition.continuous = false; // We just want one phrase for the chat
+      recognition.continuous = false;
       recognition.interimResults = true;
       recognition.lang = 'en-US';
 
@@ -51,106 +81,185 @@ export default function RoleplayActiveSession({
         setIsListening(false);
       };
 
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-
+      recognition.onend = () => setIsListening(false);
       recognition.start();
     }
   };
 
+  const handleSend = async () => {
+    if (!inputText.trim() || isLoading) return;
+    const currentMsg = inputText;
+    setInputText('');
+    setMessages(prev => [...prev, { sender: 'advisor', text: currentMsg }]);
+    setIsLoading(true);
+    
+    try {
+      const history = { messages, completedSteps, currentActiveStep, metrics: {} };
+      let nextState;
+      if (apiKey && apiKey.trim().length > 10) {
+        nextState = await runGeminiSimulationStep(apiKey, currentMsg, history, selectedScenario, playbookSettings);
+      } else {
+        nextState = runOfflineSimulationStep(currentMsg, history, selectedScenario);
+      }
+      setMessages(nextState.messages);
+      setCompletedSteps(nextState.completedSteps);
+      setCurrentActiveStep(nextState.currentActiveStep);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const endAndEvaluate = async () => {
+    setIsLoading(true);
+    setIsEvaluating(true);
+    try {
+      const history = { messages, completedSteps };
+      let result;
+      const isProMode = playbookSettings?.aiMode === 'pro';
+      const hasApiKey = apiKey && apiKey.trim().length > 10;
+      
+      if (isProMode) {
+        const response = await fetch('/api/audit-dialogue', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ history, scenario: selectedScenario, playbookSettings })
+        });
+        if (!response.ok) throw new Error('Premium dialogue audit failed.');
+        result = await response.json();
+      } else if (hasApiKey) {
+        result = await evaluateSessionGemini(apiKey, history, selectedScenario, playbookSettings);
+      } else {
+        result = evaluateSessionOffline(history);
+      }
+      
+      onEvaluationComplete(result);
+    } catch (err) {
+      console.error(err);
+      setIsEvaluating(false);
+      setIsLoading(false);
+    }
+  };
+
+  const restartRoleplay = () => {
+    setMessages([{ sender: 'customer', text: selectedScenario?.initialGreeting || 'Hello.' }]);
+    setCurrentActiveStep('connect');
+    setCompletedSteps({ connect: false, discover: false, recommend: false, protect: false, close: false });
+    setInputText('');
+  };
+
+  const getStepHint = () => {
+    switch (currentActiveStep) {
+      case 'connect':
+        return { title: 'Step 1: Connect / Welcome', hint: 'Welcome the customer in a warm, empathetic way. Ask for their name and build rapport.' };
+      case 'discover':
+        return { title: 'Step 2: Discover / Understand', hint: 'Ask open-ended questions! Uncover their exact requirements.' };
+      case 'recommend':
+        return { title: 'Step 3: Sell / Recommend', hint: 'Propose a premium product and introduce My Best Buy Plus/Total membership.' };
+      case 'protect':
+        return { title: 'Step 4: GSP / Protect', hint: 'Recommend Geek Squad Protection or AppleCare+.' };
+      case 'close':
+        return { title: 'Step 5: BBY Card / Close', hint: 'Pitch the Best Buy Credit Card. Confidently ask for the sale!' };
+      default:
+        return { title: 'Simulation Complete', hint: 'Great job! Click Complete Session & Evaluate.' };
+    }
+  };
+
+  const stepHint = getStepHint();
+
   return (
     <>
         {isEvaluating ? (
-          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', padding: '3rem', minHeight: '500px', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
-            <div style={{ position: 'relative', width: '120px', height: '120px' }}>
-              <div className="skeleton-pulse" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '50%', border: '8px solid rgba(255, 230, 0, 0.05)', borderTopColor: 'var(--bby-yellow)', animation: 'spin 1.5s linear infinite' }}></div>
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
-                <Sparkles size={36} color="var(--bby-yellow)" className="typing-dots" />
+          <div className="glass-card flex-column flex-center gap-xl p-[3rem] min-h-[500px] text-center" data-testid="evaluating-state">
+            <div className="relative w-[120px] h-[120px]">
+              <div className="skeleton-pulse absolute top-0 left-0 w-full h-full rounded-full border-[8px] border-[rgba(255,230,0,0.05)] border-t-[var(--bby-yellow)] animate-spin"></div>
+              <div className="flex-center w-full h-full">
+                <Sparkles size={36} className="text-bby-yellow typing-dots" />
               </div>
             </div>
             
-            <div style={{ maxWidth: '450px', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-              <h3 style={{ fontSize: '1.4rem', color: '#fff', fontWeight: 700 }}>AI Performance Audit in progress</h3>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.5 }}>
+            <div className="max-w-[450px] flex-column gap-sm">
+              <h3 className="text-xl text-white font-bold">AI Performance Audit in progress</h3>
+              <p className="text-sm text-secondary leading-relaxed">
                 Gemini is grading your consultative discovery questions, verifying your membership values pitch, checking GSP warranty attachments, and parsing final credit card close rewards.
               </p>
             </div>
 
-            <div style={{ width: '100%', maxWidth: '300px', display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
-              <div className="skeleton-pulse" style={{ height: '12px', width: '100%', background: 'rgba(255,255,255,0.06)', borderRadius: '6px' }}></div>
-              <div className="skeleton-pulse" style={{ height: '12px', width: '80%', background: 'rgba(255,255,255,0.06)', borderRadius: '6px', alignSelf: 'center' }}></div>
+            <div className="w-full max-w-[300px] flex-column gap-sm mt-md">
+              <div className="skeleton-pulse h-[12px] w-full bg-white-alpha-05 rounded-md"></div>
+              <div className="skeleton-pulse h-[12px] w-4/5 bg-white-alpha-05 rounded-md self-center"></div>
             </div>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div className="flex-column gap-xl">
             
             {/* Top Control Bar */}
-          <div className="glass-card" style={{ padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-              <button className="btn btn-secondary btn-icon" onClick={() => setSessionActive(false)}>
+          <div className="glass-card p-[1rem_1.5rem] flex flex-wrap justify-between items-center gap-md">
+            <div className="flex-center-y gap-xl">
+              <button className="btn btn-secondary btn-icon" onClick={onExit} data-testid="back-btn">
                 <ArrowLeft size={16} />
               </button>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <img src={selectedScenario.avatar} alt="" className="profile-avatar" />
+              <div className="flex-center-y gap-sm">
+                <img src={selectedScenario?.avatar} alt="" className="profile-avatar" />
                 <div>
-                  <h3 style={{ fontSize: '1.05rem' }}>{selectedScenario.name}</h3>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Practice: {selectedScenario.title}</p>
+                  <h3 className="text-base font-bold m-0">{selectedScenario?.name}</h3>
+                  <p className="text-xs text-secondary m-0">Practice: {selectedScenario?.title}</p>
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div className="flex-center-y gap-md">
               {apiKey && apiKey.trim().length > 10 ? (
-                <span className="tag-pill" style={{ background: 'var(--info-glow)', borderColor: 'rgba(6, 182, 212, 0.3)', color: '#67e8f9' }}>
+                <span className="tag-pill bg-[var(--info-glow)] border-[rgba(6,182,212,0.3)] text-[#67e8f9]">
                   <Sparkles size={12} fill="#67e8f9" /> Gemini Generative Active
                 </span>
               ) : (
-                <span className="tag-pill" style={{ background: 'var(--warning-glow)', borderColor: 'rgba(245, 158, 11, 0.3)', color: '#fde047' }}>
+                <span className="tag-pill bg-[var(--warning-glow)] border-[rgba(245,158,11,0.3)] text-[#fde047]">
                   Sandbox Simulator Active
                 </span>
               )}
-              <button className="btn btn-secondary" onClick={() => startRoleplay(selectedScenario)}>
+              <button className="btn btn-secondary" onClick={restartRoleplay}>
                 <RefreshCw size={14} /> Restart
               </button>
-              <button className="btn btn-accent" onClick={endRoleplay} disabled={isLoading}>
+              <button className="btn btn-accent" onClick={endAndEvaluate} disabled={isLoading} data-testid="complete-session-btn">
                 Complete Session & Evaluate
               </button>
             </div>
           </div>
 
           {/* Sales Flow Progress Bar */}
-          <div className="glass-card" style={{ padding: '1.5rem' }}>
+          <div className="glass-card p-xl">
             <div className="sales-flow-tracker">
               <div 
                 className="sales-flow-progress-bar" 
                 style={{ 
                   width: `${
-                    completedSteps.close ? 100 :
-                    completedSteps.protect ? 80 :
-                    completedSteps.recommend ? 60 :
-                    completedSteps.discover ? 40 :
-                    completedSteps.connect ? 20 : 0
+                    completedSteps?.close ? 100 :
+                    completedSteps?.protect ? 80 :
+                    completedSteps?.recommend ? 60 :
+                    completedSteps?.discover ? 40 :
+                    completedSteps?.connect ? 20 : 0
                   }%` 
                 }} 
               />
-              <div className={`flow-step ${completedSteps.connect ? 'completed' : currentActiveStep === 'connect' ? 'active' : 'pending'}`}>
+              <div className={`flow-step ${completedSteps?.connect ? 'completed' : currentActiveStep === 'connect' ? 'active' : 'pending'}`}>
                 <div className="flow-node">1</div>
                 <div className="flow-label">Connect</div>
               </div>
-              <div className={`flow-step ${completedSteps.discover ? 'completed' : currentActiveStep === 'discover' ? 'active' : 'pending'}`}>
+              <div className={`flow-step ${completedSteps?.discover ? 'completed' : currentActiveStep === 'discover' ? 'active' : 'pending'}`}>
                 <div className="flow-node">2</div>
                 <div className="flow-label">Discover</div>
               </div>
-              <div className={`flow-step ${completedSteps.recommend ? 'completed' : currentActiveStep === 'recommend' ? 'active' : 'pending'}`}>
+              <div className={`flow-step ${completedSteps?.recommend ? 'completed' : currentActiveStep === 'recommend' ? 'active' : 'pending'}`}>
                 <div className="flow-node">3</div>
                 <div className="flow-label">Recommend</div>
               </div>
-              <div className={`flow-step ${completedSteps.protect ? 'completed' : currentActiveStep === 'protect' ? 'active' : 'pending'}`}>
+              <div className={`flow-step ${completedSteps?.protect ? 'completed' : currentActiveStep === 'protect' ? 'active' : 'pending'}`}>
                 <div className="flow-node">4</div>
                 <div className="flow-label">Protect</div>
               </div>
-              <div className={`flow-step ${completedSteps.close ? 'completed' : currentActiveStep === 'close' ? 'active' : 'pending'}`}>
+              <div className={`flow-step ${completedSteps?.close ? 'completed' : currentActiveStep === 'close' ? 'active' : 'pending'}`}>
                 <div className="flow-node">5</div>
                 <div className="flow-label">Close</div>
               </div>
@@ -158,12 +267,12 @@ export default function RoleplayActiveSession({
           </div>
 
           {/* Main Chat Layout */}
-          <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '1.5rem' }}>
+          <div className="grid grid-cols-[3fr_1fr] gap-xl max-lg:grid-cols-1">
             
             {/* Dialogue Arena */}
             <div className="chat-container">
               <div className="chat-messages">
-                {messages.map((m, idx) => (
+                {messages?.map((m, idx) => (
                   <div 
                     key={idx} 
                     className={`chat-bubble ${m.sender === 'advisor' ? 'bubble-advisor' : 'bubble-customer'}`}
@@ -172,11 +281,9 @@ export default function RoleplayActiveSession({
                   </div>
                 ))}
                 {isLoading && (
-                  <div className="chat-bubble bubble-customer" style={{ display: 'flex', alignItems: 'center', width: '80px', padding: '0.75rem 1rem' }}>
+                  <div className="chat-bubble bubble-customer flex-center-y w-[80px] p-[0.75rem_1rem]">
                     <div className="typing-dots">
-                      <span></span>
-                      <span></span>
-                      <span></span>
+                      <span></span><span></span><span></span>
                     </div>
                   </div>
                 )}
@@ -186,48 +293,43 @@ export default function RoleplayActiveSession({
               <div className="chat-input-bar">
                 <input 
                   type="text" 
-                  className="chat-input" 
+                  className={`chat-input ${isListening ? 'border-error bg-[rgba(239,68,68,0.05)]' : 'border-transparent bg-white-alpha-05'}`}
                   placeholder={isListening ? "Listening... Speak your response" : "Type your response to the customer..."}
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                   disabled={isLoading}
-                  style={{ borderColor: isListening ? 'var(--error)' : 'transparent', background: isListening ? 'rgba(239, 68, 68, 0.05)' : 'rgba(255, 255, 255, 0.05)' }}
+                  data-testid="chat-input"
                 />
                 <button 
-                  className="btn btn-icon" 
-                  style={{ 
-                    background: isListening ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255, 255, 255, 0.1)', 
-                    color: isListening ? 'var(--error)' : '#fff',
-                    animation: isListening ? 'pulse 1.5s infinite' : 'none'
-                  }} 
+                  className={`btn btn-icon ${isListening ? 'bg-[rgba(239,68,68,0.2)] text-error animate-pulse' : 'bg-white-alpha-10 text-white'}`}
                   onClick={toggleMic} 
                   disabled={isLoading}
                   title="Speak response"
                 >
                   {isListening ? <MicOff size={18} /> : <Mic size={18} />}
                 </button>
-                <button className="btn btn-primary btn-icon" onClick={sendMessage} disabled={isLoading || isListening}>
+                <button className="btn btn-primary btn-icon" onClick={handleSend} disabled={isLoading || isListening} data-testid="send-msg-btn">
                   <Send size={18} />
                 </button>
               </div>
             </div>
 
             {/* Sidebar Active Guidance Coach */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div className="glass-card" style={{ borderColor: 'rgba(0, 70, 190, 0.3)', background: 'rgba(0, 70, 190, 0.05)' }}>
-                <h4 style={{ fontSize: '1rem', color: 'var(--bby-yellow)', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+            <div className="flex-column gap-md">
+              <div className="glass-card border-[rgba(0,70,190,0.3)] bg-[rgba(0,70,190,0.05)]">
+                <h4 className="text-base text-bby-yellow flex-center-y gap-sm mb-sm">
                   <Sparkles size={16} /> Live Coaching Guide
                 </h4>
-                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.75rem', marginBottom: '0.75rem' }}>
-                  <h5 style={{ fontSize: '0.85rem', color: '#fff', marginBottom: '0.25rem' }}>{stepHint.title}</h5>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{stepHint.hint}</p>
+                <div className="border-b border-white-alpha-05 pb-sm mb-sm">
+                  <h5 className="text-sm text-white mb-xs">{stepHint?.title}</h5>
+                  <p className="text-xs text-secondary leading-relaxed">{stepHint?.hint}</p>
                 </div>
                 <div>
-                  <h5 style={{ fontSize: '0.85rem', color: '#fff', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <h5 className="text-sm text-white mb-xs flex-center-y gap-xs">
                     <BookOpen size={12} /> Pro-Tip Checklist
                   </h5>
-                  <ul style={{ fontSize: '0.75rem', color: 'var(--text-muted)', paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.35rem', lineHeight: 1.4 }}>
+                  <ul className="text-xs text-muted pl-lg flex-column gap-xs leading-relaxed list-disc">
                     <li>Avoid saying "warranty"—use "protection package" or "peace of mind."</li>
                     <li>Always offer My Best Buy Total or Plus options on premium hardware.</li>
                     <li>Highlight 10% back in rewards or financing to overcome price hurdles.</li>
@@ -236,9 +338,9 @@ export default function RoleplayActiveSession({
               </div>
 
               <div className="glass-card">
-                <h4 style={{ fontSize: '0.95rem', marginBottom: '0.75rem' }}>Customer Profile</h4>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}><strong>Needs:</strong> {selectedScenario.needs}</p>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}><strong>Style:</strong> {selectedScenario.difficulty === 'Easy' ? 'Quickly cooperative' : 'Will bring up multiple financial/risk objections.'}</p>
+                <h4 className="text-sm mb-sm">Customer Profile</h4>
+                <p className="text-xs text-secondary mb-xs"><strong>Needs:</strong> {selectedScenario?.needs}</p>
+                <p className="text-xs text-secondary italic"><strong>Style:</strong> {selectedScenario?.difficulty === 'Easy' ? 'Quickly cooperative' : 'Will bring up multiple financial/risk objections.'}</p>
               </div>
           </div>
           </div>

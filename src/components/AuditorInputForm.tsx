@@ -1,88 +1,130 @@
+import React, { ChangeEvent } from 'react';
 import { Camera, RefreshCw, Sparkles, Star, Upload } from 'lucide-react';
 
+export interface AuditorFormState {
+  selectedImage: string | null;
+  textInput: string;
+  isAuditing: boolean;
+}
+
+export interface AuditorFormHandlers {
+  setSelectedImage: (image: string | null) => void;
+  setAuditResult: (result: any) => void;
+  setIsSaved: (saved: boolean) => void;
+  setTextInput: (text: string) => void;
+  handleImageUpload: (e: ChangeEvent<HTMLInputElement>) => void;
+  handleLoadDemo: () => void;
+  handleRunAudit: () => void;
+}
+
+interface AuditorInputFormProps {
+  formState: AuditorFormState;
+  formHandlers: AuditorFormHandlers;
+}
+
 export default function AuditorInputForm({
-  selectedImage,
-  setSelectedImage,
-  setAuditResult,
-  setIsSaved,
-  textInput,
-  setTextInput,
-  isAuditing,
-  handleImageUpload,
-  handleLoadDemo,
-  handleRunAudit
-}) {
+  formState,
+  formHandlers
+}: AuditorInputFormProps) {
+  const { selectedImage, textInput, isAuditing } = formState;
+  const { 
+    setSelectedImage, 
+    setAuditResult, 
+    setIsSaved, 
+    setTextInput, 
+    handleImageUpload, 
+    handleLoadDemo, 
+    handleRunAudit 
+  } = formHandlers;
+
   return (
-    <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '2rem' }}>
+    <div className="glass-card flex-column gap-xl p-xl">
       <div>
-        <h2 style={{ fontSize: '1.4rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <h2 className="text-xl mb-sm flex-row align-center gap-sm font-heading">
           <Star color="var(--bby-yellow)" fill="var(--bby-yellow)" size={22} /> NPS 5-Star Detractor Coach
         </h2>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.825rem' }}>
+        <p className="text-secondary text-sm m-0">
           Upload customer survey screenshots or copy-paste survey feedback. The General Manager AI extracts detractor details, analyzes root-causes, and creates a GROW coaching script.
         </p>
       </div>
 
       {selectedImage ? (
-        <div style={{ position: 'relative', width: '100%', minHeight: '200px', background: 'rgba(0,0,0,0.2)', border: '1px dashed var(--border-glass)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+        <div className="relative w-full min-h-200 bg-black-alpha-20 border-glass-dashed rounded-xl flex-center overflow-hidden">
           {selectedImage.startsWith('data:image/png;base64,iVBORw0K') ? (
-            <div style={{ padding: '2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+            <div className="p-xl text-center flex-column align-center gap-md">
               <Camera size={38} color="var(--bby-yellow)" />
-              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Demo Survey Screenshot Loaded</span>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>MOCK PNG Image (1-5 Star Detractor Review)</span>
+              <span className="text-sm font-bold text-white">Demo Survey Screenshot Loaded</span>
+              <span className="text-xs text-muted">MOCK PNG Image (1-5 Star Detractor Review)</span>
             </div>
           ) : (
-            <img src={selectedImage} alt="Survey screenshot preview" style={{ width: '100%', height: 'auto', maxHeight: '250px', objectFit: 'contain' }} />
+            <img 
+              src={selectedImage} 
+              alt="Survey screenshot preview" 
+              className="w-full h-auto max-h-250 object-contain" 
+            />
           )}
           <button 
-            className="btn btn-secondary" 
-            style={{ position: 'absolute', bottom: '10px', right: '10px', padding: '0.35rem 0.75rem', fontSize: '0.75rem', zIndex: 10 }} 
+            className="btn btn-secondary absolute bottom-sm right-sm px-md py-xs text-xs z-10 cursor-pointer"
             onClick={() => { setSelectedImage(null); setAuditResult(null); setIsSaved(false); }}
+            data-testid="clear-image-btn"
           >
             Clear Image
           </button>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <label style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px dashed var(--border-glass)', borderRadius: '16px', padding: '3rem 2rem', background: 'rgba(255,255,255,0.01)', transition: 'border-color 0.2s' }} className="commitment-card-hover">
-            <Upload size={38} color="var(--text-muted)" style={{ marginBottom: '0.75rem' }} />
-            <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#fff', marginBottom: '0.25rem' }}>Drag or Choose Screenshot</span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Upload a customer survey snippet</span>
-            <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
+        <div className="flex-column gap-md">
+          <label 
+            className="cursor-pointer flex-column align-center justify-center border-glass-dashed rounded-xl p-xxl bg-white-alpha-01 hover-border-primary transition-normal commitment-card-hover"
+            data-testid="image-upload-label"
+          >
+            <Upload size={38} color="var(--text-muted)" className="mb-md" />
+            <span className="text-sm font-bold text-white mb-xs">Drag or Choose Screenshot</span>
+            <span className="text-xs text-secondary">Upload a customer survey snippet</span>
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={handleImageUpload} 
+              className="d-none" 
+              data-testid="image-upload-input"
+            />
           </label>
-          <div style={{ textAlign: 'center' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>OR</span>
+          <div className="text-center">
+            <span className="text-xs text-muted font-bold">OR</span>
           </div>
-          <button className="btn btn-secondary" onClick={handleLoadDemo} style={{ width: '100%', padding: '0.65rem' }}>
+          <button 
+            className="btn btn-secondary w-full p-md cursor-pointer" 
+            onClick={handleLoadDemo}
+            data-testid="load-demo-btn"
+          >
             Load Demo Detractor Screenshot
           </button>
         </div>
       )}
 
       <div className="form-group">
-        <label className="form-label" style={{ fontSize: '0.825rem', color: 'var(--text-secondary)' }}>Survey Comment / Text Feedback:</label>
+        <label className="form-label text-sm text-secondary">Survey Comment / Text Feedback:</label>
         <textarea
-          className="form-control"
+          className="form-control text-sm bg-obsidian-alpha-40 border-glass rounded-md p-md"
           rows={4}
           placeholder="Paste raw customer comment here (e.g. Jordan didn't offer a membership and checkout took forever...)"
           value={textInput}
           onChange={(e) => setTextInput(e.target.value)}
-          style={{ fontSize: '0.85rem', background: 'rgba(11, 15, 25, 0.4)', borderColor: 'var(--border-glass)', borderRadius: '8px' }}
+          data-testid="text-input-feedback"
         />
       </div>
 
       <button 
-        className="btn btn-accent" 
-        style={{ width: '100%', padding: '0.75rem' }}
+        className="btn btn-accent w-full p-md cursor-pointer"
         onClick={handleRunAudit}
-        disabled={isAuditing || (!selectedImage && !textInput.trim())}
+        disabled={isAuditing || (!selectedImage && !textInput?.trim())}
+        data-testid="run-audit-btn"
       >
         {isAuditing ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
-            <RefreshCw size={14} className="typing-dots" style={{ animation: 'spin 2s linear infinite' }} /> GM Auditing Customer Review...
+          <div className="flex-center gap-sm">
+            <RefreshCw size={14} className="spin" /> GM Auditing Customer Review...
           </div>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
+          <div className="flex-center gap-sm">
             <Sparkles size={16} /> Audit Survey & Draft Coaching
           </div>
         )}

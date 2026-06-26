@@ -1,41 +1,99 @@
 import React from 'react';
-import { Send, Users, ShieldCheck, Star, Award, CheckCircle2, ChevronRight, MessageSquare, PlusCircle, User, Loader2, Sparkles, RefreshCw, XCircle, CheckCircle } from 'lucide-react';
+import { RefreshCw, Sparkles, CheckCircle, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Scenario } from './RoleplayConfiguration';
+
+export interface EvaluationBreakdown {
+  connect: number;
+  discover: number;
+  recommend: number;
+  protect: number;
+  close: number;
+}
+
+export interface EvaluationValues {
+  beHuman: number;
+  makeItEasy: number;
+  showWhatPossible: number;
+}
+
+export interface GrowReport {
+  goal: string;
+  reality: string;
+  options: string[];
+  will: string;
+}
+
+export interface RoleplayEvaluation {
+  passed: boolean;
+  overallScore: number;
+  breakdown: EvaluationBreakdown;
+  values: EvaluationValues;
+  growReport: GrowReport;
+}
+
+export interface RoleplayResultsProps {
+  selectedScenario: Scenario;
+  evaluation: RoleplayEvaluation;
+  onRestart: (scenario: Scenario) => void;
+  onExit: () => void;
+}
 
 export default function RoleplayResults({ 
   selectedScenario,
-  complexity,
-  customerTone,
   evaluation,
-  saveAndReturn,
-  startRoleplay,
-  setActiveView
- }: any) {
+  onRestart,
+  onExit
+}: RoleplayResultsProps) {
+  const navigate = useNavigate();
+
+  if (!evaluation) {
+    return (
+      <div className="flex-center p-xl">
+        <Loader2 className="animate-spin text-bby-blue" size={32} />
+      </div>
+    );
+  }
+
+  const handleReturnToDashboard = () => {
+    onExit();
+    navigate('/');
+  };
+
   return (
     <>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        <div className="flex-column gap-xl">
           
           {/* Header Bar */}
-          <div className="glass-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', padding: '1.5rem 2rem' }}>
+          <div className="glass-card flex justify-between items-center flex-wrap gap-md p-lg">
             <div>
-              <h2 style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>Roleplay Performance Report</h2>
-              <p style={{ color: 'var(--text-secondary)' }}>Evaluated using Best Buy Consultative Sales Rubrics.</p>
+              <h2 className="text-2xl mb-xs">Roleplay Performance Report</h2>
+              <p className="text-secondary">Evaluated using Best Buy Consultative Sales Rubrics.</p>
             </div>
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <button className="btn btn-secondary" onClick={() => startRoleplay(selectedScenario)}>
+            <div className="flex gap-md">
+              <button 
+                className="btn btn-secondary cursor-pointer" 
+                onClick={() => onRestart(selectedScenario)}
+                data-testid="practice-again-btn"
+              >
                 <RefreshCw size={14} /> Practice Again
               </button>
-              <button className="btn btn-primary" onClick={() => setActiveView('dashboard')}>
+              <button 
+                className="btn btn-primary cursor-pointer" 
+                onClick={handleReturnToDashboard}
+                data-testid="return-dashboard-btn"
+              >
                 Return to Dashboard
               </button>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-xl">
             
             {/* Left Box: Score Dial & Passed Status */}
-            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '3rem 2rem' }}>
-              <div style={{ position: 'relative', width: '160px', height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
-                <svg style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
+            <div className="glass-card flex-column items-center justify-center text-center p-2xl" data-testid="overall-score-container">
+              <div className="relative w-[160px] h-[160px] flex items-center justify-center mb-xl">
+                <svg className="w-full h-full -rotate-90">
                   <circle cx="80" cy="80" r="70" stroke="rgba(255,255,255,0.03)" strokeWidth="12" fill="none" />
                   <circle 
                     cx="80" 
@@ -49,27 +107,27 @@ export default function RoleplayResults({
                     fill="none"
                   />
                 </svg>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontSize: '2.5rem', fontWeight: 800, fontFamily: 'var(--font-heading)' }}>{evaluation.overallScore}%</span>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Score Rating</span>
+                <div className="absolute inset-0 flex-column items-center justify-center">
+                  <span className="text-4xl font-extrabold font-heading">{evaluation.overallScore}%</span>
+                  <span className="text-xs text-secondary">Score Rating</span>
                 </div>
               </div>
 
               {evaluation.passed ? (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--bby-yellow)', fontWeight: 700, fontSize: '1.25rem', fontFamily: 'var(--font-heading)' }}>
+                <div className="flex-column items-center gap-xs">
+                  <div className="flex items-center gap-xs text-bby-yellow font-bold text-xl font-heading">
                     <Sparkles size={24} fill="var(--bby-yellow)" /> PRACTICE TARGET MET!
                   </div>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: '280px' }}>
+                  <p className="text-sm text-secondary max-w-[280px]">
                     Congratulations! You scored 80% or higher and demonstrated full competency in consultative selling.
                   </p>
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--error)', fontWeight: 700, fontSize: '1.25rem', fontFamily: 'var(--font-heading)' }}>
+                <div className="flex-column items-center gap-xs">
+                  <div className="flex items-center gap-xs text-error font-bold text-xl font-heading">
                     <CheckCircle size={24} /> PRACTICE APPROVED
                   </div>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: '280px' }}>
+                  <p className="text-sm text-secondary max-w-[280px]">
                     Solid effort! Review the GROW options below and retry to improve your score. Goal is 80%+.
                   </p>
                 </div>
@@ -77,103 +135,103 @@ export default function RoleplayResults({
             </div>
 
             {/* Middle Box: Sales Flow Stage Checklist Breakdown */}
-            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <h3 style={{ fontSize: '1.15rem' }}>Sales Flow Stage Breakdown</h3>
+            <div className="glass-card flex-column gap-lg">
+              <h3 className="text-lg">Sales Flow Stage Breakdown</h3>
               
               <div className="gauge-row">
                 <span>Connect (Greeting & Welcome)</span>
                 <div className="gauge-progress-bar">
-                  <div className="gauge-progress-fill" style={{ width: `${evaluation.breakdown.connect}%`, background: 'var(--bby-blue)' }} />
+                  <div className="gauge-progress-fill bg-bby-blue" style={{ width: `${evaluation.breakdown?.connect || 0}%` }} />
                 </div>
-                <span>{evaluation.breakdown.connect}%</span>
+                <span>{evaluation.breakdown?.connect || 0}%</span>
               </div>
               <div className="gauge-row">
                 <span>Discover (Open-ended Questions)</span>
                 <div className="gauge-progress-bar">
-                  <div className="gauge-progress-fill" style={{ width: `${evaluation.breakdown.discover}%`, background: 'var(--info)' }} />
+                  <div className="gauge-progress-fill bg-info" style={{ width: `${evaluation.breakdown?.discover || 0}%` }} />
                 </div>
-                <span>{evaluation.breakdown.discover}%</span>
+                <span>{evaluation.breakdown?.discover || 0}%</span>
               </div>
               <div className="gauge-row">
                 <span>Recommend (Product & Support Match)</span>
                 <div className="gauge-progress-bar">
-                  <div className="gauge-progress-fill" style={{ width: `${evaluation.breakdown.recommend}%`, background: 'var(--bby-yellow)' }} />
+                  <div className="gauge-progress-fill bg-bby-yellow" style={{ width: `${evaluation.breakdown?.recommend || 0}%` }} />
                 </div>
-                <span>{evaluation.breakdown.recommend}%</span>
+                <span>{evaluation.breakdown?.recommend || 0}%</span>
               </div>
               <div className="gauge-row">
                 <span>Protect (Geek Squad Protection / AppleCare)</span>
                 <div className="gauge-progress-bar">
-                  <div className="gauge-progress-fill" style={{ width: `${evaluation.breakdown.protect}%`, background: 'var(--success)' }} />
+                  <div className="gauge-progress-fill bg-success" style={{ width: `${evaluation.breakdown?.protect || 0}%` }} />
                 </div>
-                <span>{evaluation.breakdown.protect}%</span>
+                <span>{evaluation.breakdown?.protect || 0}%</span>
               </div>
               <div className="gauge-row">
                 <span>Close (BBY Card Financing Pitch)</span>
                 <div className="gauge-progress-bar">
-                  <div className="gauge-progress-fill" style={{ width: `${evaluation.breakdown.close}%`, background: 'var(--error)' }} />
+                  <div className="gauge-progress-fill bg-error" style={{ width: `${evaluation.breakdown?.close || 0}%` }} />
                 </div>
-                <span>{evaluation.breakdown.close}%</span>
+                <span>{evaluation.breakdown?.close || 0}%</span>
               </div>
             </div>
 
             {/* Right Box: Best Buy Core Values */}
-            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <h3 style={{ fontSize: '1.15rem' }}>Best Buy Human-Centric Values</h3>
+            <div className="glass-card flex-column gap-xl">
+              <h3 className="text-lg">Best Buy Human-Centric Values</h3>
               
-              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                <div style={{ flex: 1, padding: '1rem', background: 'rgba(0, 70, 190, 0.05)', border: '1px solid rgba(0, 70, 190, 0.15)', borderRadius: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff', fontFamily: 'var(--font-heading)' }}>{evaluation.values.beHuman}</div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, marginTop: '0.25rem' }}>Be Human</div>
+              <div className="flex gap-md flex-wrap">
+                <div className="flex-1 p-md bg-[#0046be]/5 border border-[#0046be]/15 rounded-xl text-center">
+                  <div className="text-2xl font-extrabold text-white font-heading">{evaluation.values?.beHuman || 0}</div>
+                  <div className="text-xs text-secondary font-semibold mt-1">Be Human</div>
                 </div>
-                <div style={{ flex: 1, padding: '1rem', background: 'rgba(255, 230, 0, 0.03)', border: '1px solid rgba(255, 230, 0, 0.15)', borderRadius: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff', fontFamily: 'var(--font-heading)' }}>{evaluation.values.makeItEasy}</div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, marginTop: '0.25rem' }}>Make it Easy</div>
+                <div className="flex-1 p-md bg-[#ffe600]/5 border border-[#ffe600]/15 rounded-xl text-center">
+                  <div className="text-2xl font-extrabold text-white font-heading">{evaluation.values?.makeItEasy || 0}</div>
+                  <div className="text-xs text-secondary font-semibold mt-1">Make it Easy</div>
                 </div>
               </div>
               
-              <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.15)', borderRadius: '12px', textAlign: 'center' }}>
-                <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff', fontFamily: 'var(--font-heading)' }}>{evaluation.values.showWhatPossible}</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, marginTop: '0.25rem' }}>Show What's Possible</div>
+              <div className="p-md bg-[#10b981]/5 border border-[#10b981]/15 rounded-xl text-center">
+                <div className="text-2xl font-extrabold text-white font-heading">{evaluation.values?.showWhatPossible || 0}</div>
+                <div className="text-xs text-secondary font-semibold mt-1">Show What's Possible</div>
               </div>
             </div>
 
           </div>
 
           {/* GROW Feedback Report Card */}
-          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <h3 style={{ fontSize: '1.35rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--bby-yellow)' }}>
+          <div className="glass-card flex-column gap-xl" data-testid="grow-report-container">
+            <h3 className="text-xl flex items-center gap-sm text-bby-yellow">
               <Sparkles size={20} /> Actionable GROW Coaching Plan
             </h3>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-2xl">
               <div>
-                <h4 style={{ fontSize: '1rem', marginBottom: '0.5rem', color: '#fff' }}>G - Coaching Goal</h4>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                  {evaluation.growReport.goal}
+                <h4 className="text-base mb-sm text-white">G - Coaching Goal</h4>
+                <p className="text-sm text-secondary leading-relaxed">
+                  {evaluation.growReport?.goal || 'No goal provided.'}
                 </p>
               </div>
               <div>
-                <h4 style={{ fontSize: '1rem', marginBottom: '0.5rem', color: '#fff' }}>R - Current Reality</h4>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                  {evaluation.growReport.reality}
+                <h4 className="text-base mb-sm text-white">R - Current Reality</h4>
+                <p className="text-sm text-secondary leading-relaxed">
+                  {evaluation.growReport?.reality || 'No reality provided.'}
                 </p>
               </div>
             </div>
 
-            <div style={{ borderTop: '1px solid var(--border-glass)', paddingTop: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+            <div className="border-t border-border-glass pt-xl grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-2xl">
               <div>
-                <h4 style={{ fontSize: '1rem', marginBottom: '0.75rem', color: '#fff' }}>O - Options for Practice</h4>
-                <ul style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', lineHeight: 1.5 }}>
-                  {evaluation.growReport.options.map((opt, idx) => (
+                <h4 className="text-base mb-md text-white">O - Options for Practice</h4>
+                <ul className="text-sm text-secondary pl-5 flex-column gap-sm leading-relaxed">
+                  {evaluation.growReport?.options?.map((opt, idx) => (
                     <li key={idx}>{opt}</li>
-                  ))}
+                  )) || <li>No options provided.</li>}
                 </ul>
               </div>
               <div>
-                <h4 style={{ fontSize: '1rem', marginBottom: '0.5rem', color: '#fff' }}>W - Advisor Will / Commitment</h4>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, fontStyle: 'italic' }}>
-                  {evaluation.growReport.will}
+                <h4 className="text-base mb-sm text-white">W - Advisor Will / Commitment</h4>
+                <p className="text-sm text-secondary leading-relaxed italic">
+                  {evaluation.growReport?.will || 'No commitment provided.'}
                 </p>
               </div>
             </div>

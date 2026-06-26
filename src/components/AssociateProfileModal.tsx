@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, TrendingUp, ClipboardList, Calendar, Volume2, Square, Clock, AlertCircle, CheckCircle, FileText, Loader2, Award } from 'lucide-react';
 import MetricSparkline from './MetricSparkline';
 import ProfileTrendsTab from './AssociateProfile/ProfileTrendsTab';
@@ -21,9 +21,8 @@ export interface AssociateProfileModalProps {
 
 
 import { useAssociateProfile } from '../hooks/useAssociateProfile';
-import { renderMarkdown, formatMarkdownNotes } from '../utils/profileUtils';
 const EMPTY_OBJ = {};
-const EMPTY_ARR: any[] = [];
+const EMPTY_ARR: never[] = [];
 
 export default function AssociateProfileModal({
   isOpen,
@@ -37,15 +36,6 @@ export default function AssociateProfileModal({
   const activePeriod = useStore(state => state.activePeriod);
   const {
     activeTab, setActiveTab,
-    playingLogId, setPlayingLogId,
-    expandedLogId, setExpandedLogId,
-    isGeneratingReview, setIsGeneratingReview,
-    generatedReview, setGeneratedReview,
-    isGeneratingActionPlan, setIsGeneratingActionPlan,
-    generatedActionPlan, setGeneratedActionPlan,
-    handlePlayTTS,
-    handleGenerateReview,
-    handleGenerateActionPlan,
     sortedPeriods,
     historyPoints,
     activeHistoryPoints,
@@ -57,10 +47,11 @@ export default function AssociateProfileModal({
   if (!isOpen || !employee) return null;
 
   return (
-    <div className="modal-overlay z-1050 cursor-pointer" onClick={onClose}>
+    <div className="modal-overlay z-1050 cursor-pointer" onClick={onClose} data-testid="associate-profile-modal-overlay">
       <div 
         className="modal-content cursor-default overflow-hidden p-0" 
-        onClick={(e: any) => e.stopPropagation()}
+        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        data-testid="associate-profile-modal"
       >
         {/* Modal Header */}
         <AssociateProfileHeader 
@@ -75,30 +66,35 @@ export default function AssociateProfileModal({
           <button 
             className={`tab-btn ${activeTab === 'trends' ? 'active' : ''}`}
             onClick={() => setActiveTab('trends')}
+            data-testid="tab-trends"
           >
             <TrendingUp size={16} /> Performance Trends
           </button>
           <button 
             className={`tab-btn ${activeTab === 'coaching' ? 'active' : ''}`}
             onClick={() => setActiveTab('coaching')}
+            data-testid="tab-coaching"
           >
-            <ClipboardList size={16} /> Coaching History ({associateLogs.length})
+            <ClipboardList size={16} /> Coaching History ({associateLogs?.length || 0})
           </button>
           <button 
             className={`tab-btn ${activeTab === 'commitments' ? 'active' : ''}`}
             onClick={() => setActiveTab('commitments')}
+            data-testid="tab-commitments"
           >
-            <Calendar size={16} /> Active Commitments ({associateTasks.filter(t => t.status !== 'completed').length})
+            <Calendar size={16} /> Active Commitments ({associateTasks?.filter(t => !t.completed)?.length || 0})
           </button>
           <button 
             className={`tab-btn ${activeTab === 'oneOnOne' ? 'active' : ''}`}
             onClick={() => setActiveTab('oneOnOne')}
+            data-testid="tab-oneOnOne"
           >
             <FileText size={16} /> 1-on-1 Appraisals
           </button>
           <button 
             className={`tab-btn ${activeTab === 'trophies' ? 'active' : ''}`}
             onClick={() => setActiveTab('trophies')}
+            data-testid="tab-trophies"
           >
             <Award size={16} /> Trophies & PIPs
           </button>
@@ -118,36 +114,26 @@ export default function AssociateProfileModal({
               {activeTab === 'coaching' && (
                 <ProfileCoachingTab 
                   associateLogs={associateLogs}
-                  expandedLogId={expandedLogId}
-                  setExpandedLogId={setExpandedLogId}
-                  handlePlayTTS={handlePlayTTS}
-                  formatMarkdownNotes={formatMarkdownNotes}
-                  playingLogId={playingLogId}
                 />
               )}{/* TAB 3: Commitments Follow-up Tasks */}
           {activeTab === 'commitments' && (
             <ProfileCommitmentsTab 
               associateTasks={associateTasks}
- />
+            />
           )}
 
           {/* TAB 4: 1-on-1 Appraisals */}
           {activeTab === 'oneOnOne' && (
             <ProfileAppraisalsTab 
               employee={employee}
-              renderMarkdown={renderMarkdown}
-              isGeneratingReview={isGeneratingReview}
-              generatedReview={generatedReview}
-              handleGenerateReview={handleGenerateReview}
- />
+              associateLogs={associateLogs}
+            />
           )}
           {/* TAB 5: Trophies & PIPs */}
           {activeTab === 'trophies' && (
             <ProfileTrophiesTab 
               employee={employee} 
-              isGenerating={isGeneratingActionPlan}
-              generatedPlan={generatedActionPlan}
-              onGenerate={handleGenerateActionPlan}
+              associateLogs={associateLogs}
             />
           )}
         </div>

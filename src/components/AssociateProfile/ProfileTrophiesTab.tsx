@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import DOMPurify from 'dompurify';
 import { Award, Star, ShieldCheck, CreditCard, AlertTriangle, CheckCircle, FileText, Loader2, Sparkles } from 'lucide-react';
 import { renderMarkdown } from '../../utils/profileUtils';
-import { Employee } from '../../types';
+import { Employee, CoachingLog } from '../../types';
+import { useStore } from '../../store/useStore';
+import { generateActionPlan } from '../../services/ai/geminiCoaching';
 
 interface Trophy {
   type: string;
@@ -26,12 +28,34 @@ interface GeneratedPlan {
 
 interface ProfileTrophiesTabProps {
   employee: Employee | null;
-  isGenerating: boolean;
-  generatedPlan: GeneratedPlan | null;
-  onGenerate: () => void;
+  associateLogs: CoachingLog[];
 }
 
-export default function ProfileTrophiesTab({ employee, isGenerating, generatedPlan, onGenerate }: ProfileTrophiesTabProps) {
+export default function ProfileTrophiesTab({ employee, associateLogs }: ProfileTrophiesTabProps) {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedPlan, setGeneratedPlan] = useState<GeneratedPlan | null>(null);
+
+  useEffect(() => {
+    setGeneratedPlan(null);
+    setIsGenerating(false);
+  }, [employee?.id]);
+
+  const onGenerate = async () => {
+    if (!employee) return;
+    setIsGenerating(true);
+    try {
+      const apiKey = useStore.getState().apiKey;
+      const plan = await generateActionPlan(employee, associateLogs, apiKey);
+      if (plan) {
+        setGeneratedPlan(plan);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   if (!employee) return null;
 
   const trophies = employee.trophies || [];
@@ -85,7 +109,7 @@ export default function ProfileTrophiesTab({ employee, isGenerating, generatedPl
             <AlertTriangle size={20} className="text-error" /> Active Action Plans (PIPs)
           </h4>
           <button 
-            className="btn btn-primary btn-sm flex-row align-center gap-sm"
+            className="btn btn-primary btn-sm flex-row align-center gap-sm cursor-pointer"
             onClick={onGenerate}
             disabled={isGenerating}
             data-testid="generate-pip-btn"
@@ -109,7 +133,7 @@ export default function ProfileTrophiesTab({ employee, isGenerating, generatedPl
             </p>
             <div className="markdown-body text-sm text-primary" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(renderMarkdown(generatedPlan.planText)) }} data-testid="generated-plan-markdown" />
             <div className="mt-md flex-end gap-sm">
-               <button className="btn btn-primary btn-sm" data-testid="save-pip-btn">Save as Active PIP</button>
+               <button className="btn btn-primary btn-sm cursor-pointer" data-testid="save-pip-btn">Save as Active PIP</button>
             </div>
           </div>
         )}

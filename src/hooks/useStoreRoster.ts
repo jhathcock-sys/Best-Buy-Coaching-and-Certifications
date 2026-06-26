@@ -17,8 +17,6 @@ export function useStoreRoster(roster) {
 
   // Roster History and Performance Editor states
   const [showNewPeriodForm, setShowNewPeriodForm] = useState(false);
-  const [newPeriodName, setNewPeriodName] = useState('');
-  const [copyOption, setCopyOption] = useState('roster-only');
   
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [showImporter, setShowImporter] = useState(false);
@@ -62,8 +60,6 @@ export function useStoreRoster(roster) {
     activeDept, setActiveDept,
     showAddForm, setShowAddForm,
     showNewPeriodForm, setShowNewPeriodForm,
-    newPeriodName, setNewPeriodName,
-    copyOption, setCopyOption,
     editingEmployee, setEditingEmployee,
     showImporter, setShowImporter,
     activeSubView, setActiveSubView,

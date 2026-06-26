@@ -29,9 +29,9 @@ export default function FloorAuditUploader({ selectedImage, isAuditing, onImageS
   };
 
   return (
-    <div className="glass-card flex-column gap-lg">
+    <div className="glass-card flex-column gap-lg p-xl">
       <div>
-        <h2 className="flex-center justify-start gap-sm mb-sm text-2xl">
+        <h2 className="flex-center justify-start gap-sm mb-sm text-2xl font-heading">
           <Camera color="var(--bby-blue)" size={22} /> Visual Floor Audit
         </h2>
         <p className="text-secondary text-sm">
@@ -40,38 +40,38 @@ export default function FloorAuditUploader({ selectedImage, isAuditing, onImageS
       </div>
 
       {selectedImage ? (
-        <div className="relative w-full h-220px flex-center overflow-hidden rounded-xl bg-black-alpha-20 border-glass" style={{ borderStyle: 'dashed' }}>
+        <div className="relative w-full min-h-200 flex-center overflow-hidden rounded-xl bg-black-alpha-20 border-glass-dashed">
           {selectedImage.startsWith('data:image/png;base64,iVBORw0K') ? (
             <div className="p-xl text-center flex-column align-center gap-sm">
               <Camera size={38} color="var(--bby-yellow)" />
-              <span className="font-semibold text-sm">Demo Store Queue Snapshot Loaded</span>
-              <span className="text-muted" style={{ fontSize: '0.7rem' }}>Busy register lane with 3+ waiting customers, unsorted Computing laptop table.</span>
+              <span className="font-bold text-sm">Demo Store Queue Snapshot Loaded</span>
+              <span className="text-muted text-xs">Busy register lane with 3+ waiting customers, unsorted Computing laptop table.</span>
             </div>
           ) : (
-            <img src={selectedImage} alt="Store upload preview" className="w-full h-full" style={{ objectFit: 'contain', maxHeight: '350px' }} />
+            <img src={selectedImage} alt="Store upload preview" className="w-full h-auto max-h-350 object-contain" />
           )}
           <button 
-            className="btn btn-secondary absolute"
-            style={{ bottom: '10px', right: '10px', padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}
+            className="btn btn-secondary absolute bottom-sm right-sm px-md py-xs text-xs cursor-pointer z-10"
             onClick={onClear}
+            disabled={isAuditing}
           >
             Clear Image
           </button>
         </div>
       ) : (
         <div className="flex-column gap-md">
-          <label className="flex-column align-center justify-center p-xl rounded-xl border-glass transition-normal cursor-pointer commitment-card-hover" style={{ background: 'rgba(255,255,255,0.01)', borderStyle: 'dashed', borderWidth: '2px' }}>
+          <label className="flex-column align-center justify-center p-xl rounded-xl border-glass-dashed bg-white-alpha-01 transition-normal cursor-pointer hover-border-primary">
             <Camera size={44} className="text-muted mb-md" />
-            <span className="font-semibold text-white mb-xs text-sm">Select Store Photo</span>
-            <span className="text-secondary" style={{ fontSize: '0.75rem' }}>PNG, JPG or WebP images</span>
-            <input type="file" accept="image/*" onChange={handleImageUpload} className="opacity-0 w-full h-full absolute inset-0 cursor-pointer" style={{ display: 'none' }} />
+            <span className="font-bold text-white mb-xs text-sm">Select Store Photo</span>
+            <span className="text-secondary text-xs">PNG, JPG or WebP images</span>
+            <input type="file" accept="image/*" onChange={handleImageUpload} className="d-none" />
           </label>
 
           <div className="text-center">
-            <span className="text-muted" style={{ fontSize: '0.75rem' }}>OR</span>
+            <span className="text-muted text-xs font-bold">OR</span>
           </div>
 
-          <button className="btn btn-secondary w-full" data-testid="demo-photo-btn" onClick={handleTryDemo}>
+          <button className="btn btn-secondary w-full p-md cursor-pointer" data-testid="demo-photo-btn" onClick={handleTryDemo}>
             Load Demo Store Photo Snapshot
           </button>
         </div>
@@ -79,14 +79,14 @@ export default function FloorAuditUploader({ selectedImage, isAuditing, onImageS
 
       {selectedImage && (
         <button 
-          className="btn btn-accent w-full" 
+          className="btn btn-accent w-full p-md cursor-pointer" 
           data-testid="run-audit-btn"
           onClick={onRunAudit}
           disabled={isAuditing}
         >
           {isAuditing ? (
             <div className="flex-center gap-sm">
-              <RefreshCw size={14} className="typing-dots" style={{ animation: 'spin 2s linear infinite' }} /> Inspecting Store Layout...
+              <RefreshCw size={14} className="spin" /> Inspecting Store Layout...
             </div>
           ) : (
             <div className="flex-center gap-sm">

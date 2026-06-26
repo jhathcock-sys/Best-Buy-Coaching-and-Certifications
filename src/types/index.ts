@@ -116,7 +116,7 @@ export interface ShiftEvent {
   dueDate?: string;
   timestamp?: number;
   zoneAssignments?: Record<string, string[]>;
-  breakSchedule?: any[];
+  breakSchedule?: BreakEntry[];
   activeBreaks?: Record<string, string>;
   dailyRevenueGoal?: number;
   dailyAppsGoal?: number;
@@ -148,5 +148,6 @@ declare global {
 export interface ShiftWin { id: string; empId: string; empName: string; zone: string; type: 'pm' | 'card' | 'app'; timestamp: number; hourIndex?: number; }
 export interface ShiftSummary { totalPms: number; totalApps: number; totalRevenue: number; onTrackHours: number; onTrackRatio: number; }
 
+export interface BreakEntry { id: string; empId: string; name: string; time: string; type: string; completed: boolean; }
 export interface HistoricalShift { id: string; date: string; leaderName: string; isWeekend: boolean; totalHours: number; totalRevenue: number; totalPms: number; totalApps: number; onTrackRatio: number; }
 

@@ -1,32 +1,43 @@
-import { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useStore } from '../store/useStore';
 import { auditFiveStarSurveyGemini } from '../services/ai';
 import AuditorInputForm from './AuditorInputForm';
 import AuditorResults from './AuditorResults';
 
+export interface AuditResult {
+  rating: number;
+  comment: string;
+  associateName?: string;
+  department?: string;
+  rootCause: string;
+  coachingScript: string;
+  checkItems?: string[];
+}
+
 // Simple 1x1 PNG pixel for mock uploader
 const MOCK_SURVEY_IMAGE = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
 
-export default function FiveStarAuditor({ roster = [] }) {
+export default function FiveStarAuditor() {
   const apiKey = useStore((state) => state.apiKey);
-const playbookSettings = useStore((state) => state.playbookSettings);
+  const playbookSettings = useStore((state) => state.playbookSettings);
   const logCoachingSession = useStore((state) => state.logCoachingSession);
+  const roster = useStore((state) => state.managers || []);
 
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [imageMime, setImageMime] = useState('image/png');
-  const [textInput, setTextInput] = useState('');
-  const [isAuditing, setIsAuditing] = useState(false);
-  const [auditResult, setAuditResult] = useState(null);
-  const [isSaved, setIsSaved] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [imageMime, setImageMime] = useState<string>('image/png');
+  const [textInput, setTextInput] = useState<string>('');
+  const [isAuditing, setIsAuditing] = useState<boolean>(false);
+  const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
+  const [isSaved, setIsSaved] = useState<boolean>(false);
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
     setImageMime(file.type);
     const reader = new FileReader();
     reader.onloadend = () => {
-      setSelectedImage(reader.result);
+      setSelectedImage(reader.result as string);
       setAuditResult(null);
       setIsSaved(false);
       if (!textInput) {
@@ -45,6 +56,8 @@ const playbookSettings = useStore((state) => state.playbookSettings);
   };
 
   const handleRunAudit = async () => {
+    if (isAuditing) return;
+    
     if (!selectedImage && !textInput.trim()) {
       alert("Please upload a survey screenshot or copy-paste survey feedback text first!");
       return;
@@ -88,7 +101,7 @@ const playbookSettings = useStore((state) => state.playbookSettings);
     if (!auditResult) return;
 
     const matchedEmployee = roster.find(
-      (emp) => emp.name.toLowerCase() === (auditResult.associateName || '').toLowerCase()
+      (emp: any) => emp.name.toLowerCase() === (auditResult.associateName || '').toLowerCase()
     );
 
     const notes = `### 5-Star Detractor Audit Summary
@@ -108,29 +121,37 @@ ${auditResult.checkItems ? auditResult.checkItems.map((item, idx) => `${idx + 1}
 
     logCoachingSession({
       customerName: matchedEmployee ? matchedEmployee.name : (auditResult.associateName || 'Jordan'),
-      employeeId: matchedEmployee ? matchedEmployee.id : `emp-${Date.now()}`,
+      employeeId: matchedEmployee ? matchedEmployee.name.toLowerCase().replace(/\s+/g, '-') : `emp-${Date.now()}`,
       category: '5-Star Survey Feedback',
       score: auditResult.rating * 20,
-      avatar: matchedEmployee?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
       notes: notes
     });
 
     setIsSaved(true);
   };
 
+  const formState = useMemo(() => ({
+    selectedImage,
+    textInput,
+    isAuditing
+  }), [selectedImage, textInput, isAuditing]);
+
+  const formHandlers = useMemo(() => ({
+    setSelectedImage,
+    setAuditResult,
+    setIsSaved,
+    setTextInput,
+    handleImageUpload,
+    handleLoadDemo,
+    handleRunAudit
+  }), [handleRunAudit, handleImageUpload, handleLoadDemo]);
+
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem', marginTop: '1.5rem' }}>
+    <div className="grid-cols-2 gap-xl mt-lg" data-testid="five-star-auditor">
       <AuditorInputForm 
-        selectedImage={selectedImage}
-        setSelectedImage={setSelectedImage}
-        setAuditResult={setAuditResult}
-        setIsSaved={setIsSaved}
-        textInput={textInput}
-        setTextInput={setTextInput}
-        isAuditing={isAuditing}
-        handleImageUpload={handleImageUpload}
-        handleLoadDemo={handleLoadDemo}
-        handleRunAudit={handleRunAudit}
+        formState={formState}
+        formHandlers={formHandlers}
       />
       
       <AuditorResults 
@@ -142,3 +163,4 @@ ${auditResult.checkItems ? auditResult.checkItems.map((item, idx) => `${idx + 1}
     </div>
   );
 }
+

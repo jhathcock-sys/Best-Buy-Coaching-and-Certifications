@@ -24,14 +24,15 @@ export default function ActionSheet({ isOpen, onClose, title, children }: Action
   if (!isOpen) return null;
 
   return (
-    <div className="action-sheet-overlay" onClick={onClose}>
+    <div className="action-sheet-overlay cursor-pointer" onClick={onClose} data-testid="action-sheet-overlay">
       <div 
-        className="action-sheet-content glass-card" 
+        className="action-sheet-content glass-card cursor-default" 
         onClick={(e) => e.stopPropagation()}
+        data-testid="action-sheet-content"
       >
         <div className="action-sheet-header">
-          <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700 }}>{title}</h3>
-          <button onClick={onClose} className="icon-btn clickable bg-white-alpha-10 border-none text-white rounded-full p-xs flex-center">
+          <h3 className="m-0 text-lg font-bold" data-testid="action-sheet-title">{title}</h3>
+          <button onClick={onClose} className="icon-btn cursor-pointer bg-white-alpha-10 border-none text-white rounded-full p-xs flex-center" data-testid="action-sheet-close-btn">
             <X size={18} />
           </button>
         </div>

@@ -125,7 +125,7 @@ export default function FloorLeaderTracker() {
           )}
 
           {leaderTab === 'survey' && (
-            <FiveStarAuditor roster={roster} />
+            <FiveStarAuditor />
           )}
 
 

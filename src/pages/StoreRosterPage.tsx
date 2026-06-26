@@ -60,8 +60,6 @@ export default function StoreRoster({
     activeDept, setActiveDept,
     showAddForm, setShowAddForm,
     showNewPeriodForm, setShowNewPeriodForm,
-    newPeriodName, setNewPeriodName,
-    copyOption, setCopyOption,
     editingEmployee, setEditingEmployee,
     showImporter, setShowImporter,
     activeSubView, setActiveSubView,
@@ -144,14 +142,32 @@ export default function StoreRoster({
             setActiveDept={setActiveDept}
             tempSearch={tempSearch}
             setTempSearch={setTempSearch}
-            showNewPeriodForm={showNewPeriodForm}
-            setShowNewPeriodForm={setShowNewPeriodForm}
-            showAddForm={showAddForm}
-            setShowAddForm={setShowAddForm}
-            showImporter={showImporter}
-            setShowImporter={setShowImporter}
-            showViewSettings={showViewSettings}
-            setShowViewSettings={setShowViewSettings}
+            toggles={{
+              showNewPeriodForm,
+              showAddForm,
+              showViewSettings
+            }}
+            actions={{
+              onToggleNewPeriod: () => {
+                setShowNewPeriodForm(!showNewPeriodForm);
+                setShowAddForm(false);
+              },
+              onToggleAdd: () => {
+                setShowAddForm(!showAddForm);
+                setShowNewPeriodForm(false);
+              },
+              onToggleImport: () => {
+                setShowImporter(true);
+                setShowAddForm(false);
+                setShowNewPeriodForm(false);
+                setShowViewSettings(false);
+              },
+              onToggleSettings: () => {
+                setShowViewSettings(!showViewSettings);
+                setShowAddForm(false);
+                setShowNewPeriodForm(false);
+              }
+            }}
           />
 
           <RosterDisplaySettings 
@@ -162,16 +178,12 @@ export default function StoreRoster({
             setVisibleCols={setVisibleCols}
           />
 
-          <StartNewPeriodForm 
-            showNewPeriodForm={showNewPeriodForm}
-            setShowNewPeriodForm={setShowNewPeriodForm}
-            newPeriodName={newPeriodName}
-            setNewPeriodName={setNewPeriodName}
-            copyOption={copyOption}
-            setCopyOption={setCopyOption}
-            rosterHistory={rosterHistory}
-            onCreatePeriod={onCreatePeriod}
-          />
+          {showNewPeriodForm && (
+            <StartNewPeriodForm 
+              onClose={() => setShowNewPeriodForm(false)}
+              onCreatePeriod={onCreatePeriod}
+            />
+          )}
 
           {/* Add Associate Modal */}
           <AddEmployeeModal
@@ -189,18 +201,12 @@ export default function StoreRoster({
                   isDense={isDense}
                   setSelectedProfileEmployee={setSelectedProfileEmployee}
                   handleStartEdit={handleStartEdit}
-                  DEPARTMENTS={DEPARTMENTS}
-                  onCoachEmployee={onCoachEmployee}
-                  onCreateLog={onCreateLog}
                 />
             ) : (
                 <StoreRosterMobileCard 
                   filteredRoster={filteredRoster}
-                  visibleCols={visibleCols}
-                  isDense={isDense}
-                  setSelectedProfileEmployee={setSelectedProfileEmployee}
-                  handleStartEdit={handleStartEdit}
                   DEPARTMENTS={DEPARTMENTS}
+                  handleStartEdit={handleStartEdit}
                   onCoachEmployee={onCoachEmployee}
                   onCreateLog={onCreateLog}
                 />
@@ -247,9 +253,7 @@ export default function StoreRoster({
       )}
 
       {activeSubView === 'rentsDue' && (
-        <RentsDueAuditor 
-          onBulkImportEmployees={onBulkImportEmployees}
-        />
+        <RentsDueAuditor />
       )}
 
       {/* Performance Wizard Modal */}

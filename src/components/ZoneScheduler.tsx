@@ -130,10 +130,8 @@ export default function ZoneScheduler({
       {viewMode === 'grid' ? (
         <ZoneGrid 
           zones={zones}
-          zoneAssignments={safeZoneAssignments}
           unassignedEmps={unassignedEmps}
           roster={safeRoster}
-          activeBreaks={activeBreaks || {}}
           onAssignZone={onAssignZone}
           onUnassignZone={onUnassignZone}
           onToggleBreakState={onToggleBreakState}
@@ -141,10 +139,6 @@ export default function ZoneScheduler({
       ) : (
         <ZoneTimeline 
           timeSlots={timeSlots}
-          assignedEmpIds={assignedEmpIds}
-          roster={safeRoster}
-          zoneAssignments={safeZoneAssignments}
-          activeBreaks={activeBreaks || {}}
         />
       )}
     </div>

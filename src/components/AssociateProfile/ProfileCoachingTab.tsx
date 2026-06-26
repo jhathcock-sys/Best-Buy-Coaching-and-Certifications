@@ -1,24 +1,45 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState, useEffect } from 'react';
 import { Volume2, Square, Clock, AlertCircle } from 'lucide-react';
 import { CoachingLog } from '../../types';
+import { formatMarkdownNotes } from '../../utils/profileUtils';
 
 interface ProfileCoachingTabProps {
   associateLogs: CoachingLog[];
-  expandedLogId: string | null;
-  setExpandedLogId: (id: string | null) => void;
-  handlePlayTTS: (id: string, text: string) => void;
-  formatMarkdownNotes: (markdown: string) => ReactNode;
-  playingLogId: string | null;
 }
 
 export default function ProfileCoachingTab({ 
   associateLogs,
-  expandedLogId,
-  setExpandedLogId,
-  handlePlayTTS,
-  formatMarkdownNotes,
-  playingLogId,
  }: ProfileCoachingTabProps) {
+  const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
+  const [playingLogId, setPlayingLogId] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
+
+  const handlePlayTTS = (logId: string, text: string) => {
+    if (playingLogId === logId) {
+      window.speechSynthesis.cancel();
+      setPlayingLogId(null);
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const cleanText = text
+      .replace(/[#*`_-]/g, ' ')
+      .replace(/DISC Focus:/gi, ' DISC Focus step is ')
+      .replace(/WHAT:/gi, ' What needs to be done: ')
+      .replace(/HOW:/gi, ' How they should sell: ')
+      .replace(/WHY:/gi, ' Why it matters: ');
+    
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.onend = () => setPlayingLogId(null);
+    utterance.onerror = () => setPlayingLogId(null);
+    setPlayingLogId(logId);
+    window.speechSynthesis.speak(utterance);
+  };
+
   return (
     <>
             <div className="flex-column gap-md animate-fade-in" data-testid="profile-coaching-tab">

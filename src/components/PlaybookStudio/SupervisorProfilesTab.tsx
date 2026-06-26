@@ -1,11 +1,21 @@
 import React, { useState } from 'react';
 import { ShieldAlert, Plus, Edit2, Trash2, Check, Eye, EyeOff, Key, Users, UserPlus } from 'lucide-react';
+import { useStore } from '../../store/useStore';
+import { useShallow } from 'zustand/react/shallow';
+import { Manager } from '../../types/index';
+import { StoreState } from '../../types/store';
 
-export default function SupervisorProfilesTab({ 
-  managers, 
-  onSaveManagers,
-  storePin, setStorePin
-}: any) {
+export default function SupervisorProfilesTab() {
+  
+  const { managers, saveManagers, playbookSettings, apiKey, saveSettings } = useStore(useShallow((state: StoreState) => ({
+    managers: state.managers || [],
+    saveManagers: state.saveManagers,
+    playbookSettings: state.playbookSettings,
+    apiKey: state.apiKey,
+    saveSettings: state.saveSettings
+  })));
+
+  const [storePin, setStorePin] = useState(playbookSettings?.storePin || '1234');
   const [newManagerName, setNewManagerName] = useState('');
   const [newManagerRole, setNewManagerRole] = useState('Experience Supervisor Sales');
   const [newManagerPin, setNewManagerPin] = useState('');
@@ -15,16 +25,34 @@ export default function SupervisorProfilesTab({
   const [editingManagerPin, setEditingManagerPin] = useState('');
   const [visiblePins, setVisiblePins] = useState<Record<number, boolean>>({});
 
+  const handleSavePin = () => {
+    if (!playbookSettings || !saveSettings || !apiKey) return;
+    saveSettings({
+      apiKey: apiKey,
+      playbookSettings: {
+        ...playbookSettings,
+        storePin
+      }
+    });
+    alert('Store PIN saved securely!');
+  };
+
   const handleAddManager = () => {
     if (!newManagerName.trim() || !newManagerRole.trim() || !newManagerPin.trim()) {
       alert("Error: All fields are required."); return;
     }
-    const newMgr = { name: newManagerName.trim(), role: newManagerRole.trim(), pin: newManagerPin.trim() };
-    onSaveManagers([...managers, newMgr]);
+    const newMgr: Manager = { 
+      name: newManagerName.trim(), 
+      role: newManagerRole.trim(), 
+      pin: newManagerPin.trim()
+    };
+    if (saveManagers) {
+      saveManagers([...managers, newMgr]);
+    }
     setNewManagerName(''); setNewManagerRole('Experience Supervisor Sales'); setNewManagerPin('');
   };
 
-  const startEditingManager = (idx: number, mgr: any) => {
+  const startEditingManager = (idx: number, mgr: Manager) => {
     setEditingManagerIndex(idx);
     setEditingManagerName(mgr.name);
     setEditingManagerRole(mgr.role || 'Experience Supervisor Sales');
@@ -34,8 +62,15 @@ export default function SupervisorProfilesTab({
   const saveEditingManager = () => {
     if (!editingManagerName.trim() || !editingManagerRole.trim() || !editingManagerPin.trim() || editingManagerIndex === null) return;
     const updated = [...managers];
-    updated[editingManagerIndex] = { name: editingManagerName.trim(), role: editingManagerRole.trim(), pin: editingManagerPin.trim() };
-    onSaveManagers(updated);
+    updated[editingManagerIndex] = { 
+      ...updated[editingManagerIndex],
+      name: editingManagerName.trim(), 
+      role: editingManagerRole.trim(), 
+      pin: editingManagerPin.trim() 
+    };
+    if (saveManagers) {
+      saveManagers(updated);
+    }
     setEditingManagerIndex(null);
   };
 
@@ -43,7 +78,9 @@ export default function SupervisorProfilesTab({
     if (confirm("Remove this supervisor?")) {
       const updated = [...managers];
       updated.splice(idx, 1);
-      onSaveManagers(updated);
+      if (saveManagers) {
+        saveManagers(updated);
+      }
     }
   };
 
@@ -53,31 +90,41 @@ export default function SupervisorProfilesTab({
 
   return (
     <>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem', alignItems: 'start' }}>
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(400px,1fr))] gap-2xl items-start">
           {/* Store Passcode PIN Security Card */}
           <div className="glass-card">
-            <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 className="text-xl mb-md flex-center-y gap-sm">
               <Key size={20} color="var(--bby-yellow)" /> Store Passcode PIN Security
             </h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '1.5rem' }}>
+            <p className="text-sm text-secondary mb-xl">
               Configure the 4-digit supervisor access passcode PIN. This passcode locks all dashboards, store rosters, and settings configurations from unauthorized advisor modifications.
             </p>
 
-            <div className="form-group" style={{ margin: 0 }}>
-              <label className="form-label">Supervisor 4-Digit PIN:</label>
-              <input 
-                type="text" 
-                maxLength={4}
-                className="form-control" 
-                placeholder="e.g. 1234"
-                value={storePin}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, '');
-                  setStorePin(val);
-                }}
-                style={{ letterSpacing: '0.25em', fontSize: '1.1rem', fontWeight: 'bold', width: '120px', textAlign: 'center' }}
-              />
-              <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.35rem', margin: '0.35rem 0 0 0' }}>
+            <div className="form-group m-0">
+              <label className="form-label" htmlFor="store-pin-input">Supervisor 4-Digit PIN:</label>
+              <div className="flex gap-sm items-center">
+                <input 
+                  id="store-pin-input"
+                  type="text" 
+                  maxLength={4}
+                  className="form-control text-lg font-bold w-[120px] text-center tracking-[0.25em]" 
+                  placeholder="e.g. 1234"
+                  value={storePin}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    setStorePin(val);
+                  }}
+                  data-testid="store-pin-input"
+                />
+                <button 
+                  className="btn btn-primary px-lg py-sm text-sm font-bold flex-center-y gap-xs cursor-pointer"
+                  onClick={handleSavePin}
+                  data-testid="save-pin-btn"
+                >
+                  <Check size={16} /> Save PIN
+                </button>
+              </div>
+              <p className="text-xs text-muted mt-sm">
                 Default is 1234. Change this PIN to lock out access on floor tablets. PIN must be exactly 4 digits.
               </p>
             </div>
@@ -85,14 +132,14 @@ export default function SupervisorProfilesTab({
 
           {/* Supervisor Profiles & PINs Card */}
           <div className="glass-card">
-            <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 className="text-xl mb-md flex-center-y gap-sm">
               <Users size={20} color="var(--info)" /> Supervisor Profiles & PINs
             </h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '1.5rem' }}>
+            <p className="text-sm text-secondary mb-xl">
               Configure individual supervisor accounts and unique 4-digit PINs for dashboard logins and coaching attribution.
             </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div className="flex-column gap-md mb-xl">
               {managers.map((mgr, idx) => {
                 const isEditing = editingManagerIndex === idx;
                 const isPinVisible = visiblePins[idx];
@@ -100,92 +147,96 @@ export default function SupervisorProfilesTab({
                 return (
                   <div 
                     key={idx} 
-                    style={{ 
-                      display: 'flex', 
-                      flexDirection: 'column',
-                      gap: '0.75rem',
-                      background: 'rgba(255,255,255,0.01)', 
-                      border: '1px solid var(--border-glass)', 
-                      padding: '1rem', 
-                      borderRadius: '12px',
-                      transition: 'all 0.2s'
-                    }}
+                    className="flex-column gap-sm bg-white-alpha-01 border border-[var(--border-glass)] p-md rounded-xl transition-normal"
+                    data-testid={`manager-row-${idx}`}
                   >
                     {isEditing ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                      <div className="flex-column gap-sm">
+                        <div className="grid grid-cols-2 gap-sm">
                           <div>
-                            <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.25rem' }}>Name</label>
+                            <label className="text-xs text-secondary block mb-xs" htmlFor={`edit-name-${idx}`}>Name</label>
                             <input 
+                              id={`edit-name-${idx}`}
                               type="text" 
-                              className="form-control" 
-                              style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem' }}
+                              className="form-control text-sm px-md py-sm" 
                               value={editingManagerName}
                               onChange={(e) => setEditingManagerName(e.target.value)}
+                              data-testid={`edit-name-input-${idx}`}
                             />
                           </div>
                           <div>
-                            <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.25rem' }}>Role</label>
+                            <label className="text-xs text-secondary block mb-xs" htmlFor={`edit-role-${idx}`}>Role</label>
                             <input 
+                              id={`edit-role-${idx}`}
                               type="text" 
-                              className="form-control" 
-                              style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem' }}
+                              className="form-control text-sm px-md py-sm" 
                               value={editingManagerRole}
                               onChange={(e) => setEditingManagerRole(e.target.value)}
+                              data-testid={`edit-role-input-${idx}`}
                             />
                           </div>
                         </div>
                         <div>
-                          <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.25rem' }}>4-Digit PIN</label>
+                          <label className="text-xs text-secondary block mb-xs" htmlFor={`edit-pin-${idx}`}>4-Digit PIN</label>
                           <input 
+                            id={`edit-pin-${idx}`}
                             type="text" 
                             maxLength={4}
-                            className="form-control" 
+                            className="form-control text-sm px-md py-sm w-[100px] tracking-[0.1em]" 
                             placeholder="e.g. 2001"
-                            style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem', width: '100px', letterSpacing: '0.1em' }}
                             value={editingManagerPin}
                             onChange={(e) => setEditingManagerPin(e.target.value.replace(/\D/g, ''))}
+                            data-testid={`edit-pin-input-${idx}`}
                           />
                         </div>
-                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
-                          <button className="btn btn-primary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }} onClick={saveEditingManager}>
+                        <div className="flex gap-sm mt-xs">
+                          <button 
+                            className="btn btn-primary px-md py-xs text-xs cursor-pointer" 
+                            onClick={saveEditingManager}
+                            data-testid={`save-edit-btn-${idx}`}
+                          >
                             Save
                           </button>
-                          <button className="btn btn-secondary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }} onClick={() => setEditingManagerIndex(null)}>
+                          <button 
+                            className="btn btn-secondary px-md py-xs text-xs cursor-pointer" 
+                            onClick={() => setEditingManagerIndex(null)}
+                            data-testid={`cancel-edit-btn-${idx}`}
+                          >
                             Cancel
                           </button>
                         </div>
                       </div>
                     ) : (
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div className="flex justify-between items-center">
                         <div>
-                          <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#fff' }}>{mgr.name}</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{mgr.role}</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--bby-yellow)', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                            <span>PIN: {isPinVisible ? mgr.pin : '••••'}</span>
+                          <div className="font-bold text-sm text-white" data-testid={`manager-name-${idx}`}>{mgr.name}</div>
+                          <div className="text-xs text-secondary" data-testid={`manager-role-${idx}`}>{mgr.role}</div>
+                          <div className="text-xs text-bby-yellow mt-xs flex-center-y gap-xs">
+                            <span data-testid={`manager-pin-${idx}`}>PIN: {isPinVisible ? mgr.pin : '••••'}</span>
                             <button 
                               type="button" 
                               onClick={() => togglePinVisibility(idx)}
-                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', padding: 0 }}
+                              className="bg-transparent border-none cursor-pointer text-secondary p-0"
+                              data-testid={`toggle-pin-btn-${idx}`}
                             >
                               {isPinVisible ? <EyeOff size={13} /> : <Eye size={13} />}
                             </button>
                           </div>
                         </div>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <div className="flex gap-sm">
                           <button 
-                            className="btn btn-secondary" 
-                            style={{ padding: '0.4rem', borderRadius: '8px' }} 
+                            className="btn btn-secondary p-sm rounded-lg cursor-pointer" 
                             onClick={() => startEditingManager(idx, mgr)}
                             title="Edit Supervisor"
+                            data-testid={`edit-mgr-btn-${idx}`}
                           >
                             <Edit2 size={14} />
                           </button>
                           <button 
-                            className="btn btn-secondary" 
-                            style={{ padding: '0.4rem', borderRadius: '8px', color: 'var(--error)' }} 
+                            className="btn btn-secondary p-sm rounded-lg text-error cursor-pointer hover-bg-error hover-text-white transition-normal" 
                             onClick={() => handleDeleteManager(idx)}
                             title="Delete Supervisor"
+                            data-testid={`delete-mgr-btn-${idx}`}
                           >
                             <Trash2 size={14} />
                           </button>
@@ -197,25 +248,25 @@ export default function SupervisorProfilesTab({
               })}
             </div>
 
-            <div style={{ borderTop: '1px solid var(--border-glass)', paddingTop: '1.25rem' }}>
-              <h4 style={{ fontSize: '0.9rem', color: '#fff', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+            <div className="border-t border-[var(--border-glass)] pt-xl">
+              <h4 className="text-sm text-white mb-md flex-center-y gap-xs">
                 <UserPlus size={16} color="var(--success)" /> Add New Supervisor
               </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.5rem' }}>
+              <div className="flex-column gap-md">
+                <div className="grid grid-cols-[1.2fr_1fr] gap-sm">
                   <input 
                     type="text" 
-                    className="form-control" 
+                    className="form-control text-sm p-sm" 
                     placeholder="Supervisor Name"
-                    style={{ fontSize: '0.8rem', padding: '0.5rem' }}
                     value={newManagerName}
                     onChange={(e) => setNewManagerName(e.target.value)}
+                    data-testid="new-mgr-name-input"
                   />
                   <select 
-                    className="form-control" 
-                    style={{ fontSize: '0.8rem', padding: '0.5rem' }}
+                    className="form-control text-sm p-sm" 
                     value={newManagerRole}
                     onChange={(e) => setNewManagerRole(e.target.value)}
+                    data-testid="new-mgr-role-select"
                   >
                     <option value="Experience Manager Sales Focused">Experience Manager Sales Focused</option>
                     <option value="Experience Manager Ops Focused">Experience Manager Ops Focused</option>
@@ -225,20 +276,20 @@ export default function SupervisorProfilesTab({
                     <option value="Store Leader">Store Leader</option>
                   </select>
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <div className="flex gap-sm items-center">
                   <input 
                     type="text" 
                     maxLength={4}
-                    className="form-control" 
+                    className="form-control text-sm p-sm w-[110px] tracking-[0.05em]" 
                     placeholder="4-Digit PIN"
-                    style={{ fontSize: '0.8rem', padding: '0.5rem', width: '110px', letterSpacing: '0.05em' }}
                     value={newManagerPin}
                     onChange={(e) => setNewManagerPin(e.target.value.replace(/\D/g, ''))}
+                    data-testid="new-mgr-pin-input"
                   />
                   <button 
-                    className="btn btn-primary" 
-                    style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                    className="btn btn-primary px-lg py-sm text-sm flex-center-y gap-xs cursor-pointer"
                     onClick={handleAddManager}
+                    data-testid="add-mgr-btn"
                   >
                     <Plus size={14} /> Add Supervisor
                   </button>

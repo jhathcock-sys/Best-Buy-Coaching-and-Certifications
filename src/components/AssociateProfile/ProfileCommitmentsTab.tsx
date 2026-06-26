@@ -1,15 +1,9 @@
 import React from 'react';
 import { Calendar, CheckCircle } from 'lucide-react';
-
-interface AssociateTask {
-  id: string;
-  action: string;
-  dueDate: string;
-  completed: boolean;
-}
+import { FollowUpTask } from '../../types';
 
 interface ProfileCommitmentsTabProps {
-  associateTasks: AssociateTask[];
+  associateTasks: FollowUpTask[];
 }
 
 export default function ProfileCommitmentsTab({ 
@@ -26,9 +20,9 @@ export default function ProfileCommitmentsTab({
         </div>
       ) : (
         <div className="flex-column gap-sm">
-          {associateTasks.map((task: AssociateTask) => (
+          {associateTasks.map((task: FollowUpTask) => (
             <div 
-              key={task.id}
+              key={task.id || task.action}
               data-testid="commitment-task-item"
               className={`p-md rounded-xl flex-between align-center gap-md border-glass ${task.completed ? 'bg-success-alpha-15' : 'bg-white-alpha-05'}`}
             >

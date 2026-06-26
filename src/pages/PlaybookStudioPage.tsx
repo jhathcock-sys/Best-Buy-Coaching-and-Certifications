@@ -129,21 +129,11 @@ function PlaybookStudioContent({ playbookSettings }: { playbookSettings: any }) 
       )}
 
       {activeTab === 'prompts' && (
-        <SystemPromptsTab 
-          customSystemPrompt={customSystemPrompt} 
-          setCustomSystemPrompt={setCustomSystemPrompt} 
-          playbookSettings={playbookSettings}
-          onSaveSettings={onSaveSettings}
-        />
+        <SystemPromptsTab />
       )}
 
       {activeTab === 'supervisors' && (
-        <SupervisorProfilesTab 
-          managers={managers}
-          onSaveManagers={onSaveManagers}
-          storePin={storePin}
-          setStorePin={setStorePin}
-        />
+        <SupervisorProfilesTab />
       )}
 
       {activeTab === 'vocab' && (
@@ -151,10 +141,7 @@ function PlaybookStudioContent({ playbookSettings }: { playbookSettings: any }) 
       )}
 
       {activeTab === 'targets' && (
-        <DepartmentTargetsTab 
-          selectedDept={selectedDept} setSelectedDept={setSelectedDept}
-          deptGoals={deptGoals} handleSaveDeptGoals={onSaveDeptGoals}
-        />
+        <DepartmentTargetsTab />
       )}
 
       {activeTab === 'scenarios' && (
@@ -162,13 +149,7 @@ function PlaybookStudioContent({ playbookSettings }: { playbookSettings: any }) 
       )}
 
       {activeTab === 'sync' && (
-        <SyncDiagnosticsTab 
-          dbConnected={dbConnected}
-          storeId={storeId}
-          firebaseConfig={firebaseConfig}
-          setFirebaseConfig={setFirebaseConfig}
-          handleSaveFirebaseConfig={handleSaveFirebaseConfig}
-        />
+        <SyncDiagnosticsTab />
       )}
 
     </div>

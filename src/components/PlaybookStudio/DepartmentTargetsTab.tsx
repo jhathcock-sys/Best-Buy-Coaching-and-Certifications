@@ -1,56 +1,65 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Compass, Check } from 'lucide-react';
+import { useStore } from '../../store/useStore';
+import { useShallow } from 'zustand/react/shallow';
+import { StoreState } from '../../types/store';
+import { DeptGoal } from '../../types/index';
 
-export default function DepartmentTargetsTab({
-  selectedDept, setSelectedDept, deptGoals, handleSaveDeptGoals
-}) {
-  const [editedGoals, setEditedGoals] = React.useState(deptGoals || {});
+export default function DepartmentTargetsTab() {
+  const [selectedDept, setSelectedDept] = useState('Computers');
+  
+  const { deptGoals, saveDeptGoals } = useStore(useShallow((state: StoreState) => ({
+    deptGoals: state.deptGoals,
+    saveDeptGoals: state.saveDeptGoals
+  })));
 
-  React.useEffect(() => {
-    if (deptGoals) setEditedGoals(deptGoals);
+  const [editedGoals, setEditedGoals] = useState<Record<string, DeptGoal>>(deptGoals || {});
+
+  useEffect(() => {
+    if (deptGoals && Object.keys(deptGoals).length > 0) {
+      setEditedGoals(deptGoals);
+    }
   }, [deptGoals]);
 
-  const handleGoalChange = (key, value) => {
-    const updated = {
-      ...editedGoals,
+  const handleGoalChange = (key: keyof DeptGoal, value: string | number) => {
+    setEditedGoals(prev => ({
+      ...prev,
       [selectedDept]: {
-        ...(editedGoals[selectedDept] || {}),
+        ...(prev[selectedDept] || {} as DeptGoal),
         [key]: value
       }
-    };
-    setEditedGoals(updated);
-    if (handleSaveDeptGoals) {
-      handleSaveDeptGoals(updated);
-    }
+    }));
   };
 
   const handleSaveGoals = () => {
-    if (handleSaveDeptGoals) {
-      handleSaveDeptGoals(editedGoals);
+    if (saveDeptGoals) {
+      saveDeptGoals(editedGoals);
     }
   };
 
   const deptKeys = [
     'Computers', 'Home Theater', 'Mobile', 'Appliances', 'Smart Home', 'Digital Imaging', 'Front End'
   ];
+
   return (
     <>
-        <div style={{ maxWidth: '850px', margin: '0 auto', width: '100%' }}>
-          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--bby-yellow)' }}>
+        <div className="w-full max-w-[850px] mx-auto">
+          <div className="glass-card flex-column gap-xl">
+            <h3 className="text-xl flex-center-y gap-sm text-bby-yellow m-0">
               <Compass size={20} color="var(--bby-yellow)" /> Department Goals Configurator
             </h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: 1.4 }}>
+            <p className="text-sm text-secondary leading-relaxed m-0">
               Adapt store benchmarks dynamically by department. These goals are utilized across your roster dynamic audits and simulator scoring!
             </p>
 
             <div className="form-group">
-              <label className="form-label">Select Department to Configure:</label>
+              <label className="form-label" htmlFor="dept-select">Select Department to Configure:</label>
               <select 
-                className="form-control"
+                id="dept-select"
+                className="form-control text-sm"
                 value={selectedDept}
                 onChange={(e) => setSelectedDept(e.target.value)}
-                style={{ fontSize: '0.85rem' }}
+                data-testid="dept-select"
               >
                 {deptKeys.map(d => (
                   <option key={d} value={d}>{d}</option>
@@ -58,152 +67,156 @@ export default function DepartmentTargetsTab({
               </select>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-glass)', padding: '1rem', borderRadius: '12px' }}>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em' }}>
+            <div className="flex-column gap-md bg-white-alpha-01 border border-[var(--border-glass)] p-md rounded-xl">
+              <span className="text-xs text-muted uppercase font-bold tracking-wider">
                 Editing targets for {selectedDept}
               </span>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.25rem' }}>
+              <div className="flex-column gap-md mt-xs">
                 
-                <div style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-glass)', borderRadius: '10px' }}>
-                  <label className="form-label" style={{ fontSize: '0.75rem', color: '#fff', display: 'block', marginBottom: '0.5rem' }}>
+                <div className="p-sm bg-white-alpha-01 border border-[var(--border-glass)] rounded-lg">
+                  <label className="form-label text-xs text-white block mb-sm">
                     Memberships (Plus/Total) Evaluation
                   </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.5rem' }}>
-                    <div className="form-group" style={{ margin: 0 }}>
+                  <div className="grid grid-cols-[1.2fr_1fr] gap-sm">
+                    <div className="form-group m-0">
                       <select 
-                        className="form-control"
+                        className="form-control px-sm py-xs text-sm"
                         value={editedGoals[selectedDept]?.membershipsType || 'Hours'}
                         onChange={(e) => handleGoalChange('membershipsType', e.target.value)}
-                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                        data-testid="memberships-type-select"
                       >
                         <option value="Hours">Hours worked (1 per X hrs)</option>
                         <option value="Dollars">Dollar sales (1 per $D sales)</option>
                       </select>
                     </div>
-                    <div className="form-group" style={{ margin: 0 }}>
+                    <div className="form-group m-0">
                       <input 
                         type="number" 
-                        className="form-control"
+                        className="form-control px-sm py-xs text-sm"
                         value={editedGoals[selectedDept]?.memberships !== undefined ? editedGoals[selectedDept].memberships : ''}
-                        onChange={(e) => handleGoalChange('memberships', e.target.value)}
+                        onChange={(e) => handleGoalChange('memberships', parseFloat(e.target.value))}
                         placeholder="Target value"
-                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                        data-testid="memberships-target-input"
                       />
                     </div>
                   </div>
                 </div>
 
-                <div style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-glass)', borderRadius: '10px' }}>
-                  <label className="form-label" style={{ fontSize: '0.75rem', color: '#fff', display: 'block', marginBottom: '0.5rem' }}>
+                <div className="p-sm bg-white-alpha-01 border border-[var(--border-glass)] rounded-lg">
+                  <label className="form-label text-xs text-white block mb-sm">
                     BBY Credit Cards (Apps) Evaluation
                   </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.5rem' }}>
-                    <div className="form-group" style={{ margin: 0 }}>
+                  <div className="grid grid-cols-[1.2fr_1fr] gap-sm">
+                    <div className="form-group m-0">
                       <select 
-                        className="form-control"
+                        className="form-control px-sm py-xs text-sm"
                         value={editedGoals[selectedDept]?.creditCardsType || 'Hours'}
                         onChange={(e) => handleGoalChange('creditCardsType', e.target.value)}
-                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                        data-testid="credit-cards-type-select"
                       >
                         <option value="Hours">Hours worked (1 per X hrs)</option>
                         <option value="Dollars">Dollar sales (1 per $D sales)</option>
                       </select>
                     </div>
-                    <div className="form-group" style={{ margin: 0 }}>
+                    <div className="form-group m-0">
                       <input 
                         type="number" 
-                        className="form-control"
+                        className="form-control px-sm py-xs text-sm"
                         value={editedGoals[selectedDept]?.creditCards !== undefined ? editedGoals[selectedDept].creditCards : ''}
-                        onChange={(e) => handleGoalChange('creditCards', e.target.value)}
+                        onChange={(e) => handleGoalChange('creditCards', parseFloat(e.target.value))}
                         placeholder="Target value"
-                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                        data-testid="credit-cards-target-input"
                       />
                     </div>
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label" style={{ fontSize: '0.725rem' }}>GSP Attach % Goal:</label>
+                <div className="grid grid-cols-2 gap-sm">
+                  <div className="form-group m-0">
+                    <label className="form-label text-xs">GSP Attach % Goal:</label>
                     <input 
                       type="number" 
                       step="0.1"
-                      className="form-control"
+                      className="form-control px-sm py-xs text-sm"
                       value={editedGoals[selectedDept]?.warranty !== undefined ? editedGoals[selectedDept].warranty : ''}
-                      onChange={(e) => handleGoalChange('warranty', e.target.value)}
-                      style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                      onChange={(e) => handleGoalChange('warranty', parseFloat(e.target.value))}
+                      data-testid="warranty-target-input"
                     />
                   </div>
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label" style={{ fontSize: '0.725rem' }}>5 Star Surveys Goal:</label>
+                  <div className="form-group m-0">
+                    <label className="form-label text-xs">5 Star Surveys Goal:</label>
                     <input 
                       type="number" 
                       step="0.1"
-                      className="form-control"
+                      className="form-control px-sm py-xs text-sm"
                       value={editedGoals[selectedDept]?.surveys !== undefined ? editedGoals[selectedDept].surveys : ''}
-                      onChange={(e) => handleGoalChange('surveys', e.target.value)}
-                      style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                      onChange={(e) => handleGoalChange('surveys', parseFloat(e.target.value))}
+                      data-testid="surveys-target-input"
                     />
                   </div>
                 </div>
 
               </div>
 
-              <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.725rem' }}>RPH index Target ($/hr):</label>
+              <div className="form-group mt-sm">
+                <label className="form-label text-xs">RPH index Target ($/hr):</label>
                 <input 
                   type="number" 
-                  className="form-control"
+                  className="form-control px-sm py-xs text-sm"
                   value={editedGoals[selectedDept]?.rph !== undefined ? editedGoals[selectedDept].rph : ''}
-                  onChange={(e) => handleGoalChange('rph', e.target.value)}
-                  style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                  onChange={(e) => handleGoalChange('rph', parseFloat(e.target.value))}
+                  data-testid="rph-target-input"
                 />
               </div>
 
-              {(selectedDept === 'Computing' || selectedDept === 'Home Theatre') && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', padding: '0.75rem', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-glass)', borderRadius: '10px' }}>
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label" style={{ fontSize: '0.725rem' }}>Basket size Goal ($):</label>
+              {(selectedDept === 'Computers' || selectedDept === 'Home Theater') && (
+                <div className="grid grid-cols-2 gap-sm p-sm bg-white-alpha-01 border border-[var(--border-glass)] rounded-lg">
+                  <div className="form-group m-0">
+                    <label className="form-label text-xs">Basket size Goal ($):</label>
                     <input 
                       type="number" 
-                      className="form-control"
+                      className="form-control px-sm py-xs text-sm"
                       value={editedGoals[selectedDept]?.basket !== undefined ? editedGoals[selectedDept].basket : ''}
-                      onChange={(e) => handleGoalChange('basket', e.target.value)}
-                      style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                      onChange={(e) => handleGoalChange('basket', parseFloat(e.target.value))}
+                      data-testid="basket-target-input"
                     />
                   </div>
-                  {selectedDept === 'Computing' && (
-                    <div className="form-group" style={{ margin: 0 }}>
-                      <label className="form-label" style={{ fontSize: '0.725rem' }}>M365 Attach % Goal:</label>
+                  {selectedDept === 'Computers' && (
+                    <div className="form-group m-0">
+                      <label className="form-label text-xs">M365 Attach % Goal:</label>
                       <input 
                         type="number" 
                         step="0.1"
-                        className="form-control"
+                        className="form-control px-sm py-xs text-sm"
                         value={editedGoals[selectedDept]?.m365 !== undefined ? editedGoals[selectedDept].m365 : ''}
-                        onChange={(e) => handleGoalChange('m365', e.target.value)}
-                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                        onChange={(e) => handleGoalChange('m365', parseFloat(e.target.value))}
+                        data-testid="m365-target-input"
                       />
                     </div>
                   )}
-                  {selectedDept === 'Home Theatre' && (
-                    <div className="form-group" style={{ margin: 0 }}>
-                      <label className="form-label" style={{ fontSize: '0.725rem' }}>Audio Attach % Goal:</label>
+                  {selectedDept === 'Home Theater' && (
+                    <div className="form-group m-0">
+                      <label className="form-label text-xs">Audio Attach % Goal:</label>
                       <input 
                         type="number" 
                         step="0.1"
-                        className="form-control"
+                        className="form-control px-sm py-xs text-sm"
                         value={editedGoals[selectedDept]?.audio !== undefined ? editedGoals[selectedDept].audio : ''}
-                        onChange={(e) => handleGoalChange('audio', e.target.value)}
-                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                        onChange={(e) => handleGoalChange('audio', parseFloat(e.target.value))}
+                        data-testid="audio-target-input"
                       />
                     </div>
                   )}
                 </div>
               )}
 
-              <button className="btn btn-primary" style={{ width: '100%', padding: '0.5rem', fontSize: '0.8rem' }} onClick={handleSaveGoals}>
-                Save {selectedDept} Targets
+              <button 
+                className="btn btn-primary w-full p-sm text-sm cursor-pointer mt-md flex-center-y justify-center gap-xs font-bold" 
+                onClick={handleSaveGoals}
+                data-testid="save-dept-targets-btn"
+              >
+                <Check size={16} /> Save {selectedDept} Targets
               </button>
 
             </div>

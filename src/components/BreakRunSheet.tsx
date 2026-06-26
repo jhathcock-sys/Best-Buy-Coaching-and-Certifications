@@ -1,14 +1,29 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Clock, Trash2 } from 'lucide-react';
+import { Employee, BreakEntry } from '../types';
 
-export default function BreakRunSheet({ breakSchedule = [], roster = [], onAddBreak, onToggleBreak, onDeleteBreak }) {
+interface BreakRunSheetProps {
+  breakSchedule?: BreakEntry[];
+  roster?: Employee[];
+  onAddBreak: (entry: BreakEntry) => void;
+  onToggleBreak: (id: string) => void;
+  onDeleteBreak: (id: string) => void;
+}
+
+export default function BreakRunSheet({ 
+  breakSchedule = [], 
+  roster = [], 
+  onAddBreak, 
+  onToggleBreak, 
+  onDeleteBreak 
+}: BreakRunSheetProps) {
   const [breakForm, setBreakForm] = useState({
     empId: '',
     time: '12:00 PM',
     type: '15 min Break'
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!breakForm.empId) {
       alert('Please select an associate for the break!');
@@ -17,7 +32,7 @@ export default function BreakRunSheet({ breakSchedule = [], roster = [], onAddBr
     const emp = roster.find(e => e.id === breakForm.empId);
     if (!emp) return;
 
-    const newBreak = {
+    const newBreak: BreakEntry = {
       id: 'break_' + Date.now(),
       empId: breakForm.empId,
       name: emp.name,
@@ -31,9 +46,11 @@ export default function BreakRunSheet({ breakSchedule = [], roster = [], onAddBr
   };
 
   const sortedBreaks = [...breakSchedule].sort((a, b) => {
-    const toMins = (t) => {
+    const toMins = (t: string) => {
       const [hm, ampm] = t.split(' ');
-      let [h, m] = hm.split(':').map(Number);
+      const parts = hm.split(':').map(Number);
+      let h = parts[0];
+      const m = parts[1];
       if (ampm === 'PM' && h !== 12) h += 12;
       if (ampm === 'AM' && h === 12) h = 0;
       return h * 60 + m;
@@ -42,26 +59,25 @@ export default function BreakRunSheet({ breakSchedule = [], roster = [], onAddBr
   });
 
   return (
-    <div className="glass-card" style={{ padding: '2rem' }}>
-      <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--info)' }}>
+    <div className="glass-card p-xl">
+      <h3 className="text-xl mb-sm flex align-center gap-sm font-heading" style={{ color: 'var(--info)' }}>
         <Clock size={20} /> Breaks & Lunches Run Sheet
       </h3>
-      <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '1.5rem' }}>
+      <p className="text-secondary text-sm mb-lg">
         Timetable run sheet: coordinate scheduled breaks and lunches to prevent sales floor coverage gaps.
       </p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
+      <div className="dashboard-grid">
         
         {/* Add Break Form */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', paddingRight: '1rem' }}>
-          <h4 style={{ fontSize: '0.95rem', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '0.5rem' }}>Schedule Break</h4>
+        <div className="flex-column gap-lg" style={{ paddingRight: '1rem' }}>
+          <h4 className="font-bold border-b-glass pb-sm">Schedule Break</h4>
           
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <form onSubmit={handleSubmit} className="flex-column gap-md">
             <div className="form-group">
-              <label className="form-label" style={{ fontSize: '0.75rem' }}>Select Associate:</label>
+              <label className="form-label text-sm">Select Associate:</label>
               <select 
-                className="form-control"
-                style={{ fontSize: '0.8rem' }}
+                className="form-control text-sm cursor-pointer"
                 value={breakForm.empId}
                 onChange={(e) => setBreakForm({ ...breakForm, empId: e.target.value })}
                 required
@@ -75,10 +91,9 @@ export default function BreakRunSheet({ breakSchedule = [], roster = [], onAddBr
 
             <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1rem' }}>
               <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.75rem' }}>Target Time:</label>
+                <label className="form-label text-sm">Target Time:</label>
                 <select 
-                  className="form-control"
-                  style={{ fontSize: '0.8rem' }}
+                  className="form-control text-sm cursor-pointer"
                   value={breakForm.time}
                   onChange={(e) => setBreakForm({ ...breakForm, time: e.target.value })}
                 >
@@ -89,10 +104,9 @@ export default function BreakRunSheet({ breakSchedule = [], roster = [], onAddBr
               </div>
 
               <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.75rem' }}>Break Type:</label>
+                <label className="form-label text-sm">Break Type:</label>
                 <select 
-                  className="form-control"
-                  style={{ fontSize: '0.8rem' }}
+                  className="form-control text-sm cursor-pointer"
                   value={breakForm.type}
                   onChange={(e) => setBreakForm({ ...breakForm, type: e.target.value })}
                 >
@@ -103,7 +117,7 @@ export default function BreakRunSheet({ breakSchedule = [], roster = [], onAddBr
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary" style={{ padding: '0.6rem', fontSize: '0.8rem', marginTop: '0.25rem' }}>
+            <button type="submit" className="btn btn-primary p-sm text-sm mt-xs cursor-pointer">
               + Add Shift Break
             </button>
           </form>
@@ -111,39 +125,36 @@ export default function BreakRunSheet({ breakSchedule = [], roster = [], onAddBr
 
         {/* Timetable List */}
         <div>
-          <h4 style={{ fontSize: '0.95rem', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>Today's Break Run Sheet</h4>
+          <h4 className="font-bold border-b-glass pb-sm mb-md">Today's Break Run Sheet</h4>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '320px', overflowY: 'auto' }}>
+          <div className="flex-column gap-sm" style={{ maxHeight: '320px', overflowY: 'auto' }}>
             {sortedBreaks.length === 0 ? (
-              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem', border: '1px dashed rgba(255,255,255,0.04)', borderRadius: '12px' }}>
+              <div className="p-xl text-center text-muted text-sm border-glass rounded-xl" style={{ borderStyle: 'dashed' }}>
                 No breaks scheduled yet for today's run sheet.
               </div>
             ) : (
               sortedBreaks.map((b) => (
                 <div 
                   key={b.id} 
+                  className="flex align-center justify-between p-md rounded-xl"
                   style={{ 
-                    padding: '0.85rem 1rem', 
-                    background: b.completed ? 'rgba(16, 185, 129, 0.03)' : 'rgba(255, 255, 255, 0.01)', 
-                    border: `1px solid ${b.completed ? 'rgba(16, 185, 129, 0.25)' : 'var(--border-glass)'}`, 
-                    borderRadius: '12px',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
+                    background: b.completed ? 'var(--success-alpha-15)' : 'rgba(255, 255, 255, 0.01)', 
+                    border: `1px solid ${b.completed ? 'var(--success-alpha-15)' : 'var(--border-glass)'}`
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div className="flex align-center gap-md">
                     <input 
                       type="checkbox" 
                       checked={b.completed}
                       onChange={() => onToggleBreak(b.id)}
-                      style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                      className="cursor-pointer"
+                      style={{ width: '16px', height: '16px' }}
                     />
                     <div>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: b.completed ? 'var(--text-muted)' : '#fff', textDecoration: b.completed ? 'line-through' : 'none' }}>
+                      <div className="font-bold text-sm" style={{ color: b.completed ? 'var(--text-muted)' : '#fff', textDecoration: b.completed ? 'line-through' : 'none' }}>
                         {b.name}
                       </div>
-                      <div style={{ fontSize: '0.725rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>
+                      <div className="text-secondary mt-xs" style={{ fontSize: '0.725rem' }}>
                         {b.time} — <strong>{b.type}</strong>
                       </div>
                     </div>
@@ -151,7 +162,8 @@ export default function BreakRunSheet({ breakSchedule = [], roster = [], onAddBr
 
                   <button
                     type="button"
-                    style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', transition: 'color 0.2s', padding: 0 }}
+                    className="bg-transparent border-none text-muted cursor-pointer flex-center"
+                    style={{ transition: 'color 0.2s', padding: 0 }}
                     onClick={() => onDeleteBreak(b.id)}
                   >
                     <Trash2 size={16} />

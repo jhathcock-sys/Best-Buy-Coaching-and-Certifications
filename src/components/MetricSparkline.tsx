@@ -1,13 +1,13 @@
 
 
 export interface MetricSparklineProps {
-  dataPoints: any[];
+  dataPoints: number[];
   color?: string;
 }
 
 export default function MetricSparkline({ dataPoints = [], color = 'var(--bby-blue)' }: MetricSparklineProps) {
   if (!dataPoints || dataPoints.length === 0) {
-    return <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>No history</span>;
+    return <span className="text-xs text-muted" data-testid="sparkline-no-history">No history</span>;
   }
   
   const width = 110;
@@ -32,8 +32,8 @@ export default function MetricSparkline({ dataPoints = [], color = 'var(--bby-bl
   const pathD = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-      <svg width={width} height={height} style={{ overflow: 'visible' }}>
+    <div className="flex-row align-center gap-sm" data-testid="metric-sparkline">
+      <svg width={width} height={height} className="overflow-visible">
         <path
           d={pathD}
           fill="none"
@@ -51,15 +51,16 @@ export default function MetricSparkline({ dataPoints = [], color = 'var(--bby-bl
             fill="#fff"
             stroke={color}
             strokeWidth="1.5"
-            style={{ cursor: 'pointer' }}
+            className="cursor-pointer"
           >
             <title>{p.val}</title>
           </circle>
         ))}
       </svg>
-      <span style={{ fontSize: '0.75rem', color: '#fff', fontWeight: 600 }}>
+      <span className="text-xs text-white font-semibold">
         {dataPoints[dataPoints.length - 1]}
       </span>
     </div>
   );
 }
+

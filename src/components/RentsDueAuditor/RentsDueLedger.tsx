@@ -1,164 +1,202 @@
-import React from 'react';
-import { CheckCircle2, RefreshCw } from 'lucide-react';
+import React, { useState } from 'react';
+import { CheckCircle2 } from 'lucide-react';
+export interface ParsedEmployee {
+  name: string;
+  rph: number;
+  rphOwed: number;
+  rphStatus: 'on-track' | 'off-track';
+  revenue: number;
+  revenueOwed: number;
+  revenueStatus: 'on-track' | 'off-track';
+  apps: number;
+  appsOwed: number;
+  appsStatus: 'on-track' | 'off-track';
+  memberships: number;
+  membershipsOwed: number;
+  membershipsStatus: 'on-track' | 'off-track';
+  warranty: number;
+  warrantyGoal: number;
+  warrantyStatus: 'on-track' | 'off-track';
+}
+
+export interface RentsDueLedgerProps {
+  gaps?: {
+    rev: number;
+    apps: number;
+    pms: number;
+  };
+  parsedEmployees: ParsedEmployee[] | null;
+  setParsedEmployees: (employees: ParsedEmployee[] | null) => void;
+  syncSuccess: boolean;
+  handleSyncToRoster: () => void | Promise<void>;
+}
 
 export default function RentsDueLedger({ 
-  selectedPeriod,
-  setSelectedPeriod,
-  showNewPeriodInput,
-  setShowNewPeriodInput,
-  customPeriodName,
-  setCustomPeriodName,
-  snapshotDate,
-  setSnapshotDate,
-  rosterHistory,
-  activePeriod,
-  todayStr,
-
   gaps,
   parsedEmployees,
   setParsedEmployees,
   syncSuccess,
-  setSyncSuccess,
-  handleSyncToRoster,
-  comparisonRoster
- }: any) {
+  handleSyncToRoster
+}: RentsDueLedgerProps) {
+  const [isSyncing, setIsSyncing] = useState(false);
+  const employees = parsedEmployees || [];
+  
+  const handleSyncClick = async () => {
+    if (isSyncing) return;
+    setIsSyncing(true);
+    try {
+      await handleSyncToRoster();
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const safeDiv = employees.length > 0 ? employees.length : 1;
+  const onTrackCount = employees.filter(e => e.rphStatus === 'on-track' && e.revenueStatus === 'on-track').length;
+  const rentPayerRate = employees.length > 0 ? Math.round((onTrackCount / safeDiv) * 100) : 0;
+
   return (
     <>
-        /* AUDIT RESULTS VIEW */
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        {/* AUDIT RESULTS VIEW */}
+        <div className="flex-column gap-xl">
           
           {/* Top KPI Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem' }}>
-            <div className="glass-card" style={{ padding: '1.25rem' }}>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em' }}>Revenue Rent Owed</span>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: gaps.rev > 0 ? 'var(--error)' : 'var(--success)', marginTop: '0.25rem', fontFamily: 'var(--font-heading)' }}>
-                ${gaps.rev.toLocaleString()}
+          <div className="metrics-grid">
+            <div className="glass-card p-xl">
+              <span className="text-xs text-muted uppercase font-bold tracking-wider block mb-xs">Revenue Rent Owed</span>
+              <div className={`text-3xl font-black mt-xs font-heading ${(gaps?.rev || 0) > 0 ? 'text-error' : 'text-success'}`}>
+                ${(gaps?.rev || 0).toLocaleString()}
               </div>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Outstanding salesperson gap</span>
+              <span className="text-xs text-secondary mt-xs block">Outstanding salesperson gap</span>
             </div>
 
-            <div className="glass-card" style={{ padding: '1.25rem' }}>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em' }}>Apps Owed</span>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: gaps.apps > 0 ? 'var(--bby-yellow)' : 'var(--success)', marginTop: '0.25rem', fontFamily: 'var(--font-heading)' }}>
-                {gaps.apps} Apps
+            <div className="glass-card p-xl">
+              <span className="text-xs text-muted uppercase font-bold tracking-wider block mb-xs">Apps Owed</span>
+              <div className={`text-3xl font-black mt-xs font-heading ${(gaps?.apps || 0) > 0 ? 'text-bby-yellow' : 'text-success'}`}>
+                {gaps?.apps || 0} Apps
               </div>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Credit Card apps to reach standard</span>
+              <span className="text-xs text-secondary mt-xs block">Credit Card apps to reach standard</span>
             </div>
 
-            <div className="glass-card" style={{ padding: '1.25rem' }}>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em' }}>Memberships Owed</span>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: gaps.pms > 0 ? 'var(--info)' : 'var(--success)', marginTop: '0.25rem', fontFamily: 'var(--font-heading)' }}>
-                {gaps.pms} Plus/Total
+            <div className="glass-card p-xl">
+              <span className="text-xs text-muted uppercase font-bold tracking-wider block mb-xs">Memberships Owed</span>
+              <div className={`text-3xl font-black mt-xs font-heading ${(gaps?.pms || 0) > 0 ? 'text-info' : 'text-success'}`}>
+                {gaps?.pms || 0} Plus/Total
               </div>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Memberships to reach standard</span>
+              <span className="text-xs text-secondary mt-xs block">Memberships to reach standard</span>
             </div>
 
-            <div className="glass-card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em' }}>Rent Payer Rate</span>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--success)', marginTop: '0.25rem', fontFamily: 'var(--font-heading)' }}>
-                {Math.round((parsedEmployees.filter(e => e.rphStatus === 'on-track' && e.revenueStatus === 'on-track').length / parsedEmployees.length) * 100)}%
+            <div className="glass-card p-xl flex-column justify-center">
+              <span className="text-xs text-muted uppercase font-bold tracking-wider block mb-xs">Rent Payer Rate</span>
+              <div className="text-3xl font-black mt-xs font-heading text-success">
+                {rentPayerRate}%
               </div>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Associates meeting all baseline Rents</span>
+              <span className="text-xs text-secondary mt-xs block">Associates meeting all baseline Rents</span>
             </div>
           </div>
 
           {/* Action Bar */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <button className="btn btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }} onClick={() => setParsedEmployees(null)}>
+          <div className="flex-center justify-between flex-wrap gap-md">
+            <div className="flex-center gap-sm">
+              <button 
+                className="btn btn-secondary px-md py-sm text-sm cursor-pointer" 
+                onClick={() => setParsedEmployees(null)}
+                data-testid="reset-upload-btn"
+              >
                 ← Reset & Upload New File
               </button>
             </div>
             
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <div className="flex gap-sm">
               <button 
-                className="btn btn-accent" 
-                style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}
-                onClick={handleSyncToRoster}
+                className={`btn btn-accent px-md py-sm text-sm cursor-pointer ${isSyncing ? 'opacity-50' : ''}`}
+                onClick={handleSyncClick}
+                disabled={isSyncing}
+                data-testid="sync-metrics-btn"
               >
-                Sync Metrics to Active Roster
+                {isSyncing ? 'Syncing...' : 'Sync Metrics to Active Roster'}
               </button>
             </div>
           </div>
 
           {syncSuccess && (
-            <div style={{ padding: '0.75rem 1.25rem', background: 'var(--success-glow)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '10px', fontSize: '0.825rem', color: '#a7f3d0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <div className="p-md bg-[var(--success-glow)] border border-[rgba(16,185,129,0.3)] rounded-xl text-sm text-[#a7f3d0] flex-center-y gap-xs" data-testid="sync-success-message">
               <CheckCircle2 size={16} /> Roster ledger values updated. All performance evaluations and sparklines will reflect these parsed values immediately.
             </div>
           )}
 
           {/* Ledger Table */}
-          <div className="glass-card" style={{ overflowX: 'auto', padding: 0 }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left' }}>
+          <div className="glass-card overflow-x-auto p-0">
+            <table className="w-full border-collapse text-sm text-left">
               <thead>
-                <tr style={{ borderBottom: '1px solid var(--border-glass)', background: 'rgba(255,255,255,0.01)' }}>
-                  <th style={{ padding: '1rem' }}>SALESPERSON</th>
-                  <th style={{ padding: '1rem', textAlign: 'center' }}>RPH ($/hr)</th>
-                  <th style={{ padding: '1rem', textAlign: 'center' }}>REVENUE ($)</th>
-                  <th style={{ padding: '1rem', textAlign: 'center' }}>CREDIT CARDS</th>
-                  <th style={{ padding: '1rem', textAlign: 'center' }}>MEMBERSHIPS</th>
-                  <th style={{ padding: '1rem', textAlign: 'center' }}>WARRANTY GSP</th>
+                <tr className="border-b border-[var(--border-glass)] bg-white-alpha-01">
+                  <th className="p-md">SALESPERSON</th>
+                  <th className="p-md text-center">RPH ($/hr)</th>
+                  <th className="p-md text-center">REVENUE ($)</th>
+                  <th className="p-md text-center">CREDIT CARDS</th>
+                  <th className="p-md text-center">MEMBERSHIPS</th>
+                  <th className="p-md text-center">WARRANTY GSP</th>
                 </tr>
               </thead>
               <tbody>
-                {parsedEmployees.map((emp, idx) => {
+                {employees.map((emp, idx) => {
                   const isPaidAll = emp.rphStatus === 'on-track' && emp.revenueStatus === 'on-track' && emp.appsStatus === 'on-track' && emp.membershipsStatus === 'on-track';
                   return (
-                    <tr key={idx} style={{ borderBottom: '1px solid var(--border-glass)', background: isPaidAll ? 'rgba(16, 185, 129, 0.02)' : 'transparent' }}>
-                      <td style={{ padding: '1rem', fontWeight: 'bold' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <tr key={idx} className={`border-b border-[var(--border-glass)] ${isPaidAll ? 'bg-[rgba(16,185,129,0.02)]' : 'bg-transparent'}`}>
+                      <td className="p-md font-bold">
+                        <div className="flex-column">
                           <span>{emp.name}</span>
-                          <span style={{ fontSize: '0.7rem', color: isPaidAll ? 'var(--success)' : 'var(--text-muted)' }}>
+                          <span className={`text-xs ${isPaidAll ? 'text-success' : 'text-muted'}`}>
                             {isPaidAll ? 'Paid Full Rent' : 'Owes Rent'}
                           </span>
                         </div>
                       </td>
                       
                       {/* RPH */}
-                      <td style={{ padding: '1rem', textAlign: 'center' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 'bold' }}>${emp.rph}</span>
-                          <span style={{ fontSize: '0.7rem', color: emp.rphStatus === 'on-track' ? 'var(--success)' : 'var(--error)' }}>
+                      <td className="p-md text-center">
+                        <div className="flex-column items-center">
+                          <span className="font-bold">${emp.rph}</span>
+                          <span className={`text-xs ${emp.rphStatus === 'on-track' ? 'text-success' : 'text-error'}`}>
                             {emp.rphStatus === 'on-track' ? 'Paid' : `Owed: $${emp.rphOwed}`}
                           </span>
                         </div>
                       </td>
 
                       {/* REVENUE */}
-                      <td style={{ padding: '1rem', textAlign: 'center' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 'bold' }}>${emp.revenue.toLocaleString()}</span>
-                          <span style={{ fontSize: '0.7rem', color: emp.revenueStatus === 'on-track' ? 'var(--success)' : 'var(--error)' }}>
+                      <td className="p-md text-center">
+                        <div className="flex-column items-center">
+                          <span className="font-bold">${emp.revenue.toLocaleString()}</span>
+                          <span className={`text-xs ${emp.revenueStatus === 'on-track' ? 'text-success' : 'text-error'}`}>
                             {emp.revenueStatus === 'on-track' ? 'Paid' : `Owed: $${emp.revenueOwed.toLocaleString()}`}
                           </span>
                         </div>
                       </td>
 
                       {/* APPS */}
-                      <td style={{ padding: '1rem', textAlign: 'center' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 'bold' }}>{emp.apps} Apps</span>
-                          <span style={{ fontSize: '0.7rem', color: emp.appsStatus === 'on-track' ? 'var(--success)' : 'var(--error)' }}>
+                      <td className="p-md text-center">
+                        <div className="flex-column items-center">
+                          <span className="font-bold">{emp.apps} Apps</span>
+                          <span className={`text-xs ${emp.appsStatus === 'on-track' ? 'text-success' : 'text-error'}`}>
                             {emp.appsStatus === 'on-track' ? 'Paid' : `Owed: ${emp.appsOwed}`}
                           </span>
                         </div>
                       </td>
 
                       {/* MEMBERSHIPS */}
-                      <td style={{ padding: '1rem', textAlign: 'center' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 'bold' }}>{emp.memberships} PMs</span>
-                          <span style={{ fontSize: '0.7rem', color: emp.membershipsStatus === 'on-track' ? 'var(--success)' : 'var(--error)' }}>
+                      <td className="p-md text-center">
+                        <div className="flex-column items-center">
+                          <span className="font-bold">{emp.memberships} PMs</span>
+                          <span className={`text-xs ${emp.membershipsStatus === 'on-track' ? 'text-success' : 'text-error'}`}>
                             {emp.membershipsStatus === 'on-track' ? 'Paid' : `Owed: ${emp.membershipsOwed}`}
                           </span>
                         </div>
                       </td>
 
                       {/* WARRANTY */}
-                      <td style={{ padding: '1rem', textAlign: 'center' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 'bold' }}>{emp.warranty}%</span>
-                          <span style={{ fontSize: '0.7rem', color: emp.warrantyStatus === 'on-track' ? 'var(--success)' : 'var(--error)' }}>
+                      <td className="p-md text-center">
+                        <div className="flex-column items-center">
+                          <span className="font-bold">{emp.warranty}%</span>
+                          <span className={`text-xs ${emp.warrantyStatus === 'on-track' ? 'text-success' : 'text-error'}`}>
                             Goal: {emp.warrantyGoal}%
                           </span>
                         </div>

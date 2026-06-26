@@ -1,82 +1,46 @@
 import { useState, useEffect } from 'react';
-import { useStore } from '../store/useStore';
-import { generateMonthlyOneOnOne, generateActionPlan } from '../services/ai/geminiCoaching';
+import { Employee, CoachingLog, FollowUpTask } from '../types';
 
-export function useAssociateProfile(isOpen, employee, rosterHistory, coachingLogs, followUpTasks, deptGoals) {
+const DEFAULT_GOALS = { memberships: 8, creditCards: 12.5, warranty: 11, surveys: 1, rph: 640 };
+
+export function useAssociateProfile(
+  isOpen: boolean, 
+  employee: Employee | null, 
+  rosterHistory: Record<string, Record<string, any>>, 
+  coachingLogs: CoachingLog[], 
+  followUpTasks: FollowUpTask[], 
+  deptGoals: Record<string, any>
+) {
   const [activeTab, setActiveTab] = useState('trends');
-  const [playingLogId, setPlayingLogId] = useState<any>(null);
-  const [expandedLogId, setExpandedLogId] = useState<any>(null);
-  const [isGeneratingReview, setIsGeneratingReview] = useState(false);
-  const [generatedReview, setGeneratedReview] = useState<any>(null);
-  const [isGeneratingActionPlan, setIsGeneratingActionPlan] = useState(false);
-  const [generatedActionPlan, setGeneratedActionPlan] = useState<any>(null);
 
   useEffect(() => {
     if (isOpen) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveTab('trends');
-      setPlayingLogId(null);
-      setExpandedLogId(null);
     }
-    return () => {
-      window.speechSynthesis.cancel();
-    };
-  }, [isOpen]);
-
-  // Handle TTS
-  const handlePlayTTS = (logId: any, text: any) => {
-    if (playingLogId === logId) {
-      window.speechSynthesis.cancel();
-      setPlayingLogId(null);
-      return;
-    }
-    window.speechSynthesis.cancel();
-    const cleanText = text
-      .replace(/[#*`_-]/g, ' ') // Strip markdown chars
-      .replace(/DISC Focus:/gi, ' DISC Focus step is ')
-      .replace(/WHAT:/gi, ' What needs to be done: ')
-      .replace(/HOW:/gi, ' How they should sell: ')
-      .replace(/WHY:/gi, ' Why it matters: ');
-    
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.onend = () => setPlayingLogId(null);
-    utterance.onerror = () => setPlayingLogId(null);
-    setPlayingLogId(logId);
-    window.speechSynthesis.speak(utterance);
-  };
+  }, [isOpen, employee?.id]);
 
   if (!isOpen || !employee) return {
     activeTab, setActiveTab,
-    playingLogId, setPlayingLogId,
-    expandedLogId, setExpandedLogId,
-    isGeneratingReview, setIsGeneratingReview,
-    generatedReview, setGeneratedReview,
-    isGeneratingActionPlan, setIsGeneratingActionPlan,
-    generatedActionPlan, setGeneratedActionPlan,
-    handlePlayTTS,
-    handleGenerateReview: async () => {},
-    handleGenerateActionPlan: async () => {},
     sortedPeriods: [],
     historyPoints: [],
     activeHistoryPoints: [],
     associateLogs: [],
     associateTasks: [],
-    activeGoals: {}
+    activeGoals: DEFAULT_GOALS
   };
 
   // 1. Gather historical data for this associate
-
   const sortedPeriods = Object.keys(rosterHistory).sort((a, b) => {
-    const parsePeriod = (p: any) => {
+    const parsePeriod = (p: string) => {
       const [month, year] = p.split(' ');
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       const monthIdx = months.findIndex(m => month.startsWith(m)) || 0;
-      return new Date(parseInt(year), monthIdx);
+      return new Date(parseInt(year), monthIdx).getTime();
     };
-    return (parsePeriod(a) as any) - (parsePeriod(b) as any);
+    return parsePeriod(a) - parsePeriod(b);
   });
 
-  const historyPoints = sortedPeriods.map((period: any) => {
+  const historyPoints = sortedPeriods.map((period: string) => {
     const empMap = rosterHistory[period] || {};
     const emp = empMap[employee.id] || Object.values(empMap).find((e: any) => e.name === employee.name);
     return {
@@ -110,52 +74,10 @@ export function useAssociateProfile(isOpen, employee, rosterHistory, coachingLog
   );
 
   // Active department goals
-  const activeGoals = deptGoals[employee.dept] || { memberships: 8, creditCards: 12.5, warranty: 11, surveys: 1, rph: 640 };
-
-  const handleGenerateReview = async () => {
-    setIsGeneratingReview(true);
-    setGeneratedReview(null);
-    try {
-      const apiKey = useStore.getState().apiKey;
-      const reviewText = await generateMonthlyOneOnOne(employee, associateLogs, apiKey);
-      setGeneratedReview(reviewText);
-    } catch (err) {
-      console.error(err);
-      setGeneratedReview("Error generating review. Please check your API key.");
-    } finally {
-      setIsGeneratingReview(false);
-    }
-  };
-
-  const handleGenerateActionPlan = async () => {
-    setIsGeneratingActionPlan(true);
-    try {
-      const apiKey = useStore.getState().apiKey;
-      const plan = await generateActionPlan(employee, associateLogs, apiKey);
-      if (plan) {
-        setGeneratedActionPlan(plan);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsGeneratingActionPlan(false);
-    }
-  };
-
-
-  // Helper to parse markdown-like bold items in log notes
+  const activeGoals = deptGoals[employee.dept] || DEFAULT_GOALS;
 
   return {
     activeTab, setActiveTab,
-    playingLogId, setPlayingLogId,
-    expandedLogId, setExpandedLogId,
-    isGeneratingReview, setIsGeneratingReview,
-    generatedReview, setGeneratedReview,
-    isGeneratingActionPlan, setIsGeneratingActionPlan,
-    generatedActionPlan, setGeneratedActionPlan,
-    handlePlayTTS,
-    handleGenerateReview,
-    handleGenerateActionPlan,
     sortedPeriods,
     historyPoints,
     activeHistoryPoints,

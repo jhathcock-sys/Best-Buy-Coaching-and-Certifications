@@ -1,35 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Compass, ShieldAlert } from 'lucide-react';
+import { useShallow } from 'zustand/react/shallow';
 import { testLatency } from '../../services/firebase';
 import { useStore } from '../../store/useStore';
+import { FollowUpTask } from '../../types';
 
 const EMPTY_OBJ = {};
-const EMPTY_ARR: any[] = [];
+const EMPTY_ARR: never[] = [];
 
-export interface FirebaseConfig {
-  apiKey: string;
-  authDomain: string;
-  projectId: string;
-  storageBucket: string;
-  messagingSenderId: string;
-  appId: string;
-}
-
-export interface SyncDiagnosticsTabProps {
-  dbConnected: boolean;
-  storeId: string;
-  firebaseConfig: FirebaseConfig;
-  setFirebaseConfig: (config: FirebaseConfig) => void;
-  handleSaveFirebaseConfig: (config: FirebaseConfig | null) => void;
-}
-
-export default function SyncDiagnosticsTab({
-  dbConnected, storeId
-}: SyncDiagnosticsTabProps) {
-  const rosterHistory = useStore(state => state.rosterHistory) || EMPTY_OBJ;
-  const coachingLogs = useStore(state => state.coachingLogs) || EMPTY_ARR;
-  const followUpTasks = useStore(state => state.followUpTasks) || EMPTY_ARR;
-  const floorLeaderShifts = useStore(state => state.floorLeaderShifts) || EMPTY_ARR;
+export default function SyncDiagnosticsTab() {
+  const { 
+    rosterHistory, coachingLogs, followUpTasks, floorLeaderShifts, 
+    dbConnected, storeId 
+  } = useStore(useShallow(state => ({
+    rosterHistory: state.rosterHistory || EMPTY_OBJ,
+    coachingLogs: state.coachingLogs || EMPTY_ARR,
+    followUpTasks: state.followUpTasks || EMPTY_ARR,
+    floorLeaderShifts: state.floorLeaderShifts || EMPTY_ARR,
+    dbConnected: state.dbConnected,
+    storeId: state.storeId
+  })));
   const [diagnosticsLogs, setDiagnosticsLogs] = useState<string[]>([]);
   const [isRunningDiagnostics, setIsRunningDiagnostics] = useState(false);
   const isMounted = useRef(true);
@@ -61,7 +51,7 @@ export default function SyncDiagnosticsTab({
         await addLog("⚡ Starting IndexedDB Cache & Sync Diagnostics...", 200);
         await addLog(`📂 Auditing Roster Periods: ${Object.keys(rosterHistory).length} documents found in local cache.`, 300);
         await addLog(`📝 Auditing Coaching Logs: ${coachingLogs.length} logs found in local cache.`, 200);
-        await addLog(`🤝 Auditing Commitments: ${followUpTasks.length} commitments (${followUpTasks.filter((t: any) => !t.completed).length} pending) in local cache.`, 200);
+        await addLog(`🤝 Auditing Commitments: ${followUpTasks.length} commitments (${followUpTasks.filter((t: FollowUpTask) => !t?.completed).length} pending) in local cache.`, 200);
         await addLog(`⏰ Auditing Floor Leader Shifts: ${floorLeaderShifts.length} shifts in local cache.`, 200);
         await addLog(`📡 Testing Firebase connection latency...`, 300);
         
@@ -166,7 +156,7 @@ export default function SyncDiagnosticsTab({
           </div>
 
           <button 
-            className={`btn ${isRunningDiagnostics ? 'btn-secondary' : 'btn-primary'} ${diagnosticsLogs.length > 0 ? 'mb-lg' : ''}`}
+            className={`btn ${isRunningDiagnostics ? 'btn-secondary' : 'btn-primary'} ${diagnosticsLogs.length > 0 ? 'mb-lg' : ''} cursor-pointer`}
             onClick={runDiagnostics} 
             disabled={isRunningDiagnostics}
             data-testid="run-sync-diagnostics-btn"
@@ -176,11 +166,11 @@ export default function SyncDiagnosticsTab({
 
           {diagnosticsLogs.length > 0 && (
             <div 
-              className="p-md rounded-xl flex-column gap-sm overflow-y-auto bg-black-alpha-20 border-glass text-sm text-info"
+              className="p-md rounded-xl flex-column gap-sm overflow-y-auto bg-black-alpha-20 border-glass text-sm text-secondary"
               data-testid="diagnostics-log-output"
             >
               {diagnosticsLogs.map((log, idx) => (
-                <div key={idx} className="border-glass p-xs border-none">
+                <div key={idx} className="p-xs">
                   {log}
                 </div>
               ))}

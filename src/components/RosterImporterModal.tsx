@@ -149,7 +149,7 @@ export default function RosterImporterModal({ isOpen, onClose, onImport }: { isO
                         <td className="p-md text-center">{row.warranty}%</td>
                         <td className="p-md text-center">{row.surveys.toFixed(1)}</td>
                         <td className="p-md text-center">${row.rph}/hr</td>
-                        <td className="p-md text-center">{(row.dept === 'Computing' || row.dept === 'Home Theatre') ? `$${parseFloat(row.basket || 0).toFixed(2)}` : '—'}</td>
+                        <td className="p-md text-center">{(row.dept === 'Computing' || row.dept === 'Home Theatre') ? `$${(row.basket || 0).toFixed(2)}` : '—'}</td>
                         <td className="p-md text-center">{row.dept === 'Computing' ? `${row.m365 || 0}% M365` : row.dept === 'Home Theatre' ? `${row.audio || 0}% Audio` : '—'}</td>
                       </tr>
                     ))}

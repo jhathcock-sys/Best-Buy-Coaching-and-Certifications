@@ -1,10 +1,11 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { httpsCallable } from 'firebase/functions';
 import { app } from '../services/firebase';
 import { getFunctions } from 'firebase/functions';
 import FloorAuditUploader from './FloorAuditUploader';
 import FloorAuditReport from './FloorAuditReport';
+import { Loader } from 'lucide-react';
 
 interface AuditResult {
   status: 'Green' | 'Yellow' | 'Red';
@@ -21,9 +22,12 @@ export default function FloorAudit() {
   const [isAuditing, setIsAuditing] = useState(false);
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  
+  const activeImageRef = useRef<string | null>(null);
 
   const handleImageSelect = useCallback((image: string, mime: string) => {
     setSelectedImage(image);
+    activeImageRef.current = image;
     setImageMime(mime);
     setAuditResult(null);
     setErrorMsg(null);
@@ -31,18 +35,20 @@ export default function FloorAudit() {
 
   const handleClear = useCallback(() => {
     setSelectedImage(null);
+    activeImageRef.current = null;
     setAuditResult(null);
     setErrorMsg(null);
   }, []);
 
   const handleRunAudit = useCallback(async () => {
-    if (!selectedImage) return;
+    if (!selectedImage || !playbookSettings) return;
     
     setIsAuditing(true);
     setErrorMsg(null);
+    const requestImage = selectedImage;
 
     try {
-      const base64Data = selectedImage.split(',')[1];
+      const base64Data = requestImage.split(',')[1];
       if (!app) throw new Error('Firebase not initialized');
       
       const functionsInstance = getFunctions(app);
@@ -56,18 +62,36 @@ export default function FloorAudit() {
         playbookSettings
       });
       
+      // Abort if the user cleared the image or uploaded a new one while waiting
+      if (activeImageRef.current !== requestImage) return;
+
       const data = response.data as AuditResult;
       setAuditResult(data);
-    } catch (e: any) {
+    } catch (e: unknown) {
+      if (activeImageRef.current !== requestImage) return;
       console.error(e);
-      setErrorMsg(e.message || 'An error occurred during the floor layout audit.');
+      if (e instanceof Error) {
+        setErrorMsg(e.message || 'An error occurred during the floor layout audit.');
+      } else {
+        setErrorMsg('An unknown error occurred during the floor layout audit.');
+      }
     } finally {
-      setIsAuditing(false);
+      if (activeImageRef.current === requestImage) {
+        setIsAuditing(false);
+      }
     }
   }, [selectedImage, imageMime, playbookSettings]);
 
+  if (!playbookSettings) {
+    return (
+      <div className="flex-center p-xxl min-h-200">
+        <Loader className="spin text-secondary" size={32} />
+      </div>
+    );
+  }
+
   return (
-    <div className="dashboard-grid mt-lg">
+    <div className="dashboard-grid mt-lg" data-testid="floor-audit-container">
       <div className="flex-column gap-lg">
         <FloorAuditUploader
           selectedImage={selectedImage}

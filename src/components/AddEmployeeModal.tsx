@@ -7,40 +7,48 @@ import { z } from 'zod';
 export interface AddEmployeeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddEmployee: (emp: z.infer<typeof EmployeeSchema>) => void;
+  onAddEmployee: (emp: z.infer<typeof EmployeeSchema>) => void | Promise<void>;
 }
 
-export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: AddEmployeeModalProps) {
+const DEPARTMENTS = ['Front End', 'General Sales', 'Appliances', 'Computing', 'Mobile', 'Home Theatre', 'Geek Squad'];
 
-  const [form, setForm] = useState({
-    name: '',
-    employeeNumber: '',
-    dept: 'Front End',
-    hours: '',
-    memberships: '',
-    creditCards: '',
-    warranty: '',
-    surveys: '',
-    rph: '',
-    transactions: '',
-    basket: '',
-    m365: '',
-    audio: '',
-    focus5: false,
-    gap: 'None'
-  });
+const INITIAL_FORM_STATE = {
+  name: '',
+  employeeNumber: '',
+  dept: 'Front End',
+  hours: '',
+  memberships: '',
+  creditCards: '',
+  warranty: '',
+  surveys: '',
+  rph: '',
+  transactions: '',
+  basket: '',
+  m365: '',
+  audio: '',
+  focus5: false,
+  gap: 'None'
+};
+
+export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: AddEmployeeModalProps) {
+  const [form, setForm] = useState(INITIAL_FORM_STATE);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
-  const DEPARTMENTS = ['Front End', 'General Sales', 'Appliances', 'Computing', 'Mobile', 'Home Theatre', 'Geek Squad'];
+  const handleClose = () => {
+    setForm(INITIAL_FORM_STATE);
+    onClose();
+  };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!form.name.trim()) {
       alert("Please enter the associate's name!");
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const parsedEmp = EmployeeSchema.parse({
         id: `emp-${Date.now()}`,
@@ -60,50 +68,36 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
         focus5: form.focus5 || false,
         gap: form.gap || 'None'
       });
-      onAddEmployee(parsedEmp);
+      await Promise.resolve(onAddEmployee(parsedEmp));
+      setForm(INITIAL_FORM_STATE);
+      onClose();
     } catch (err) {
       console.error('Validation failed:', err);
       alert('Invalid form data. Please check your inputs.');
-      return;
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    setForm({
-      name: '',
-      employeeNumber: '',
-      dept: 'Front End',
-      hours: '',
-      memberships: '',
-      creditCards: '',
-      warranty: '',
-      surveys: '',
-      rph: '',
-      transactions: '',
-      basket: '',
-      m365: '',
-      audio: '',
-      focus5: false,
-      gap: 'None'
-    });
-    onClose();
   };
 
   return (
-    <div className="modal-overlay cursor-pointer" onClick={onClose}>
-      <div className="modal-content cursor-default" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+    <div className="modal-overlay cursor-pointer" onClick={handleClose} data-testid="add-employee-modal-overlay">
+      <div className="modal-content cursor-default" onClick={(e: React.MouseEvent) => e.stopPropagation()} data-testid="add-employee-modal">
         <div className="modal-header">
           <h3 className="text-xl text-white font-heading m-0 flex-row align-center gap-sm">
             <Users size={20} color="var(--bby-yellow)" /> Add New Associate to Roster
           </h3>
           <button 
             type="button"
-            className="flex-center text-muted border-none bg-transparent"
-            onClick={onClose}
+            className="flex-center text-muted border-none bg-transparent cursor-pointer"
+            onClick={handleClose}
+            disabled={isSubmitting}
+            data-testid="add-employee-close-btn"
           >
             <X size={20} />
           </button>
         </div>
         
-        <form onSubmit={handleSubmit} className="modal-body flex-column gap-lg max-h-80vh overflow-y-auto">
+        <form onSubmit={handleSubmit} className="modal-body flex-column gap-lg max-h-80vh overflow-y-auto" data-testid="add-employee-form">
           <div className="form-grid">
             <div className="form-group">
               <label className="form-label">Associate Name:</label>
@@ -113,6 +107,8 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                 placeholder="e.g. Sarah Jennings"
                 value={form.name}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, name: e.target.value })}
+                disabled={isSubmitting}
+                data-testid="input-name"
               />
             </div>
 
@@ -124,15 +120,19 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                 placeholder="e.g. A1234567"
                 value={form.employeeNumber}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, employeeNumber: e.target.value })}
+                disabled={isSubmitting}
+                data-testid="input-employee-number"
               />
             </div>
             
             <div className="form-group">
               <label className="form-label">Department:</label>
               <select 
-                className="form-control form-control-sm"
+                className="form-control form-control-sm cursor-pointer"
                 value={form.dept}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, dept: e.target.value })}
+                disabled={isSubmitting}
+                data-testid="select-dept"
               >
                 {DEPARTMENTS.map(d => (
                   <option key={d} value={d}>{d}</option>
@@ -149,6 +149,8 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                 placeholder="e.g. 45.5"
                 value={form.hours}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, hours: e.target.value })}
+                disabled={isSubmitting}
+                data-testid="input-hours"
               />
             </div>
             
@@ -160,6 +162,8 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                 placeholder="e.g. 6"
                 value={form.memberships}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, memberships: e.target.value })}
+                disabled={isSubmitting}
+                data-testid="input-memberships"
               />
             </div>
             
@@ -171,6 +175,8 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                 placeholder="e.g. 3"
                 value={form.creditCards}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, creditCards: e.target.value })}
+                disabled={isSubmitting}
+                data-testid="input-credit-cards"
               />
             </div>
             
@@ -183,6 +189,8 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                 placeholder="e.g. 10.5"
                 value={form.warranty}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, warranty: e.target.value })}
+                disabled={isSubmitting}
+                data-testid="input-warranty"
               />
             </div>
             
@@ -194,6 +202,8 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                 placeholder="e.g. 4 or Failing"
                 value={form.surveys}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, surveys: e.target.value })}
+                disabled={isSubmitting}
+                data-testid="input-surveys"
               />
             </div>
             
@@ -205,6 +215,8 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                 placeholder="e.g. 950"
                 value={form.rph}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, rph: e.target.value })}
+                disabled={isSubmitting}
+                data-testid="input-rph"
               />
             </div>
 
@@ -216,6 +228,8 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                 placeholder="e.g. 150"
                 value={form.transactions}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, transactions: e.target.value })}
+                disabled={isSubmitting}
+                data-testid="input-transactions"
               />
             </div>
 
@@ -230,6 +244,8 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                   placeholder="e.g. 165.50"
                   value={form.basket}
                   onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, basket: e.target.value })}
+                  disabled={isSubmitting}
+                  data-testid="input-basket"
                 />
               </div>
             )}
@@ -244,6 +260,8 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                   placeholder="e.g. 62.5"
                   value={form.m365}
                   onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, m365: e.target.value })}
+                  disabled={isSubmitting}
+                  data-testid="input-m365"
                 />
               </div>
             )}
@@ -258,6 +276,8 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
                   placeholder="e.g. 38.0"
                   value={form.audio}
                   onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, audio: e.target.value })}
+                  disabled={isSubmitting}
+                  data-testid="input-audio"
                 />
               </div>
             )}
@@ -271,6 +291,8 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
               placeholder="e.g. GSP Attach (4.0% vs 12.0%) or None"
               value={form.gap}
               onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, gap: e.target.value })}
+              disabled={isSubmitting}
+              data-testid="input-gap"
             />
           </div>
 
@@ -281,6 +303,8 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
               className="w-4 h-4 cursor-pointer"
               checked={form.focus5}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, focus5: e.target.checked })}
+              disabled={isSubmitting}
+              data-testid="input-focus5"
             />
             <label htmlFor="add-focus5" className="text-sm text-white cursor-pointer font-semibold">
               🔥 Add to Focus 5 List (Supervisor Observation Plan)
@@ -288,11 +312,11 @@ export default function AddEmployeeModal({ isOpen, onClose, onAddEmployee }: Add
           </div>
 
           <div className="flex-row gap-md justify-end mt-sm pt-md border-top">
-            <button type="button" className="btn btn-secondary btn-sm" onClick={onClose}>
+            <button type="button" className="btn btn-secondary btn-sm cursor-pointer" onClick={handleClose} disabled={isSubmitting} data-testid="btn-cancel">
               Cancel
             </button>
-            <button type="submit" className="btn btn-accent btn-sm">
-              Add Associate
+            <button type="submit" className="btn btn-accent btn-sm cursor-pointer" disabled={isSubmitting} data-testid="btn-submit">
+              {isSubmitting ? 'Adding...' : 'Add Associate'}
             </button>
           </div>
         </form>

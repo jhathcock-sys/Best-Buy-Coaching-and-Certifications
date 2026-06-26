@@ -1,8 +1,9 @@
 import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
+import { Employee } from '../../types';
 
 interface DraggableAssociateProps {
-  emp: any;
+  emp: Employee;
   isOnBreak: '15m' | '30m' | null;
   onUnassignZone?: (empId: string) => void;
   onToggleBreakState?: (empId: string, state: '15m' | '30m' | null) => void;
@@ -22,12 +23,7 @@ export default function DraggableAssociate({ emp, isOnBreak, onUnassignZone, onT
     zIndex: isOverlay ? 999 : (isDragging ? 0 : 1),
     opacity: isDragging && !isOverlay ? 0.3 : 1,
     cursor: isOverlay || isDragging ? 'grabbing' : 'grab',
-    boxShadow: isOverlay ? '0 12px 40px var(--black-alpha-50), 0 0 20px var(--bby-blue-alpha-20)' : undefined,
-    border: isOverlay ? '1px solid var(--bby-blue)' : undefined,
-    background: isOverlay ? 'var(--bg-card-hover)' : undefined,
-    backdropFilter: isOverlay ? 'blur(16px)' : undefined,
-    position: 'relative',
-    transition: isDragging ? 'none' : 'var(--transition-normal)'
+    position: 'relative'
   };
 
   return (
@@ -36,18 +32,19 @@ export default function DraggableAssociate({ emp, isOnBreak, onUnassignZone, onT
       style={style} 
       {...listeners} 
       {...attributes}
-      className={`zone-emp-card ${isOnBreak ? 'zone-emp-card-break' : 'zone-emp-card-active'}`}
-      data-testid={`draggable-associate-${emp.id}`}
+      className={`zone-emp-card ${isOnBreak ? 'zone-emp-card-break' : 'zone-emp-card-active'} ${isOverlay ? 'zone-emp-card-overlay' : ''} ${isDragging ? 'zone-emp-card-dragging' : ''}`}
+      data-testid={`draggable-associate-${emp?.id}`}
     >
       <div className="zone-emp-header">
-        <span className={`zone-emp-name ${isOnBreak ? 'zone-emp-name-break' : ''}`}>{emp.name}</span>
+        <span className={`zone-emp-name ${isOnBreak ? 'zone-emp-name-break' : ''}`}>{emp?.name}</span>
         {onUnassignZone && (
           <button 
-            className="zone-emp-remove"
+            className="zone-emp-remove cursor-pointer"
             onPointerDown={(e) => {
               e.stopPropagation(); // prevent drag when clicking remove
-              onUnassignZone(emp.id);
+              onUnassignZone(emp?.id);
             }}
+            data-testid={`btn-remove-${emp?.id}`}
           >
             Remove
           </button>
@@ -55,20 +52,20 @@ export default function DraggableAssociate({ emp, isOnBreak, onUnassignZone, onT
       </div>
       
       <div className="zone-emp-metrics">
-        <span>Membs: {emp.memberships}</span>
-        <span>CCs: {emp.creditCards}</span>
-        <span>GSP: {emp.warranty}%</span>
+        <span>Membs: {emp?.memberships ?? 0}</span>
+        <span>CCs: {emp?.creditCards ?? 0}</span>
+        <span>GSP: {emp?.warranty ?? 0}%</span>
       </div>
 
       <div className="zone-emp-tags">
-        {emp.focus5 && (
+        {emp?.focus5 && (
           <span className="zone-emp-focus">
             🔥 FOCUS 5
           </span>
         )}
-        {emp.gap && emp.gap !== 'None' && (
+        {emp?.gap && emp.gap !== 'None' && (
           <span className="zone-emp-gap">
-            ⚠️ Gap: {emp.gap.split(' & ')[0]}
+            ⚠️ Gap: {emp.gap.split(' & ')[0] || ''}
           </span>
         )}
       </div>
@@ -78,15 +75,16 @@ export default function DraggableAssociate({ emp, isOnBreak, onUnassignZone, onT
         <div className="zone-break-controls">
           {isOnBreak ? (
             <div className="zone-break-active">
-              <span className="zone-break-text" data-testid={`break-status-${emp.id}`}>
+              <span className="zone-break-text" data-testid={`break-status-${emp?.id}`}>
                 {isOnBreak === '15m' ? '☕ On 15m Break' : '🍔 On 30m Lunch'}
               </span>
               <button
-                className="zone-break-end-btn"
+                className="zone-break-end-btn cursor-pointer"
                 onPointerDown={(e) => {
                   e.stopPropagation();
-                  onToggleBreakState(emp.id, null);
+                  onToggleBreakState(emp?.id, null);
                 }}
+                data-testid={`btn-end-break-${emp?.id}`}
               >
                 End Break
               </button>
@@ -97,21 +95,23 @@ export default function DraggableAssociate({ emp, isOnBreak, onUnassignZone, onT
               <div className="zone-break-btns">
                 <button
                   type="button"
-                  className="zone-break-btn"
+                  className="zone-break-btn cursor-pointer"
                   onPointerDown={(e) => {
                     e.stopPropagation();
-                    onToggleBreakState(emp.id, '15m');
+                    onToggleBreakState(emp?.id, '15m');
                   }}
+                  data-testid={`btn-start-15m-${emp?.id}`}
                 >
                   ☕ 15m
                 </button>
                 <button
                   type="button"
-                  className="zone-break-btn"
+                  className="zone-break-btn cursor-pointer"
                   onPointerDown={(e) => {
                     e.stopPropagation();
-                    onToggleBreakState(emp.id, '30m');
+                    onToggleBreakState(emp?.id, '30m');
                   }}
+                  data-testid={`btn-start-30m-${emp?.id}`}
                 >
                   🍔 30m
                 </button>

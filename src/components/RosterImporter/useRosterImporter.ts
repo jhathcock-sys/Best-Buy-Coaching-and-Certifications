@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 export const FUZZY_MAP = {
   name: ['name', 'associate', 'employee', 'staff', 'member', 'associate name'],
@@ -13,17 +13,42 @@ export const FUZZY_MAP = {
   basket: ['basket', 'basket size', 'average basket', 'basket$', 'avg basket', 'basket total'],
   m365: ['m365', 'microsoft 365', 'office 365', 'm365 attach', 'office attach', 'm365%', 'microsoft attach'],
   audio: ['audio', 'audio attach', 'audio%', 'audio attach%', 'sound attach', 'ht audio']
-};
+} as const;
+
+type FuzzyMapKeys = keyof typeof FUZZY_MAP;
+
+export interface ParsedEmployeeRow {
+  name: string;
+  employeeNumber: string;
+  dept: string;
+  hours: number;
+  memberships: number;
+  creditCards: number;
+  warranty: number;
+  surveys: number;
+  rph: number;
+  basket: number;
+  m365: number;
+  audio: number;
+  opportunityGap: string;
+}
 
 export function useRosterImporter() {
   const [csvData, setCsvData] = useState<string[][] | null>(null);
   const [headers, setHeaders] = useState<string[]>([]);
   const [mappings, setMappings] = useState<Record<string, number>>({});
-  const [parsedRows, setParsedRows] = useState<any[]>([]);
+  const [parsedRows, setParsedRows] = useState<ParsedEmployeeRow[]>([]);
   const [fileName, setFileName] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  
+  const isMounted = useRef(true);
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
-  const normalizeDept = (raw: string) => {
+  const normalizeDept = useCallback((raw: string) => {
     if (!raw) return 'General Sales';
     const clean = raw.toLowerCase().trim();
     if (clean.includes('comp') || clean.includes('pc') || clean.includes('laptop')) return 'Computing';
@@ -33,12 +58,12 @@ export function useRosterImporter() {
     if (clean.includes('gs') || clean.includes('geek') || clean.includes('serv')) return 'Geek Squad';
     if (clean.includes('front') || clean.includes('cash') || clean.includes('cs') || clean.includes('checkout')) return 'Front End';
     return 'General Sales';
-  };
+  }, []);
 
-  const generatePreview = (rows: string[][], currentMappings: Record<string, number>) => {
+  const generatePreview = useCallback((rows: string[][], currentMappings: Record<string, number>) => {
     const list = rows.map(row => {
       const parsedDept = currentMappings.department !== -1 && row[currentMappings.department] ? normalizeDept(row[currentMappings.department]) : 'General Sales';
-      const emp = {
+      const emp: ParsedEmployeeRow = {
         name: currentMappings.name !== -1 && row[currentMappings.name] ? row[currentMappings.name] : 'Unknown Name',
         employeeNumber: currentMappings.employeeNumber !== -1 && row[currentMappings.employeeNumber] ? row[currentMappings.employeeNumber] : '',
         dept: parsedDept,
@@ -56,9 +81,9 @@ export function useRosterImporter() {
       return emp;
     });
     setParsedRows(list);
-  };
+  }, [normalizeDept]);
 
-  const parseCSVText = (text: string) => {
+  const parseCSVText = useCallback((text: string) => {
     const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
     if (lines.length < 2) {
       setErrorMsg("Error: The CSV file must contain a header row and at least one data row.");
@@ -91,7 +116,7 @@ export function useRosterImporter() {
     setCsvData(parsedData);
 
     const initialMappings: Record<string, number> = {};
-    Object.keys(FUZZY_MAP).forEach(key => {
+    (Object.keys(FUZZY_MAP) as FuzzyMapKeys[]).forEach(key => {
       const matchIndex = parsedHeaders.findIndex(header => {
         const normalizedHeader = header.toLowerCase().replace(/[^a-z0-9]/g, '');
         return FUZZY_MAP[key].some((term: string) => {
@@ -111,9 +136,9 @@ export function useRosterImporter() {
 
     setMappings(initialMappings);
     generatePreview(parsedData, initialMappings);
-  };
+  }, [generatePreview]);
 
-  const handleFile = (file: File) => {
+  const handleFile = useCallback((file: File) => {
     if (!file.name.endsWith('.csv')) {
       setErrorMsg("Error: Please upload a valid CSV file (.csv). Excel files can be saved as CSV in one click!");
       return;
@@ -123,24 +148,32 @@ export function useRosterImporter() {
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      const text = e.target?.result as string;
+      if (!isMounted.current) return;
+      const text = e.target?.result;
+      if (typeof text !== 'string') {
+        setErrorMsg('Failed to read file');
+        return;
+      }
       parseCSVText(text);
     };
     reader.readAsText(file);
-  };
+  }, [parseCSVText]);
 
-  const handleMappingChange = (key: string, index: number) => {
-    const newMappings = { ...mappings, [key]: index };
-    setMappings(newMappings);
-    if (csvData) generatePreview(csvData, newMappings);
-  };
+  const handleMappingChange = useCallback((key: string, index: number) => {
+    setMappings(prev => {
+      const newMappings = { ...prev, [key]: index };
+      if (csvData) generatePreview(csvData, newMappings);
+      return newMappings;
+    });
+  }, [csvData, generatePreview]);
 
-  const reset = () => {
+  const reset = useCallback(() => {
     setCsvData(null);
     setHeaders([]);
     setParsedRows([]);
     setFileName('');
-  };
+    setErrorMsg('');
+  }, []);
 
   return {
     csvData,

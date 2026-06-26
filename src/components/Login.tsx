@@ -1,18 +1,15 @@
 import { useState } from 'react';
 import { Shield, Delete } from 'lucide-react';
-import { Manager } from '../types';
 import { useStore } from '../store/useStore';
 
 interface LoginProps {
   correctPin?: string;
   onLoginSuccess: (pin: string, storeId: string) => void;
-  dbConnected: boolean;
+  isHydrating?: boolean;
 }
 
-const EMPTY_ARR: any[] = [];
-
-export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected }: LoginProps) {
-  const managers = useStore((state) => state.managers) || EMPTY_ARR;
+export default function Login({ correctPin = '1234', onLoginSuccess, isHydrating = false }: LoginProps) {
+  const dbConnected = useStore((state) => state.dbConnected);
   const [pin, setPin] = useState('');
   const [storeId, setStoreId] = useState(() => localStorage.getItem('bby_last_store') || '');
   const [isShaking, setIsShaking] = useState(false);
@@ -20,7 +17,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
   const [isLoading, setIsLoading] = useState(false);
 
   const handleKeyPress = async (num: string) => {
-    if (pin.length < 4 && !isSuccess && !isLoading) {
+    if (pin.length < 4 && !isSuccess && !isLoading && !isHydrating) {
       const newPin = pin + num;
       setPin(newPin);
       
@@ -86,7 +83,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
               }}
               placeholder="Store Number"
               className="login-input"
-              disabled={isLoading}
+              disabled={isLoading || isHydrating}
             />
           )}
         </div>
@@ -112,7 +109,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
               type="button"
               className="keypad-btn"
               data-testid={`keypad-${num}`}
-              disabled={isLoading}
+              disabled={isLoading || isHydrating}
               onClick={() => handleKeyPress(num.toString())}
             >
               {num}
@@ -125,7 +122,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
             className="keypad-action-btn"
             data-testid="keypad-clear"
             onClick={handleClear}
-            disabled={isLoading}
+            disabled={isLoading || isHydrating}
           >
             CLEAR
           </button>
@@ -135,7 +132,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
             className="keypad-btn"
             data-testid="keypad-0"
             onClick={() => handleKeyPress('0')}
-            disabled={isLoading}
+            disabled={isLoading || isHydrating}
           >
             0
           </button>
@@ -145,7 +142,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
             className="keypad-action-btn"
             data-testid="keypad-backspace"
             onClick={handleBackspace}
-            disabled={isLoading}
+            disabled={isLoading || isHydrating}
           >
             <Delete size={22} />
           </button>
@@ -166,18 +163,6 @@ export default function Login({ correctPin = '1234', onLoginSuccess, dbConnected
           )}
         </div>
       </div>
-      
-      {/* Keypad custom shake CSS */}
-      <style>{`
-        .shake-animation {
-          animation: shake 0.5s ease;
-        }
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          20%, 60% { transform: translateX(-8px); }
-          40%, 80% { transform: translateX(8px); }
-        }
-      `}</style>
     </div>
   );
 }

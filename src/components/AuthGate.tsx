@@ -11,10 +11,10 @@ export default function AuthGate({ requireManager = true, children }: AuthGatePr
   const activeManager = useStore((state) => state.activeManager);
 
   if (requireManager) {
-    if (!activeManager || !/manager|supervisor|leader|gm/i.test(activeManager.role)) {
+    if (!activeManager || !/manager|supervisor|leader|gm/i.test(activeManager?.role || '')) {
       return <Navigate replace to="/dashboard" />;
     }
   }
 
-  return <>{children}</>;
+  return <div data-testid="auth-gate-approved" className="contents">{children}</div>;
 }

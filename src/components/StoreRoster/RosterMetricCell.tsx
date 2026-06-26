@@ -1,124 +1,36 @@
 import React from 'react';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
+import { useStore } from '../../store/useStore';
+import { getMetricClass, getPaceText } from '../../utils/rosterUtils';
+import { Employee } from '../../types';
 
-// Utility functions for metric calculations
-export const getMetricClass = (val, type, dept, emp, deptGoals) => {
-  const goals = (deptGoals && (deptGoals[dept] || deptGoals['Front End'])) || {};
-  const target = goals[type] !== undefined ? goals[type] : 0;
-  const typeKey = type + 'Type';
-  const isHoursType = goals[typeKey] === 'Hours';
-  const isDollarsType = goals[typeKey] === 'Dollars';
+export interface StatusBadgeProps {
+  gap: string;
+}
 
-  if (type === 'memberships') {
-    if (isHoursType) {
-      const pace = emp.hours / (val || 0.001);
-      return pace <= target ? 'text-success' : pace <= target + 3.0 ? 'text-warning' : 'text-danger';
-    } else if (isDollarsType) {
-      const revenue = emp.hours * emp.rph;
-      const pace = revenue / (val || 0.001);
-      return pace <= target ? 'text-success' : pace <= target + 2000 ? 'text-warning' : 'text-danger';
-    }
-    return val >= target ? 'text-success' : val >= target - 1 ? 'text-warning' : 'text-danger';
-  }
-
-  if (type === 'creditCards') {
-    if (isHoursType) {
-      const pace = emp.hours / (val || 0.001);
-      return pace <= target ? 'text-success' : pace <= target + 4.0 ? 'text-warning' : 'text-danger';
-    } else if (isDollarsType) {
-      const revenue = emp.hours * emp.rph;
-      const pace = revenue / (val || 0.001);
-      return pace <= target ? 'text-success' : pace <= target + 3000 ? 'text-warning' : 'text-danger';
-    }
-    return val >= target ? 'text-success' : val >= target - 1 ? 'text-warning' : 'text-danger';
-  }
-
-  if (type === 'warranty') {
-    return val >= target ? 'text-success' : val >= target - 3.0 ? 'text-warning' : 'text-danger';
-  }
-  if (type === 'surveys') {
-    return val >= target ? 'text-success' : 'text-danger';
-  }
-  if (type === 'rph') {
-    return val >= target ? 'text-success' : val >= target - 150 ? 'text-warning' : 'text-danger';
-  }
-  if (type === 'basket') {
-    return val >= target ? 'text-success' : val >= target - 30 ? 'text-warning' : 'text-danger';
-  }
-  if (type === 'm365') {
-    return val >= target ? 'text-success' : val >= target - 10 ? 'text-warning' : 'text-danger';
-  }
-  if (type === 'audio') {
-    return val >= target ? 'text-success' : val >= target - 10 ? 'text-warning' : 'text-danger';
-  }
-  return '';
-};
-
-export const getPaceText = (val, type, dept, emp, deptGoals) => {
-  const goals = (deptGoals && (deptGoals[dept] || deptGoals['Front End'])) || {};
-  const typeKey = type + 'Type';
-  const isHoursType = goals[typeKey] === 'Hours';
-  const isDollarsType = goals[typeKey] === 'Dollars';
-
-  if (!val || val === 0) return 'No pace';
-
-  if (isHoursType) {
-    const pace = emp.hours / val;
-    return `1 in ${pace.toFixed(1)} hrs`;
-  } else if (isDollarsType) {
-    const revenue = emp.hours * emp.rph;
-    const pace = revenue / val;
-    return `1 in $${(pace / 1000).toFixed(1)}k rev`;
-  }
-  return '';
-};
-
-export const getEmployeeGap = (emp, deptGoals) => {
-  const gaps = [];
-  
-  if (getMetricClass(emp.memberships, 'memberships', emp.dept, emp, deptGoals) === 'text-danger') {
-    gaps.push('PMs');
-  }
-  if (getMetricClass(emp.creditCards, 'creditCards', emp.dept, emp, deptGoals) === 'text-danger') {
-    gaps.push('Apps');
-  }
-  if (getMetricClass(emp.warranty, 'warranty', emp.dept, emp, deptGoals) === 'text-danger') {
-    gaps.push('GSP');
-  }
-  if (getMetricClass(emp.surveys, 'surveys', emp.dept, emp, deptGoals) === 'text-danger') {
-    gaps.push('5*');
-  }
-  if (getMetricClass(emp.rph, 'rph', emp.dept, emp, deptGoals) === 'text-danger') {
-    gaps.push('RPH');
-  }
-  if ((emp.dept === 'Computing' || emp.dept === 'Home Theatre') && getMetricClass(emp.basket, 'basket', emp.dept, emp, deptGoals) === 'text-danger') {
-    gaps.push('Basket');
-  }
-  if (emp.dept === 'Computing' && getMetricClass(emp.m365, 'm365', emp.dept, emp, deptGoals) === 'text-danger') {
-    gaps.push('M365 Attach');
-  }
-  if (emp.dept === 'Home Theatre' && getMetricClass(emp.audio, 'audio', emp.dept, emp, deptGoals) === 'text-danger') {
-    gaps.push('Audio Attach');
-  }
-  
-  if (gaps.length === 0) return 'None';
-  return gaps.join(' & ');
-};
-
-export const StatusBadge = ({ gap }) => {
-  if (gap === 'None' || !gap || gap.startsWith('None')) {
+export const StatusBadge = ({ gap }: StatusBadgeProps) => {
+  if (!gap || gap === 'None' || gap.startsWith('None')) {
     return (
-      <span className="tag-pill tag-pill-success">
+      <span className="tag-pill tag-pill-success" data-testid="status-badge-success">
         <CheckCircle size={12} className="roster-icon-inline" /> Hitting Target
       </span>
     );
   }
   return (
-    <span className="tag-pill tag-pill-error">
+    <span className="tag-pill tag-pill-error" data-testid="status-badge-error">
       <AlertTriangle size={12} className="roster-icon-inline" /> Gap: {gap}
     </span>
   );
 };
+
+export interface RosterMetricCellProps {
+  val: number | undefined | null;
+  type: string;
+  dept: string;
+  emp: Employee;
+  displayValue: string | number;
+  isDense: boolean;
+}
 
 export const RosterMetricCell = React.memo(({ 
   val, 
@@ -126,9 +38,10 @@ export const RosterMetricCell = React.memo(({
   dept, 
   emp, 
   displayValue, 
-  deptGoals, 
   isDense 
-}: any) => {
+}: RosterMetricCellProps) => {
+  const deptGoals = useStore((state) => state.deptGoals);
+
   const isDeptMetric = (
     type !== 'basket' && type !== 'm365' && type !== 'audio'
   ) || (
@@ -139,7 +52,7 @@ export const RosterMetricCell = React.memo(({
   
   if (!isDeptMetric) {
     return (
-      <td className={`roster-td ${isDense ? 'roster-td-dense' : 'roster-td-standard'} metric-empty-cell`}>
+      <td className={`roster-td ${isDense ? 'roster-td-dense' : 'roster-td-standard'} metric-empty-cell`} data-testid={`metric-cell-${type}-empty`}>
         <span className="metric-empty">—</span>
       </td>
     );
@@ -156,16 +69,16 @@ export const RosterMetricCell = React.memo(({
   }
   
   const paceText = (type === 'memberships' || type === 'creditCards') ? getPaceText(val, type, dept, emp, deptGoals) : '';
-  const showPace = val > 0 && paceText && paceText !== 'No pace';
+  const showPace = (val || 0) > 0 && paceText && paceText !== 'No pace';
 
   return (
-    <td className={`roster-td ${isDense ? 'roster-td-dense' : 'roster-td-standard'} roster-td-center`}>
+    <td className={`roster-td ${isDense ? 'roster-td-dense' : 'roster-td-standard'} roster-td-center`} data-testid={`metric-cell-${type}`}>
       <div className="metric-cell-container">
-        <span className={pillClass}>
+        <span className={pillClass} data-testid={`metric-pill-${type}`}>
           {displayValue}
         </span>
         {showPace && (
-          <span className="metric-pace">
+          <span className="metric-pace" data-testid={`metric-pace-${type}`}>
             {paceText}
           </span>
         )}
@@ -173,3 +86,4 @@ export const RosterMetricCell = React.memo(({
     </td>
   );
 });
+

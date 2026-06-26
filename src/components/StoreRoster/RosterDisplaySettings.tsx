@@ -1,32 +1,59 @@
 import React from 'react';
 import { Sliders } from 'lucide-react';
 
+export interface VisibleCols {
+  hours: boolean;
+  dept: boolean;
+  memberships: boolean;
+  creditCards: boolean;
+  warranty: boolean;
+  surveys: boolean;
+  rph: boolean;
+  basket: boolean;
+  attach: boolean;
+  status: boolean;
+}
+
+export interface RosterDisplaySettingsProps {
+  showViewSettings: boolean;
+  isDense: boolean;
+  setIsDense: (isDense: boolean) => void;
+  visibleCols: VisibleCols;
+  setVisibleCols: React.Dispatch<React.SetStateAction<VisibleCols>>;
+}
+
 export default function RosterDisplaySettings({
   showViewSettings,
-  isDense, setIsDense,
-  visibleCols, setVisibleCols
-}: any) {
+  isDense,
+  setIsDense,
+  visibleCols,
+  setVisibleCols
+}: RosterDisplaySettingsProps) {
   if (!showViewSettings) return null;
 
   return (
-    <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.25rem 2rem', border: '1px solid rgba(255, 255, 255, 0.08)', animation: 'fadeIn 0.25s ease' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-        <h4 style={{ margin: 0, fontSize: '0.95rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}>
-          <Sliders size={16} color="var(--bby-blue)" /> Roster Display Settings
+    <div 
+      className="glass-card flex flex-col gap-4 py-5 px-8 border border-white/10 animate-fade-in"
+      data-testid="roster-display-settings"
+    >
+      <div className="flex justify-between items-center flex-wrap gap-4">
+        <h4 className="m-0 text-[0.95rem] text-white flex items-center gap-[0.4rem] font-bold">
+          <Sliders size={16} className="text-bby-blue" /> Roster Display Settings
         </h4>
-        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+        <label className="inline-flex items-center gap-2 cursor-pointer text-sm text-text-secondary">
           <input 
             type="checkbox" 
             checked={isDense} 
             onChange={(e) => setIsDense(e.target.checked)} 
-            style={{ cursor: 'pointer' }}
+            className="cursor-pointer"
+            data-testid="dense-mode-toggle"
           />
           <span>Enable Dense Grid Layout</span>
         </label>
       </div>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem 1.25rem', padding: '0.75rem', background: 'rgba(0,0,0,0.15)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.02)' }}>
-        {Object.keys(visibleCols).map(col => {
+      <div className="flex flex-wrap gap-y-3 gap-x-5 p-3 bg-black/15 rounded-lg border border-white/5">
+        {(Object.keys(visibleCols || {}) as Array<keyof VisibleCols>).map(col => {
           const label = 
             col === 'hours' ? 'Hours' :
             col === 'dept' ? 'Department' :
@@ -40,12 +67,13 @@ export default function RosterDisplaySettings({
             col === 'status' ? 'Status' : col;
 
           return (
-            <label key={col} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.8rem', color: '#fff' }}>
+            <label key={col} className="inline-flex items-center gap-[0.4rem] cursor-pointer text-sm text-white">
               <input 
                 type="checkbox" 
                 checked={visibleCols[col]} 
                 onChange={(e) => setVisibleCols({ ...visibleCols, [col]: e.target.checked })} 
-                style={{ cursor: 'pointer' }}
+                className="cursor-pointer"
+                data-testid={`toggle-col-${col}`}
               />
               <span>{label}</span>
             </label>

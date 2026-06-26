@@ -1,22 +1,43 @@
-import React, { ReactNode } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileText, Loader2 } from 'lucide-react';
-import { Employee } from '../../types';
+import { Employee, CoachingLog } from '../../types';
+import { useStore } from '../../store/useStore';
+import { generateMonthlyOneOnOne } from '../../services/ai/geminiCoaching';
+import { renderMarkdown } from '../../utils/profileUtils';
 
 interface ProfileAppraisalsTabProps {
   employee: Employee | null;
-  isGeneratingReview: boolean;
-  generatedReview: string | null;
-  handleGenerateReview: () => void;
-  renderMarkdown: (markdown: string) => ReactNode;
+  associateLogs: CoachingLog[];
 }
 
 export default function ProfileAppraisalsTab({ 
   employee,
-  isGeneratingReview,
-  generatedReview,
-  handleGenerateReview,
-  renderMarkdown
+  associateLogs,
 }: ProfileAppraisalsTabProps) {
+  const [isGeneratingReview, setIsGeneratingReview] = useState(false);
+  const [generatedReview, setGeneratedReview] = useState<string | null>(null);
+
+  useEffect(() => {
+    setGeneratedReview(null);
+    setIsGeneratingReview(false);
+  }, [employee?.id]);
+
+  const handleGenerateReview = async () => {
+    if (!employee) return;
+    setIsGeneratingReview(true);
+    setGeneratedReview(null);
+    try {
+      const apiKey = useStore.getState().apiKey;
+      const reviewText = await generateMonthlyOneOnOne(employee, associateLogs, apiKey);
+      setGeneratedReview(reviewText);
+    } catch (err) {
+      console.error(err);
+      setGeneratedReview("Error generating review. Please check your API key.");
+    } finally {
+      setIsGeneratingReview(false);
+    }
+  };
+
   return (
     <>
             <div className="flex-column gap-md animate-fade-in">

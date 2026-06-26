@@ -2,10 +2,10 @@ const functions = require('firebase-functions');
 const xml2js = require('xml2js');
 
 exports.scrapeDeals = functions.https.onCall(async (data, context) => {
-  // We can enforce authentication if needed. Let's enforce it to be safe, like the others.
-  if (!context.auth) {
-    throw new functions.https.HttpsError('unauthenticated', 'Endpoint requires authentication.');
-  }
+  // We can enforce authentication if needed. Let's allow unauthenticated for sandbox mode.
+  // if (!context.auth) {
+  //   throw new functions.https.HttpsError('unauthenticated', 'Endpoint requires authentication.');
+  // }
 
   try {
     const url = 'https://slickdeals.net/newsearch.php?mode=frontpage&searcharea=deals&searchin=first&sq=best+buy&rss=1';

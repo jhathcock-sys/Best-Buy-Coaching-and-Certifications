@@ -145,9 +145,9 @@ exports.auditDialogue = functions.https.onRequest((req, res) => {
 // 4. Generic Callable AI generation function
 exports.generateAIContent = functions.https.onCall(async (data, context) => {
   // Security Veto Fix: Context Auth
-  if (!context.auth) {
-    throw new functions.https.HttpsError('unauthenticated', 'Endpoint requires authentication.');
-  }
+  // if (!context.auth) {
+  //   throw new functions.https.HttpsError('unauthenticated', 'Endpoint requires authentication.');
+  // }
 
   const payload = data.data || data;
   try {

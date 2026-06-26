@@ -1,6 +1,5 @@
 {
     "remaining_queue": [
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/store/slices/shiftSlice.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/store/slices/uiSlice.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/store/cviHelper.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/store/useStore.ts",
@@ -162,12 +161,13 @@
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/store/slices/authSlice.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/store/slices/constants.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/store/slices/metricsSlice.ts",
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/store/slices/playbookSlice.ts"
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/store/slices/playbookSlice.ts",
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/store/slices/shiftSlice.ts"
     ],
     "current_checkpoint": {
-        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/store/slices/shiftSlice.ts"
+        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/store/slices/uiSlice.ts"
     },
-    "file_index": 117,
+    "file_index": 118,
     "status": "ACTIVE",
     "agent_feed": [
         {

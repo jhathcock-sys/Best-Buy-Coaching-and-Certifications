@@ -1,7 +1,18 @@
-import { SchemaType } from '@google/generative-ai';
-import { getGeminiModel, executeWithRetry } from './core.js';
+import { SchemaType, type Schema } from '@google/generative-ai';
+import { getGeminiModel, executeWithRetry } from './core';
+import type { PlaybookSettings } from '../../types';
 
-export async function runStoreShiftSimulationGemini(apiKey, rosterData, zoneAssignments, playbookSettings) {
+export interface RosterMetric {
+  name: string;
+  rph: string | number;
+  memberships: string | number;
+  creditCards: string | number;
+  warranty: string | number;
+  surveys: string | number;
+  dept: string;
+}
+
+export async function runStoreShiftSimulationGemini(apiKey: string | undefined, rosterData: RosterMetric[], zoneAssignments: Record<string, string>, playbookSettings: PlaybookSettings) {
   try {
     const model = getGeminiModel(apiKey, playbookSettings);
     
@@ -9,9 +20,9 @@ export async function runStoreShiftSimulationGemini(apiKey, rosterData, zoneAssi
       You are a Retail Store Shift Simulator.
       Simulate an 8-hour retail shift at Best Buy based on:
       1. Roster Metrics Profile (strengths/gaps):
-      ${JSON.stringify(rosterData)}
+      ${JSON.stringify(rosterData || [])}
       2. Zone Placement (which employee is assigned to which department):
-      ${JSON.stringify(zoneAssignments)}
+      ${JSON.stringify(zoneAssignments || {})}
 
       Generate:
       1. A chronological Shift Log listing 5 key events (e.g. Hour 1, Hour 3, Hour 5, Hour 6, Hour 8). Each event should describe a customer interaction (such as a gaming TV request, a membership objection, or register queues), showing how the assigned associate handled it based on their metrics/personality.
@@ -42,7 +53,7 @@ export async function runStoreShiftSimulationGemini(apiKey, rosterData, zoneAssi
       Do not include markdown. Return only raw JSON.
     `;
 
-    const responseSchema: any = {
+    const responseSchema: Schema = {
       type: SchemaType.OBJECT,
       properties: {
         shiftLogs: {
@@ -86,7 +97,7 @@ export async function runStoreShiftSimulationGemini(apiKey, rosterData, zoneAssi
 
     const parsed = JSON.parse(result.response.text());
     return {
-      shiftLogs: Array.isArray(parsed.shiftLogs) ? parsed.shiftLogs : [],
+      shiftLogs: Array.isArray(parsed?.shiftLogs) ? parsed.shiftLogs : [],
       scorecard: {
         revenue: parsed.scorecard?.revenue || 0,
         revenueGoal: parsed.scorecard?.revenueGoal || 0,

@@ -1,6 +1,5 @@
 {
     "remaining_queue": [
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/floorSimulator.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/geminiAuditors.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/geminiCoaching.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/geminiDocumentParsers.ts",
@@ -162,12 +161,13 @@
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/constants.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/core.ts",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/customerSimulator.ts",
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/employeeSimulator.ts"
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/employeeSimulator.ts",
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/floorSimulator.ts"
     ],
     "current_checkpoint": {
-        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/floorSimulator.ts"
+        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/geminiAuditors.ts"
     },
-    "file_index": 103,
+    "file_index": 104,
     "status": "ACTIVE",
     "agent_feed": [
         {

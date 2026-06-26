@@ -121,7 +121,7 @@ export default function FloorLeaderTracker() {
           )}
 
           {leaderTab === 'sim' && (
-            <ShiftSimulator roster={roster} />
+            <ShiftSimulator />
           )}
 
           {leaderTab === 'survey' && (

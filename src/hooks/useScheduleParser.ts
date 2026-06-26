@@ -1,30 +1,90 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { normalizeZone, fuzzyMatchName, parseShiftHours, generateBreaks, WEEKDAY_KEYS } from '../utils/scheduleParserUtils';
 import Papa from 'papaparse';
 import DOMPurify from 'dompurify';
 import { parseScheduleImage } from '../services/ai';
-export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAddEmployee, isOpen) {
-  const [activeTab, setActiveTab] = useState('image'); // 'image' | 'csv'
-  const [isParsing, setIsParsing] = useState(false);
-  const [parsedItems, setParsedItems] = useState([]); // Array of raw extracted rows
-  const [reviews, setReviews] = useState([]); // Array of resolved objects
-  const [fileName, setFileName] = useState('');
+import { useStore } from '../store/useStore';
+import { useShallow } from 'zustand/react/shallow';
+import { Employee } from '../types';
 
-  const [errorMsg, setErrorMsg] = useState('');
+export interface ParsedItem {
+  name: string;
+  shift: string;
+  zone: string;
+}
+
+export interface ReviewItem {
+  id: string;
+  originalName: string;
+  originalShift: string;
+  matchedEmpId: string;
+  assignedZone: string;
+  startTimeStr: string;
+  durationHours: number;
+}
+
+export interface CsvMapping {
+  name: number;
+  shift: number;
+  zone: number;
+}
+
+export interface UseScheduleParserProps {
+  onImportConfirm: (result: { zoneAssignments: Record<string, string[]>; breakSchedule: any[] }) => void;
+  onClose: () => void;
+  isOpen?: boolean;
+}
+
+const EMPTY_OBJ: Record<string, never> = {};
+
+export function useScheduleParser({ onImportConfirm, onClose, isOpen }: UseScheduleParserProps) {
+  const { rosterHistory, activePeriod, apiKey, addEmployee } = useStore(useShallow(state => ({
+    rosterHistory: state.rosterHistory,
+    activePeriod: state.activePeriod,
+    apiKey: state.apiKey,
+    addEmployee: state.addEmployee
+  })));
+
+  const _rawroster = activePeriod ? ((rosterHistory || EMPTY_OBJ)[activePeriod] || EMPTY_OBJ) : EMPTY_OBJ;
+  const roster = useMemo(() => {
+    return (Object.values(_rawroster) as Employee[]).sort((a, b) => a.name.localeCompare(b.name));
+  }, [_rawroster]);
+  const [activeTab, setActiveTab] = useState<string>('image'); // 'image' | 'csv'
+  const [isParsing, setIsParsing] = useState<boolean>(false);
+  const [parsedItems, setParsedItems] = useState<ParsedItem[]>([]); // Array of raw extracted rows
+  const [reviews, setReviews] = useState<ReviewItem[]>([]); // Array of resolved objects
+  const [fileName, setFileName] = useState<string>('');
+
+  const [errorMsg, setErrorMsg] = useState<string>('');
   
   // CSV specific states
-  const [csvHeaders, setCsvHeaders] = useState([]);
-  const [csvDataRows, setCsvDataRows] = useState([]);
-  const [csvMappings, setCsvMappings] = useState({ name: 0, shift: 1, zone: 2 });
-  const [isWeeklyCsv, setIsWeeklyCsv] = useState(false);
-  const [selectedDayColumn, setSelectedDayColumn] = useState('');
+  const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
+  const [csvDataRows, setCsvDataRows] = useState<string[][]>([]);
+  const [csvMappings, setCsvMappings] = useState<CsvMapping>({ name: 0, shift: 1, zone: 2 });
+  const [isWeeklyCsv, setIsWeeklyCsv] = useState<boolean>(false);
+  const [selectedDayColumn, setSelectedDayColumn] = useState<string>('');
 
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  
+  // Reset state when modal closes
+  useEffect(() => {
+    if (isOpen === false) {
+      setIsParsing(false);
+      setParsedItems([]);
+      setReviews([]);
+      setFileName('');
+      setErrorMsg('');
+      setCsvHeaders([]);
+      setCsvDataRows([]);
+      setCsvMappings({ name: 0, shift: 1, zone: 2 });
+      setIsWeeklyCsv(false);
+      setSelectedDayColumn('');
+      setActiveTab('image');
+    }
+  }, [isOpen]);
 
   // Handle image upload and trigger OCR parsing
-  const handleImageFile = (file) => {
+  const handleImageFile = (file: File) => {
     if (!file.type.startsWith('image/')) {
       setErrorMsg('Error: Please upload a valid image file (.png, .jpg, .jpeg).');
       return;
@@ -33,8 +93,9 @@ export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAd
     setFileName(file.name);
 
     const reader = new FileReader();
-    reader.onload = async (e: any) => {
-      const base64Url = e.target.result;
+    reader.onload = async (e: ProgressEvent<FileReader>) => {
+      if (!e.target?.result) return;
+      const base64Url = e.target.result as string;
 
       
       const base64Data = base64Url.split(',')[1];
@@ -52,7 +113,8 @@ export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAd
   };
 
   // Call Gemini Vision to extract schedule data
-  const runOcrParsing = async (base64Data, mimeType) => {
+  const runOcrParsing = async (base64Data: string, mimeType: string) => {
+    if (isParsing) return;
     setIsParsing(true);
     setErrorMsg('');
     try {
@@ -93,7 +155,7 @@ export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAd
   };
 
   // Handle CSV file processing
-  const handleCsvFile = (file) => {
+  const handleCsvFile = (file: File) => {
     if (!file.name.endsWith('.csv')) {
       setErrorMsg('Error: Please upload a valid CSV file (.csv).');
       return;
@@ -102,14 +164,15 @@ export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAd
     setFileName(file.name);
 
     const reader = new FileReader();
-    reader.onload = (e: any) => {
-      const text = e.target.result;
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      if (!e.target?.result) return;
+      const text = e.target.result as string;
       parseCSVText(text);
     };
     reader.readAsText(file);
   };
 
-  const parseCSVText = (text) => {
+  const parseCSVText = (text: string) => {
     Papa.parse(text, {
       skipEmptyLines: true,
       complete: (results) => {
@@ -118,7 +181,7 @@ export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAd
           return;
         }
         
-        const lines = results.data as any[][];
+        const lines = results.data as string[][];
         if (lines.length < 2) {
           setErrorMsg('Error: CSV file must contain a header row and at least one data row.');
           return;
@@ -160,7 +223,7 @@ export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAd
 
   // Convert CSV parsed data rows to list of review records
   const generatePreviewFromCsv = () => {
-    let items = [];
+    const items: ParsedItem[] = [];
 
     if (isWeeklyCsv) {
       // Weekly Calendar structure (Name column + Day Shift column)
@@ -180,7 +243,7 @@ export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAd
         // Skip off days
         if (empName && shiftStr && shiftStr.toLowerCase() !== 'off' && shiftStr.trim() !== '') {
           // Attempt to map department based on the store roster if employee already exists
-          const existingEmp = roster.find(r => r.name.toLowerCase().includes(empName.toLowerCase()));
+          const existingEmp = (roster || []).find(r => r?.name?.toLowerCase().includes(empName.toLowerCase()));
           const guessedZone = existingEmp ? existingEmp.dept : 'Computing';
 
           items.push({
@@ -217,7 +280,7 @@ export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAd
   };
 
   // Build the editable validation reviews list from raw parsed inputs
-  const generateReviewList = (rawItems) => {
+  const generateReviewList = (rawItems: ParsedItem[]) => {
     const list = rawItems.map((item, idx) => {
       // Fuzzy match against active roster
       const matchedEmp = fuzzyMatchName(item.name, roster);
@@ -238,7 +301,7 @@ export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAd
   };
 
   // Handle matching updates in validation grid
-  const handleMatchChange = (reviewId, selectedId) => {
+  const handleMatchChange = (reviewId: string, selectedId: string) => {
     setReviews(prev => prev.map(rev => {
       if (rev.id === reviewId) {
         return { ...rev, matchedEmpId: selectedId };
@@ -248,7 +311,7 @@ export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAd
   };
 
   // Handle zone mapping override
-  const handleZoneChange = (reviewId, zoneName) => {
+  const handleZoneChange = (reviewId: string, zoneName: string) => {
     setReviews(prev => prev.map(rev => {
       if (rev.id === reviewId) {
         return { ...rev, assignedZone: zoneName };
@@ -258,7 +321,7 @@ export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAd
   };
 
   // Handle shift string manual edit
-  const handleShiftTimeChange = (reviewId, newShiftTime) => {
+  const handleShiftTimeChange = (reviewId: string, newShiftTime: string) => {
     setReviews(prev => prev.map(rev => {
       if (rev.id === reviewId) {
         const shiftDetails = parseShiftHours(newShiftTime);
@@ -282,7 +345,7 @@ export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAd
     }
 
     // 1. Build zone assignments
-    const finalZoneAssignments = {
+    const finalZoneAssignments: Record<string, string[]> = {
       'Computing': [],
       'Mobile': [],
       'Home Theatre': [],
@@ -292,11 +355,11 @@ export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAd
     };
 
     // 2. Build break events
-    const finalBreakSchedule = [];
+    const finalBreakSchedule: any[] = [];
 
     activeReviews.forEach(rev => {
-      let empId;
-      let empName;
+      let empId: string;
+      let empName: string;
 
       if (rev.matchedEmpId === 'create_new') {
         // Create new employee dynamically with unique ID and default parameters
@@ -305,21 +368,21 @@ export function useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAd
           id: newId,
           name: DOMPurify.sanitize(String(rev.originalName || '').trim()),
           dept: DOMPurify.sanitize(String(rev.assignedZone || '').trim()),
-          hours: parseFloat(rev.durationHours) || 8.0,
+          hours: rev.durationHours || 8.0,
           memberships: 0,
           creditCards: 0,
           warranty: 0.0,
           surveys: 5.0,
           rph: 600,
           gap: 'None'
-        };
-        if (onAddEmployee) {
-          onAddEmployee(newEmp);
+        } as Employee;
+        if (addEmployee) {
+          addEmployee(newEmp);
         }
         empId = newId;
         empName = newEmp.name;
       } else {
-        const emp = roster.find(e => e.id === rev.matchedEmpId);
+        const emp = (roster || []).find(e => e.id === rev.matchedEmpId);
         if (!emp) return;
         empId = emp.id;
         empName = emp.name;

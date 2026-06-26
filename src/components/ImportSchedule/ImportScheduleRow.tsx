@@ -8,6 +8,8 @@ export interface ParsedShiftRowData {
   originalShift: string;
   assignedZone: string;
   breaks?: { type: string; time: string; }[];
+  startTimeStr: string;
+  durationHours: number;
 }
 
 export interface ImportScheduleRowProps {

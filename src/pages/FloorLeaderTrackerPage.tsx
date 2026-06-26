@@ -146,10 +146,7 @@ export default function FloorLeaderTracker() {
       <ImportScheduleModal 
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
-        roster={roster}
         onImportConfirm={handleImportSchedule}
-        apiKey={apiKey}
-        onAddEmployee={onAddEmployee}
       />
 
     </div>

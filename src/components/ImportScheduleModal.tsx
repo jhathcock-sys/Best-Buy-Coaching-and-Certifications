@@ -5,6 +5,8 @@ import { parseScheduleImage } from '../services/ai';
 
 // standard department/zone mapping helper
 import { useScheduleParser } from '../hooks/useScheduleParser';
+import { useStore } from '../store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { generateBreaks, WEEKDAY_KEYS } from '../utils/scheduleParserUtils';
 import ImportWizardStep1 from './ImportSchedule/ImportWizardStep1';
 import ImportWizardStep2 from './ImportSchedule/ImportWizardStep2';
@@ -13,13 +15,10 @@ import { Employee } from '../types';
 interface ImportScheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  roster: Employee[];
   onImportConfirm: (payload: { zoneAssignments: any; breakSchedule: any }) => void;
-  apiKey: string;
-  onAddEmployee: (employeeName: Employee) => void;
 }
 
-export default function ImportScheduleModal({ isOpen, onClose, roster = [], onImportConfirm, apiKey, onAddEmployee }: ImportScheduleModalProps) {
+export default function ImportScheduleModal({ isOpen, onClose, onImportConfirm }: ImportScheduleModalProps) {
   const {
     activeTab, setActiveTab,
     isParsing, setIsParsing,
@@ -41,7 +40,15 @@ export default function ImportScheduleModal({ isOpen, onClose, roster = [], onIm
     handleConfirmImport,
     runDemoParse,
     generatePreviewFromCsv
-  } = useScheduleParser(roster, onImportConfirm, onClose, apiKey, onAddEmployee, isOpen);
+  } = useScheduleParser({ onImportConfirm, onClose, isOpen });
+
+  const roster = useStore(useShallow(state => {
+    const activePeriod = state.activePeriod;
+    const rosterHistory = state.rosterHistory;
+    const EMPTY_OBJ = {};
+    const _rawroster = activePeriod ? ((rosterHistory || EMPTY_OBJ)[activePeriod] || EMPTY_OBJ) : EMPTY_OBJ;
+    return Object.values(_rawroster) as Employee[];
+  }));
 
   if (!isOpen) return null;
 

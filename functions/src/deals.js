@@ -42,11 +42,16 @@ exports.scrapeDeals = functions.https.onCall(async (data, context) => {
       itemsArray = [rawItems];
     }
 
-    const deals = itemsArray.map(item => ({
-      title: item.title || '',
-      link: item.link || '',
-      description: item.description || ''
-    }));
+    const deals = itemsArray
+      .filter(item => {
+        const title = (item.title || '').toLowerCase();
+        return title.includes('best buy') || title.includes('bestbuy');
+      })
+      .map(item => ({
+        title: item.title || '',
+        link: item.link || '',
+        description: item.description || ''
+      }));
 
     return deals;
   } catch (error) {

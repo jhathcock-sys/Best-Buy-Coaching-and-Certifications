@@ -9,6 +9,7 @@ export interface Message {
 }
 
 export interface CompletedSteps {
+  [key: string]: boolean;
   connect: boolean;
   discover: boolean;
   recommend: boolean;

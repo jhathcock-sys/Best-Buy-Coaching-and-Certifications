@@ -17,9 +17,15 @@ export interface GeminiRequestContent {
 
 export interface GeminiRequest {
   contents?: GeminiRequestContent[];
+  systemInstruction?: {
+    role: string;
+    parts: { text: string }[];
+  };
   generationConfig?: {
     responseMimeType?: string;
-    responseSchema?: Record<string, unknown>;
+    responseSchema?: any; // Allows @google/generative-ai Schema
+    maxOutputTokens?: number;
+    temperature?: number;
   };
 }
 
@@ -32,12 +38,13 @@ export function isGeminiAvailable(apiKey: string | undefined): boolean {
   return true;
 }
 
-export function getGeminiModel(apiKey: string | undefined, playbookSettings: PlaybookSettings) {
+export function getGeminiModel(apiKey: string | undefined, playbookSettings?: Partial<PlaybookSettings>) {
   const isProMode = playbookSettings?.aiMode === 'pro';
   
   return {
-    generateContent: async (request: GeminiRequest) => {
+    generateContent: async (req: GeminiRequest | string) => {
       try {
+        const request: GeminiRequest = typeof req === 'string' ? { contents: [{ role: 'user', parts: [{ text: req }] }] } : req;
         const functions = getFunctions(app);
         const generateAIContentFn = httpsCallable(functions, 'generateAIContent');
         
@@ -91,8 +98,8 @@ export function getGeminiModel(apiKey: string | undefined, playbookSettings: Pla
         throw error;
       }
     },
-    generateContentStream: async function(request: GeminiRequest) {
-      const result = await this.generateContent(request);
+    generateContentStream: async function(req: GeminiRequest | string) {
+      const result = await this.generateContent(req);
       return {
         stream: [
           { text: () => result.response.text() }

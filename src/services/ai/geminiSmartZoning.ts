@@ -1,6 +1,7 @@
-import { getGeminiModel } from './core';
+import { getGeminiModel, executeWithRetry } from './core';
+import type { PlaybookSettings, Employee } from '../../types';
 
-export async function generateSmartZoning(roster: any[], zones: string[], apiKey: string, playbookSettings: any) {
+export async function generateSmartZoning(roster: Employee[], zones: string[], apiKey: string | undefined, playbookSettings: PlaybookSettings) {
   if (!apiKey) throw new Error("Missing Gemini API Key");
   
   const model = getGeminiModel(apiKey, playbookSettings);
@@ -10,10 +11,10 @@ export async function generateSmartZoning(roster: any[], zones: string[], apiKey
     Your goal is to optimize the daily lineup by assigning employees to specific zones to maximize revenue and metrics.
     
     Here is the available roster with their historical performance (RPH = Revenue Per Hour):
-    ${JSON.stringify(roster.map(e => ({ id: e.id, name: e.name, rph: e.rph, memberships: e.memberships, dept: e.dept })), null, 2)}
+    ${JSON.stringify((roster || []).map((e: Employee) => ({ id: e.id, name: e.name, rph: e.rph, memberships: e.memberships, dept: e.dept })), null, 2)}
     
     Here are the zones available:
-    ${JSON.stringify(zones)}
+    ${JSON.stringify(zones || [])}
     
     Rules for assignment:
     1. Every employee in the roster MUST be assigned to exactly one zone.
@@ -24,12 +25,12 @@ export async function generateSmartZoning(roster: any[], zones: string[], apiKey
   `;
 
   try {
-    const result = await model.generateContent({
+    const result = await executeWithRetry(() => model.generateContent({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       generationConfig: {
         responseMimeType: 'application/json',
       }
-    });
+    }));
     const response = await result.response;
     const text = response.text().replace(/```json/g, '').replace(/```/g, '').trim();
     const parsed = JSON.parse(text);

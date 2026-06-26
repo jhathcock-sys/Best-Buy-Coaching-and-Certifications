@@ -1,6 +1,5 @@
 {
     "remaining_queue": [
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/DailyLineupBuilderPage.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/DashboardPage.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/FloorLeaderTrackerPage.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/LiveFloorShadowPage.tsx",
@@ -162,12 +161,13 @@
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/AuraHUDPage.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/BreakroomTVPage.tsx",
         "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/CoachingHistoryPage.tsx",
-        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/CoachSimulatorPage.tsx"
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/CoachSimulatorPage.tsx",
+        "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/DailyLineupBuilderPage.tsx"
     ],
     "current_checkpoint": {
-        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/DailyLineupBuilderPage.tsx"
+        "file_path": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/pages/DashboardPage.tsx"
     },
-    "file_index": 89,
+    "file_index": 90,
     "status": "ACTIVE",
     "agent_feed": [
         {

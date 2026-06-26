@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { CalendarDays, Users, MapPin, Search, AlertTriangle, CheckCircle, Clock, Wand2 } from 'lucide-react';
-
+import { CalendarDays, Wand2 } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { Employee } from '../types';
+import ZoneCard from '../components/DailyLineupBuilder/ZoneCard';
+import AvailableRosterPanel from '../components/DailyLineupBuilder/AvailableRosterPanel';
 
 const EMPTY_OBJ = {};
 
@@ -9,7 +11,11 @@ export default function DailyLineupBuilder() {
   const activePeriod = useStore((state) => state.activePeriod);
   const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
   const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
-  const roster: any[] = React.useMemo(() => Object.values(_rawroster).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawroster]);
+  const roster: Employee[] = React.useMemo(
+    () => (Object.values(_rawroster) as Employee[]).sort((a, b) => (a?.name || '').localeCompare(b?.name || '')), 
+    [_rawroster]
+  );
+  
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -27,13 +33,18 @@ export default function DailyLineupBuilder() {
   });
   const [isSmartAssigning, setIsSmartAssigning] = useState(false);
   const apiKey = useStore((state) => state.apiKey);
-
   const playbookSettings = useStore(state => state.playbookSettings);
+
   const handleSmartAssign = async () => {
     if (!apiKey) {
       alert("Please configure your Gemini API key in Settings first.");
       return;
     }
+    if (roster.length === 0) {
+      alert("Roster is empty or still loading.");
+      return;
+    }
+    
     setIsSmartAssigning(true);
     try {
       const { generateSmartZoning } = await import('../services/ai/geminiSmartZoning');
@@ -59,12 +70,12 @@ export default function DailyLineupBuilder() {
     const isAssigned = Object.values(assignments).some(assignedList => assignedList.includes(emp.id));
     if (isAssigned) return false;
     if (searchTerm) {
-      return emp.name.toLowerCase().includes(searchTerm.toLowerCase());
+      return (emp.name || '').toLowerCase().includes(searchTerm.toLowerCase());
     }
     return true;
   });
 
-  const handleAssign = (empId, targetZone) => {
+  const handleAssign = (empId: string, targetZone: string) => {
     setAssignments(prev => {
       const newAssignments = { ...prev };
       // Remove from any existing zone first to support moving between zones
@@ -77,7 +88,7 @@ export default function DailyLineupBuilder() {
     });
   };
 
-  const handleUnassign = (empId, zone) => {
+  const handleUnassign = (empId: string, zone: string) => {
     setAssignments(prev => {
       const newAssignments = { ...prev };
       newAssignments[zone] = newAssignments[zone].filter(id => id !== empId);
@@ -85,161 +96,65 @@ export default function DailyLineupBuilder() {
     });
   };
 
-  const getCoverageStatus = (zone) => {
-    const count = assignments[zone].length;
-    if (count === 0) return { color: 'var(--error)', text: 'Critical Gap', icon: <AlertTriangle size={14} /> };
-    if (count === 1) return { color: 'var(--warning)', text: 'Minimal', icon: <Clock size={14} /> };
-    return { color: 'var(--success)', text: 'Covered', icon: <CheckCircle size={14} /> };
-  };
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', height: '100%', minHeight: '600px', animation: 'fadeIn 0.3s ease' }}>
+    <div className="flex-column gap-xl h-full min-h-[600px] animate-fade-in">
       
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="flex-between flex-wrap gap-md align-center">
         <div>
-          <h2 style={{ fontSize: '1.75rem', fontFamily: 'var(--font-heading)', color: 'var(--bby-blue)', display: 'flex', alignItems: 'center', gap: '0.75rem', margin: 0 }}>
+          <h2 className="flex-row align-center gap-sm font-heading text-bby-blue m-0 text-1-75rem">
             <CalendarDays size={28} /> Daily Lineup Builder
           </h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '0.5rem' }}>
+          <p className="text-secondary text-sm mt-xs m-0">
             Assign associates to zones and identify coverage gaps for the day.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <div className="flex-row gap-md">
           <input 
             type="date" 
-            className="form-control" 
+            data-testid="lineup-date-input"
+            className="form-control w-auto" 
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            style={{ width: 'auto' }}
           />
           <button 
-            className="btn btn-secondary" 
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.2)' }}
+            data-testid="smart-assign-btn"
+            className="btn cursor-pointer flex-row align-center gap-xs" 
+            style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.2)' }}
             onClick={handleSmartAssign}
-            disabled={isSmartAssigning}
+            disabled={isSmartAssigning || roster.length === 0}
           >
             <Wand2 size={16} />
             {isSmartAssigning ? 'Thinking...' : 'AI Smart Assign'}
           </button>
-          <button className="btn btn-primary">Save Lineup</button>
+          <button data-testid="save-lineup-btn" className="btn btn-primary cursor-pointer">Save Lineup</button>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '2rem' }}>
+      <div className="grid gap-xl" style={{ gridTemplateColumns: '1fr 300px' }}>
         
         {/* Floor Zones Layout */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignContent: 'start' }}>
-          {zones.map(zone => {
-            const status = getCoverageStatus(zone);
-            return (
-              <div key={zone} className="glass-card" style={{ padding: '1.25rem', borderTop: `4px solid ${status.color}` }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                  <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0, fontSize: '1.05rem', color: '#fff' }}>
-                    <MapPin size={18} color="var(--bby-blue)" /> {zone}
-                  </h4>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', color: status.color, fontWeight: 700 }}>
-                    {status.icon} {status.text}
-                  </span>
-                </div>
-                
-                <div 
-                  style={{ minHeight: '100px', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    const empId = e.dataTransfer.getData('text/plain');
-                    if (empId) {
-                      handleAssign(empId, zone);
-                    }
-                  }}
-                >
-                  {assignments[zone].length === 0 ? (
-                    <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'center', margin: 'auto' }}>
-                      Drag here or click assign
-                    </div>
-                  ) : (
-                    assignments[zone].map(empId => {
-                      const emp = roster.find(e => e.id === empId);
-                      if (!emp) return null;
-                      return (
-                        <div 
-                          key={empId} 
-                          draggable
-                          onDragStart={(e) => e.dataTransfer.setData('text/plain', empId)}
-                          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 0.75rem', borderRadius: '6px', cursor: 'grab' }}
-                        >
-                          <span style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 600 }}>{emp.name}</span>
-                          <button 
-                            onClick={() => handleUnassign(empId, zone)}
-                            style={{ background: 'transparent', border: 'none', color: 'var(--error)', cursor: 'pointer', fontSize: '0.75rem' }}
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-            );
-          })}
+        <div className="grid gap-lg" style={{ gridTemplateColumns: '1fr 1fr', alignContent: 'start' }}>
+          {zones.map(zone => (
+            <ZoneCard 
+              key={zone}
+              zone={zone}
+              assignments={assignments[zone]}
+              roster={roster}
+              handleAssign={handleAssign}
+              handleUnassign={handleUnassign}
+            />
+          ))}
         </div>
 
         {/* Available Roster Sidebar */}
-        <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <h3 style={{ fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-            <Users size={18} /> Available Roster
-          </h3>
-          <div className="search-bar" style={{ marginBottom: '0.5rem' }}>
-            <Search className="search-icon" size={16} />
-            <input 
-              type="text" 
-              placeholder="Find associate..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="form-control"
-            />
-          </div>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', overflowY: 'auto', flex: 1, paddingRight: '0.5rem' }}>
-            {availableRoster.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'center' }}>No available associates</p>
-            ) : (
-              availableRoster.map(emp => (
-                <div 
-                  key={emp.id} 
-                  draggable
-                  onDragStart={(e) => e.dataTransfer.setData('text/plain', emp.id)}
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-glass)', borderRadius: '8px', padding: '0.75rem', cursor: 'grab' }}
-                >
-                  <div style={{ fontWeight: 600, color: '#fff', fontSize: '0.9rem', marginBottom: '0.25rem' }}>{emp.name}</div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>{emp.dept}</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
-                    {zones.map(zone => (
-                      <button 
-                        key={zone}
-                        onClick={() => handleAssign(emp.id, zone)}
-                        style={{ 
-                          background: 'rgba(0, 70, 190, 0.2)', 
-                          border: '1px solid rgba(0, 70, 190, 0.4)', 
-                          color: '#fff', 
-                          fontSize: '0.7rem', 
-                          padding: '0.2rem 0.4rem', 
-                          borderRadius: '4px',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        +{zone.split(' ')[0]}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
+        <AvailableRosterPanel 
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          availableRoster={availableRoster}
+          zones={zones}
+          handleAssign={handleAssign}
+        />
       </div>
     </div>
   );

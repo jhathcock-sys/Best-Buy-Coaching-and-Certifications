@@ -1,8 +1,8 @@
 import { useRef } from 'react';
 import { Upload, X, Check, AlertCircle, FileText, ChevronRight } from 'lucide-react';
-import { useRosterImporter, FUZZY_MAP } from './RosterImporter/useRosterImporter';
+import { useRosterImporter, FUZZY_MAP, ParsedEmployeeRow } from './RosterImporter/useRosterImporter';
 
-export default function RosterImporterModal({ isOpen, onClose, onImport }: { isOpen: boolean, onClose: () => void, onImport: (rows: any[]) => void }) {
+export default function RosterImporterModal({ isOpen, onClose, onImport }: { isOpen: boolean, onClose: () => void, onImport: (rows: ParsedEmployeeRow[]) => void }) {
   const {
     csvData,
     headers,
@@ -31,25 +31,25 @@ export default function RosterImporterModal({ isOpen, onClose, onImport }: { isO
   };
 
   const handleSaveImport = () => {
-    if (parsedRows.length === 0) return;
+    if (!parsedRows || parsedRows.length === 0) return;
     onImport(parsedRows);
     onClose();
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose} style={{ zIndex: 1100 }}>
+    <div className="modal-overlay z-[1100]" onClick={onClose}>
       <div className="modal-content glass-card max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
         
         <div className="modal-header flex-between p-lg border-b border-glass">
           <h3 className="m-0 flex-center gap-sm font-bold text-primary">
             <Upload className="text-bby-yellow w-5 h-5" /> Bulk Roster CSV Importer
           </h3>
-          <button className="btn btn-secondary p-sm" onClick={onClose}>
+          <button className="btn btn-secondary p-sm cursor-pointer" onClick={onClose} data-testid="close-modal-btn">
             <X size={16} />
           </button>
         </div>
 
-        <div className="p-xl overflow-y-auto" style={{ maxHeight: '70vh' }}>
+        <div className="p-xl overflow-y-auto max-h-[70vh]">
           
           {errorMsg && (
             <div className="bg-error-alpha border border-error rounded-xl p-md flex gap-sm mb-lg text-error">
@@ -64,8 +64,9 @@ export default function RosterImporterModal({ isOpen, onClose, onImport }: { isO
               onDrop={handleDrop}
               className="border-dashed border-2 border-glass rounded-xl p-xl flex-column align-center text-center cursor-pointer hover-scale bg-white-alpha-05 transition-normal"
               onClick={() => fileInputRef.current?.click()}
+              data-testid="dropzone-area"
             >
-              <input type="file" ref={fileInputRef} onChange={handleFileSelect} accept=".csv" className="hidden" style={{ display: 'none' }} />
+              <input type="file" ref={fileInputRef} onChange={handleFileSelect} accept=".csv" className="hidden" data-testid="file-input" />
               <div className="w-16 h-16 rounded-full bg-bby-blue-alpha-20 flex-center mb-lg">
                 <Upload size={32} className="text-info" />
               </div>
@@ -85,7 +86,7 @@ export default function RosterImporterModal({ isOpen, onClose, onImport }: { isO
                   <span className="text-sm font-semibold text-primary">{fileName}</span>
                   <span className="text-xs text-muted">({csvData.length} records found)</span>
                 </div>
-                <button className="btn btn-secondary text-xs py-sm" onClick={reset}>
+                <button className="btn btn-secondary text-xs py-sm cursor-pointer" onClick={reset} data-testid="change-file-btn">
                   Change File
                 </button>
               </div>
@@ -97,19 +98,20 @@ export default function RosterImporterModal({ isOpen, onClose, onImport }: { isO
                 Our system automatically matched your spreadsheet columns. Verify below that each field aligns with the correct app parameter.
               </p>
 
-              <div className="dashboard-grid bg-white-alpha-05 p-lg rounded-xl border-glass mb-xl" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1rem' }}>
+              <div className="dashboard-grid bg-white-alpha-05 p-lg rounded-xl border-glass mb-xl grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-md">
                 {Object.keys(FUZZY_MAP).map(key => (
                   <div key={key} className="flex-column gap-xs">
                     <label className="text-xs font-semibold text-secondary capitalize">
                       {key.replace(/([A-Z])/g, ' $1')}:
                     </label>
                     <select
-                      className="bby-select text-sm p-sm bg-obsidian border-glass text-primary rounded-lg"
-                      value={mappings[key]}
-                      onChange={(e) => handleMappingChange(key, parseInt(e.target.value, 10))}
+                      className="bby-select text-sm p-sm bg-obsidian border-glass text-primary rounded-lg cursor-pointer"
+                      value={mappings[key] ?? -1}
+                      onChange={(e) => handleMappingChange(key as keyof ParsedEmployeeRow, parseInt(e.target.value, 10))}
+                      data-testid={`mapping-select-${key}`}
                     >
                       <option value={-1}>-- Ignore / Default to 0 --</option>
-                      {headers.map((header, idx) => (
+                      {headers?.map((header, idx) => (
                         <option key={idx} value={idx}>Column {idx + 1}: {header}</option>
                       ))}
                     </select>
@@ -118,8 +120,8 @@ export default function RosterImporterModal({ isOpen, onClose, onImport }: { isO
               </div>
 
               <h4 className="text-base font-bold mb-sm text-primary">Data Preview Summary</h4>
-              <div className="overflow-x-auto border-glass rounded-xl bg-black-alpha-20" style={{ maxHeight: '250px' }}>
-                <table className="w-full text-left text-sm" style={{ borderCollapse: 'collapse' }}>
+              <div className="overflow-x-auto border-glass rounded-xl bg-black-alpha-20 max-h-[250px]">
+                <table className="w-full text-left text-sm border-collapse">
                   <thead className="bg-bg-card border-b border-glass sticky top-0">
                     <tr>
                       <th className="p-md font-semibold text-secondary">Name</th>
@@ -135,22 +137,22 @@ export default function RosterImporterModal({ isOpen, onClose, onImport }: { isO
                     </tr>
                   </thead>
                   <tbody>
-                    {parsedRows.map((row, idx) => (
+                    {parsedRows?.map((row, idx) => (
                       <tr key={idx} className="border-b border-glass last:border-0 hover:bg-white-alpha-05">
-                        <td className="p-md font-semibold text-primary">{row.name}</td>
+                        <td className="p-md font-semibold text-primary">{row?.name}</td>
                         <td className="p-md">
                           <span className="px-sm py-xs rounded-lg text-xs bg-white-alpha-05 border-glass">
-                            {row.dept}
+                            {row?.dept}
                           </span>
                         </td>
-                        <td className="p-md text-center">{row.hours}h</td>
-                        <td className="p-md text-center">{row.memberships}%</td>
-                        <td className="p-md text-center">{row.creditCards} Apps</td>
-                        <td className="p-md text-center">{row.warranty}%</td>
-                        <td className="p-md text-center">{row.surveys.toFixed(1)}</td>
-                        <td className="p-md text-center">${row.rph}/hr</td>
-                        <td className="p-md text-center">{(row.dept === 'Computing' || row.dept === 'Home Theatre') ? `$${(row.basket || 0).toFixed(2)}` : '—'}</td>
-                        <td className="p-md text-center">{row.dept === 'Computing' ? `${row.m365 || 0}% M365` : row.dept === 'Home Theatre' ? `${row.audio || 0}% Audio` : '—'}</td>
+                        <td className="p-md text-center">{row?.hours}h</td>
+                        <td className="p-md text-center">{row?.memberships}%</td>
+                        <td className="p-md text-center">{row?.creditCards} Apps</td>
+                        <td className="p-md text-center">{row?.warranty}%</td>
+                        <td className="p-md text-center">{row?.surveys?.toFixed(1)}</td>
+                        <td className="p-md text-center">${row?.rph}/hr</td>
+                        <td className="p-md text-center">{(row?.dept === 'Computing' || row?.dept === 'Home Theatre') ? `$${(row?.basket || 0).toFixed(2)}` : '—'}</td>
+                        <td className="p-md text-center">{row?.dept === 'Computing' ? `${row?.m365 || 0}% M365` : row?.dept === 'Home Theatre' ? `${row?.audio || 0}% Audio` : '—'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -162,13 +164,13 @@ export default function RosterImporterModal({ isOpen, onClose, onImport }: { isO
         </div>
 
         <div className="modal-footer flex-end gap-md p-lg border-t border-glass">
-          <button className="btn btn-secondary" onClick={onClose}>
+          <button className="btn btn-secondary cursor-pointer" onClick={onClose} data-testid="cancel-btn">
             Cancel
           </button>
           
           {csvData && (
-            <button className="btn btn-primary flex-center gap-sm bg-bby-yellow text-black hover:bg-bby-yellow-hover" onClick={handleSaveImport}>
-              <Check size={16} /> Import {parsedRows.length} Associates
+            <button className="btn btn-primary flex-center gap-sm bg-bby-yellow text-black hover:bg-bby-yellow-hover cursor-pointer" onClick={handleSaveImport} data-testid="save-import-btn">
+              <Check size={16} /> Import {parsedRows?.length || 0} Associates
             </button>
           )}
         </div>

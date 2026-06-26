@@ -1811,6 +1811,12 @@ input[type="checkbox"]:hover {
 .overflow-y-auto { overflow-y: auto; }
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
 .z-1050 { z-index: 1050; }
+.z-1100 { z-index: 1100; }
+.max-h-70vh { max-height: 70vh; }
+.max-h-250px { max-height: 250px; }
+.auto-grid-240 { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+.border-collapse { border-collapse: collapse; }
+.hidden { display: none !important; }
 
 .tab-btn {
   flex: 1;

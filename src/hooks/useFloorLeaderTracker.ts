@@ -4,8 +4,9 @@ import { toast } from 'react-hot-toast';
 import { useFloorLogging } from './FloorLeader/useFloorLogging';
 import { useFloorScheduling } from './FloorLeader/useFloorScheduling';
 import { FloorLeaderTabType } from '../components/FloorLeaderTracker/FloorLeaderTabs';
+import { Employee, Manager, ShiftEvent } from '../types';
 
-export function useFloorLeaderTracker(activeManager, roster, onSaveShift) {
+export function useFloorLeaderTracker(activeManager: Manager | null, roster: Employee[], onSaveShift: (shift: ShiftEvent) => void) {
   const activeShift = useStore((state) => state.activeShift);
   const setActiveShift = useStore((state) => state.setActiveShift);
   
@@ -18,11 +19,11 @@ export function useFloorLeaderTracker(activeManager, roster, onSaveShift) {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   // --- Domain Hooks ---
-  const floorScheduling = useFloorScheduling(roster, activeShift, setActiveShift);
+  const floorScheduling = useFloorScheduling();
 
 
 
-  const checkHourStatus = (pms, apps, isWeekendShift) => {
+  const checkHourStatus = (pms: number, apps: number, isWeekendShift?: boolean) => {
     const pmGoal = isWeekendShift ? 3 : 2;
     const appGoal = isWeekendShift ? 3 : 2;
     return pms >= pmGoal && apps >= appGoal;

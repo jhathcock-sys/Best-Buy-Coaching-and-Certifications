@@ -1,5 +1,6 @@
 import { StateCreator } from 'zustand';
 import { StoreState, PlaybookSlice } from '../../types/store';
+import { Employee, CoachingLog } from '../../types';
 import { DEFAULT_PLAYBOOK_SETTINGS } from './constants';
 import { 
   savePlaybookSettingsToCloud,
@@ -78,9 +79,9 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       }
 
       const periodMap1 = rosterHistory[activePeriod] || {};
-      const empId = session.employeeId || Object.values(periodMap1).find((e: any) => e.name === session.customerName)?.id || `emp-${Date.now()}`;
+      const empId = session.employeeId || Object.values(periodMap1).find((e: Employee) => e.name === session.customerName)?.id || `emp-${Date.now()}`;
       
-      let newLog: any;
+      let newLog: CoachingLog;
       try {
         newLog = CoachingLogSchema.parse({
           id: `log-${Date.now()}`,
@@ -94,7 +95,7 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
           notes: session.notes || '',
           timestamp: Date.now(),
           coachName: get().activeManager?.name || 'Supervisor'
-        });
+        }) as CoachingLog;
       } catch (err) {
         console.error('Coaching log validation failed:', err);
         return;
@@ -249,7 +250,7 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
       const activePeriod = get().activePeriod;
       const rosterHistory = get().rosterHistory || {};
       const periodMap3 = rosterHistory[activePeriod] || {};
-      const targetEmp = Object.values(periodMap3).find((e: any) => e.name === customerName);
+      const targetEmp = Object.values(periodMap3).find((e: Employee) => e.name === customerName);
       
       if (targetEmp) {
         if (score === 100) {

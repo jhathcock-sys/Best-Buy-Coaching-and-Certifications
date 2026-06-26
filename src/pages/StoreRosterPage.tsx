@@ -69,7 +69,7 @@ export default function StoreRoster({
     handleStartEdit,
     DEPARTMENTS,
     filteredRoster
-  } = useStoreRoster(roster);
+  } = useStoreRoster();
 
   const handleSaveEdit = (updatedMetrics) => {
     if (onEditEmployee && editingEmployee) {

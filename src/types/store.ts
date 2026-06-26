@@ -14,7 +14,6 @@ import {
 import { UiSlice } from '../store/slices/uiSlice';
 
 export interface AuthSlice {
-  activeView: string;
   apiKey: string;
   dbConnected: boolean;
   isAuthenticated: boolean;
@@ -24,7 +23,6 @@ export interface AuthSlice {
   managers: Manager[];
   storeId: string | null;
   
-  setActiveView: (view: string) => void;
   setApiKey: (key: string) => void;
   setDbConnected: (connected: boolean) => void;
   setIsAuthenticated: (authenticated: boolean) => void;

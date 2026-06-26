@@ -4,10 +4,14 @@ import {
   Clock, Compass, Users, Archive 
 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function MobileNav() {
-  const activeView = useStore((state) => state.activeView);
-  const setActiveView = useStore((state) => state.setActiveView);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const activeView = location.pathname === '/' ? 'dashboard' : location.pathname.substring(1);
+
+  const setActiveView = (view: string) => navigate(view === 'dashboard' ? '/' : '/' + view);
 
   return (
     <div className="bottom-nav">

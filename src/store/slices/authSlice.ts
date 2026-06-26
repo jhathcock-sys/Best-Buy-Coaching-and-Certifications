@@ -25,7 +25,6 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
   const initialDbConnected = isFirebaseConnected();
 
   return {
-    activeView: 'dashboard',
     apiKey: initialApiKey,
     dbConnected: initialDbConnected,
     isAuthenticated: sessionStorage.getItem('bby_authenticated') === 'true',
@@ -41,7 +40,6 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
       else sessionStorage.removeItem('bby_store_id');
     },
 
-    setActiveView: (view) => set({ activeView: view }),
 
     setApiKey: (key) => {
       set({ apiKey: key });

@@ -6,11 +6,16 @@ import {
 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { useShallow } from 'zustand/react/shallow';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Sidebar() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const activeView = location.pathname === '/' ? 'dashboard' : location.pathname.substring(1);
+
+  const setActiveView = (view: string) => navigate(view === 'dashboard' ? '/' : '/' + view);
+
   const {
-    activeView,
-    setActiveView,
     activeManager,
     logout,
     toggleCategory,
@@ -19,8 +24,6 @@ export default function Sidebar() {
     playbookSettings,
     apiKey
   } = useStore(useShallow(state => ({
-    activeView: state.activeView,
-    setActiveView: state.setActiveView,
     activeManager: state.activeManager,
     logout: state.logout,
     toggleCategory: state.toggleCategory,

@@ -3,9 +3,10 @@ import DOMPurify from 'dompurify';
 import { Target, TrendingUp, Calendar, CheckCircle, Award, Trophy, Medal, Zap, Star } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import MetricCards from '../components/Dashboard/MetricCards';
+import { Employee, CoachingLog } from '../types';
 
 interface AdvisorDashboardProps {
-  employee: any;
+  employee: Employee;
   onNavigate: (view: string) => void;
 }
 
@@ -15,21 +16,28 @@ const EMPTY_OBJ = {};
 export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashboardProps) {
   const coachingLogs = useStore(state => state.coachingLogs) || EMPTY_ARR;
   const activePeriod = useStore(state => state.activePeriod);
-  const storeDeptGoals = useStore(state => state.deptGoals);
-  // Filter coaching logs specifically for this employee
-  const myLogs = coachingLogs.filter((log: any) => 
-    log.employeeId === employee.id || log.employeeName === employee.name
-  );
-
-  const rosterHistory = useStore(state => state.rosterHistory);
-  const _rawactiveRoster = rosterHistory?.[activePeriod] || EMPTY_OBJ;
-  const activeRoster = React.useMemo(() => (Object.values(_rawactiveRoster) as any[]).sort((a: any, b: any) => a.name.localeCompare(b.name)), [_rawactiveRoster]);
   
-  // Calculate Top 3 Roleplay Champions based on "Perfect Roleplay Score" trophies or general trophies
-  const top3Champions = [...activeRoster]
-    .filter(emp => emp.trophies && emp.trophies.length > 0)
-    .sort((a, b) => b.trophies.length - a.trophies.length)
-    .slice(0, 3);
+  const rosterHistory = useStore(state => state.rosterHistory);
+  const _rawactiveRoster = activePeriod ? (rosterHistory?.[activePeriod] || EMPTY_OBJ) : EMPTY_OBJ;
+  const activeRoster = useMemo(() => (Object.values(_rawactiveRoster) as Employee[]).sort((a, b) => a.name.localeCompare(b.name)), [_rawactiveRoster]);
+  
+  const myLogs = useMemo(() => {
+    if (!employee) return [];
+    return coachingLogs.filter((log: CoachingLog) => 
+      log.employeeId === employee.id || log.employeeName === employee.name
+    );
+  }, [coachingLogs, employee]);
+
+  const top3Champions = useMemo(() => {
+    return [...activeRoster]
+      .filter(emp => emp.trophies && emp.trophies.length > 0)
+      .sort((a, b) => (b.trophies?.length || 0) - (a.trophies?.length || 0))
+      .slice(0, 3);
+  }, [activeRoster]);
+
+  if (!employee || !employee.name) {
+    return <div className="p-xl text-center">Loading Advisor Data...</div>;
+  }
 
   const getTrophyIcon = (iconName: string) => {
     switch (iconName) {
@@ -45,7 +53,6 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
   const xpProgress = totalXP % 500;
 
   // Daily Quests (Deterministic based on employee name length and date)
-  const today = new Date().toLocaleDateString();
   const dailyQuests = [
     { 
       title: "Complete an AI Roleplay", 
@@ -75,7 +82,7 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
             </span>
           </h1>
           <p className="text-secondary m-0 mb-md text-1-1rem">
-            {employee.dept} Advisor • ID: {employee.id || employee.employeeId || 'N/A'}
+            {employee.dept} Advisor • ID: {employee.id || 'N/A'}
           </p>
           <div className="flex-center gap-md bg-white-alpha-05 py-sm px-md rounded-20 w-fit">
             <span className="text-sm font-bold text-white">XP: {totalXP}</span>
@@ -87,6 +94,7 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
         </div>
         <button
           onClick={() => onNavigate('roleplay')}
+          data-testid="practice-ai-button"
           className="btn-primary flex-center gap-sm px-lg py-md rounded-20 font-semibold border-none cursor-pointer"
         >
           <Target size={18} />
@@ -121,7 +129,7 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
           {/* Personal Trophies */}
           <div className="bg-surface rounded-20 border-glass p-lg">
             <h2 className="text-xl font-bold mb-md flex-center gap-sm justify-start">
-              <Award size={20} color="#8b5cf6" />
+              <Award size={20} color="var(--primary)" />
               My Trophy Case
             </h2>
             {(!employee.trophies || employee.trophies.length === 0) ? (
@@ -130,7 +138,7 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
               </div>
             ) : (
               <div className="grid-auto-fill-150 gap-md">
-                {employee.trophies.map((trophy: any, idx: number) => (
+                {employee.trophies.map((trophy, idx) => (
                   <div key={idx} className="bg-white-alpha-02 p-md rounded-xl border-white-alpha-05 text-center">
                     <div className="flex-center mb-sm">
                       {getTrophyIcon(trophy.icon)}
@@ -145,7 +153,7 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
 
           <div className="bg-surface rounded-20 border-glass p-lg">
           <h2 className="text-xl font-bold mb-md flex-center gap-sm justify-start">
-            <Calendar size={20} color="#10b981" />
+            <Calendar size={20} color="var(--success)" />
             My Recent Feedback & GROW Logs
           </h2>
           {myLogs.length === 0 ? (
@@ -154,7 +162,7 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
             </div>
           ) : (
             <div className="flex-column gap-md">
-              {myLogs.map((log: any, idx: number) => (
+              {myLogs.map((log, idx) => (
                 <div key={idx} className="bg-white-alpha-02 p-lg rounded-15 border-white-alpha-05">
                   <div className="flex-between mb-sm">
                     <span className="font-semibold text-bby-yellow">{log.discFocus}</span>
@@ -163,8 +171,8 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
                     </span>
                   </div>
                   <div 
-                    className="text-sm text-white leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(log.coachingPlanMd ? log.coachingPlanMd.substring(0, 300) + '...' : 'Review completed.') }}
+                    className="text-sm text-white leading-relaxed line-clamp-3 overflow-hidden"
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(log.coachingPlanMd || 'Review completed.') }}
                   />
                 </div>
               ))}
@@ -186,23 +194,31 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
               </div>
             ) : (
               <div className="flex-column gap-md">
-                {top3Champions.map((champ, idx) => (
-                  <div key={champ.id} className="flex-center gap-md p-md rounded-xl justify-start" style={{ 
-                    background: idx === 0 ? 'rgba(255, 230, 0, 0.1)' : 'rgba(255,255,255,0.03)', 
-                    border: idx === 0 ? '1px solid rgba(255, 230, 0, 0.3)' : '1px solid rgba(255,255,255,0.05)'
-                  }}>
-                    <div className="w-8 h-8 rounded-full flex-center font-bold text-black" style={{ 
-                      background: idx === 0 ? 'var(--bby-yellow)' : idx === 1 ? '#e2e8f0' : '#cd7f32'
-                    }}>
-                      {idx + 1}
+                {top3Champions.map((champ, idx) => {
+                  let bgClass = "bg-white-alpha-02 border-white-alpha-05";
+                  let badgeClass = "bg-surface";
+                  if (idx === 0) {
+                    bgClass = "bg-yellow-alpha-10 border-yellow-alpha-30";
+                    badgeClass = "bg-bby-yellow text-black";
+                  } else if (idx === 1) {
+                    badgeClass = "bg-silver text-black";
+                  } else if (idx === 2) {
+                    badgeClass = "bg-bronze text-white";
+                  }
+
+                  return (
+                    <div key={champ.id} className={`flex-center gap-md p-md rounded-xl justify-start ${bgClass}`}>
+                      <div className={`w-8 h-8 rounded-full flex-center font-bold ${badgeClass}`}>
+                        {idx + 1}
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-semibold text-white text-base">{champ.name}</div>
+                        <div className="text-xs text-secondary">{champ.trophies?.length || 0} Trophies</div>
+                      </div>
+                      {idx === 0 && <Medal size={24} color="var(--bby-yellow)" />}
                     </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-white text-base">{champ.name}</div>
-                      <div className="text-xs text-secondary">{champ.trophies.length} Trophies</div>
-                    </div>
-                    {idx === 0 && <Medal size={24} color="var(--bby-yellow)" />}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -215,15 +231,9 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
             </h2>
             <div className="flex-column gap-md">
               {dailyQuests.map((quest, idx) => (
-                <div key={idx} className="flex-between align-center bg-white-alpha-02 p-md rounded-xl" style={{ 
-                  border: quest.completed ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(255,255,255,0.05)',
-                  opacity: quest.completed ? 0.7 : 1
-                }}>
+                <div key={idx} className={`flex-between align-center bg-white-alpha-02 p-md rounded-xl ${quest.completed ? 'border-success opacity-70' : 'border-glass'}`}>
                   <div className="flex-center gap-md">
-                    <div className="w-6 h-6 rounded-full flex-center" style={{ 
-                      border: quest.completed ? 'none' : '2px solid var(--text-muted)',
-                      background: quest.completed ? 'var(--success)' : 'transparent'
-                    }}>
+                    <div className={`w-6 h-6 rounded-full flex-center ${quest.completed ? 'bg-success' : 'border-2 border-muted'}`}>
                       {quest.completed && <CheckCircle size={16} color="#fff" />}
                     </div>
                     <div className={`font-medium ${quest.completed ? 'text-secondary line-through' : 'text-white'}`}>

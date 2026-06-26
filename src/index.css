@@ -2127,3 +2127,11 @@ input[type="checkbox"]:hover {
   40%, 80% { transform: translateX(8px); }
 }
 
+
+.bg-silver { background: #e2e8f0; }
+.bg-bronze { background: #cd7f32; }
+.bg-yellow-alpha-10 { background: rgba(255, 230, 0, 0.1); }
+.border-yellow-alpha-30 { border: 1px solid rgba(255, 230, 0, 0.3); }
+.border-success { border: 1px solid var(--success); }
+.border-muted { border-color: var(--text-muted); }
+.opacity-70 { opacity: 0.7; }

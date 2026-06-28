@@ -3,11 +3,14 @@ import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, onSnapshot, setDoc, getDoc, collection, addDoc, query, orderBy, limit, deleteDoc, getDocs, getDocsFromCache, type Firestore, type DocumentData, type DocumentReference, type QuerySnapshot, type DocumentSnapshot } from 'firebase/firestore';
 import { getAuth, signInWithEmailAndPassword, signOut, type Auth } from 'firebase/auth';
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import { getStorage, ref, uploadBytes, getDownloadURL, type FirebaseStorage } from 'firebase/storage';
+import { type RentsDueArchive } from '../types';
 import bcrypt from 'bcryptjs';
 
 export let app: FirebaseApp | null = null;
 let db: Firestore | null = null;
 let auth: Auth | null = null;
+export let storage: FirebaseStorage | null = null;
 
 // Get config from localStorage or env variables
 export const getSavedFirebaseConfig = (): Record<string, string> | null => {
@@ -52,6 +55,9 @@ export const initFirebase = (customConfig: Record<string, string> | null = null)
     }
     
     auth = getAuth(app);
+    if (app) {
+      storage = getStorage(app);
+    }
 
     // Enable offline local database caching and synchronization with the modern API
     db = initializeFirestore(app, {
@@ -64,6 +70,7 @@ export const initFirebase = (customConfig: Record<string, string> | null = null)
     app = null;
     db = null;
     auth = null;
+    storage = null;
     return null;
   }
 };
@@ -779,3 +786,53 @@ export const testLatency = async (storeId: string) => {
   }
   return -1;
 };
+
+// Rents Due Archive Upload
+export const uploadRentsDueArchive = async (storeId: string, file: File | Blob, filename: string): Promise<string | null> => {
+  if (!storage) return null;
+  try {
+    const storageRef = ref(storage, `stores/${storeId}/rentsDue/${filename}`);
+    const snapshot = await uploadBytes(storageRef, file);
+    return await getDownloadURL(snapshot.ref);
+  } catch (e) {
+    console.error('Failed to upload Rents Due archive:', e);
+    toast.error('Failed to upload file to storage');
+    return null;
+  }
+};
+
+// Rents Due Archive Metadata Save
+export const saveRentsDueArchiveMetadata = async (storeId: string, metadata: Omit<RentsDueArchive, 'id' | 'storeId'>) => {
+  if (!db) return false;
+  try {
+    const colRef = collection(db, 'stores', storeId, 'rentsDueArchives');
+    await addDoc(colRef, {
+      ...metadata,
+      timestamp: metadata.timestamp || new Date().getTime()
+    });
+    return true;
+  } catch (e) {
+    console.error('Failed to save Rents Due archive metadata:', e);
+    return false;
+  }
+};
+
+// Subscribe to Rents Due Archives
+export const subscribeToRentsDueArchives = (storeId: string, onUpdate: (data: RentsDueArchive[]) => void) => {
+  if (!db) return null;
+  try {
+    const colRef = collection(db, 'stores', storeId, 'rentsDueArchives');
+    const q = query(colRef, orderBy('timestamp', 'desc'), limit(50));
+    return onSnapshot(q, (snap: QuerySnapshot<DocumentData>) => {
+      const archives: RentsDueArchive[] = [];
+      snap.forEach((d: DocumentSnapshot<DocumentData>) => {
+        archives.push({ id: d.id, ...d.data() } as RentsDueArchive);
+      });
+      onUpdate(archives);
+    });
+  } catch (e) {
+    console.error('Failed to subscribe to Rents Due archives:', e);
+    return null;
+  }
+};
+

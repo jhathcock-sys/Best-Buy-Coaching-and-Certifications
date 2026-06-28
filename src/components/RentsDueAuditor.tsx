@@ -6,7 +6,8 @@ import { parseRentsDueDocumentGemini } from '../services/ai';
 import { useStore } from '../store/useStore';
 import { mockRentsDuePayload } from '../data/mockRentsDue';
 import { mapParsedRentsToRoster, parseRentsDueCSVCloud } from '../utils/rentsDueUtils';
-import { Employee } from '../types';
+import { Employee, type RentsDueArchive } from '../types';
+import { uploadRentsDueArchive, saveRentsDueArchiveMetadata, subscribeToRentsDueArchives } from '../services/firebase';
 
 const EMPTY_OBJ: Record<string, any> = {};
 
@@ -15,6 +16,7 @@ const EMPTY_OBJ: Record<string, any> = {};
 export default function RentsDueAuditor() {
   const apiKey = useStore((state) => state.apiKey);
   const activePeriod = useStore((state) => state.activePeriod);
+  const storeId = useStore((state) => state.storeId);
   const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
   const bulkImportEmployees = useStore((state) => state.bulkImportEmployees);
   const addDailySnapshot = useStore((state) => state.addDailySnapshot);
@@ -22,6 +24,8 @@ export default function RentsDueAuditor() {
   const rawRoster = rosterHistory[activePeriod];
   const roster = React.useMemo<Employee[]>(() => rawRoster ? Object.values(rawRoster as Record<string, Employee>).sort((a: Employee, b: Employee) => a.name.localeCompare(b.name)) : [], [rawRoster]);
 
+  const [activeTab, setActiveTab] = useState<'audit' | 'archives'>('audit');
+  const [archives, setArchives] = useState<RentsDueArchive[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState(activePeriod);
   const [showNewPeriodInput, setShowNewPeriodInput] = useState(false);
   const [customPeriodName, setCustomPeriodName] = useState('');
@@ -38,13 +42,20 @@ export default function RentsDueAuditor() {
   const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const demoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const unsubscribeArchivesRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
+    if (storeId) {
+      unsubscribeArchivesRef.current = subscribeToRentsDueArchives(storeId, (data) => {
+        setArchives(data);
+      }) as unknown as (() => void);
+    }
     return () => {
       if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
       if (demoTimeoutRef.current) clearTimeout(demoTimeoutRef.current);
+      if (unsubscribeArchivesRef.current) unsubscribeArchivesRef.current();
     };
-  }, []);
+  }, [storeId]);
 
   const comparisonRoster = React.useMemo<Employee[]>(() => {
     if (selectedPeriod === activePeriod) return roster;
@@ -58,10 +69,26 @@ export default function RentsDueAuditor() {
     if (file) handleProcessFile(file);
   };
 
+  const handleArchiveUpload = async (fileOrBlob: File | Blob, name: string) => {
+    if (!storeId) return;
+    const timestamp = Date.now();
+    const finalName = `${timestamp}_${name}`;
+    const downloadUrl = await uploadRentsDueArchive(storeId, fileOrBlob, finalName);
+    if (downloadUrl) {
+      await saveRentsDueArchiveMetadata(storeId, {
+        fileName: name,
+        downloadUrl,
+        period: selectedPeriod,
+        timestamp
+      });
+    }
+  };
+
   const handleProcessFile = (file: File) => {
     setFileName(file.name);
     setErrorMsg('');
     setParsedEmployees(null);
+    handleArchiveUpload(file, file.name);
 
     const reader = new FileReader();
     if (file.type.startsWith('image/')) {
@@ -118,6 +145,8 @@ export default function RentsDueAuditor() {
       alert("Please paste the spreadsheet text copy or CSV data first!");
       return;
     }
+    const blob = new Blob([textInput], { type: 'text/plain' });
+    handleArchiveUpload(blob, 'pasted_rents_due.txt');
     
     try {
       setIsParsing(true);
@@ -194,31 +223,22 @@ export default function RentsDueAuditor() {
       
       {/* Description Panel */}
       <div className="glass-card p-xl">
-        <h2 className="text-xl flex-row align-center gap-sm m-0" style={{ fontFamily: 'var(--font-heading)', color: 'var(--bby-yellow)' }}>
+        <h2 className="text-xl flex-row align-center gap-sm m-0 font-heading text-bby-yellow">
           <FileText size={20} /> Rents Due Document Auditor
         </h2>
-        <p className="text-sm text-secondary" style={{ marginTop: '0.5rem', lineHeight: '1.4' }}>
+        <p className="text-sm text-secondary mt-sm leading-relaxed">
           "Paying Rent" represents meeting baseline sales metrics. Upload your weirdly laid out **Rents Due** spreadsheet report (as a CSV file, copied spreadsheet text lines, or an image/screenshot of the table). The AI parses salesperson RPH, total revenue, apps, memberships, and protection warranty attachments, showing who has paid rent and mapping the gaps.
         </p>
       </div>
 
       {/* Target Period Selector */}
-      <div className="glass-card flex-row align-center gap-md flex-wrap p-lg" style={{ background: 'rgba(255, 255, 255, 0.015)' }}>
+      <div className="glass-card flex-row align-center gap-md flex-wrap p-lg bg-[rgba(255,255,255,0.015)]">
         <div className="flex-column gap-xs">
           <label className="text-xs font-bold text-secondary">Target Ledger Period (Month):</label>
           {!showNewPeriodInput ? (
             <div className="flex-row align-center gap-sm">
               <select
-                className="form-control cursor-pointer"
-                style={{
-                  background: 'rgba(11, 15, 25, 0.6)',
-                  border: '1px solid var(--border-glass)',
-                  borderRadius: '6px',
-                  padding: '0.45rem 1.75rem 0.45rem 1rem',
-                  fontSize: '0.85rem',
-                  color: '#fff',
-                  width: '210px'
-                }}
+                className="form-control cursor-pointer bg-obsidian border border-glass rounded-md px-md py-[0.45rem] text-[0.85rem] text-white w-[210px]"
                 value={selectedPeriod}
                 onChange={(e) => {
                   if (e.target.value === '__new__') {
@@ -239,16 +259,7 @@ export default function RentsDueAuditor() {
             <div className="flex-row align-center gap-sm">
               <input
                 type="text"
-                className="form-control"
-                style={{
-                  background: 'rgba(11, 15, 25, 0.6)',
-                  border: '1px solid var(--border-glass)',
-                  borderRadius: '6px',
-                  padding: '0.45rem 1rem',
-                  fontSize: '0.85rem',
-                  color: '#fff',
-                  width: '210px'
-                }}
+                className="form-control bg-obsidian border border-glass rounded-md px-md py-[0.45rem] text-[0.85rem] text-white w-[210px]"
                 placeholder="e.g. April 2026"
                 value={customPeriodName}
                 onChange={(e) => setCustomPeriodName(e.target.value)}
@@ -256,8 +267,7 @@ export default function RentsDueAuditor() {
               />
               <button
                 type="button"
-                className="btn btn-primary cursor-pointer text-xs"
-                style={{ padding: '0.45rem 0.85rem' }}
+                className="btn btn-primary cursor-pointer text-xs px-[0.85rem] py-[0.45rem]"
                 onClick={() => {
                   if (customPeriodName.trim()) {
                     const cleaned = customPeriodName.trim();
@@ -273,8 +283,7 @@ export default function RentsDueAuditor() {
               </button>
               <button
                 type="button"
-                className="btn btn-secondary cursor-pointer text-xs"
-                style={{ padding: '0.45rem 0.85rem' }}
+                className="btn btn-secondary cursor-pointer text-xs px-[0.85rem] py-[0.45rem]"
                 onClick={() => {
                   setShowNewPeriodInput(false);
                   setSelectedPeriod(activePeriod);
@@ -286,8 +295,8 @@ export default function RentsDueAuditor() {
             </div>
           )}
         </div>
-        <div className="text-xs text-muted flex-1" style={{ lineHeight: '1.4' }}>
-          Uploading and parsing will apply to the performance ledger of <strong style={{ color: 'var(--bby-yellow)' }}>{selectedPeriod}</strong>. 
+        <div className="text-xs text-muted flex-1 leading-relaxed">
+          Uploading and parsing will apply to the performance ledger of <strong className="text-bby-yellow">{selectedPeriod}</strong>. 
           {comparisonRoster.length > 0 ? (
             <span> This period has <strong>{comparisonRoster.length}</strong> existing team members. Syncing will merge the parsed metrics.</span>
           ) : (
@@ -301,37 +310,78 @@ export default function RentsDueAuditor() {
         <span className="text-sm font-semibold text-secondary">Log Snapshot As:</span>
         <input 
           type="date"
-          className="form-input"
+          className="form-input px-sm py-[0.4rem] text-[0.85rem] max-w-[200px]"
           value={snapshotDate}
           onChange={(e) => setSnapshotDate(e.target.value)}
-          style={{ padding: '0.4rem 0.75rem', fontSize: '0.85rem', maxWidth: '200px' }}
           data-testid="snapshot-date-input"
         />
         <span className="text-xs text-muted">This sets the date for Trend Reporting aggregation.</span>
       </div>
 
+      {/* Tabs */}
+      <div className="flex-row gap-sm border-b border-[var(--border-glass)] pb-sm">
+        <button 
+          className={`btn ${activeTab === 'audit' ? 'btn-primary' : 'btn-secondary'} cursor-pointer px-lg py-sm`}
+          onClick={() => setActiveTab('audit')}
+          data-testid="tab-audit"
+        >
+          Upload & Audit
+        </button>
+        <button 
+          className={`btn ${activeTab === 'archives' ? 'btn-primary' : 'btn-secondary'} cursor-pointer px-lg py-sm`}
+          onClick={() => setActiveTab('archives')}
+          data-testid="tab-archives"
+        >
+          Archives ({archives?.length || 0})
+        </button>
+      </div>
 
-          {!parsedEmployees ? (
-            <RentsDueUploader 
-              fileName={fileName}
-              errorMsg={errorMsg}
-              isParsing={isParsing}
-              textInput={textInput}
-              setTextInput={setTextInput}
-              handleFileChange={handleFileChange}
-              fileInputRef={fileInputRef}
-              handleManualTextParse={handleManualTextParse}
-              handleProcessFile={handleProcessFile}
-              loadDemoData={loadDemoData}
-            />
+
+          {activeTab === 'archives' ? (
+            <div className="flex-column gap-md" data-testid="archives-list">
+              {!archives || archives.length === 0 ? (
+                <div className="glass-card p-xl text-center text-secondary" data-testid="empty-archives-msg">
+                  No Rents Due archives found for this store.
+                </div>
+              ) : (
+                archives?.map(arch => (
+                  <div key={arch.id} className="glass-card p-md flex-row justify-between align-center" data-testid={`archive-item-${arch.id}`}>
+                    <div>
+                      <h4 className="m-0 font-bold text-sm">{arch.fileName}</h4>
+                      <div className="text-xs text-secondary mt-xs">
+                        Period: {arch.period} | Uploaded: {new Date(arch.timestamp).toLocaleString()}
+                      </div>
+                    </div>
+                    <a href={arch.downloadUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary cursor-pointer text-xs px-md py-sm flex-center-y gap-xs" data-testid={`download-archive-${arch.id}`}>
+                      <FileText size={14} /> View / Download
+                    </a>
+                  </div>
+                ))
+              )}
+            </div>
           ) : (
-            <RentsDueLedger 
-              gaps={gaps}
-              parsedEmployees={parsedEmployees}
-              setParsedEmployees={setParsedEmployees}
-              syncSuccess={syncSuccess}
-              handleSyncToRoster={handleSyncToRoster}
-            />
+            !parsedEmployees ? (
+              <RentsDueUploader 
+                fileName={fileName}
+                errorMsg={errorMsg}
+                isParsing={isParsing}
+                textInput={textInput}
+                setTextInput={setTextInput}
+                handleFileChange={handleFileChange}
+                fileInputRef={fileInputRef}
+                handleManualTextParse={handleManualTextParse}
+                handleProcessFile={handleProcessFile}
+                loadDemoData={loadDemoData}
+              />
+            ) : (
+              <RentsDueLedger 
+                gaps={gaps}
+                parsedEmployees={parsedEmployees}
+                setParsedEmployees={setParsedEmployees}
+                syncSuccess={syncSuccess}
+                handleSyncToRoster={handleSyncToRoster}
+              />
+            )
           )}
 
 

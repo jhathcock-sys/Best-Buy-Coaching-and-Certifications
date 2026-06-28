@@ -4,6 +4,7 @@ import { useStore } from '../store/useStore';
 import { Employee } from '../types';
 import ZoneCard from '../components/DailyLineupBuilder/ZoneCard';
 import AvailableRosterPanel from '../components/DailyLineupBuilder/AvailableRosterPanel';
+import HuddleBriefingWidget from '../components/DailyLineupBuilder/HuddleBriefingWidget';
 
 const EMPTY_OBJ = {};
 
@@ -130,6 +131,8 @@ export default function DailyLineupBuilder() {
           <button data-testid="save-lineup-btn" className="btn btn-primary cursor-pointer">Save Lineup</button>
         </div>
       </div>
+
+      <HuddleBriefingWidget />
 
       <div className="grid gap-xl" style={{ gridTemplateColumns: '1fr 300px' }}>
         

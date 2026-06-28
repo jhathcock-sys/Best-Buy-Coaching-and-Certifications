@@ -15,6 +15,7 @@ import FiveStarAuditor from '../components/FiveStarAuditor';
 import ShiftSetupForm from '../components/FloorLeader/ShiftSetupForm';
 import ShiftTrackerTab from '../components/FloorLeader/ShiftTrackerTab';
 import HandoffReportModal from '../components/FloorLeaderTracker/HandoffReportModal';
+import AgenticPrioritizationWidget from '../components/Coaching/AgenticPrioritizationWidget';
 import { Employee } from '../types';
 
 const EMPTY_OBJ = {};
@@ -54,6 +55,8 @@ export default function FloorLeaderTracker() {
           Track hourly credit cards (Apps) and memberships (PMs) targets in real-time during your floor-leading shift.
         </p>
       </div>
+
+      <AgenticPrioritizationWidget />
 
       {!activeShift ? (
         <ShiftSetupForm />

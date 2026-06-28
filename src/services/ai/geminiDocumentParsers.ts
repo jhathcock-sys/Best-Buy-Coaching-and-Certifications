@@ -51,7 +51,12 @@ export async function parseScheduleImage(base64Data: string, mimeType: string, a
     const parsedData = JSON.parse(responseText);
     
     if (Array.isArray(parsedData)) {
-      return parsedData.map((item: any) => ({
+      interface ScheduleParsedItem {
+        name?: string;
+        shift?: string;
+        zone?: string;
+      }
+      return parsedData.map((item: ScheduleParsedItem) => ({
         ...item,
         name: DOMPurify.sanitize(String(item.name || 'Unknown')),
         shift: DOMPurify.sanitize(String(item.shift || 'Unknown')),
@@ -69,7 +74,7 @@ export async function parseScheduleImage(base64Data: string, mimeType: string, a
 
 export const parseRentsDueDocumentGemini = async (base64Image: string | undefined, mimeType: string | undefined, textInput: string | undefined, apiKey: string | undefined) => {
   try {
-    const keyToUse = apiKey || localStorage.getItem('bby_api_key') || import.meta.env.VITE_GEMINI_API_KEY;
+    const keyToUse = apiKey || import.meta.env.VITE_GEMINI_API_KEY || localStorage.getItem('bby_api_key');
     if (!keyToUse || keyToUse.trim().length < 10) {
       throw new Error("No Gemini API key available.");
     }
@@ -139,7 +144,26 @@ export const parseRentsDueDocumentGemini = async (base64Image: string | undefine
       }
     };
 
-    const sanitizeRentsDueObj = (obj: any) => ({
+    interface RentsDueParsedItem {
+      name?: string;
+      rph?: number;
+      rphOwed?: number;
+      rphStatus?: string;
+      revenue?: number;
+      revenueOwed?: number;
+      revenueStatus?: string;
+      apps?: number;
+      appsOwed?: number;
+      appsStatus?: string;
+      memberships?: number;
+      membershipsOwed?: number;
+      membershipsStatus?: string;
+      warranty?: number;
+      warrantyGoal?: number;
+      warrantyStatus?: string;
+    }
+
+    const sanitizeRentsDueObj = (obj: RentsDueParsedItem) => ({
       ...obj,
       name: DOMPurify.sanitize(String(obj.name || 'Unknown')),
       rph: obj.rph || 0,

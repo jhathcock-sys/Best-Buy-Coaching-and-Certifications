@@ -179,36 +179,18 @@ export const parseRentsDueDocumentGemini = async (base64Image: string | undefine
       const parsedData = JSON.parse(result.response.text());
       return Array.isArray(parsedData) ? parsedData.map(sanitizeRentsDueObj) : [];
     } else {
-      // Chunk unstructured text payloads to avoid token truncation
-      const lines = textInput ? textInput.split('\n') : [];
-      if (lines.length === 0) return [];
+      if (!textInput || !textInput.trim()) return [];
 
-      const CHUNK_SIZE = 30;
-      const chunks = [];
-      for (let i = 0; i < lines.length; i += CHUNK_SIZE) {
-        chunks.push(lines.slice(i, i + CHUNK_SIZE).join('\n'));
-      }
-
-      let allParsedEmployees: any[] = [];
-      
-      // Process chunks sequentially to respect rate limits
-      for (const chunk of chunks) {
-        if (!chunk.trim()) continue;
-        const res = await executeWithRetry(() => model.generateContent({
-          contents: [{ role: 'user', parts: [{ text: systemPrompt + '\nAnalyze this chunk of the Rents Due performance report:\n' + chunk }] }],
-          generationConfig: {
-            responseMimeType: 'application/json',
-            responseSchema: responseSchema,
-            maxOutputTokens: 8192
-          }
-        }));
-        const parsed = JSON.parse(res.response.text());
-        if (Array.isArray(parsed)) {
-          allParsedEmployees = [...allParsedEmployees, ...parsed.map(sanitizeRentsDueObj)];
+      const res = await executeWithRetry(() => model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: systemPrompt + '\nAnalyze this entire Rents Due performance report:\n' + textInput }] }],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseSchema: responseSchema,
+          maxOutputTokens: 8192
         }
-      }
-
-      return allParsedEmployees;
+      }));
+      const parsed = JSON.parse(res.response.text());
+      return Array.isArray(parsed) ? parsed.map(sanitizeRentsDueObj) : [];
     }
   } catch (error) {
     console.error('Rents Due Document Parsing Error:', error);

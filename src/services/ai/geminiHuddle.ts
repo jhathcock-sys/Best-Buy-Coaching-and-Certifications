@@ -4,7 +4,7 @@ import type { Employee, PlaybookSettings } from '../../types';
 export async function generateHuddleScript(
   roster: Employee[], 
   apiKey: string | undefined, 
-  playbookSettings: any
+  playbookSettings: PlaybookSettings
 ): Promise<string> {
   const model = getGeminiModel(apiKey, playbookSettings);
 

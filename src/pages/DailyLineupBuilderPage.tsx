@@ -120,8 +120,8 @@ export default function DailyLineupBuilder() {
           />
           <button 
             data-testid="smart-assign-btn"
-            className="btn cursor-pointer flex-row align-center gap-xs" 
-            style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.2)' }}
+            className="btn cursor-pointer flex-row align-center gap-xs text-success border-glass" 
+            style={{ background: 'var(--success-alpha-15)' }}
             onClick={handleSmartAssign}
             disabled={isSmartAssigning || roster.length === 0}
           >

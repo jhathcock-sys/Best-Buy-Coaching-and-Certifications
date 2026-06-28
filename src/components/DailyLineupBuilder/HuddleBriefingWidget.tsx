@@ -34,24 +34,24 @@ export default function HuddleBriefingWidget() {
     try {
       const generatedScript = await generateHuddleScript(roster, apiKey, playbookSettings);
       setScript(generatedScript);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Huddle Generation Error:', err);
-      setError(err?.message || "Failed to generate huddle script.");
+      const e = err as Error;
+      setError(e?.message || "Failed to generate huddle script.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="card glass-panel w-full p-lg flex-column gap-md">
+    <div className="glass-card w-full flex-column gap-md">
       <div className="flex-between align-center">
         <h3 className="font-heading text-lg m-0 flex-row align-center gap-sm">
           <Sparkles size={20} className="text-bby-yellow" /> Morning Huddle Script
         </h3>
         <button 
           data-testid="generate-huddle-btn"
-          className="btn cursor-pointer flex-row align-center gap-xs"
-          style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.2)' }}
+          className="btn btn-secondary text-bby-blue cursor-pointer flex-row align-center gap-xs"
           onClick={handleGenerate}
           disabled={loading || roster.length === 0}
         >
@@ -61,7 +61,7 @@ export default function HuddleBriefingWidget() {
       </div>
       
       {error && (
-        <div className="p-sm text-sm" style={{ color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '4px' }}>
+        <div data-testid="huddle-error" className="alert-card-danger p-sm text-sm rounded-xl">
           {error}
         </div>
       )}
@@ -69,11 +69,9 @@ export default function HuddleBriefingWidget() {
       {script && !loading && (
         <div 
           data-testid="huddle-script-output"
-          className="p-md text-secondary"
+          className="p-md text-secondary rounded-xl border-glass"
           style={{ 
-            background: 'rgba(0,0,0,0.2)', 
-            borderRadius: '8px', 
-            border: '1px solid var(--border-glass)',
+            background: 'var(--bg-obsidian)',
             whiteSpace: 'pre-wrap',
             lineHeight: '1.6'
           }}
@@ -83,9 +81,9 @@ export default function HuddleBriefingWidget() {
       )}
       
       {loading && !script && (
-        <div className="p-xl flex-center flex-column gap-md" style={{ color: '#38bdf8' }}>
+        <div data-testid="huddle-loading" className="p-xl flex-center flex-column gap-md text-bby-blue">
           <Wand2 size={32} className="animate-pulse" />
-          <p className="m-0 text-sm animate-pulse">Drafting AI coaching tips for the team...</p>
+          <p className="m-0 text-sm animate-pulse text-bby-blue">Drafting AI coaching tips for the team...</p>
         </div>
       )}
     </div>

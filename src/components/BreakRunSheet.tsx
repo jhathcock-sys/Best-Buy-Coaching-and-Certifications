@@ -20,6 +20,8 @@ export default function BreakRunSheet({
   onOptimizeBreaks
 }: BreakRunSheetProps) {
   const [isOptimizing, setIsOptimizing] = useState(false);
+  const [preventOverlaps, setPreventOverlaps] = useState(false);
+  const [staggerBreaks, setStaggerBreaks] = useState(false);
   const [breakForm, setBreakForm] = useState({
     empId: '',
     time: '12:00 PM',
@@ -70,42 +72,55 @@ export default function BreakRunSheet({
         <p className="text-secondary text-sm">
           Timetable run sheet: coordinate scheduled breaks and lunches to prevent sales floor coverage gaps.
         </p>
-        <button 
-          className="glass-button text-bby-yellow border-bby-yellow/30 hover:bg-bby-yellow/10 animate-pulse-slow flex-align gap-2 text-sm"
-          onClick={async () => {
-            if (onOptimizeBreaks) {
-              setIsOptimizing(true);
-              try {
-                const { generateOptimizedBreaks } = await import('../services/ai/geminiBreaks');
-                const { useStore } = await import('../store/useStore');
-                const store = useStore.getState();
-                const zoneAssignments = store.activeShift?.zoneAssignments || {};
-                const optimized = await generateOptimizedBreaks(roster, zoneAssignments, breakSchedule, store.apiKey, store.playbookSettings);
-                
-                // Map the returned generic break JSON to valid BreakEntry objects
-                const validBreaks = optimized.map((b: any, index: number) => ({
-                  id: `ai_break_${Date.now()}_${index}`,
-                  empId: b.employeeId,
-                  name: b.employeeName || roster.find(r => r.id === b.employeeId)?.name || 'Associate',
-                  time: b.startTime,
-                  type: b.duration === 30 ? '30 min Lunch' : '15 min Break',
-                  completed: false
-                }));
+        <div className="flex-column gap-sm align-end">
+          <button 
+            className="glass-button text-bby-yellow border-bby-yellow/30 hover:bg-bby-yellow/10 animate-pulse-slow flex-align gap-2 text-sm"
+            onClick={async () => {
+              if (onOptimizeBreaks) {
+                setIsOptimizing(true);
+                try {
+                  const { generateOptimizedBreaks } = await import('../services/ai/geminiBreaks');
+                  const { useStore } = await import('../store/useStore');
+                  const store = useStore.getState();
+                  const zoneAssignments = store.activeShift?.zoneAssignments || {};
+                  const optimized = await generateOptimizedBreaks(roster, zoneAssignments, breakSchedule, store.apiKey, store.playbookSettings, preventOverlaps, staggerBreaks);
+                  
+                  // Map the returned generic break JSON to valid BreakEntry objects
+                  const validBreaks = optimized.map((b: any, index: number) => ({
+                    id: `ai_break_${Date.now()}_${index}`,
+                    empId: b.employeeId,
+                    name: b.employeeName || roster.find((r: Employee) => r.id === b.employeeId)?.name || 'Associate',
+                    time: b.startTime,
+                    type: b.duration === 30 ? '30 min Lunch' : '15 min Break',
+                    completed: false
+                  }));
 
-                onOptimizeBreaks(validBreaks);
-              } catch (e) {
-                console.error('Optimization failed:', e);
-                alert('Failed to optimize breaks.');
-              } finally {
-                setIsOptimizing(false);
+                  onOptimizeBreaks(validBreaks);
+                } catch (e) {
+                  console.error('Optimization failed:', e);
+                  alert('Failed to optimize breaks.');
+                } finally {
+                  setIsOptimizing(false);
+                }
               }
-            }
-          }}
-          disabled={isOptimizing}
-        >
-          {isOptimizing ? <span className="animate-spin mr-1">⏳</span> : <span className="mr-1">✨</span>}
-          {isOptimizing ? 'Optimizing...' : 'Optimize Breaks with AI'}
-        </button>
+            }}
+            disabled={isOptimizing}
+          >
+            {isOptimizing ? <span className="animate-spin mr-1">⏳</span> : <span className="mr-1">✨</span>}
+            {isOptimizing ? 'Optimizing...' : 'Optimize Breaks with AI'}
+          </button>
+          
+          <div className="flex-column gap-xs text-xs mt-xs" style={{ color: 'var(--text-secondary)' }}>
+            <label className="flex align-center gap-xs cursor-pointer">
+              <input type="checkbox" checked={preventOverlaps} onChange={e => setPreventOverlaps(e.target.checked)} />
+              Prevent zone overlaps
+            </label>
+            <label className="flex align-center gap-xs cursor-pointer">
+              <input type="checkbox" checked={staggerBreaks} onChange={e => setStaggerBreaks(e.target.checked)} />
+              Stagger breaks (15 min gap)
+            </label>
+          </div>
+        </div>
       </div>
 
       <div className="dashboard-grid">

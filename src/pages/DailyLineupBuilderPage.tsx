@@ -33,6 +33,7 @@ export default function DailyLineupBuilder() {
     'Geek Squad': []
   });
   const [isSmartAssigning, setIsSmartAssigning] = useState(false);
+  const [enforceMinimumCoverage, setEnforceMinimumCoverage] = useState(false);
   const apiKey = useStore((state) => state.apiKey);
   const playbookSettings = useStore(state => state.playbookSettings);
 
@@ -49,7 +50,7 @@ export default function DailyLineupBuilder() {
     setIsSmartAssigning(true);
     try {
       const { generateSmartZoning } = await import('../services/ai/geminiSmartZoning');
-      const newAssignments = await generateSmartZoning(roster, zones, apiKey, playbookSettings);
+      const newAssignments = await generateSmartZoning(roster, zones, apiKey, playbookSettings, enforceMinimumCoverage);
       
       // Ensure all zones exist in the result, even if empty
       const normalizedAssignments: Record<string, string[]> = {};
@@ -118,6 +119,14 @@ export default function DailyLineupBuilder() {
             value={date}
             onChange={(e) => setDate(e.target.value)}
           />
+          <label className="flex-row align-center gap-xs text-sm cursor-pointer" style={{ color: 'var(--text-secondary)' }}>
+            <input 
+              type="checkbox" 
+              checked={enforceMinimumCoverage}
+              onChange={e => setEnforceMinimumCoverage(e.target.checked)}
+            />
+            Enforce minimum 1 associate per zone
+          </label>
           <button 
             data-testid="smart-assign-btn"
             className="btn cursor-pointer flex-row align-center gap-xs text-success border-glass" 

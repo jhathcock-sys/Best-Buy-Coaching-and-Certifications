@@ -5,7 +5,9 @@ export const generateOptimizedBreaks = async (
   zoneAssignments: Record<string, string[]>,
   currentBreaks: any[],
   apiKey?: string,
-  playbookSettings?: any
+  playbookSettings?: any,
+  preventOverlaps: boolean = false,
+  staggerBreaks: boolean = false
 ) => {
   const model = getGeminiModel(apiKey, playbookSettings);
 
@@ -22,6 +24,10 @@ ${JSON.stringify(zoneAssignments, null, 2)}
 
 Here are the currently scheduled breaks (do not overwrite these unless absolutely necessary):
 ${JSON.stringify(currentBreaks, null, 2)}
+
+Rules:
+${preventOverlaps ? "- CRITICAL: Never schedule two people in the same zone at the same time." : ""}
+${staggerBreaks ? "- CRITICAL: Ensure at least 15 minutes between any two breaks." : ""}
 
 Please return a JSON array of break objects. Each break object should have:
 - employeeId: (string) The ID of the employee

@@ -1,7 +1,13 @@
 import { getGeminiModel, executeWithRetry } from './core';
 import type { PlaybookSettings, Employee } from '../../types';
 
-export async function generateSmartZoning(roster: Employee[], zones: string[], apiKey: string | undefined, playbookSettings: PlaybookSettings) {
+export async function generateSmartZoning(
+  roster: Employee[], 
+  zones: string[], 
+  apiKey: string | undefined, 
+  playbookSettings: PlaybookSettings,
+  enforceMinimumCoverage: boolean = false
+) {
   if (!apiKey) throw new Error("Missing Gemini API Key");
   
   const model = getGeminiModel(apiKey, playbookSettings);
@@ -20,6 +26,7 @@ export async function generateSmartZoning(roster: Employee[], zones: string[], a
     1. Every employee in the roster MUST be assigned to exactly one zone.
     2. Try to assign employees to zones that match their department (e.g. Computing to Computing), but flex high-RPH performers to high-traffic zones (like Mobile or Computing) if needed.
     3. Ensure no zone is left empty if possible.
+    ${enforceMinimumCoverage ? "4. CRITICAL: Ensure absolutely no zone is left empty." : ""}
     
     Respond ONLY with a valid JSON object where keys are the zone names, and values are arrays of employee IDs assigned to that zone. Do not include markdown blocks or any other text.
   `;

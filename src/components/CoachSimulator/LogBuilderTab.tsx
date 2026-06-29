@@ -7,6 +7,7 @@ import { useShallow } from 'zustand/react/shallow';
 import LogBuilderFormFields, { LogBuilderForm } from './LogBuilderFormFields';
 import LogPreview from './LogPreview';
 import { generateCoachingLogLocal, generateCoachingLogGemini } from '../../services/ai';
+import { TEMPLATES } from './templates';
 
 export interface LogBuilderTabProps {
   prefillBuilderData: any;
@@ -23,7 +24,6 @@ export interface LogBuilderTabProps {
   handleStopSpeech: () => void;
   isPlayingSpeech: boolean;
   isPausedSpeech: boolean;
-  TEMPLATES: any;
 }
 
 export default function LogBuilderTab({
@@ -40,8 +40,7 @@ export default function LogBuilderTab({
   handleSpeech,
   handleStopSpeech,
   isPlayingSpeech,
-  isPausedSpeech,
-  TEMPLATES
+  isPausedSpeech
 }: LogBuilderTabProps) {
 
   const { playbookSettings, apiKey } = useStore(useShallow(state => ({

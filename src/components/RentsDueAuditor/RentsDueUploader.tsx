@@ -51,6 +51,7 @@ export default function RentsDueUploader({
               onChange={(e) => {
                 if (isParsing) return;
                 handleFileChange(e);
+                e.target.value = '';
               }}
               accept=".csv,text/csv,text/plain,image/*"
               data-testid="upload-input"

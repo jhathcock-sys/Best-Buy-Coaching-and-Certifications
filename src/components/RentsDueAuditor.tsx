@@ -88,6 +88,7 @@ export default function RentsDueAuditor() {
     setFileName(file.name);
     setErrorMsg('');
     setParsedEmployees(null);
+    setIsParsing(true);
     handleArchiveUpload(file, file.name);
 
     const reader = new FileReader();
@@ -103,7 +104,6 @@ export default function RentsDueAuditor() {
         const text = e.target?.result?.toString() || '';
         
         try {
-          setIsParsing(true);
           const cloudParsed = await parseRentsDueCSVCloud(text);
           if (cloudParsed && cloudParsed.length > 0) {
             setParsedEmployees(cloudParsed as ParsedEmployee[]);
@@ -119,6 +119,7 @@ export default function RentsDueAuditor() {
       reader.readAsText(file);
     } else {
       setErrorMsg('Error: Please upload a valid CSV file, text sheet copy-paste, or image screenshot.');
+      setIsParsing(false);
     }
   };
 

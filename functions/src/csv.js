@@ -25,7 +25,19 @@ exports.parseRentsDueCSV = functions.https.onCall(async (data, context) => {
   }
 
   try {
-    const result = Papa.parse(text.trim(), {
+    const csvLines = text.trim().split(/\r?\n/);
+    let headerRowIndex = 0;
+    for (let i = 0; i < Math.min(10, csvLines.length); i++) {
+      const lineLower = csvLines[i].toLowerCase();
+      if (lineLower.includes('name') || lineLower.includes('employee') || lineLower.includes('advisor')) {
+        headerRowIndex = i;
+        break;
+      }
+    }
+    
+    const cleanedText = csvLines.slice(headerRowIndex).join('\n');
+
+    const result = Papa.parse(cleanedText, {
       header: true,
       skipEmptyLines: true,
       dynamicTyping: true
@@ -37,11 +49,6 @@ exports.parseRentsDueCSV = functions.https.onCall(async (data, context) => {
 
     const rows = result.data;
     if (rows.length === 0) return { parsedData: null };
-
-    const firstRow = rows[0];
-    const keys = Object.keys(firstRow).map(k => k.toLowerCase());
-    const hasName = keys.some(k => k.includes('name') || k.includes('employee') || k.includes('advisor'));
-    if (!hasName) return { parsedData: null };
 
     const parsedData = rows.map((row) => {
       const getVal = (possibleKeys, defaultVal = 0) => {

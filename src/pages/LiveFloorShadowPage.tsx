@@ -46,7 +46,7 @@ export default function LiveFloorShadow({
             Follow an advisor, log their behaviors, and auto-generate coaching notes.
           </p>
         </div>
-        <button onClick={() => onNavigate && onNavigate('dashboard')} className="btn-secondary flex-center gap-sm">
+        <button onClick={() => onNavigate && onNavigate('dashboard')} className="btn-secondary flex-center gap-sm cursor-pointer" data-testid="live-shadow-back-btn">
           <Check size={16} /> Finish & Close
         </button>
       </div>
@@ -64,7 +64,7 @@ export default function LiveFloorShadow({
             The AI has successfully compiled your observations into actionable coaching notes and logged them to the employee's history.
           </p>
           <div className="flex-center gap-md">
-            <button onClick={() => onNavigate && onNavigate('dashboard')} className="btn-primary">
+            <button onClick={() => onNavigate && onNavigate('dashboard')} className="btn-primary cursor-pointer" data-testid="live-shadow-finish-btn">
               Return to Profile
             </button>
           </div>

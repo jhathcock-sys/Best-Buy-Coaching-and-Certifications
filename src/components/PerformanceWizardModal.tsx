@@ -91,7 +91,7 @@ export default function PerformanceWizardModal({
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose} data-testid="performance-wizard-modal">
+    <div className="modal-overlay cursor-pointer" onClick={onClose} data-testid="performance-wizard-modal">
       <div 
         className="modal-content" 
         onClick={(e) => e.stopPropagation()} 

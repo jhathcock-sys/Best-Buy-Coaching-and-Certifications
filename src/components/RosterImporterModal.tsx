@@ -37,8 +37,8 @@ export default function RosterImporterModal({ isOpen, onClose, onImport }: { isO
   };
 
   return (
-    <div className="modal-overlay z-[1100]" onClick={onClose}>
-      <div className="modal-content glass-card max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay z-[1100] cursor-pointer" onClick={onClose} data-testid="roster-importer-modal">
+      <div className="modal-content glass-card max-w-4xl w-full cursor-default" onClick={(e) => e.stopPropagation()}>
         
         <div className="modal-header flex-between p-lg border-b border-glass">
           <h3 className="m-0 flex-center gap-sm font-bold text-primary">

@@ -246,8 +246,8 @@ export default function CoachingHistory() {
 
       {/* Details Modal */}
       {selectedSession && (
-        <div className="modal-overlay cursor-pointer" onClick={() => setSelectedSession(null)}>
-          <div className="modal-content modal-border-bby cursor-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay cursor-pointer" onClick={() => setSelectedSession(null)} data-testid="coaching-history-modal-overlay">
+          <div className="modal-content modal-border-bby cursor-auto" onClick={(e) => e.stopPropagation()} data-testid="coaching-history-modal">
             <div className="modal-header">
               <div className="flex-row align-center gap-sm">
                 <img src={selectedSession.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'} alt="" className="avatar-sm" />

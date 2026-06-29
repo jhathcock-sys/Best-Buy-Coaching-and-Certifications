@@ -49,7 +49,7 @@ export default function ImportScheduleModal({ isOpen, onClose, onImportConfirm }
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay z-1100" onClick={onClose} data-testid="import-schedule-modal">
+    <div className="modal-overlay z-1100 cursor-pointer" onClick={onClose} data-testid="import-schedule-modal">
       <div className="modal-content max-w-980 p-none bg-obsidian" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
         
         {/* Modal Header */}

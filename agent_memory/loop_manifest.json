@@ -2,12 +2,9 @@
     "active_vetos":  [
 
                      ],
-    "status":  "ACTIVE",
-    "remaining_queue":  [
-                            "src/components/AuditorResults.tsx",
-                            "src/components/Analytics/DynamicChartRenderer.tsx"
-                        ],
-    "current_checkpoint":  14,
+    "status":  "COMPLETED",
+    "remaining_queue":  null,
+    "current_checkpoint":  16,
     "processed_queue":  [
                             "src/components/FiveStarAuditor.tsx",
                             "src/components/ImportScheduleModal.tsx",
@@ -22,6 +19,8 @@
                             "src/components/RentsDueAuditor.tsx",
                             "src/components/Playbook/CustomScenarioForm.tsx",
                             "src/components/PlaybookStudio/SupervisorProfilesTab.tsx",
-                            "src/pages/CoachSimulatorPage.tsx"
+                            "src/pages/CoachSimulatorPage.tsx",
+                            "src/components/AuditorResults.tsx",
+                            "src/components/Analytics/DynamicChartRenderer.tsx"
                         ]
 }

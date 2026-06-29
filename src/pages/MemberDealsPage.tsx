@@ -49,7 +49,7 @@ export const MemberDealsPage: React.FC = () => {
           <AlertCircle className="w-12 h-12 mb-2" />
           <h3 className="text-lg font-bold">Failed to load deals</h3>
           <p className="max-w-md">{error}</p>
-          <button onClick={fetchDeals} className="glass-button mt-4">Try Again</button>
+          <button onClick={fetchDeals} className="glass-button mt-4 cursor-pointer" data-testid="fetch-deals-btn">Try Again</button>
         </div>
       ) : loading && deals.length === 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

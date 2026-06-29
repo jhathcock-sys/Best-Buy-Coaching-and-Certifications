@@ -12,18 +12,9 @@ let db: Firestore | null = null;
 let auth: Auth | null = null;
 export let storage: FirebaseStorage | null = null;
 
-// Get config from localStorage or env variables
+// Get config from env variables
 export const getSavedFirebaseConfig = (): Record<string, string> | null => {
-  try {
-    if (typeof localStorage !== 'undefined') {
-      const saved = localStorage.getItem('bby_firebase_config');
-      if (saved) return JSON.parse(saved);
-    }
-  } catch (e) {
-    console.error('Failed to parse saved firebase config', e);
-  }
-
-  // Fallback to Vite env variables if present
+  // Rely strictly on Vite env variables
   if (import.meta.env.VITE_FIREBASE_API_KEY && import.meta.env.VITE_FIREBASE_PROJECT_ID) {
     return {
       apiKey: import.meta.env.VITE_FIREBASE_API_KEY,

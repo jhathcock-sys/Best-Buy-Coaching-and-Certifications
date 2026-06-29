@@ -47,12 +47,11 @@ export default function SyncManager() {
     const unsubPlaybook = subscribeToPlaybookSettings(storeId, (s: PlaybookSettings | null) => {
       if (s) {
         const hasEnvKey = !!(import.meta.env.VITE_GEMINI_API_KEY && import.meta.env.VITE_GEMINI_API_KEY.trim().length > 10);
-        const savedKey = localStorage.getItem('bby_api_key');
         
         // Clone object before mutating
         const updatedSettings: PlaybookSettings = { ...s };
         
-        if (hasEnvKey && (!savedKey || savedKey.trim().length < 10)) {
+        if (hasEnvKey) {
           updatedSettings.useGemini = true;
         }
         if (!updatedSettings.storePin) {

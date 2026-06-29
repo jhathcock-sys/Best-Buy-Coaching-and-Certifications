@@ -1,7 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Send, Sparkles, RefreshCw, BookOpen, Mic, MicOff } from 'lucide-react';
+import { ArrowLeft, Sparkles, RefreshCw } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { runOfflineSimulationStep, runGeminiSimulationStep, evaluateSessionOffline, evaluateSessionGemini } from '../../services/ai';
+import RoleplayEvaluationState from './RoleplayEvaluationState';
+import RoleplayProgressBar from './RoleplayProgressBar';
+import RoleplayChatWindow from './RoleplayChatWindow';
+import RoleplaySidebarCoach from './RoleplaySidebarCoach';
 
 export interface Message {
   sender: 'customer' | 'advisor';
@@ -172,26 +176,7 @@ export default function RoleplayActiveSession({
   return (
     <>
         {isEvaluating ? (
-          <div className="glass-card flex-column flex-center gap-xl p-[3rem] min-h-[500px] text-center" data-testid="evaluating-state">
-            <div className="relative w-[120px] h-[120px]">
-              <div className="skeleton-pulse absolute top-0 left-0 w-full h-full rounded-full border-[8px] border-[rgba(255,230,0,0.05)] border-t-[var(--bby-yellow)] animate-spin"></div>
-              <div className="flex-center w-full h-full">
-                <Sparkles size={36} className="text-bby-yellow typing-dots" />
-              </div>
-            </div>
-            
-            <div className="max-w-[450px] flex-column gap-sm">
-              <h3 className="text-xl text-white font-bold">AI Performance Audit in progress</h3>
-              <p className="text-sm text-secondary leading-relaxed">
-                Gemini is grading your consultative discovery questions, verifying your membership values pitch, checking GSP warranty attachments, and parsing final credit card close rewards.
-              </p>
-            </div>
-
-            <div className="w-full max-w-[300px] flex-column gap-sm mt-md">
-              <div className="skeleton-pulse h-[12px] w-full bg-white-alpha-05 rounded-md"></div>
-              <div className="skeleton-pulse h-[12px] w-4/5 bg-white-alpha-05 rounded-md self-center"></div>
-            </div>
-          </div>
+          <RoleplayEvaluationState />
         ) : (
           <div className="flex-column gap-xl">
             
@@ -229,121 +214,29 @@ export default function RoleplayActiveSession({
             </div>
           </div>
 
-          {/* Sales Flow Progress Bar */}
-          <div className="glass-card p-xl">
-            <div className="sales-flow-tracker">
-              <div 
-                className="sales-flow-progress-bar" 
-                style={{ 
-                  width: `${
-                    completedSteps?.close ? 100 :
-                    completedSteps?.protect ? 80 :
-                    completedSteps?.recommend ? 60 :
-                    completedSteps?.discover ? 40 :
-                    completedSteps?.connect ? 20 : 0
-                  }%` 
-                }} 
-              />
-              <div className={`flow-step ${completedSteps?.connect ? 'completed' : currentActiveStep === 'connect' ? 'active' : 'pending'}`}>
-                <div className="flow-node">1</div>
-                <div className="flow-label">Connect</div>
-              </div>
-              <div className={`flow-step ${completedSteps?.discover ? 'completed' : currentActiveStep === 'discover' ? 'active' : 'pending'}`}>
-                <div className="flow-node">2</div>
-                <div className="flow-label">Discover</div>
-              </div>
-              <div className={`flow-step ${completedSteps?.recommend ? 'completed' : currentActiveStep === 'recommend' ? 'active' : 'pending'}`}>
-                <div className="flow-node">3</div>
-                <div className="flow-label">Recommend</div>
-              </div>
-              <div className={`flow-step ${completedSteps?.protect ? 'completed' : currentActiveStep === 'protect' ? 'active' : 'pending'}`}>
-                <div className="flow-node">4</div>
-                <div className="flow-label">Protect</div>
-              </div>
-              <div className={`flow-step ${completedSteps?.close ? 'completed' : currentActiveStep === 'close' ? 'active' : 'pending'}`}>
-                <div className="flow-node">5</div>
-                <div className="flow-label">Close</div>
-              </div>
-            </div>
-          </div>
+          <RoleplayProgressBar 
+            completedSteps={completedSteps}
+            currentActiveStep={currentActiveStep}
+          />
 
           {/* Main Chat Layout */}
           <div className="grid grid-cols-[3fr_1fr] gap-xl max-lg:grid-cols-1">
             
-            {/* Dialogue Arena */}
-            <div className="chat-container">
-              <div className="chat-messages">
-                {messages?.map((m, idx) => (
-                  <div 
-                    key={idx} 
-                    className={`chat-bubble ${m.sender === 'advisor' ? 'bubble-advisor' : 'bubble-customer'}`}
-                  >
-                    {m.text}
-                  </div>
-                ))}
-                {isLoading && (
-                  <div className="chat-bubble bubble-customer flex-center-y w-[80px] p-[0.75rem_1rem]">
-                    <div className="typing-dots">
-                      <span></span><span></span><span></span>
-                    </div>
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
-              </div>
+            <RoleplayChatWindow 
+              messages={messages}
+              isLoading={isLoading}
+              isListening={isListening}
+              inputText={inputText}
+              setInputText={setInputText}
+              handleSend={handleSend}
+              toggleMic={toggleMic}
+              messagesEndRef={messagesEndRef}
+            />
 
-              <div className="chat-input-bar">
-                <input 
-                  type="text" 
-                  className={`chat-input ${isListening ? 'border-error bg-[rgba(239,68,68,0.05)]' : 'border-transparent bg-white-alpha-05'}`}
-                  placeholder={isListening ? "Listening... Speak your response" : "Type your response to the customer..."}
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                  disabled={isLoading}
-                  data-testid="chat-input"
-                />
-                <button 
-                  className={`btn btn-icon ${isListening ? 'bg-[rgba(239,68,68,0.2)] text-error animate-pulse' : 'bg-white-alpha-10 text-white'}`}
-                  onClick={toggleMic} 
-                  disabled={isLoading}
-                  title="Speak response"
-                >
-                  {isListening ? <MicOff size={18} /> : <Mic size={18} />}
-                </button>
-                <button className="btn btn-primary btn-icon" onClick={handleSend} disabled={isLoading || isListening} data-testid="send-msg-btn">
-                  <Send size={18} />
-                </button>
-              </div>
-            </div>
-
-            {/* Sidebar Active Guidance Coach */}
-            <div className="flex-column gap-md">
-              <div className="glass-card border-[rgba(0,70,190,0.3)] bg-[rgba(0,70,190,0.05)]">
-                <h4 className="text-base text-bby-yellow flex-center-y gap-sm mb-sm">
-                  <Sparkles size={16} /> Live Coaching Guide
-                </h4>
-                <div className="border-b border-white-alpha-05 pb-sm mb-sm">
-                  <h5 className="text-sm text-white mb-xs">{stepHint?.title}</h5>
-                  <p className="text-xs text-secondary leading-relaxed">{stepHint?.hint}</p>
-                </div>
-                <div>
-                  <h5 className="text-sm text-white mb-xs flex-center-y gap-xs">
-                    <BookOpen size={12} /> Pro-Tip Checklist
-                  </h5>
-                  <ul className="text-xs text-muted pl-lg flex-column gap-xs leading-relaxed list-disc">
-                    <li>Avoid saying "warranty"—use "protection package" or "peace of mind."</li>
-                    <li>Always offer My Best Buy Total or Plus options on premium hardware.</li>
-                    <li>Highlight 10% back in rewards or financing to overcome price hurdles.</li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="glass-card">
-                <h4 className="text-sm mb-sm">Customer Profile</h4>
-                <p className="text-xs text-secondary mb-xs"><strong>Needs:</strong> {selectedScenario?.needs}</p>
-                <p className="text-xs text-secondary italic"><strong>Style:</strong> {selectedScenario?.difficulty === 'Easy' ? 'Quickly cooperative' : 'Will bring up multiple financial/risk objections.'}</p>
-              </div>
-          </div>
+            <RoleplaySidebarCoach 
+              stepHint={stepHint}
+              selectedScenario={selectedScenario}
+            />
           </div>
           </div>
         )}

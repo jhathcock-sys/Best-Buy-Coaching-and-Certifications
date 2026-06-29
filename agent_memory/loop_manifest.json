@@ -4,14 +4,13 @@
                      ],
     "status":  "ACTIVE",
     "remaining_queue":  [
-                            "src/components/RentsDueAuditor.tsx",
                             "src/components/Playbook/CustomScenarioForm.tsx",
                             "src/components/PlaybookStudio/SupervisorProfilesTab.tsx",
                             "src/pages/CoachSimulatorPage.tsx",
                             "src/components/AuditorResults.tsx",
                             "src/components/Analytics/DynamicChartRenderer.tsx"
                         ],
-    "current_checkpoint":  10,
+    "current_checkpoint":  11,
     "processed_queue":  [
                             "src/components/FiveStarAuditor.tsx",
                             "src/components/ImportScheduleModal.tsx",
@@ -22,6 +21,7 @@
                             "src/components/FloorAuditReport.tsx",
                             "src/components/RoleplayCenter/RoleplayActiveSession.tsx",
                             "src/components/SyncManager.tsx",
-                            "src/services/firebase.ts"
+                            "src/services/firebase.ts",
+                            "src/components/RentsDueAuditor.tsx"
                         ]
 }

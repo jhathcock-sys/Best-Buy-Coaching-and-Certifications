@@ -2,13 +2,23 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Trash2, Volume2, BookOpen, Clock } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { CoachingLog } from '../types';
+import { calculateCoachingImpact } from '../utils/coachingImpact';
 
 const EMPTY_ARR: CoachingLog[] = [];
 
 export default function CoachingHistory() {
   const coachingLogs = useStore(state => state.coachingLogs) || EMPTY_ARR;
+  const rawDailySnapshots = useStore(state => state.dailySnapshots);
   const onDeleteLog = useStore(state => state.deleteCoachingLog);
   const [searchTerm, setSearchTerm] = useState('');
+
+  const dailySnapshots = useMemo(() => {
+    if (!rawDailySnapshots) return [];
+    return Object.keys(rawDailySnapshots).map(date => ({
+      date,
+      employees: rawDailySnapshots[date]
+    }));
+  }, [rawDailySnapshots]);
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [selectedSession, setSelectedSession] = useState<CoachingLog | null>(null);
   
@@ -154,7 +164,10 @@ export default function CoachingHistory() {
             <p>No coaching logs match your active filters.</p>
           </div>
         ) : (
-          filteredSessions.map((session, index) => (
+          filteredSessions.map((session, index) => {
+            const impact = calculateCoachingImpact(session.employeeId, session.date, dailySnapshots);
+            
+            return (
             <div 
               key={index} 
               data-testid={`session-card-${index}`}
@@ -198,6 +211,28 @@ export default function CoachingHistory() {
               {/* Footer: Date & Score Indicator */}
               <div className="session-footer">
                 <span className="flex-row align-center gap-xs"><Clock size={12} /> {session.date?.split(' ')[0]}</span>
+                
+                {impact === 'HIGH_IMPACT' && (
+                  <span className="tag-pill tag-mini text-success" style={{ backgroundColor: 'var(--success-glow)', border: '1px solid var(--success)' }}>
+                    High Impact 🟢
+                  </span>
+                )}
+                {impact === 'NEEDS_FOLLOW_UP' && (
+                  <span className="tag-pill tag-mini text-error" style={{ backgroundColor: 'var(--error-glow)', border: '1px solid var(--error)' }}>
+                    Needs Follow Up 🔴
+                  </span>
+                )}
+                {impact === 'NEUTRAL' && (
+                  <span className="tag-pill tag-mini text-muted border-glass">
+                    Neutral Impact ⚪
+                  </span>
+                )}
+                {impact === 'PENDING' && (
+                  <span className="tag-pill tag-mini text-muted border-glass">
+                    Impact Pending ⏳
+                  </span>
+                )}
+
                 {session.score !== 100 && (
                   <span className={`font-bold ${session.score >= 80 ? 'text-success' : 'text-error'}`}>
                     Score: {session.score}%
@@ -205,7 +240,7 @@ export default function CoachingHistory() {
                 )}
               </div>
             </div>
-          ))
+          )})
         )}
       </div>
 

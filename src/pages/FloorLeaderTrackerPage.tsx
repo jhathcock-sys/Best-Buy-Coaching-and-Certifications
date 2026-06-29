@@ -14,7 +14,7 @@ import ShiftSimulator from '../components/ShiftSimulator';
 import FiveStarAuditor from '../components/FiveStarAuditor';
 import ShiftSetupForm from '../components/FloorLeader/ShiftSetupForm';
 import ShiftTrackerTab from '../components/FloorLeader/ShiftTrackerTab';
-import HandoffReportModal from '../components/FloorLeaderTracker/HandoffReportModal';
+import ShiftHandoffModal from '../components/FloorLeader/ShiftHandoffModal';
 import AgenticPrioritizationWidget from '../components/Coaching/AgenticPrioritizationWidget';
 import { Employee } from '../types';
 
@@ -26,6 +26,9 @@ export default function FloorLeaderTracker() {
   const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
   const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
   const roster = React.useMemo(() => (Object.values(_rawroster) as Employee[]).sort((a: Employee, b: Employee) => (a?.name || '').localeCompare(b?.name || '')), [_rawroster]);
+  const followUpTasks = useStore((state) => state.followUpTasks) || [];
+  const playbookSettings = useStore((state) => state.playbookSettings);
+  const apiKey = useStore((state) => state.apiKey);
 
   const onSaveShift = useStore((state) => state.saveFloorLeaderShift);
   const [isHandoffModalOpen, setIsHandoffModalOpen] = useState(false);
@@ -132,8 +135,22 @@ export default function FloorLeaderTracker() {
 
       {/* Handoff Modal */}
       {isHandoffModalOpen && (
-        <HandoffReportModal
+        <ShiftHandoffModal
+          isOpen={isHandoffModalOpen}
           onClose={() => setIsHandoffModalOpen(false)}
+          activeShift={activeShift}
+          roster={roster}
+          followUpTasks={followUpTasks}
+          playbookSettings={playbookSettings || {
+            useGemini: true,
+            customSystemPrompt: '',
+            allowedPhrases: [],
+            forbiddenPhrases: [],
+            storePin: '0000',
+            trainingLogs: [],
+            aiMode: 'flash'
+          }}
+          apiKey={apiKey}
         />
       )}
 

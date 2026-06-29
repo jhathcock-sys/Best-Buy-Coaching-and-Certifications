@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Wand2 } from 'lucide-react';
+import { useStore } from '../../store/useStore';
+import { generateRentRecoveryPlans } from '../../services/ai/geminiRentRecovery';
 export interface ParsedEmployee {
   name: string;
   rph: number;
@@ -39,6 +41,11 @@ export default function RentsDueLedger({
   handleSyncToRoster
 }: RentsDueLedgerProps) {
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [successToast, setSuccessToast] = useState<string | null>(null);
+  
+  const addFollowUpTask = useStore(state => state.addFollowUpTask);
+  const playbookSettings = useStore(state => state.playbookSettings);
   const employees = parsedEmployees || [];
   
   const handleSyncClick = async () => {
@@ -48,6 +55,31 @@ export default function RentsDueLedger({
       await handleSyncToRoster();
     } finally {
       setIsSyncing(false);
+    }
+  };
+
+  const handleGenerateRecoveryPlans = async () => {
+    if (isGenerating) return;
+    const offTrackEmployees = employees.filter(emp => 
+      emp.rphStatus === 'off-track' || 
+      emp.revenueStatus === 'off-track' || 
+      emp.appsStatus === 'off-track' || 
+      emp.membershipsStatus === 'off-track'
+    );
+    if (offTrackEmployees.length === 0) return;
+
+    setIsGenerating(true);
+    try {
+      const tasks = await generateRentRecoveryPlans(offTrackEmployees, playbookSettings || {}, undefined);
+      tasks.forEach(task => addFollowUpTask(task));
+      setSuccessToast(`Generated recovery plans for ${tasks.length} off-track employees.`);
+      setTimeout(() => setSuccessToast(null), 3000);
+    } catch (err) {
+      console.error(err);
+      setSuccessToast('Failed to generate recovery plans.');
+      setTimeout(() => setSuccessToast(null), 3000);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -109,6 +141,20 @@ export default function RentsDueLedger({
             
             <div className="flex gap-sm">
               <button 
+                className={`btn btn-secondary px-md py-sm text-sm cursor-pointer ${isGenerating ? 'opacity-70' : ''}`}
+                onClick={handleGenerateRecoveryPlans}
+                disabled={isGenerating || employees.length === 0}
+                data-testid="generate-recovery-plans-btn"
+                style={{
+                  borderColor: isGenerating ? 'var(--bby-yellow)' : '',
+                  boxShadow: isGenerating ? '0 0 15px var(--bby-yellow)' : '',
+                  transition: 'all 0.3s'
+                }}
+              >
+                <Wand2 size={16} className={isGenerating ? 'animate-pulse text-bby-yellow' : ''} />
+                {isGenerating ? 'Generating...' : 'Generate AI Recovery Plans'}
+              </button>
+              <button 
                 className={`btn btn-accent px-md py-sm text-sm cursor-pointer ${isSyncing ? 'opacity-50' : ''}`}
                 onClick={handleSyncClick}
                 disabled={isSyncing}
@@ -122,6 +168,12 @@ export default function RentsDueLedger({
           {syncSuccess && (
             <div className="p-md bg-[var(--success-glow)] border border-[rgba(16,185,129,0.3)] rounded-xl text-sm text-[#a7f3d0] flex-center-y gap-xs" data-testid="sync-success-message">
               <CheckCircle2 size={16} /> Roster ledger values updated. All performance evaluations and sparklines will reflect these parsed values immediately.
+            </div>
+          )}
+
+          {successToast && (
+            <div className="p-md rounded-xl text-sm text-white flex-center-y gap-xs animate-fade-in" style={{ backgroundColor: 'var(--bby-blue)', border: '1px solid rgba(0,70,190,0.3)' }} data-testid="ai-success-message">
+              <CheckCircle2 size={16} /> {successToast}
             </div>
           )}
 

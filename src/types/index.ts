@@ -182,6 +182,9 @@ export interface FollowUpTask {
   employeeName?: string;
   department?: string;
   action?: string;
+  actionItem?: string;
+  topic?: string;
+  category?: string;
   dueDate?: string;
   completed?: boolean;
   notes?: string;

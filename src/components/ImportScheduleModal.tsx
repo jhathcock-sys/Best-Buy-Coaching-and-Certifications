@@ -6,7 +6,6 @@ import { parseScheduleImage } from '../services/ai';
 // standard department/zone mapping helper
 import { useScheduleParser } from '../hooks/useScheduleParser';
 import { useStore } from '../store/useStore';
-import { useShallow } from 'zustand/react/shallow';
 import { generateBreaks, WEEKDAY_KEYS } from '../utils/scheduleParserUtils';
 import ImportWizardStep1 from './ImportSchedule/ImportWizardStep1';
 import ImportWizardStep2 from './ImportSchedule/ImportWizardStep2';
@@ -42,13 +41,10 @@ export default function ImportScheduleModal({ isOpen, onClose, onImportConfirm }
     generatePreviewFromCsv
   } = useScheduleParser({ onImportConfirm, onClose, isOpen });
 
-  const roster = useStore(useShallow(state => {
-    const activePeriod = state.activePeriod;
-    const rosterHistory = state.rosterHistory;
-    const EMPTY_OBJ = {};
-    const _rawroster = activePeriod ? ((rosterHistory || EMPTY_OBJ)[activePeriod] || EMPTY_OBJ) : EMPTY_OBJ;
-    return Object.values(_rawroster) as Employee[];
-  }));
+  const activePeriod = useStore(state => state.activePeriod);
+  const rosterHistory = useStore(state => state.rosterHistory);
+  const _rawroster = activePeriod && rosterHistory ? (rosterHistory[activePeriod] || {}) : {};
+  const roster = Object.values(_rawroster) as Employee[];
 
   if (!isOpen) return null;
 
@@ -139,7 +135,7 @@ export default function ImportScheduleModal({ isOpen, onClose, onImportConfirm }
 
         {/* Modal Footer */}
         <div className="flex-between p-x-2rem p-y-xl border-glass-top bg-white-alpha-01">
-          <button className="btn btn-secondary cursor-pointer" onClick={onClose}>
+          <button className="btn btn-secondary cursor-pointer" onClick={onClose} data-testid="cancel-import-btn">
             Cancel
           </button>
           

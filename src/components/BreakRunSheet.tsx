@@ -129,7 +129,7 @@ export default function BreakRunSheet({
         <div className="flex-column gap-lg" style={{ paddingRight: '1rem' }}>
           <h4 className="font-bold border-b-glass pb-sm">Schedule Break</h4>
           
-          <form onSubmit={handleSubmit} className="flex-column gap-md">
+          <form onSubmit={handleSubmit} className="flex-column gap-md" data-testid="break-form">
             <div className="form-group">
               <label className="form-label text-sm">Select Associate:</label>
               <select 
@@ -173,7 +173,7 @@ export default function BreakRunSheet({
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary p-sm text-sm mt-xs cursor-pointer">
+            <button type="submit" className="btn btn-primary p-sm text-sm mt-xs cursor-pointer" data-testid="add-break-submit">
               + Add Shift Break
             </button>
           </form>

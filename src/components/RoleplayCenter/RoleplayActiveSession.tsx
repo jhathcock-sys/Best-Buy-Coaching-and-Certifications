@@ -220,7 +220,7 @@ export default function RoleplayActiveSession({
                   Sandbox Simulator Active
                 </span>
               )}
-              <button className="btn btn-secondary" onClick={restartRoleplay}>
+              <button className="btn btn-secondary" onClick={restartRoleplay} data-testid="restart-session-btn">
                 <RefreshCw size={14} /> Restart
               </button>
               <button className="btn btn-accent" onClick={endAndEvaluate} disabled={isLoading} data-testid="complete-session-btn">

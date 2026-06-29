@@ -71,7 +71,7 @@ export const ConversationalAnalyticsWidget: React.FC<ConversationalAnalyticsWidg
 
       {/* AI Input Area */}
       <div className="mb-lg">
-        <form onSubmit={handleSubmit} className={`gap-md w-full ${compact ? 'flex-column align-stretch' : 'flex-row align-center'}`}>
+        <form onSubmit={handleSubmit} className={`gap-md w-full ${compact ? 'flex-column align-stretch' : 'flex-row align-center'}`} data-testid="ai-trend-form">
           <div className="flex-1 relative w-full">
             <Sparkles size={18} className="absolute left-md top-1/2 text-bby-blue opacity-70" style={{ transform: 'translateY(-50%)' }} />
             <input

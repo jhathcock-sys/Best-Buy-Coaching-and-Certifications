@@ -21,7 +21,8 @@ export default function FiveStarAuditor() {
   const apiKey = useStore((state) => state.apiKey);
   const playbookSettings = useStore((state) => state.playbookSettings);
   const logCoachingSession = useStore((state) => state.logCoachingSession);
-  const roster = useStore((state) => state.managers || []);
+  const managers = useStore((state) => state.managers);
+  const roster = managers || [];
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [imageMime, setImageMime] = useState<string>('image/png');

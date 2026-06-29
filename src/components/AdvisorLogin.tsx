@@ -123,7 +123,7 @@ export default function AdvisorLogin({ onLoginSuccess, dbConnected }: AdvisorLog
         </p>
       </div>
 
-      <form onSubmit={handleLogin} className="w-full flex-column gap-md">
+      <form onSubmit={handleLogin} className="w-full flex-column gap-md" data-testid="advisor-login-form">
         <div>
           <input
             type="text"

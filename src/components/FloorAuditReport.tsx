@@ -136,7 +136,7 @@ Let's move fast, get our customers greeted, and ensure checkout remains smooth. 
               <div className="flex-column gap-sm">
                 <div className="flex-between">
                   <span className="text-secondary font-bold uppercase tracking-wide text-xs">Huddle Announcement Script</span>
-                  <button className="btn btn-secondary flex-center gap-sm px-sm py-xs text-xs h-auto cursor-pointer" onClick={copyScript}>
+                  <button className="btn btn-secondary flex-center gap-sm px-sm py-xs text-xs h-auto cursor-pointer" onClick={copyScript} data-testid="copy-script-btn">
                     <ClipboardCopy size={12} /> Copy Script
                   </button>
                 </div>

@@ -78,7 +78,7 @@ export default function ShiftSetupForm() {
         </p>
       </div>
 
-      <form onSubmit={handleStartShift} className="flex-column gap-xl">
+      <form onSubmit={handleStartShift} className="flex-column gap-xl" data-testid="shift-setup-form">
         <div className="form-group">
           <label className="form-label flex-center justify-start gap-xs">
             <User size={16} /> Leader Name:

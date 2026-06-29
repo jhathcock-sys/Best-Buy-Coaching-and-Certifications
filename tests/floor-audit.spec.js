@@ -8,7 +8,8 @@ test.describe('Floor Audit', () => {
     // Select Advisor persona
     await page.getByTestId('persona-advisor-btn').click();
 
-    // Enter Employee ID (yinel)
+    // Enter Store Number and Employee ID (yinel)
+    await page.getByPlaceholder('Store Number').fill('0281');
     await page.getByPlaceholder('Employee ID').fill('yinel');
     await page.getByTestId('advisor-login-submit').click();
 

@@ -10,18 +10,17 @@ export default function ShiftScorecard({ scorecard }: ShiftScorecardProps) {
   const isPassing = (scorecard?.placementScore ?? 0) >= 80;
 
   return (
-    <div className="glass-card flex flex-col gap-md">
+    <div className="glass-card flex flex-col gap-md" data-testid="shift-scorecard">
       <div className="flex justify-between items-center">
         <h3 className="text-lg flex items-center gap-sm">
           <Award size={18} color="var(--bby-yellow)" /> Shift Scorecard
         </h3>
         <span 
-          className="tag-pill text-xs font-bold" 
-          style={{
-            background: isPassing ? 'var(--success-glow)' : 'var(--warning-glow)',
-            color: isPassing ? 'var(--success)' : 'var(--warning)',
-            borderColor: isPassing ? 'rgba(16,185,129,0.2)' : 'rgba(245,158,11,0.2)',
-          }}
+          className={`tag-pill text-xs font-bold border ${
+            isPassing 
+              ? 'bg-[var(--success-glow)] text-success border-[var(--success-glow)]' 
+              : 'bg-[var(--warning-glow)] text-warning border-[var(--warning-glow)]'
+          }`}
           data-testid="placement-score-tag"
         >
           Placement Score: {scorecard?.placementScore ?? 0}%

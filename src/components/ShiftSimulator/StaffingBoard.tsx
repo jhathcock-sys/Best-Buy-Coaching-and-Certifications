@@ -14,15 +14,15 @@ interface StaffingBoardProps {
 const ZONES = ['Computing', 'Home Theatre', 'Mobile', 'Front End'];
 
 export default function StaffingBoard({
-  roster,
-  placements,
+  roster = [],
+  placements = {},
   handleSelectEmployee,
   handleRunSimulation,
   isSimulating,
   isAnyAssigned
 }: StaffingBoardProps) {
   return (
-    <div className="glass-card flex flex-col gap-lg">
+    <div className="glass-card flex flex-col gap-lg" data-testid="staffing-board">
       <div>
         <h2 className="text-lg flex items-center gap-sm mb-sm">
           <Users color="var(--bby-blue)" size={22} /> Shift Staffing Board

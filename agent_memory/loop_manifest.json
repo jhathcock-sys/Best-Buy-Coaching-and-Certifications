@@ -1,6 +1,6 @@
 {
     "status":  "ACTIVE",
-    "current_checkpoint":  70,
+    "current_checkpoint":  80,
     "active_vetos":  [
 
                      ],
@@ -81,9 +81,7 @@
                             "src/components/RoleplayCenter/RoleplayProgressBar.tsx",
                             "src/components/RoleplayCenter/RoleplayResults.tsx",
                             "src/components/RoleplayCenter/RoleplaySidebarCoach.tsx",
-                            "src/components/RosterImporter/useRosterImporter.ts"
-                        ],
-    "remaining_queue":  [
+                            "src/components/RosterImporter/useRosterImporter.ts",
                             "src/components/ShiftSimulator/ShiftScorecard.tsx",
                             "src/components/ShiftSimulator/ShiftTimeline.tsx",
                             "src/components/ShiftSimulator/StaffingBoard.tsx",
@@ -93,7 +91,9 @@
                             "src/components/StoreRoster/StartNewPeriodForm.tsx",
                             "src/components/StoreRoster/StoreRosterHeader.tsx",
                             "src/components/StoreRoster/StoreRosterMobileCard.tsx",
-                            "src/components/StoreRoster/StoreRosterTable.tsx",
+                            "src/components/StoreRoster/StoreRosterTable.tsx"
+                        ],
+    "remaining_queue":  [
                             "src/components/StoreRoster/StoreRosterTableRow.tsx",
                             "src/components/ui/ActionSheet.tsx",
                             "src/components/ui/Skeleton.tsx",

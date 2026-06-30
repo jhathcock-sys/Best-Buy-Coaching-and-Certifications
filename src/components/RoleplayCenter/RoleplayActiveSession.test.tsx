@@ -48,7 +48,7 @@ describe('RoleplayActiveSession', () => {
       avatar: 'test.jpg'
     };
     
-    render(<RoleplayActiveSession selectedScenario={mockScenario} onExit={vi.fn()} onEvaluationComplete={vi.fn()} />);
+    render(<RoleplayActiveSession selectedScenario={mockScenario} onExit={vi.fn()} onEvaluationComplete={vi.fn()} complexity="Beginner" customerTone="Neutral" />);
     
     expect(screen.getByTestId('back-btn')).toBeInTheDocument();
     expect(screen.getByTestId('restart-session-btn')).toBeInTheDocument();

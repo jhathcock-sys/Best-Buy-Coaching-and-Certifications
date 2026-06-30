@@ -76,14 +76,14 @@ export default function StoreRosterMobileCard({
 
   const getDeptStyle = (deptName: string) => {
     switch(deptName) {
-      case 'Front End': return { bg: 'rgba(59, 130, 246, 0.15)', color: 'var(--bby-blue)', border: 'rgba(59, 130, 246, 0.3)' };
-      case 'General Sales': return { bg: 'rgba(139, 92, 246, 0.15)', color: '#a78bfa', border: 'rgba(139, 92, 246, 0.3)' };
-      case 'Appliances': return { bg: 'rgba(245, 158, 11, 0.15)', color: 'var(--warning)', border: 'rgba(245, 158, 11, 0.3)' };
-      case 'Computing': return { bg: 'rgba(16, 185, 129, 0.15)', color: 'var(--success)', border: 'rgba(16, 185, 129, 0.3)' };
-      case 'Mobile': return { bg: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', border: 'rgba(236, 72, 153, 0.3)' };
-      case 'Home Theatre': return { bg: 'rgba(239, 68, 68, 0.15)', color: 'var(--error)', border: 'rgba(239, 68, 68, 0.3)' };
-      case 'Geek Squad': return { bg: 'rgba(249, 115, 22, 0.15)', color: '#fb923c', border: 'rgba(249, 115, 22, 0.3)' };
-      default: return { bg: 'rgba(255, 255, 255, 0.1)', color: 'var(--text-secondary)', border: 'rgba(255, 255, 255, 0.2)' };
+      case 'Front End': return 'bg-[rgba(59,130,246,0.15)] text-[var(--bby-blue)] border-[rgba(59,130,246,0.3)]';
+      case 'General Sales': return 'bg-[rgba(139,92,246,0.15)] text-[#a78bfa] border-[rgba(139,92,246,0.3)]';
+      case 'Appliances': return 'bg-[rgba(245,158,11,0.15)] text-[var(--warning)] border-[rgba(245,158,11,0.3)]';
+      case 'Computing': return 'bg-[rgba(16,185,129,0.15)] text-[var(--success)] border-[rgba(16,185,129,0.3)]';
+      case 'Mobile': return 'bg-[rgba(236,72,153,0.15)] text-[#f472b6] border-[rgba(236,72,153,0.3)]';
+      case 'Home Theatre': return 'bg-[rgba(239,68,68,0.15)] text-[var(--error)] border-[rgba(239,68,68,0.3)]';
+      case 'Geek Squad': return 'bg-[rgba(249,115,22,0.15)] text-[#fb923c] border-[rgba(249,115,22,0.3)]';
+      default: return 'bg-[rgba(255,255,255,0.1)] text-[var(--text-secondary)] border-[rgba(255,255,255,0.2)]';
     }
   };
 
@@ -151,17 +151,10 @@ export default function StoreRosterMobileCard({
               <div className="flex-row align-center gap-sm">
                 <span className="text-xs text-secondary">Dept:</span>
                 {(() => {
-                  const deptStyle = getDeptStyle(emp.dept || 'All');
+                  const deptClass = getDeptStyle(emp.dept || 'All');
                   return (
                     <select 
-                      className="form-control text-xs font-bold rounded-full cursor-pointer w-auto text-center appearance-none outline-none"
-                      style={{ 
-                        padding: '0.25rem 0.6rem', 
-                        background: deptStyle.bg, 
-                        border: `1px solid ${deptStyle.border}`,
-                        color: deptStyle.color,
-                        textAlignLast: 'center'
-                      }}
+                      className={`form-control text-xs font-bold rounded-full cursor-pointer w-auto text-center appearance-none outline-none border px-[0.6rem] py-xs [text-align-last:center] ${deptClass}`}
                       value={emp.dept}
                       onChange={(e) => onUpdateEmployeeDept && onUpdateEmployeeDept(emp.id, e.target.value)}
                       data-testid={`dept-select-emp-${emp.id}`}

@@ -21,7 +21,7 @@ exports.generateCoaching = functions.https.onCall(async (data, context) => {
     const payload = (data.data || data) || {};
     const { name, gapType, gapDetails, positives, rawObservation, playbookSettings, selectedDiscSteps, apiKey } = payload;
     const aiInstance = getGeminiClient(apiKey);
-    const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-flash' });
+    const model = aiInstance.getGenerativeModel({ model: 'gemini-pro-latest' });
     
     const stepsText = Array.isArray(selectedDiscSteps) ? selectedDiscSteps.join(', ') : (selectedDiscSteps || 'Solve');
     
@@ -110,7 +110,7 @@ exports.auditDialogue = functions.https.onCall(async (data, context) => {
     const forbiddenPhrases = playbookSettings?.forbiddenPhrases?.join(', ') || 'warranty';
 
     const aiInstance = getGeminiClient(apiKey);
-    const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-flash' });
+    const model = aiInstance.getGenerativeModel({ model: 'gemini-pro-latest' });
     
     const evaluationPrompt = `
       Evaluate sales roleplay transcript (${scenario?.name || 'Unknown Scenario'}).
@@ -175,7 +175,7 @@ exports.generateAIContent = functions.https.onCall(async (data, context) => {
     }
     
     const aiInstance = getGeminiClient(apiKey);
-    const modelName = isProMode ? 'gemini-3.5-flash' : 'gemini-3.5-flash';
+    const modelName = isProMode ? 'gemini-pro-latest' : 'gemini-3.5-flash';
     const model = aiInstance.getGenerativeModel({ model: modelName });
     
     const generationConfig = { maxOutputTokens: 8192 };

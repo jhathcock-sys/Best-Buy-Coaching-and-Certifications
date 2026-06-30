@@ -2,6 +2,10 @@
 
 These rules apply to all AI agents working in this workspace.
 
+## RULE 0: ZERO-TRUST ORCHESTRATOR MANDATE
+The Master Orchestrator (the parent agent reading this file) is strictly FORBIDDEN from using code editing tools (like `replace_file_content`, `multi_replace_file_content`, or `write_to_file`) on any application source code in `src/` or `functions/`. The Master Orchestrator is purely a Project Manager and Planner. 
+To modify application code, the Master Orchestrator MUST use the `invoke_subagent` tool to summon the `expert_coder`. The Orchestrator's only permitted file modifications are to update Markdown artifacts, memory logs, and planning documents.
+
 ## Memory Logging
 You must maintain a "single source of truth" memory log of all actions taken and completed tasks.
 1. All logs are stored in the `agent_memory/` directory at the root of the project.

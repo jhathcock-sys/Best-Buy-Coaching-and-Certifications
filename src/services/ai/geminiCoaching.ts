@@ -200,7 +200,7 @@ export const generateActionPlan = async (employeeData: Employee, logs: CoachingL
     }
 
     const aiInstance = new GoogleGenerativeAI(apiKey!);
-    const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-pro' });
+    const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-flash' });
 
     const prompt = `
       You are an expert Best Buy Store Manager tasked with creating a 30-Day Performance Improvement Plan (Action Plan) for an associate.

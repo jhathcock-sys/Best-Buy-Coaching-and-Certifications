@@ -39,10 +39,18 @@ export default function RentsDueAuditor() {
   
   const todayStr = new Date().toISOString().split('T')[0];
   const [snapshotDate, setSnapshotDate] = useState(todayStr);
+  const isMounted = useRef(true);
   const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const demoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const unsubscribeArchivesRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (storeId) {
@@ -121,6 +129,7 @@ export default function RentsDueAuditor() {
           const text = e.target?.result?.toString() || '';
           try {
             const cloudParsed = await parseRentsDueCSVCloud(text);
+            if (!isMounted.current) return;
             if (cloudParsed && cloudParsed.length > 0) {
               setParsedEmployees(cloudParsed as ParsedEmployee[]);
               setIsParsing(false);
@@ -128,8 +137,10 @@ export default function RentsDueAuditor() {
               return;
             }
           } catch (err) {
+            if (!isMounted.current) return;
             console.warn("Cloud parse failed, falling back to Gemini", err);
           }
+          if (!isMounted.current) return;
           runOcrParsing('', '', text);
           if (fileInputRef.current) fileInputRef.current.value = '';
         };
@@ -152,16 +163,18 @@ export default function RentsDueAuditor() {
     setErrorMsg('');
     try {
       const parsed = await parseRentsDueDocumentGemini(base64Data, mimeType, textData || textInput, apiKey);
+      if (!isMounted.current) return;
       if (Array.isArray(parsed) && parsed.length > 0) {
         setParsedEmployees(parsed as ParsedEmployee[]);
       } else {
         throw new Error("Parsed output was empty or invalid.");
       }
     } catch (e) {
+      if (!isMounted.current) return;
       console.error(e);
       setErrorMsg('Failed to parse Rents Due report. Make sure you have a valid Gemini API key or try our interactive demo dataset.');
     } finally {
-      setIsParsing(false);
+      if (isMounted.current) setIsParsing(false);
     }
   };
 
@@ -176,12 +189,14 @@ export default function RentsDueAuditor() {
     try {
       setIsParsing(true);
       const cloudParsed = await parseRentsDueCSVCloud(textInput);
+      if (!isMounted.current) return;
       if (cloudParsed && cloudParsed.length > 0) {
         setParsedEmployees(cloudParsed as ParsedEmployee[]);
         setIsParsing(false);
         return;
       }
     } catch (err) {
+      if (!isMounted.current) return;
       console.warn("Cloud parse failed, falling back to Gemini", err);
     }
     
@@ -194,6 +209,7 @@ export default function RentsDueAuditor() {
     setFileName('rents_due_june_2026_copy.csv');
     
     demoTimeoutRef.current = setTimeout(() => {
+      if (!isMounted.current) return;
       setParsedEmployees(mockRentsDuePayload as ParsedEmployee[]);
       setIsParsing(false);
     }, 1200);
@@ -244,7 +260,7 @@ export default function RentsDueAuditor() {
   const gaps = getGapsSummary();
 
   return (
-    <div className="flex-column gap-xl mt-md">
+    <div className="flex-column gap-xl mt-md" data-testid="rents-due-auditor">
       
       {/* Description Panel */}
       <div className="glass-card p-xl">

@@ -89,7 +89,7 @@ export default function LoginGate({ correctPin = '1234', onLoginSuccess, dbConne
           <button
             onClick={() => setSelectedPersona('supervisor')}
             data-testid="persona-supervisor-btn"
-            className="login-gate-persona-btn supervisor"
+            className="login-gate-persona-btn supervisor cursor-pointer"
           >
             <div className="login-gate-persona-icon">
               <Shield size={32} color="var(--bby-yellow)" />

@@ -1,6 +1,6 @@
 {
     "status":  "ACTIVE",
-    "current_checkpoint":  100,
+    "current_checkpoint":  110,
     "active_vetos":  [
 
                      ],
@@ -111,9 +111,7 @@
                             "src/components/FloorAudit.tsx",
                             "src/components/FloorAuditReport.tsx",
                             "src/components/FloorAuditUploader.tsx",
-                            "src/components/ImportScheduleModal.tsx"
-                        ],
-    "remaining_queue":  [
+                            "src/components/ImportScheduleModal.tsx",
                             "src/components/Login.tsx",
                             "src/components/LoginGate.tsx",
                             "src/components/MetricSparkline.tsx",
@@ -123,7 +121,9 @@
                             "src/components/RosterImporterModal.tsx",
                             "src/components/ServiceWorkerBanner.tsx",
                             "src/components/ShiftSimulator.tsx",
-                            "src/components/SyncManager.tsx",
+                            "src/components/SyncManager.tsx"
+                        ],
+    "remaining_queue":  [
                             "src/components/ZoneScheduler.tsx",
                             "src/data/mockRentsDue.ts",
                             "src/hooks/FloorLeader/useFloorLogging.ts",

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Sparkles, AlertCircle } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { runStoreShiftSimulationGemini } from '../services/ai';
@@ -34,6 +34,13 @@ export default function ShiftSimulator() {
 
   const [isSimulating, setIsSimulating] = useState(false);
   const [simulationResult, setSimulationResult] = useState<SimulationResult | null>(null);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const handleSelectEmployee = (zone: string, id: string) => {
     setPlacements(prev => ({
@@ -70,19 +77,21 @@ export default function ShiftSimulator() {
 
     try {
       const result = await runStoreShiftSimulationGemini(apiKey, selectedRosterData, placementMappings, playbookSettings);
+      if (!isMounted.current) return;
       setSimulationResult(result as SimulationResult);
     } catch (e) {
+      if (!isMounted.current) return;
       console.error(e);
       alert('An error occurred during shift simulation. Check console logs.');
     } finally {
-      setIsSimulating(false);
+      if (isMounted.current) setIsSimulating(false);
     }
   };
 
   const isAnyAssigned = Object.values(placements).some(v => !!v);
 
   return (
-    <div className="grid mt-lg gap-2xl grid-cols-[repeat(auto-fit,minmax(400px,1fr))]">
+    <div className="grid mt-lg gap-2xl grid-cols-[repeat(auto-fit,minmax(400px,1fr))]" data-testid="shift-simulator">
       
       {/* Left Column: Staff Assignments Board */}
       <StaffingBoard 

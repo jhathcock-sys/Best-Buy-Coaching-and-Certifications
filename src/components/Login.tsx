@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Shield, Delete } from 'lucide-react';
 import { useStore } from '../store/useStore';
 
@@ -9,12 +9,19 @@ interface LoginProps {
 }
 
 export default function Login({ correctPin = '1234', onLoginSuccess, isHydrating = false }: LoginProps) {
+  const isMounted = useRef(true);
   const dbConnected = useStore((state) => state.dbConnected);
   const [pin, setPin] = useState('');
   const [storeId, setStoreId] = useState(() => localStorage.getItem('bby_last_store') || '');
   const [isShaking, setIsShaking] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const handleKeyPress = async (num: string) => {
     if (pin.length < 4 && !isSuccess && !isLoading && !isHydrating) {
@@ -24,19 +31,22 @@ export default function Login({ correctPin = '1234', onLoginSuccess, isHydrating
       if (newPin.length === 4) {
         setIsLoading(true);
         const success = await useStore.getState().login(newPin, storeId || '1480');
+        if (!isMounted.current) return;
         setIsLoading(false);
         
         if (success) {
           setIsSuccess(true);
           localStorage.setItem('bby_last_store', storeId || '1480');
           setTimeout(() => {
-            onLoginSuccess(newPin, storeId || '1480');
+            if (isMounted.current) onLoginSuccess(newPin, storeId || '1480');
           }, 800);
         } else {
           setIsShaking(true);
           setTimeout(() => {
-            setIsShaking(false);
-            setPin('');
+            if (isMounted.current) {
+              setIsShaking(false);
+              setPin('');
+            }
           }, 600);
         }
       }
@@ -107,7 +117,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, isHydrating
             <button
               key={num}
               type="button"
-              className="keypad-btn"
+              className="keypad-btn cursor-pointer"
               data-testid={`keypad-${num}`}
               disabled={isLoading || isHydrating}
               onClick={() => handleKeyPress(num.toString())}
@@ -119,7 +129,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, isHydrating
           {/* Bottom row: Clear, 0, Backspace */}
           <button
             type="button"
-            className="keypad-action-btn"
+            className="keypad-action-btn cursor-pointer"
             data-testid="keypad-clear"
             onClick={handleClear}
             disabled={isLoading || isHydrating}
@@ -129,7 +139,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, isHydrating
 
           <button
             type="button"
-            className="keypad-btn"
+            className="keypad-btn cursor-pointer"
             data-testid="keypad-0"
             onClick={() => handleKeyPress('0')}
             disabled={isLoading || isHydrating}
@@ -139,7 +149,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, isHydrating
 
           <button
             type="button"
-            className="keypad-action-btn"
+            className="keypad-action-btn cursor-pointer"
             data-testid="keypad-backspace"
             onClick={handleBackspace}
             disabled={isLoading || isHydrating}

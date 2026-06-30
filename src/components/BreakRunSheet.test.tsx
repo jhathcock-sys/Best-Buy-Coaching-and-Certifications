@@ -17,8 +17,8 @@ describe('BreakRunSheet', () => {
   it('renders correctly', () => {
     render(
       <BreakRunSheet 
-        roster={mockRoster} 
-        breakSchedule={mockSchedule} 
+        roster={mockRoster as any} 
+        breakSchedule={mockSchedule as any} 
         onAddBreak={vi.fn()} 
         onToggleBreak={vi.fn()} 
         onDeleteBreak={vi.fn()} 
@@ -32,7 +32,7 @@ describe('BreakRunSheet', () => {
     const mockAdd = vi.fn();
     render(
       <BreakRunSheet 
-        roster={mockRoster} 
+        roster={mockRoster as any} 
         breakSchedule={[]} 
         onAddBreak={mockAdd} 
         onToggleBreak={vi.fn()} 

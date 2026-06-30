@@ -15,7 +15,6 @@ export const ConversationalAnalyticsWidget: React.FC<ConversationalAnalyticsWidg
   
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
   const [chartConfig, setChartConfig] = useState<GenerativeChartConfig | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,7 +46,7 @@ export const ConversationalAnalyticsWidget: React.FC<ConversationalAnalyticsWidg
 
   if (!isPlaybookHydrated) {
     return (
-      <div className={`glass-card flex-center flex-column w-full h-full gap-md ${compact ? 'p-lg' : 'p-2xl'}`}>
+      <div className={`glass-card flex-center flex-column w-full h-full gap-md ${compact ? 'p-lg' : 'p-2xl'}`} data-testid="hydration-loading">
         <div className="w-40px h-40px border-3 border-solid border-white-alpha-10 border-bby-yellow-t-4 rounded-full animate-spin"></div>
         <span className="text-secondary text-sm font-semibold uppercase tracking-widest animate-fade-in">Loading Data...</span>
       </div>
@@ -56,7 +55,7 @@ export const ConversationalAnalyticsWidget: React.FC<ConversationalAnalyticsWidg
 
   return (
     <div className={`glass-card flex-column w-full h-full relative overflow-hidden ${compact ? 'p-lg' : 'p-xl'}`}>
-      <div className="absolute top-0 left-0 w-full h-1 opacity-50" style={{ background: 'linear-gradient(to right, var(--bby-blue), var(--bby-yellow))' }} />
+      <div className="absolute top-0 left-0 w-full h-1 opacity-50 bg-gradient-bby-horizontal" />
       
       {/* Header */}
       <div className={`flex-column ${compact ? 'gap-xs mb-lg' : 'gap-sm mb-xl'}`}>
@@ -72,17 +71,14 @@ export const ConversationalAnalyticsWidget: React.FC<ConversationalAnalyticsWidg
       {/* AI Input Area */}
       <div className="mb-lg">
         <form onSubmit={handleSubmit} className={`gap-md w-full ${compact ? 'flex-column align-stretch' : 'flex-row align-center'}`} data-testid="ai-trend-form">
-          <div className="flex-1 relative w-full">
-            <Sparkles size={18} className="absolute left-md top-1/2 text-bby-blue opacity-70" style={{ transform: 'translateY(-50%)' }} />
+          <div className={`flex-1 flex-row align-center bg-black-alpha-30 border-glass rounded-lg transition-all focus-within-border-bby w-full ${compact ? 'py-sm px-sm' : 'py-sm px-md'}`}>
+            <Sparkles size={18} className="text-bby-blue opacity-70 flex-shrink-0 mx-sm" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
               placeholder={compact ? "e.g. Best week for PMs?" : "e.g. What was our best week for memberships?"}
-              className={`w-full bg-black-alpha-30 border-glass rounded-lg py-md pr-md pl-2-5rem text-white transition-all outline-none ${compact ? 'text-md' : 'text-lg'}`}
-              style={{ borderColor: isFocused ? 'var(--bby-blue)' : undefined }}
+              className={`w-full bg-transparent border-none text-white outline-none ${compact ? 'text-md py-xs' : 'text-lg py-sm'}`}
               data-testid="ai-trend-input"
               disabled={isLoading}
             />
@@ -90,8 +86,7 @@ export const ConversationalAnalyticsWidget: React.FC<ConversationalAnalyticsWidg
           <button
             type="submit"
             disabled={isLoading || !query.trim()}
-            className={`bg-bby-blue text-white font-bold py-md px-xl rounded-lg border-none transition-all flex-row align-center justify-center gap-sm ${(isLoading || !query.trim()) ? 'opacity-50' : 'hover-opacity-80'}`}
-            style={{ cursor: (isLoading || !query.trim()) ? 'not-allowed' : 'pointer' }}
+            className={`bg-bby-blue text-white font-bold py-md px-xl rounded-lg border-none transition-all flex-row align-center justify-center gap-sm ${(isLoading || !query.trim()) ? 'opacity-50 cursor-not-allowed' : 'hover-opacity-80 cursor-pointer'}`}
             data-testid="ai-trend-submit"
           >
             {isLoading ? 'Analyzing...' : 'Ask AI'}
@@ -101,7 +96,7 @@ export const ConversationalAnalyticsWidget: React.FC<ConversationalAnalyticsWidg
 
       {/* Loading State */}
       {isLoading && (
-        <div className={`flex-column align-center justify-center py-xl gap-md ${compact ? 'flex-1' : ''}`}>
+        <div data-testid="ai-analyzing" className={`flex-column align-center justify-center py-xl gap-md ${compact ? 'flex-1' : ''}`}>
           <div className="w-40px h-40px border-3 border-solid border-white-alpha-10 border-bby-yellow-t-4 rounded-full animate-spin"></div>
           <span className="text-bby-blue text-md font-bold animate-pulse">Analyzing Store Data...</span>
         </div>
@@ -109,7 +104,7 @@ export const ConversationalAnalyticsWidget: React.FC<ConversationalAnalyticsWidg
 
       {/* Error State */}
       {error && !isLoading && (
-        <div className="border-glass border-error-alpha-20 bg-error-alpha-15 p-md rounded-lg flex-row gap-md align-center mb-md">
+        <div data-testid="ai-error-banner" className="border-glass border-error-alpha-20 bg-error-alpha-15 p-md rounded-lg flex-row gap-md align-center mb-md">
           <AlertCircle size={20} className="text-error flex-shrink-0" />
           <p className="text-white m-0 text-sm">{error}</p>
         </div>

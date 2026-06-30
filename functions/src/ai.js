@@ -230,8 +230,62 @@ function getSchemaForType(schemaType) {
         },
         required: ["score", "passed", "feedback", "details"]
       };
-    default:
+    case 'coaching_target':
+      return {
+        type: SchemaType.ARRAY,
+        items: {
+          type: SchemaType.OBJECT,
+          properties: {
+            name: { type: SchemaType.STRING },
+            reason: { type: SchemaType.STRING },
+            recommendedAction: { type: SchemaType.STRING }
+          },
+          required: ["name", "reason", "recommendedAction"]
+        }
+      };
+    case 'rent_recovery':
+      return {
+        type: SchemaType.ARRAY,
+        items: {
+          type: SchemaType.OBJECT,
+          properties: {
+            id: { type: SchemaType.STRING },
+            assignee: { type: SchemaType.STRING },
+            priority: { type: SchemaType.STRING },
+            type: { type: SchemaType.STRING },
+            description: { type: SchemaType.STRING },
+            status: { type: SchemaType.STRING }
+          },
+          required: ["id", "assignee", "priority", "type", "description", "status"]
+        }
+      };
+    case 'break_schedule':
+      return {
+        type: SchemaType.ARRAY,
+        items: {
+          type: SchemaType.OBJECT,
+          properties: {
+            employee: { type: SchemaType.STRING },
+            breakTime: { type: SchemaType.STRING },
+            type: { type: SchemaType.STRING },
+            coverage: { type: SchemaType.STRING }
+          },
+          required: ["employee", "breakTime", "type", "coverage"]
+        }
+      };
+    case 'smart_zoning':
+    case 'aura_batch_insights':
+    case 'customer_simulation_step':
+    case 'employee_coaching_step':
+    case 'evaluate_coaching_session':
+    case 'store_shift_simulation':
+    case 'audit_performance_workbook':
+    case 'audit_five_star_survey':
+      // Return null to allow flexible JSON objects without strict schemas for complex unstructured maps.
+      // (Bypasses the strict throw check below by letting these explicitly exist, but we must update the generationConfig logic to accept null from valid cases)
       return null;
+    default:
+      return undefined;
   }
 }
 
@@ -253,7 +307,7 @@ exports.generateCoaching = functions.https.onCall(async (data, context) => {
     const payload = (data.data || data) || {};
     const { name, gapType, gapDetails, positives, rawObservation, playbookSettings, selectedDiscSteps, apiKey } = payload;
     const aiInstance = getGeminiClient(apiKey);
-    const model = aiInstance.getGenerativeModel({ model: 'gemini-pro-latest' });
+    const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-pro' });
     
     const stepsText = Array.isArray(selectedDiscSteps) ? selectedDiscSteps.join(', ') : (selectedDiscSteps || 'Solve');
     
@@ -342,7 +396,7 @@ exports.auditDialogue = functions.https.onCall(async (data, context) => {
     const forbiddenPhrases = playbookSettings?.forbiddenPhrases?.join(', ') || 'warranty';
 
     const aiInstance = getGeminiClient(apiKey);
-    const model = aiInstance.getGenerativeModel({ model: 'gemini-pro-latest' });
+    const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-pro' });
     
     const evaluationPrompt = `
       Evaluate sales roleplay transcript (${scenario?.name || 'Unknown Scenario'}).
@@ -407,17 +461,38 @@ exports.generateAIContent = functions.https.onCall(async (data, context) => {
     }
     
     const aiInstance = getGeminiClient(apiKey);
-    const modelName = isProMode ? 'gemini-pro-latest' : 'gemini-3.5-flash';
-    const model = aiInstance.getGenerativeModel({ model: modelName });
+    const modelName = isProMode ? 'gemini-3.5-pro' : 'gemini-3.5-flash';
+    
+    const modelOptions = { model: modelName };
+    if (systemInstruction) {
+      modelOptions.systemInstruction = systemInstruction;
+    }
+    const model = aiInstance.getGenerativeModel(modelOptions);
     
     const generationConfig = { maxOutputTokens: 8192 };
+    
+    if (modelConfig) {
+      if (modelConfig.temperature !== undefined) generationConfig.temperature = modelConfig.temperature;
+      if (modelConfig.topK !== undefined) generationConfig.topK = modelConfig.topK;
+      if (modelConfig.topP !== undefined) generationConfig.topP = modelConfig.topP;
+      if (modelConfig.maxOutputTokens !== undefined) generationConfig.maxOutputTokens = modelConfig.maxOutputTokens;
+    }
+
     if (isJSON) {
       generationConfig.responseMimeType = 'application/json';
+      let schema = undefined;
       if (schemaType) {
-        generationConfig.responseSchema = getSchemaForType(schemaType);
-      } else if (modelConfig?.responseSchema) {
-        // Fallback for backwards compatibility during migration
-        generationConfig.responseSchema = modelConfig.responseSchema;
+        schema = getSchemaForType(schemaType);
+      }
+      if (schema === undefined && modelConfig?.responseSchema) {
+        schema = modelConfig.responseSchema;
+      }
+      
+      if (schema !== undefined) {
+        if (schema !== null) {
+          generationConfig.responseSchema = schema;
+        }
+        // If schema is strictly null, it is an explicitly allowed schema-less JSON generation.
       } else {
         throw new functions.https.HttpsError('invalid-argument', 'JSON generation requires a valid schemaType or modelConfig.responseSchema.');
       }
@@ -427,11 +502,7 @@ exports.generateAIContent = functions.https.onCall(async (data, context) => {
     if (isVision && base64Image) {
       parts.push({ inlineData: { data: base64Image, mimeType: mimeType || 'image/jpeg' } });
     }
-    if (systemInstruction) {
-        parts.push({ text: `System Instruction: ${systemInstruction}\n\nUser Input: ${prompt}` });
-    } else {
-        parts.push({ text: prompt });
-    }
+    parts.push({ text: prompt });
     
     const requestOptions = { timeout: 30000 };
     const result = await model.generateContent({

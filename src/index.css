@@ -233,7 +233,10 @@ h1, h2, h3, h4, h5, h6 {
 .mt-xs { margin-top: 0.25rem; }
 .rounded-full { border-radius: 50%; }
 .cursor-pointer { cursor: pointer; }
+.cursor-not-allowed { cursor: not-allowed; }
 
+.bg-gradient-bby-horizontal { background: linear-gradient(to right, var(--bby-blue), var(--bby-yellow)); }
+.focus-within-border-bby:focus-within { border-color: var(--bby-blue); }
 .leading-relaxed { line-height: 1.4; }
 
 .bg-error-alpha { background: var(--error-alpha-15); }

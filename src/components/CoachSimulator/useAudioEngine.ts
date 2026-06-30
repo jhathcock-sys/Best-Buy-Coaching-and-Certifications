@@ -12,9 +12,12 @@ export function useAudioEngine(messages: ChatMessage[], setInputVal: React.Dispa
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<any>(null);
+  const isMounted = useRef(true);
 
   useEffect(() => {
+    isMounted.current = true;
     return () => {
+      isMounted.current = false;
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
@@ -43,10 +46,12 @@ export function useAudioEngine(messages: ChatMessage[], setInputVal: React.Dispa
     const utterance = new SpeechSynthesisUtterance(cleanText);
     
     utterance.onend = () => {
+      if (!isMounted.current) return;
       setIsPlayingSpeech(false);
       setIsPausedSpeech(false);
     };
     utterance.onerror = () => {
+      if (!isMounted.current) return;
       setIsPlayingSpeech(false);
       setIsPausedSpeech(false);
     };
@@ -127,10 +132,12 @@ export function useAudioEngine(messages: ChatMessage[], setInputVal: React.Dispa
       recognition.lang = 'en-US';
 
       recognition.onstart = () => {
+        if (!isMounted.current) return;
         setIsListening(true);
       };
 
       recognition.onresult = (event: any) => {
+        if (!isMounted.current) return;
         const transcript = event.results[0][0].transcript;
         if (transcript) {
           setInputVal(prev => prev ? prev + ' ' + transcript : transcript);
@@ -138,12 +145,14 @@ export function useAudioEngine(messages: ChatMessage[], setInputVal: React.Dispa
       };
 
       recognition.onerror = (event: any) => {
+        if (!isMounted.current) return;
         toast.error("Speech recognition error.");
         console.error("Speech recognition error:", event.error);
         setIsListening(false);
       };
 
       recognition.onend = () => {
+        if (!isMounted.current) return;
         setIsListening(false);
       };
 

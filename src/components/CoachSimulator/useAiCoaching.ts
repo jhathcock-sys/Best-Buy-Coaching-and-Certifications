@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { 
   runOfflineEmployeeCoachingStep, 
@@ -9,6 +9,15 @@ import {
 } from '../../services/ai';
 
 export function useAiCoaching(apiKey, playbookSettings, coachingLogs, onLogCoachingSession) {
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [sessionActive, setSessionActive] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -43,7 +52,7 @@ export function useAiCoaching(apiKey, playbookSettings, coachingLogs, onLogCoach
   };
 
   const handleSend = async (inputVal, isVoiceMode, speakText) => {
-    if (!inputVal.trim() || isThinking) return;
+    if (!inputVal.trim() || isThinking || !selectedEmployee) return;
     const currentMsg = inputVal;
     
     setMessages(prev => [...prev, { sender: 'coach', text: currentMsg }]);
@@ -73,6 +82,7 @@ export function useAiCoaching(apiKey, playbookSettings, coachingLogs, onLogCoach
           playbookSettings, 
           pastLogs,
           (partialText) => {
+            if (!isMounted.current) return;
             setMessages(prev => {
               const newMsgs = [...prev];
               // If the last message is from 'coach', it means the employee hasn't replied yet in the UI state
@@ -91,7 +101,9 @@ export function useAiCoaching(apiKey, playbookSettings, coachingLogs, onLogCoach
         nextState = runOfflineEmployeeCoachingStep(currentMsg, historyObj, selectedEmployee);
       }
     } catch (err) {
-      toast.error("Coaching generation error.");
+      if (isMounted.current) {
+        toast.error("Coaching generation error.");
+      }
       console.error("Coaching step generation error:", err);
       const historyObj = {
         messages: [...messages, { sender: 'coach', text: currentMsg }],
@@ -100,16 +112,18 @@ export function useAiCoaching(apiKey, playbookSettings, coachingLogs, onLogCoach
       };
       nextState = runOfflineEmployeeCoachingStep(currentMsg, historyObj, selectedEmployee);
     } finally {
-      setIsThinking(false);
-      if (nextState) {
-        setMessages(nextState.messages);
-        setCompletedCoachSteps(nextState.completedCoachSteps);
-        setCurrentCoachStep(nextState.currentCoachStep);
-        
-        if (isVoiceMode) {
-          const lastMsg = nextState.messages[nextState.messages.length - 1];
-          if (lastMsg && lastMsg.sender !== 'coach') {
-            speakText(lastMsg.text);
+      if (isMounted.current) {
+        setIsThinking(false);
+        if (nextState) {
+          setMessages(nextState.messages);
+          setCompletedCoachSteps(nextState.completedCoachSteps);
+          setCurrentCoachStep(nextState.currentCoachStep);
+          
+          if (isVoiceMode) {
+            const lastMsg = nextState.messages[nextState.messages.length - 1];
+            if (lastMsg && lastMsg.sender !== 'coach') {
+              speakText(lastMsg.text);
+            }
           }
         }
       }
@@ -117,6 +131,7 @@ export function useAiCoaching(apiKey, playbookSettings, coachingLogs, onLogCoach
   };
 
   const finishCoaching = async () => {
+    if (!selectedEmployee) return;
     setIsEvaluating(true);
     const historyObj = {
       messages: messages,
@@ -132,7 +147,9 @@ export function useAiCoaching(apiKey, playbookSettings, coachingLogs, onLogCoach
         evalResult = evaluateCoachingSession(historyObj);
       }
       
-      setEvaluation(evalResult);
+      if (isMounted.current) {
+        setEvaluation(evalResult);
+      }
       
       if (onLogCoachingSession) {
         const isRoster = selectedEmployee.id && String(selectedEmployee.id).startsWith('roster-');
@@ -148,12 +165,16 @@ export function useAiCoaching(apiKey, playbookSettings, coachingLogs, onLogCoach
         });
       }
     } catch (err) {
-      toast.error("Evaluation generation error.");
-      console.error("Evaluation error:", err);
-      const evalResult = evaluateCoachingSession(historyObj);
-      setEvaluation(evalResult);
+      if (isMounted.current) {
+        toast.error("Evaluation generation error.");
+        console.error("Evaluation error:", err);
+        const evalResult = evaluateCoachingSession(historyObj);
+        setEvaluation(evalResult);
+      }
     } finally {
-      setIsEvaluating(false);
+      if (isMounted.current) {
+        setIsEvaluating(false);
+      }
     }
   };
 

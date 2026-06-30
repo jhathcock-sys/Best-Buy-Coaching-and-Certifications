@@ -1,6 +1,6 @@
 {
     "status":  "ACTIVE",
-    "current_checkpoint":  10,
+    "current_checkpoint":  20,
     "active_vetos":  [
 
                      ],
@@ -21,9 +21,7 @@
                             "src/components/CoachSimulator/ActiveSession.tsx",
                             "src/components/CoachSimulator/GrowSimulatorTab.tsx",
                             "src/components/CoachSimulator/LogPreview.tsx",
-                            "src/components/CoachSimulator/templates.ts"
-                        ],
-    "remaining_queue":  [
+                            "src/components/CoachSimulator/templates.ts",
                             "src/components/CoachSimulator/useAiCoaching.ts",
                             "src/components/CoachSimulator/useAudioEngine.ts",
                             "src/components/Dashboard/CircularGauge.tsx",
@@ -33,7 +31,9 @@
                             "src/components/Dashboard/DashboardLeaderboard.tsx",
                             "src/components/Dashboard/DashboardSystemAlerts.tsx",
                             "src/components/Dashboard/MetricCards.tsx",
-                            "src/components/FloorLeader/OcvObservationForm.tsx",
+                            "src/components/FloorLeader/OcvObservationForm.tsx"
+                        ],
+    "remaining_queue":  [
                             "src/components/FloorLeader/QuickLogWinForm.tsx",
                             "src/components/FloorLeader/ShiftHandoffModal.tsx",
                             "src/components/FloorLeader/ShiftSetupForm.tsx",

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Employee } from '../../types';
 
 interface OcvData {
@@ -29,6 +29,18 @@ export default function OcvObservationForm({
   const [ocvNotes, setOcvNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const isMounted = useRef(true);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -41,16 +53,21 @@ export default function OcvObservationForm({
       notes: ocvNotes,
     });
     
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
-    
-    setOcvEmpId('');
-    setOcvConnect(false);
-    setOcvRecommend(false);
-    setOcvProtect(false);
-    setOcvClose(false);
-    setOcvNotes('');
-    setIsSubmitting(false);
+    if (isMounted.current) {
+      setShowSuccess(true);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        if (isMounted.current) setShowSuccess(false);
+      }, 3000);
+      
+      setOcvEmpId('');
+      setOcvConnect(false);
+      setOcvRecommend(false);
+      setOcvProtect(false);
+      setOcvClose(false);
+      setOcvNotes('');
+      setIsSubmitting(false);
+    }
   };
 
   return (

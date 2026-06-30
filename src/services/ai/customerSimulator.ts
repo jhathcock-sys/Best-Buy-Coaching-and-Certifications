@@ -338,7 +338,18 @@ export async function evaluateSessionGemini(apiKey: string | undefined, history:
       apiKey
     });
     
-    const parsed = result.data as any;
+    const parsed = result.data as {
+      overallScore?: number;
+      passed?: boolean;
+      breakdown?: Record<string, number>;
+      values?: Record<string, number>;
+      growReport?: {
+        goal?: string;
+        reality?: string;
+        options?: string[];
+        will?: string;
+      };
+    };
     
     return {
       overallScore: parsed?.overallScore || 0,

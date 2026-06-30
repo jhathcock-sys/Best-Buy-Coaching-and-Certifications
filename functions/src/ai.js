@@ -273,6 +273,29 @@ function getSchemaForType(schemaType) {
           required: ["employee", "breakTime", "type", "coverage"]
         }
       };
+    case 'conversational_analytics':
+      return {
+        type: SchemaType.OBJECT,
+        properties: {
+          chartType: { type: SchemaType.STRING, description: "The type of chart to display: 'bar', 'metric', or 'line'" },
+          title: { type: SchemaType.STRING, description: "A concise, descriptive title for the chart" },
+          narrativeSummary: { type: SchemaType.STRING, description: "A short, insightful summary of what the data shows answering the user's question" },
+          dataPoints: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                label: { type: SchemaType.STRING, description: "X-axis label or metric name" },
+                value: { type: SchemaType.NUMBER, description: "Y-axis value or metric value" },
+                colorAccent: { type: SchemaType.STRING, description: "Optional hex color code for this specific data point, e.g. '#2563EB'" }
+              },
+              required: ["label", "value"]
+            }
+          },
+          format: { type: SchemaType.STRING, description: "How to format the values: 'currency', 'number', or 'percentage'" }
+        },
+        required: ["chartType", "title", "narrativeSummary", "dataPoints", "format"]
+      };
     case 'smart_zoning':
     case 'aura_batch_insights':
     case 'customer_simulation_step':

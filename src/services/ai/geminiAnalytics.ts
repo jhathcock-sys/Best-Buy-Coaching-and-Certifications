@@ -39,53 +39,7 @@ ${JSON.stringify(trimmedSnapshots)}
       prompt: prompt.trim(),
       isProMode: true,
       isJSON: true,
-      modelConfig: {
-        responseSchema: {
-          type: "OBJECT",
-          properties: {
-            chartType: {
-              type: "STRING",
-              description: "The type of chart to display: 'bar', 'metric', or 'line'",
-              enum: ["bar", "metric", "line"]
-            },
-            title: {
-              type: "STRING",
-              description: "A concise, descriptive title for the chart"
-            },
-            narrativeSummary: {
-              type: "STRING",
-              description: "A short, insightful summary of what the data shows answering the user's question"
-            },
-            dataPoints: {
-              type: "ARRAY",
-              items: {
-                type: "OBJECT",
-                properties: {
-                  label: {
-                    type: "STRING",
-                    description: "X-axis label or metric name"
-                  },
-                  value: {
-                    type: "NUMBER",
-                    description: "Y-axis value or metric value"
-                  },
-                  colorAccent: {
-                    type: "STRING",
-                    description: "Optional hex color code for this specific data point, e.g. '#2563EB'"
-                  }
-                },
-                required: ["label", "value"]
-              }
-            },
-            format: {
-              type: "STRING",
-              description: "How to format the values: 'currency', 'number', or 'percentage'",
-              enum: ["currency", "number", "percentage"]
-            }
-          },
-          required: ["chartType", "title", "narrativeSummary", "dataPoints", "format"]
-        }
-      }
+      schemaType: 'conversational_analytics'
     };
 
     const result = await generateAIContentFn(payload);

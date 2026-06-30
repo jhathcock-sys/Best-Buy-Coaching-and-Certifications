@@ -1,6 +1,6 @@
 {
     "status":  "ACTIVE",
-    "current_checkpoint":  140,
+    "current_checkpoint":  150,
     "active_vetos":  [
 
                      ],
@@ -151,9 +151,7 @@
                             "src/schemas/index.ts",
                             "src/services/ai/auraEngine.ts",
                             "src/services/ai/constants.ts",
-                            "src/services/ai/core.ts"
-                        ],
-    "remaining_queue":  [
+                            "src/services/ai/core.ts",
                             "src/services/ai/customerSimulator.ts",
                             "src/services/ai/employeeSimulator.ts",
                             "src/services/ai/floorSimulator.ts",
@@ -163,7 +161,9 @@
                             "src/services/ai/geminiCoaching.ts",
                             "src/services/ai/geminiCoachingTarget.ts",
                             "src/services/ai/geminiDocumentParsers.ts",
-                            "src/services/ai/geminiHandoff.ts",
+                            "src/services/ai/geminiHandoff.ts"
+                        ],
+    "remaining_queue":  [
                             "src/services/ai/geminiHuddle.ts",
                             "src/services/ai/geminiRentRecovery.ts",
                             "src/services/ai/geminiSmartZoning.ts",

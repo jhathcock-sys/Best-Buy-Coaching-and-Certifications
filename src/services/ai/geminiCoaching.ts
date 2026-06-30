@@ -2,7 +2,6 @@ import { getFunctions, httpsCallable } from 'firebase/functions';
 import { app } from '../firebase';
 import type { PlaybookSettings, Employee, CoachingLog } from '../../types';
 import { executeWithRetry } from './core';
-import { SchemaType, type Schema } from '@google/generative-ai'; // Just for types, not instantiation
 
 export async function generateCoachingLogGemini(
   apiKey: string | undefined, 
@@ -100,7 +99,7 @@ export const generateMonthlyOneOnOne = async (employeeData: Employee, logs: Coac
       apiKey,
       isJSON: false
     }));
-    return (response.data as any).text;
+    return (response.data as { text: string }).text;
 
   } catch (error) {
     console.error("1-on-1 Generation Error:", error);
@@ -151,26 +150,14 @@ export const generateActionPlan = async (employeeData: Employee, logs: CoachingL
       }
     `;
 
-    const responseSchema: Schema = {
-      type: SchemaType.OBJECT,
-      properties: {
-        type: { type: SchemaType.STRING },
-        status: { type: SchemaType.STRING },
-        reason: { type: SchemaType.STRING },
-        dateCreated: { type: SchemaType.STRING },
-        planText: { type: SchemaType.STRING }
-      },
-      required: ["type", "status", "reason", "dateCreated", "planText"]
-    };
-
     const response = await executeWithRetry(() => generateAIContent({
       prompt,
       apiKey,
       isJSON: true,
-      modelConfig: { responseSchema }
+      schemaType: 'action_plan'
     }));
     
-    const parsed = JSON.parse((response.data as any).text);
+    const parsed = JSON.parse((response.data as { text: string }).text);
     return {
       type: parsed?.type || "30-Day Action Plan: Focus Area",
       status: parsed?.status || "Active",
@@ -217,7 +204,7 @@ export const generatePerformanceGap = async (
       apiKey,
       isJSON: false
     }));
-    return ((response.data as any).text || "").trim();
+    return ((response.data as { text: string })?.text || "").trim();
   } catch (error) {
     console.error("Gap Generation Error:", error);
     return "Failed to auto-generate gap. Please verify API key.";

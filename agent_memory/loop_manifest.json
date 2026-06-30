@@ -1,6 +1,6 @@
 {
     "status":  "ACTIVE",
-    "current_checkpoint":  20,
+    "current_checkpoint":  30,
     "active_vetos":  [
 
                      ],
@@ -31,9 +31,7 @@
                             "src/components/Dashboard/DashboardLeaderboard.tsx",
                             "src/components/Dashboard/DashboardSystemAlerts.tsx",
                             "src/components/Dashboard/MetricCards.tsx",
-                            "src/components/FloorLeader/OcvObservationForm.tsx"
-                        ],
-    "remaining_queue":  [
+                            "src/components/FloorLeader/OcvObservationForm.tsx",
                             "src/components/FloorLeader/QuickLogWinForm.tsx",
                             "src/components/FloorLeader/ShiftHandoffModal.tsx",
                             "src/components/FloorLeader/ShiftSetupForm.tsx",
@@ -43,7 +41,9 @@
                             "src/components/FloorLeader/ShiftTrackerSidebar.tsx",
                             "src/components/FloorLeader/ShiftTrackerTab.tsx",
                             "src/components/FloorLeaderTracker/FloorLeaderContext.tsx",
-                            "src/components/FloorLeaderTracker/FloorLeaderHeader.tsx",
+                            "src/components/FloorLeaderTracker/FloorLeaderHeader.tsx"
+                        ],
+    "remaining_queue":  [
                             "src/components/FloorLeaderTracker/FloorLeaderTabs.tsx",
                             "src/components/FloorLeaderTracker/HistoricalShiftsArchive.tsx",
                             "src/components/ImportSchedule/ImportScheduleRow.tsx",

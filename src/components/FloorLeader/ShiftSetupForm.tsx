@@ -69,7 +69,7 @@ export default function ShiftSetupForm() {
   return (
     <div className="glass-card max-w-lg mx-auto p-xl">
       <div className="text-center mb-xl">
-        <div className="flex-center mx-auto mb-md rounded-full border" style={{ width: '56px', height: '56px', background: 'rgba(0, 70, 190, 0.08)', borderColor: 'rgba(0,70,190,0.25)' }}>
+        <div className="flex-center mx-auto mb-md rounded-full border" style={{ width: '56px', height: '56px', background: 'var(--bby-blue-alpha-10)', borderColor: 'var(--bby-blue-alpha-20)' }}>
           <Clock size={28} color="var(--bby-blue)" />
         </div>
         <h2 className="text-2xl font-bold">Start Floor Lead Shift</h2>
@@ -102,16 +102,13 @@ export default function ShiftSetupForm() {
             <button
               type="button"
               onClick={() => setIsWeekend(false)}
-              className="btn"
+              className="btn font-semibold transition-normal cursor-pointer"
               style={{
                 padding: '0.75rem',
                 borderRadius: '12px',
-                border: '1px solid var(--border-glass)',
-                background: !isWeekend ? 'rgba(0, 70, 190, 0.15)' : 'rgba(255,255,255,0.01)',
-                borderColor: !isWeekend ? 'var(--bby-blue)' : 'var(--border-glass)',
+                border: `1px solid ${!isWeekend ? 'var(--bby-blue)' : 'var(--border-glass)'}`,
+                background: !isWeekend ? 'var(--bby-blue-alpha-10)' : 'var(--white-alpha-05)',
                 color: !isWeekend ? '#fff' : 'var(--text-secondary)',
-                fontWeight: 600,
-                transition: 'all 0.2s'
               }}
               data-testid="btn-weekday-toggle"
             >
@@ -120,16 +117,13 @@ export default function ShiftSetupForm() {
             <button
               type="button"
               onClick={() => setIsWeekend(true)}
-              className="btn"
+              className="btn font-semibold transition-normal cursor-pointer"
               style={{
                 padding: '0.75rem',
                 borderRadius: '12px',
-                border: '1px solid var(--border-glass)',
-                background: isWeekend ? 'rgba(253, 216, 53, 0.08)' : 'rgba(255,255,255,0.01)',
-                borderColor: isWeekend ? 'var(--bby-yellow)' : 'var(--border-glass)',
+                border: `1px solid ${isWeekend ? 'var(--bby-yellow)' : 'var(--border-glass)'}`,
+                background: isWeekend ? 'rgba(253, 216, 53, 0.08)' : 'var(--white-alpha-05)',
                 color: isWeekend ? '#fff' : 'var(--text-secondary)',
-                fontWeight: 600,
-                transition: 'all 0.2s'
               }}
               data-testid="btn-weekend-toggle"
             >

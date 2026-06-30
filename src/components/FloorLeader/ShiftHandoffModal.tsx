@@ -28,6 +28,19 @@ export default function ShiftHandoffModal({
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
 
+  const isMounted = React.useRef(true);
+  const copyTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  React.useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
+
   if (!isOpen) return null;
 
   const handleGenerate = async () => {
@@ -45,13 +58,19 @@ export default function ShiftHandoffModal({
         apiKey
       );
       
-      setBriefing(result);
+      if (isMounted.current) {
+        setBriefing(result);
+      }
     } catch (error: unknown) {
-      const err = error as Error;
-      console.error('Failed to generate handoff briefing:', err);
-      setError(err?.message || 'Failed to generate briefing. Please try again.');
+      if (isMounted.current) {
+        const err = error as Error;
+        console.error('Failed to generate handoff briefing:', err);
+        setError(err?.message || 'Failed to generate briefing. Please try again.');
+      }
     } finally {
-      setIsGenerating(false);
+      if (isMounted.current) {
+        setIsGenerating(false);
+      }
     }
   };
 
@@ -59,8 +78,12 @@ export default function ShiftHandoffModal({
     if (!briefing) return;
     try {
       await navigator.clipboard.writeText(briefing);
+      if (!isMounted.current) return;
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+      copyTimeoutRef.current = setTimeout(() => {
+        if (isMounted.current) setCopied(false);
+      }, 2000);
     } catch (err) {
       console.error('Failed to copy text', err);
     }

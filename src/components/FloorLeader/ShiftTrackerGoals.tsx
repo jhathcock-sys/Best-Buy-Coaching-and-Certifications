@@ -35,8 +35,7 @@ export default function ShiftTrackerGoals({ activeSummary }: ShiftTrackerGoalsPr
               <span className="text-sm text-secondary">$</span>
               <input 
                 type="number"
-                className="w-24 p-1 text-xs m-0 text-center border border-glass rounded-md text-white"
-                style={{ background: 'rgba(11,15,25,0.6)' }}
+                className="w-24 p-1 text-xs m-0 text-center border border-glass rounded-md text-white bg-black-alpha-20"
                 value={activeShift.dailyRevenueGoal || 10000}
                 onChange={(e) => {
                   const val = parseFloat(e.target.value) || 0;
@@ -50,8 +49,8 @@ export default function ShiftTrackerGoals({ activeSummary }: ShiftTrackerGoalsPr
             const goal = activeShift.dailyRevenueGoal || 10000;
             const pct = Math.min(Math.round(((activeSummary?.totalRevenue || 0) / goal) * 100), 100);
             return (
-              <div className="w-full h-2 bg-white/5 border border-glass rounded-full overflow-hidden relative">
-                <div style={{ width: `${pct}%`, background: 'linear-gradient(90deg, var(--bby-blue), var(--info))' }} className="h-full transition-all duration-400 rounded-full"></div>
+              <div className="w-full h-2 bg-white-alpha-05 border border-glass rounded-full overflow-hidden relative">
+                <div style={{ width: `${pct}%`, background: 'linear-gradient(90deg, var(--bby-blue), var(--info))' }} className="h-full transition-normal rounded-full"></div>
               </div>
             );
           })()}
@@ -65,8 +64,7 @@ export default function ShiftTrackerGoals({ activeSummary }: ShiftTrackerGoalsPr
             </span>
             <input 
               type="number"
-              className="w-20 p-1 text-xs m-0 text-center border border-glass rounded-md text-white"
-              style={{ background: 'rgba(11,15,25,0.6)' }}
+              className="w-20 p-1 text-xs m-0 text-center border border-glass rounded-md text-white bg-black-alpha-20"
               value={activeShift.dailyPmsGoal || 15}
               onChange={(e) => {
                 const val = parseInt(e.target.value) || 0;
@@ -79,8 +77,8 @@ export default function ShiftTrackerGoals({ activeSummary }: ShiftTrackerGoalsPr
             const goal = activeShift.dailyPmsGoal || 15;
             const pct = Math.min(Math.round(((activeSummary?.totalPms || 0) / goal) * 100), 100);
             return (
-              <div className="w-full h-2 bg-white/5 border border-glass rounded-full overflow-hidden relative">
-                <div style={{ width: `${pct}%`, background: 'linear-gradient(90deg, var(--success), #10b981)' }} className="h-full transition-all duration-400 rounded-full"></div>
+              <div className="w-full h-2 bg-white-alpha-05 border border-glass rounded-full overflow-hidden relative">
+                <div style={{ width: `${pct}%`, background: 'linear-gradient(90deg, var(--success), #10b981)' }} className="h-full transition-normal rounded-full"></div>
               </div>
             );
           })()}
@@ -94,8 +92,7 @@ export default function ShiftTrackerGoals({ activeSummary }: ShiftTrackerGoalsPr
             </span>
             <input 
               type="number"
-              className="w-20 p-1 text-xs m-0 text-center border border-glass rounded-md text-white"
-              style={{ background: 'rgba(11,15,25,0.6)' }}
+              className="w-20 p-1 text-xs m-0 text-center border border-glass rounded-md text-white bg-black-alpha-20"
               value={activeShift.dailyAppsGoal || 10}
               onChange={(e) => {
                 const val = parseInt(e.target.value) || 0;
@@ -108,8 +105,8 @@ export default function ShiftTrackerGoals({ activeSummary }: ShiftTrackerGoalsPr
             const goal = activeShift.dailyAppsGoal || 10;
             const pct = Math.min(Math.round(((activeSummary?.totalApps || 0) / goal) * 100), 100);
             return (
-              <div className="w-full h-2 bg-white/5 border border-glass rounded-full overflow-hidden relative">
-                <div style={{ width: `${pct}%`, background: 'linear-gradient(90deg, var(--bby-yellow), #f59e0b)' }} className="h-full transition-all duration-400 rounded-full"></div>
+              <div className="w-full h-2 bg-white-alpha-05 border border-glass rounded-full overflow-hidden relative">
+                <div style={{ width: `${pct}%`, background: 'linear-gradient(90deg, var(--bby-yellow), #f59e0b)' }} className="h-full transition-normal rounded-full"></div>
               </div>
             );
           })()}

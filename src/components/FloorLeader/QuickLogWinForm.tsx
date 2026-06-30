@@ -19,6 +19,13 @@ export default function QuickLogWinForm({
   handleLogFloorWin
 }: QuickLogWinFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isMounted = React.useRef(true);
+
+  React.useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const safeRoster = roster || [];
   const safeOnShift = getEmployeesOnShift() || [];
@@ -29,7 +36,9 @@ export default function QuickLogWinForm({
     try {
       await handleLogFloorWin();
     } finally {
-      setIsSubmitting(false);
+      if (isMounted.current) {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -43,7 +52,7 @@ export default function QuickLogWinForm({
           <label className="form-label text-sm text-secondary">Select Associate:</label>
           <select 
             className="form-control"
-            style={{ background: '#0e1220', fontSize: '0.85rem', height: '38px' }}
+            style={{ background: 'var(--bg-obsidian)', fontSize: '0.85rem', height: '38px' }}
             value={selectedEmpId}
             onChange={(e) => setSelectedEmpId(e.target.value)}
             data-testid="win-form-select"
@@ -79,17 +88,14 @@ export default function QuickLogWinForm({
           <div className="flex-center gap-sm mt-xs w-full">
             <button
               type="button"
-              className="btn flex-1"
+              className="btn flex-1 cursor-pointer font-semibold"
               style={{
                 padding: '0.55rem',
                 fontSize: '0.8rem',
                 borderRadius: '8px',
-                border: '1px solid var(--border-glass)',
-                background: winType === 'pm' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255,255,255,0.01)',
-                borderColor: winType === 'pm' ? 'var(--success)' : 'var(--border-glass)',
-                color: winType === 'pm' ? '#fff' : 'var(--text-secondary)',
-                fontWeight: 600,
-                cursor: 'pointer'
+                border: `1px solid ${winType === 'pm' ? 'var(--success)' : 'var(--border-glass)'}`,
+                background: winType === 'pm' ? 'var(--success-alpha-15)' : 'var(--white-alpha-05)',
+                color: winType === 'pm' ? '#fff' : 'var(--text-secondary)'
               }}
               onClick={() => setWinType('pm')}
               data-testid="win-form-pm"
@@ -99,17 +105,14 @@ export default function QuickLogWinForm({
             </button>
             <button
               type="button"
-              className="btn flex-1"
+              className="btn flex-1 cursor-pointer font-semibold"
               style={{
                 padding: '0.55rem',
                 fontSize: '0.8rem',
                 borderRadius: '8px',
-                border: '1px solid var(--border-glass)',
-                background: winType === 'app' ? 'rgba(242, 169, 0, 0.15)' : 'rgba(255,255,255,0.01)',
-                borderColor: winType === 'app' ? 'var(--bby-yellow)' : 'var(--border-glass)',
-                color: winType === 'app' ? '#fff' : 'var(--text-secondary)',
-                fontWeight: 600,
-                cursor: 'pointer'
+                border: `1px solid ${winType === 'app' ? 'var(--bby-yellow)' : 'var(--border-glass)'}`,
+                background: winType === 'app' ? 'rgba(242, 169, 0, 0.15)' : 'var(--white-alpha-05)',
+                color: winType === 'app' ? '#fff' : 'var(--text-secondary)'
               }}
               onClick={() => setWinType('app')}
               data-testid="win-form-app"
@@ -121,8 +124,8 @@ export default function QuickLogWinForm({
         </div>
 
         <button 
-          className="btn btn-primary mt-xs w-full"
-          style={{ padding: '0.65rem', fontSize: '0.85rem', fontWeight: 700 }}
+          className="btn btn-primary mt-xs w-full font-bold"
+          style={{ padding: '0.65rem', fontSize: '0.85rem' }}
           onClick={handleLogClick}
           disabled={!selectedEmpId || isSubmitting}
           data-testid="win-form-submit"

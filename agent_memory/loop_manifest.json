@@ -5,10 +5,10 @@
 
                      ],
     "processed_queue":  [
-                            "src/components/Analytics/ConversationalAnalyticsWidget.tsx"
+                            "src/components/Analytics/ConversationalAnalyticsWidget.tsx",
+                            "src/components/Analytics/DynamicChartRenderer.tsx"
                         ],
     "remaining_queue":  [
-                            "src/components/Analytics/DynamicChartRenderer.tsx",
                             "src/components/AssociateProfile/AssociateProfileHeader.tsx",
                             "src/components/AssociateProfile/ProfileAppraisalsTab.tsx",
                             "src/components/AssociateProfile/ProfileCoachingTab.tsx",

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Users, Search } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { getStoreGuestPin, signInTenant, signOutTenant } from '../services/firebase';
@@ -30,6 +30,14 @@ export default function AdvisorLogin({ onLoginSuccess, dbConnected }: AdvisorLog
   const [localStoreId, setLocalStoreId] = useState(() => localStorage.getItem('bby_last_store') || '');
   const [error, setError] = useState('');
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,8 +53,10 @@ export default function AdvisorLogin({ onLoginSuccess, dbConnected }: AdvisorLog
         const pin = await getStoreGuestPin(localStoreId) || '1234';
         const signInSuccess = await signInTenant(localStoreId, pin);
         if (!signInSuccess) {
-          setError('Failed to connect to store database.');
-          setIsAuthenticating(false);
+          if (isMounted.current) {
+            setError('Failed to connect to store database.');
+            setIsAuthenticating(false);
+          }
           return;
         }
 
@@ -56,9 +66,9 @@ export default function AdvisorLogin({ onLoginSuccess, dbConnected }: AdvisorLog
         const remoteActivePeriod = periodSnap.exists() ? periodSnap.data().activePeriod : null;
         
         if (!remoteActivePeriod) {
-          setError('Store has no active schedule period.');
+          if (isMounted.current) setError('Store has no active schedule period.');
           await signOutTenant();
-          setIsAuthenticating(false);
+          if (isMounted.current) setIsAuthenticating(false);
           return;
         }
 
@@ -75,15 +85,15 @@ export default function AdvisorLogin({ onLoginSuccess, dbConnected }: AdvisorLog
           useStore.getState().setStoreId(localStoreId);
           onLoginSuccess(employeeId, matchedEmployee);
         } else {
-          setError('Employee ID not found in current active roster.');
+          if (isMounted.current) setError('Employee ID not found in current active roster.');
           await signOutTenant();
         }
       } catch (err) {
         console.error('Advisor login error:', err);
-        setError('Error connecting to database. Please try again.');
+        if (isMounted.current) setError('Error connecting to database. Please try again.');
         await signOutTenant();
       } finally {
-        setIsAuthenticating(false);
+        if (isMounted.current) setIsAuthenticating(false);
       }
     } else {
       // Offline Mode

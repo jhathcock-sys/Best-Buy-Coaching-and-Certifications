@@ -64,35 +64,35 @@ export default function AssociateProfileModal({
         {/* Tab Selection Row */}
         <div className="flex-row bg-white-alpha-10 border-bottom">
           <button 
-            className={`tab-btn ${activeTab === 'trends' ? 'active' : ''}`}
+            className={`tab-btn cursor-pointer ${activeTab === 'trends' ? 'active' : ''}`}
             onClick={() => setActiveTab('trends')}
             data-testid="tab-trends"
           >
             <TrendingUp size={16} /> Performance Trends
           </button>
           <button 
-            className={`tab-btn ${activeTab === 'coaching' ? 'active' : ''}`}
+            className={`tab-btn cursor-pointer ${activeTab === 'coaching' ? 'active' : ''}`}
             onClick={() => setActiveTab('coaching')}
             data-testid="tab-coaching"
           >
             <ClipboardList size={16} /> Coaching History ({associateLogs?.length || 0})
           </button>
           <button 
-            className={`tab-btn ${activeTab === 'commitments' ? 'active' : ''}`}
+            className={`tab-btn cursor-pointer ${activeTab === 'commitments' ? 'active' : ''}`}
             onClick={() => setActiveTab('commitments')}
             data-testid="tab-commitments"
           >
             <Calendar size={16} /> Active Commitments ({associateTasks?.filter(t => !t.completed)?.length || 0})
           </button>
           <button 
-            className={`tab-btn ${activeTab === 'oneOnOne' ? 'active' : ''}`}
+            className={`tab-btn cursor-pointer ${activeTab === 'oneOnOne' ? 'active' : ''}`}
             onClick={() => setActiveTab('oneOnOne')}
             data-testid="tab-oneOnOne"
           >
             <FileText size={16} /> 1-on-1 Appraisals
           </button>
           <button 
-            className={`tab-btn ${activeTab === 'trophies' ? 'active' : ''}`}
+            className={`tab-btn cursor-pointer ${activeTab === 'trophies' ? 'active' : ''}`}
             onClick={() => setActiveTab('trophies')}
             data-testid="tab-trophies"
           >

@@ -21,9 +21,8 @@ describe('StoreRosterMobileCard Component', () => {
     render(
       <StoreRosterMobileCard 
         filteredRoster={[mockEmployee as any]} 
-        rosterHistory={[]} 
-        activePeriod={{ id: '1', name: 'Period 1' } as any} 
-        deptGoals={{}} 
+        DEPARTMENTS={['Computing']}
+        handleStartEdit={() => {}}
       />
     );
 

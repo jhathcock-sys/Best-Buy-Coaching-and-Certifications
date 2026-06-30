@@ -1,6 +1,6 @@
 {
     "status":  "ACTIVE",
-    "current_checkpoint":  80,
+    "current_checkpoint":  90,
     "active_vetos":  [
 
                      ],
@@ -91,9 +91,7 @@
                             "src/components/StoreRoster/StartNewPeriodForm.tsx",
                             "src/components/StoreRoster/StoreRosterHeader.tsx",
                             "src/components/StoreRoster/StoreRosterMobileCard.tsx",
-                            "src/components/StoreRoster/StoreRosterTable.tsx"
-                        ],
-    "remaining_queue":  [
+                            "src/components/StoreRoster/StoreRosterTable.tsx",
                             "src/components/StoreRoster/StoreRosterTableRow.tsx",
                             "src/components/ui/ActionSheet.tsx",
                             "src/components/ui/Skeleton.tsx",
@@ -103,7 +101,9 @@
                             "src/components/ZoneScheduler/ZoneTimeline.tsx",
                             "src/components/AddEmployeeModal.tsx",
                             "src/components/AdvisorLogin.tsx",
-                            "src/components/AssociateProfileModal.tsx",
+                            "src/components/AssociateProfileModal.tsx"
+                        ],
+    "remaining_queue":  [
                             "src/components/AuditorInputForm.tsx",
                             "src/components/AuditorResults.tsx",
                             "src/components/AuthGate.tsx",

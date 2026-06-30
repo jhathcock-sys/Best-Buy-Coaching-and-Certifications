@@ -1,6 +1,6 @@
 {
     "status":  "ACTIVE",
-    "current_checkpoint":  30,
+    "current_checkpoint":  40,
     "active_vetos":  [
 
                      ],
@@ -41,9 +41,7 @@
                             "src/components/FloorLeader/ShiftTrackerSidebar.tsx",
                             "src/components/FloorLeader/ShiftTrackerTab.tsx",
                             "src/components/FloorLeaderTracker/FloorLeaderContext.tsx",
-                            "src/components/FloorLeaderTracker/FloorLeaderHeader.tsx"
-                        ],
-    "remaining_queue":  [
+                            "src/components/FloorLeaderTracker/FloorLeaderHeader.tsx",
                             "src/components/FloorLeaderTracker/FloorLeaderTabs.tsx",
                             "src/components/FloorLeaderTracker/HistoricalShiftsArchive.tsx",
                             "src/components/ImportSchedule/ImportScheduleRow.tsx",
@@ -53,7 +51,9 @@
                             "src/components/layout/MobileNav.tsx",
                             "src/components/layout/Sidebar.tsx",
                             "src/components/LiveFloorShadow/ShadowStep1Employee.tsx",
-                            "src/components/LiveFloorShadow/ShadowStep2Observation.tsx",
+                            "src/components/LiveFloorShadow/ShadowStep2Observation.tsx"
+                        ],
+    "remaining_queue":  [
                             "src/components/LiveFloorShadow/ShadowStep3Coaching.tsx",
                             "src/components/PerformanceWizardModal/WizardStep1General.tsx",
                             "src/components/PerformanceWizardModal/WizardStep2Attach.tsx",

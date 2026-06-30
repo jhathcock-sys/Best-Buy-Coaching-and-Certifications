@@ -42,9 +42,12 @@ export default function ShadowStep2Observation({
  }: ShadowStep2ObservationProps) {
   const [isListening, setIsListening] = React.useState(false);
   const recognitionRef = React.useRef<ISpeechRecognition | null>(null);
+  const isMounted = React.useRef(true);
 
   useEffect(() => {
+    isMounted.current = true;
     return () => {
+      isMounted.current = false;
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
@@ -72,6 +75,7 @@ export default function ShadowStep2Observation({
       recognition.lang = 'en-US';
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
+        if (!isMounted.current) return;
         let transcript = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
           if (event.results[i].isFinal) {
@@ -84,11 +88,13 @@ export default function ShadowStep2Observation({
       };
 
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        if (!isMounted.current) return;
         console.error("Speech recognition error:", event.error);
         setIsListening(false);
       };
 
       recognition.onend = () => {
+        if (!isMounted.current) return;
         setIsListening(false);
       };
 

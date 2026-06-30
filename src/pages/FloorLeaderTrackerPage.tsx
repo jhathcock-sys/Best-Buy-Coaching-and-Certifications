@@ -91,7 +91,7 @@ export default function FloorLeaderTracker() {
               <div className="flex-end mb-neg-md">
                 <button 
                   data-testid="import-schedule-btn"
-                  className="btn btn-primary flex-center gap-sm"
+                  className="btn btn-primary flex-center gap-sm cursor-pointer"
                   onClick={() => setIsImportModalOpen(true)}
                 >
                   <Upload size={15} /> Import Floor Schedule

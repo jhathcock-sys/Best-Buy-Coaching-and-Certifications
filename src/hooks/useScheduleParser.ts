@@ -65,6 +65,14 @@ export function useScheduleParser({ onImportConfirm, onClose, isOpen }: UseSched
   const [selectedDayColumn, setSelectedDayColumn] = useState<string>('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   // Reset state when modal closes
   useEffect(() => {
@@ -119,6 +127,7 @@ export function useScheduleParser({ onImportConfirm, onClose, isOpen }: UseSched
     setErrorMsg('');
     try {
       const data = await parseScheduleImage(base64Data, mimeType, apiKey);
+      if (!isMounted.current) return;
       if (Array.isArray(data)) {
         setParsedItems(data);
         generateReviewList(data);
@@ -126,10 +135,13 @@ export function useScheduleParser({ onImportConfirm, onClose, isOpen }: UseSched
         throw new Error('Parsed result was not a JSON array.');
       }
     } catch (err) {
+      if (!isMounted.current) return;
       console.error(err);
       setErrorMsg('Failed to parse schedule image. Please verify your Gemini API key or try the CSV loader instead.');
     } finally {
-      setIsParsing(false);
+      if (isMounted.current) {
+        setIsParsing(false);
+      }
     }
   };
 
@@ -140,6 +152,7 @@ export function useScheduleParser({ onImportConfirm, onClose, isOpen }: UseSched
     
     // Simulate API delay
     setTimeout(() => {
+      if (!isMounted.current) return;
       const mockExtracted = [
         { name: 'Ricky', shift: '9:00 AM - 5:30 PM', zone: 'General Sales' },
         { name: 'Julianna', shift: '10:00 AM - 6:30 PM', zone: 'PC / Computing' },

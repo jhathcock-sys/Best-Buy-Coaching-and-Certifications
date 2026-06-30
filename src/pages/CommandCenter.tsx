@@ -26,21 +26,30 @@ export default function CommandCenter() {
   const [manifest, setManifest] = useState<Manifest | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchManifest = async () => {
       try {
         const res = await fetch('/loop_manifest.json?t=' + Date.now());
         if (res.ok) {
           const data = await res.json();
-          setManifest(data);
+          if (isMounted) {
+            setManifest(data);
+          }
         }
       } catch (e) {
-        console.error('Failed to fetch manifest', e);
+        if (isMounted) {
+          console.error('Failed to fetch manifest', e);
+        }
       }
     };
 
     fetchManifest();
     const interval = setInterval(fetchManifest, 1500);
-    return () => clearInterval(interval);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -83,7 +92,7 @@ export default function CommandCenter() {
   };
 
   return (
-    <div className="min-h-screen bg-space p-xl" style={{ backgroundImage: 'radial-gradient(circle at 50% 0%, var(--bg-card-hover), transparent 70%)' }}>
+    <div className="min-h-screen bg-space p-xl" data-testid="command-center-page" style={{ backgroundImage: 'radial-gradient(circle at 50% 0%, var(--bg-card-hover), transparent 70%)' }}>
       
       {/* HEADER */}
       <motion.div 

@@ -1,6 +1,6 @@
 {
     "status":  "ACTIVE",
-    "current_checkpoint":  120,
+    "current_checkpoint":  130,
     "active_vetos":  [
 
                      ],
@@ -131,9 +131,7 @@
                             "src/hooks/useCategoryAutoExpand.ts",
                             "src/hooks/useFloorLeaderTracker.ts",
                             "src/hooks/useLiveFloorShadow.ts",
-                            "src/hooks/useMediaQuery.ts"
-                        ],
-    "remaining_queue":  [
+                            "src/hooks/useMediaQuery.ts",
                             "src/hooks/useScheduleParser.ts",
                             "src/hooks/useStoreRoster.ts",
                             "src/pages/AdvisorDashboardPage.tsx",
@@ -143,7 +141,9 @@
                             "src/pages/CoachSimulatorPage.tsx",
                             "src/pages/CommandCenter.tsx",
                             "src/pages/DashboardPage.tsx",
-                            "src/pages/FloorLeaderTrackerPage.tsx",
+                            "src/pages/FloorLeaderTrackerPage.tsx"
+                        ],
+    "remaining_queue":  [
                             "src/pages/LiveFloorShadowPage.tsx",
                             "src/pages/MemberDealsPage.tsx",
                             "src/pages/PlaybookStudioPage.tsx",

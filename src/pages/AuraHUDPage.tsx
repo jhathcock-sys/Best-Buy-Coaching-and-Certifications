@@ -25,6 +25,14 @@ export default function AuraHUDPage({ onCoachEmployee }: AuraHUDPageProps) {
   const [insights, setInsights] = useState<Record<string, AuraInsight>>({});
   const [isScanning, setIsScanning] = useState(false);
 
+  const isMounted = React.useRef(true);
+  React.useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   const handleScanFloor = async () => {
     if (!apiKey) {
       alert("Please configure your Gemini API key in Settings first.");
@@ -45,16 +53,20 @@ export default function AuraHUDPage({ onCoachEmployee }: AuraHUDPageProps) {
 
     try {
       const batchInsights = await generateAuraBatchInsights(sortedRoster, deptGoals, apiKey, playbookSettings);
-      setInsights(batchInsights);
+      if (isMounted.current) {
+        setInsights(batchInsights);
+      }
     } catch (e) {
       console.error("Batch scan failed:", e);
+    } finally {
+      if (isMounted.current) {
+        setIsScanning(false);
+      }
     }
-    
-    setIsScanning(false);
   };
 
   return (
-    <div className="aura-hud-container">
+    <div className="aura-hud-container" data-testid="aura-hud-page">
       {isScanning && <div className="aura-radar-sweep" />}
       
       <div className="aura-header">

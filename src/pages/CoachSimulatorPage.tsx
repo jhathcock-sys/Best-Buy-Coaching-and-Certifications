@@ -144,7 +144,7 @@ export default function CoachSimulator({
 
 
   return (
-    <div className="flex-column gap-2xl">
+    <div className="flex-column gap-2xl" data-testid="coach-simulator-page">
       {/* Platform Title */}
       <div className="flex-between flex-wrap gap-md">
         <div>
@@ -157,14 +157,14 @@ export default function CoachSimulator({
           <div className="flex-row gap-xs bg-white-alpha-02 p-xs rounded-xl border-glass">
             <button 
               data-testid="tab-sim-btn"
-              className={`btn btn-sm shadow-none ${activeTab === 'sim' ? 'btn-primary' : 'btn-secondary'}`}
+              className={`btn btn-sm shadow-none cursor-pointer ${activeTab === 'sim' ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => setActiveTab('sim')}
             >
               GROW Practice Simulator
             </button>
             <button 
               data-testid="tab-builder-btn"
-              className={`btn btn-sm shadow-none ${activeTab === 'builder' ? 'btn-primary' : 'btn-secondary'}`}
+              className={`btn btn-sm shadow-none cursor-pointer ${activeTab === 'builder' ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => setActiveTab('builder')}
             >
               4-Section Log Builder

@@ -3,6 +3,8 @@ import { Search, Trash2, Volume2, BookOpen, Clock } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { CoachingLog } from '../types';
 import { calculateCoachingImpact } from '../utils/coachingImpact';
+import CoachingSessionCard from '../components/CoachingHistory/CoachingSessionCard';
+import CoachingDetailsModal from '../components/CoachingHistory/CoachingDetailsModal';
 
 const EMPTY_ARR: CoachingLog[] = [];
 
@@ -168,155 +170,32 @@ export default function CoachingHistory() {
             const impact = calculateCoachingImpact(session.employeeId, session.date, dailySnapshots);
             
             return (
-            <div 
-              key={index} 
-              data-testid={`session-card-${index}`}
-              className="glass-card session-card cursor-pointer"
-              onClick={() => {
-                setSelectedSession(session);
-                handleStopSpeech();
-              }}
-            >
-              <div>
-                {/* Header: Avatar, Name, Score, Trash */}
-                <div className="flex-between align-start gap-sm">
-                  <div className="flex-row align-center gap-sm">
-                    <img src={session.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'} alt="" className="avatar-sm border-glass" />
-                    <div>
-                      <h4 className="text-base font-bold text-white m-0">{session.employeeName || session.customerName}</h4>
-                      <span className={`tag-pill tag-mini ${session.category?.includes('Observation') ? 'tag-obs' : session.category?.includes('Practice') ? 'tag-prac' : 'tag-role'}`}>
-                        {session.category}
-                      </span>
-                      {session.coachName && (
-                        <div className="text-xxs text-muted mt-0-2rem font-medium">
-                          Coach: {session.coachName}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <button 
-                    data-testid={`delete-session-btn-${index}`}
-                    className="btn btn-secondary btn-icon btn-icon-transparent cursor-pointer"
-                    onClick={(e) => handleDelete(session, e)}
-                  >
-                    <Trash2 size={14} color="var(--error)" />
-                  </button>
-                </div>
-
-                <p className="session-notes">
-                  {session.notes}
-                </p>
-              </div>
-
-              {/* Footer: Date & Score Indicator */}
-              <div className="session-footer">
-                <span className="flex-row align-center gap-xs"><Clock size={12} /> {session.date?.split(' ')[0]}</span>
-                
-                {impact === 'HIGH_IMPACT' && (
-                  <span className="tag-pill tag-mini text-success" style={{ backgroundColor: 'var(--success-glow)', border: '1px solid var(--success)' }}>
-                    High Impact 🟢
-                  </span>
-                )}
-                {impact === 'NEEDS_FOLLOW_UP' && (
-                  <span className="tag-pill tag-mini text-error" style={{ backgroundColor: 'var(--error-glow)', border: '1px solid var(--error)' }}>
-                    Needs Follow Up 🔴
-                  </span>
-                )}
-                {impact === 'NEUTRAL' && (
-                  <span className="tag-pill tag-mini text-muted border-glass">
-                    Neutral Impact ⚪
-                  </span>
-                )}
-                {impact === 'PENDING' && (
-                  <span className="tag-pill tag-mini text-muted border-glass">
-                    Impact Pending ⏳
-                  </span>
-                )}
-
-                {session.score !== 100 && (
-                  <span className={`font-bold ${session.score >= 80 ? 'text-success' : 'text-error'}`}>
-                    Score: {session.score}%
-                  </span>
-                )}
-              </div>
-            </div>
-          )})
+              <CoachingSessionCard
+                key={index}
+                index={index}
+                session={session}
+                impact={impact}
+                onSelect={(s) => {
+                  setSelectedSession(s);
+                  handleStopSpeech();
+                }}
+                onDelete={handleDelete}
+              />
+            );
+          })
         )}
       </div>
 
       {/* Details Modal */}
       {selectedSession && (
-        <div className="modal-overlay cursor-pointer" onClick={() => setSelectedSession(null)} data-testid="coaching-history-modal-overlay">
-          <div className="modal-content modal-border-bby cursor-auto" onClick={(e) => e.stopPropagation()} data-testid="coaching-history-modal">
-            <div className="modal-header">
-              <div className="flex-row align-center gap-sm">
-                <img src={selectedSession.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'} alt="" className="avatar-sm" />
-                <div>
-                  <h3 className="text-1-15rem text-white font-heading m-0">
-                    Coaching Review: {selectedSession.employeeName || selectedSession.customerName}
-                  </h3>
-                  <span className="text-0-7rem text-muted">
-                    {selectedSession.category} | {selectedSession.date} {selectedSession.coachName ? `| Coach: ${selectedSession.coachName}` : ''}
-                  </span>
-                </div>
-              </div>
-              <button 
-                data-testid="modal-close-icon"
-                className="btn-close-transparent cursor-pointer" 
-                onClick={() => setSelectedSession(null)}
-              >
-                &times;
-              </button>
-            </div>
-            
-            <div className="modal-body modal-body-scroll">
-              <div className="notes-code-block">
-                {selectedSession.notes}
-              </div>
-
-              {/* Text-to-Speech controls */}
-              <div className="tts-controls-container">
-                <h4 className="text-0-825rem text-secondary flex-row align-center gap-sm m-0">
-                  <Volume2 size={15} color="var(--bby-yellow)" /> Coaching Plan Reader (Text-to-Speech)
-                </h4>
-                <div className="flex-row gap-sm mt-xs">
-                  <button 
-                    data-testid="tts-play-btn"
-                    className={`btn btn-tts cursor-pointer ${isPlayingSpeech && !isPausedSpeech ? 'btn-secondary' : 'btn-accent'}`} 
-                    onClick={() => handleSpeech(selectedSession.notes)}
-                  >
-                    <Volume2 size={13} /> {isPlayingSpeech ? (isPausedSpeech ? 'Resume' : 'Pause') : 'Read Plan Aloud'}
-                  </button>
-                  {isPlayingSpeech && (
-                    <button 
-                      data-testid="tts-stop-btn"
-                      className="btn btn-secondary btn-tts-stop cursor-pointer" 
-                      onClick={handleStopSpeech}
-                    >
-                      Stop
-                    </button>
-                  )}
-                </div>
-                {isPlayingSpeech && (
-                  <div className="tts-status">
-                    <span className="pulse-dot pulse-dot-mini"></span>
-                    <span>{isPausedSpeech ? 'Paused' : 'Currently speaking...'}</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex-end">
-                <button 
-                  data-testid="modal-close-btn"
-                  className="btn btn-secondary btn-close-modal cursor-pointer" 
-                  onClick={() => setSelectedSession(null)}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <CoachingDetailsModal
+          session={selectedSession}
+          onClose={() => setSelectedSession(null)}
+          isPlayingSpeech={isPlayingSpeech}
+          isPausedSpeech={isPausedSpeech}
+          onSpeechPlay={handleSpeech}
+          onSpeechStop={handleStopSpeech}
+        />
       )}
 
     </div>

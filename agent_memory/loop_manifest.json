@@ -1,6 +1,6 @@
 {
     "status":  "ACTIVE",
-    "current_checkpoint":  110,
+    "current_checkpoint":  120,
     "active_vetos":  [
 
                      ],
@@ -121,9 +121,7 @@
                             "src/components/RosterImporterModal.tsx",
                             "src/components/ServiceWorkerBanner.tsx",
                             "src/components/ShiftSimulator.tsx",
-                            "src/components/SyncManager.tsx"
-                        ],
-    "remaining_queue":  [
+                            "src/components/SyncManager.tsx",
                             "src/components/ZoneScheduler.tsx",
                             "src/data/mockRentsDue.ts",
                             "src/hooks/FloorLeader/useFloorLogging.ts",
@@ -133,7 +131,9 @@
                             "src/hooks/useCategoryAutoExpand.ts",
                             "src/hooks/useFloorLeaderTracker.ts",
                             "src/hooks/useLiveFloorShadow.ts",
-                            "src/hooks/useMediaQuery.ts",
+                            "src/hooks/useMediaQuery.ts"
+                        ],
+    "remaining_queue":  [
                             "src/hooks/useScheduleParser.ts",
                             "src/hooks/useStoreRoster.ts",
                             "src/pages/AdvisorDashboardPage.tsx",

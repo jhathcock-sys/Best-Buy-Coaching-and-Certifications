@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Users, Clock, LayoutGrid, Zap } from 'lucide-react';
 import ZoneGrid from './ZoneScheduler/ZoneGrid';
 import ZoneTimeline from './ZoneScheduler/ZoneTimeline';
@@ -50,6 +50,14 @@ export default function ZoneScheduler({
   const [viewMode, setViewMode] = useState<'grid' | 'timeline'>('grid');
   const [isDeploying, setIsDeploying] = useState(false);
 
+  const isMounted = useRef(true);
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   const handleAutoDeploy = async () => {
     if (!apiKey) {
       toast.error('API Key missing. Cannot Auto-Deploy.');
@@ -62,15 +70,20 @@ export default function ZoneScheduler({
       toastId = toast.loading('Gemini is analyzing floor traffic and optimizing roster...');
       const assignments = await generateSmartZoning(roster, ZONES, apiKey, playbookSettings);
       
+      if (!isMounted.current) return;
+
       if (onImportSchedule) {
         onImportSchedule({ zoneAssignments: assignments, breakSchedule: EMPTY_ARR });
       }
       toast.success('Roster optimized and Auto-Deployed!', { id: toastId });
     } catch (err) {
+      if (!isMounted.current) return;
       toast.error('Auto-Deploy failed. Check API key and network.', { id: toastId });
       console.error(err);
     } finally {
-      setIsDeploying(false);
+      if (isMounted.current) {
+        setIsDeploying(false);
+      }
     }
   };
 

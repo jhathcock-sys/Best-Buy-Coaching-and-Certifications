@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { generateCoachingLogGemini } from '../services/ai';
 import { useStore } from '../store/useStore';
 import { Employee } from '../types';
@@ -30,6 +30,14 @@ export function useLiveFloorShadow({
   const [department, setDepartment] = useState('General Sales');
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+
+  const isMounted = useRef(true);
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
 
   useEffect(() => {
@@ -236,6 +244,8 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
           discFocus
         );
 
+        if (!isMounted.current) return;
+
         if (aiResponse) {
           logText = `## 📋 Coaching Plan: ${selectedEmployee.name} (Live Floor Shadowing) — DISC Focus: ${aiResponse.discStep || discFocus}
           
@@ -258,9 +268,12 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
         logText = generateGrowLog();
       }
     } catch (e) {
+      if (!isMounted.current) return;
       console.error("AI coaching log generation failed, falling back to local template", e);
       logText = generateGrowLog();
     }
+
+    if (!isMounted.current) return;
 
     setCompiledLog(logText);
     setIsGenerating(false);

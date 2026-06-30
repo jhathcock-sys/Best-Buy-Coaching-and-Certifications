@@ -19,9 +19,7 @@ describe('geminiCoaching - generateCoachingLogGemini', () => {
 
   it('correctly generates a coaching log based on inputs', async () => {
     const mockApiResponse = {
-      data: {
-        text: JSON.stringify({ what: 'Mocked What', how: 'Mocked How', why: 'Mocked Why' })
-      }
+      data: { what: 'Mocked What', how: 'Mocked How', why: 'Mocked Why' }
     };
     
     mockHttpsCallableFn.mockResolvedValueOnce(mockApiResponse);
@@ -50,19 +48,15 @@ describe('geminiCoaching - generateCoachingLogGemini', () => {
     expect(mockHttpsCallableFn).toHaveBeenCalledTimes(1);
     
     const callArgs = mockHttpsCallableFn.mock.calls[0][0];
-    const promptText = callArgs.prompt;
-    
-    expect(promptText).toContain('John Doe');
-    expect(promptText).toContain('Memberships');
-    expect(promptText).toContain('Solve, Close');
-    expect(promptText).toContain('Be extremely encouraging');
+    expect(callArgs.name).toBe('John Doe');
+    expect(callArgs.gapType).toBe('Memberships');
+    expect(callArgs.selectedDiscSteps).toEqual(['Solve', 'Close']);
+    expect(callArgs.playbookSettings.customSystemPrompt).toBe('Be extremely encouraging');
   });
 
   it('handles empty playbookSettings gracefully', async () => {
     const mockApiResponse = {
-      data: {
-        text: JSON.stringify({ what: 'Default What' })
-      }
+      data: { what: 'Default What' }
     };
     
     mockHttpsCallableFn.mockResolvedValueOnce(mockApiResponse);

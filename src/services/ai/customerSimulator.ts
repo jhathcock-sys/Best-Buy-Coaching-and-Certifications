@@ -348,110 +348,21 @@ export async function runGeminiSimulationStep(apiKey: string | undefined, messag
 export async function evaluateSessionGemini(apiKey: string | undefined, history: SimulationHistory, scenario: PlaybookScenario, playbookSettings: PlaybookSettings) {
   try {
     if (!history || !scenario) return evaluateSessionOffline(history);
-    const model = getGeminiModel(apiKey, playbookSettings);
     
-    const dialogueStr = (history?.messages || []).map(m => `${m.sender}: ${m.text}`).join('\n');
-    
-    const evaluationPrompt = `
-      You are a Best Buy Sales Evaluator and Coach. Evaluate the following sales roleplay transcript between a Sales Advisor and a Customer (${scenario?.name || 'Customer'}).
-      
-      Transcript:
-      ${dialogueStr}
-      
-      Playbook standards:
-      - Allowed Terms: ${playbookSettings?.allowedPhrases ? playbookSettings.allowedPhrases.join(', ') : 'My Best Buy Total/Plus, GSP'}
-      - Prohibited Terms: ${playbookSettings?.forbiddenPhrases ? playbookSettings.forbiddenPhrases.join(', ') : 'warranty'}
+    const { getFunctions, httpsCallable } = await import('firebase/functions');
+    const { app } = await import('../firebase');
+    const functions = getFunctions(app);
+    const auditDialogue = httpsCallable(functions, 'auditDialogue');
 
-      Evaluate on a 0-100 scale for each Best Buy Sales Flow Step:
-      - Connect: Greeting, welcoming, building emotional connection/rapport.
-      - Discover: Probing questions, understanding the 'why' and context of college.
-      - Recommend: Correct product suggestion, mentioning My Best Buy memberships.
-      - Protect: Recommending Geek Squad Protection (GSP) or AppleCare.
-      - Close: Offering Best Buy Credit Card financing/rewards, and asking for the sale.
-
-      Also evaluate on Best Buy's core values:
-      - Be Human
-      - Make It Easy
-      - Show What's Possible
-
-      Provide the coaching feedback using the GROW framework:
-      - Goal: The ideal standard.
-      - Reality: What the advisor actually did well or missed.
-      - Options: 3 concrete action steps they can take next time.
-      - Will: A call to action.
-
-      You must reply strictly in structured JSON matching this schema:
-      {
-        "overallScore": number (0-100),
-        "passed": boolean (overallScore >= 80),
-        "breakdown": {
-          "connect": number,
-          "discover": number,
-          "recommend": number,
-          "protect": number,
-          "close": number
-        },
-        "values": {
-          "beHuman": number,
-          "makeItEasy": number,
-          "showWhatPossible": number
-        },
-        "growReport": {
-          "goal": "string",
-          "reality": "string",
-          "options": ["string", "string", "string"],
-          "will": "string"
-        }
-      }
-    `;
-
-    const responseSchema = {
-      type: SchemaType.OBJECT,
-      properties: {
-        overallScore: { type: SchemaType.NUMBER },
-        passed: { type: SchemaType.BOOLEAN },
-        breakdown: {
-          type: SchemaType.OBJECT,
-          properties: {
-            connect: { type: SchemaType.NUMBER },
-            discover: { type: SchemaType.NUMBER },
-            recommend: { type: SchemaType.NUMBER },
-            protect: { type: SchemaType.NUMBER },
-            close: { type: SchemaType.NUMBER }
-          },
-          required: ["connect", "discover", "recommend", "protect", "close"]
-        },
-        values: {
-          type: SchemaType.OBJECT,
-          properties: {
-            beHuman: { type: SchemaType.NUMBER },
-            makeItEasy: { type: SchemaType.NUMBER },
-            showWhatPossible: { type: SchemaType.NUMBER }
-          },
-          required: ["beHuman", "makeItEasy", "showWhatPossible"]
-        },
-        growReport: {
-          type: SchemaType.OBJECT,
-          properties: {
-            goal: { type: SchemaType.STRING },
-            reality: { type: SchemaType.STRING },
-            options: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-            will: { type: SchemaType.STRING }
-          },
-          required: ["goal", "reality", "options", "will"]
-        }
-      },
-      required: ["overallScore", "passed", "breakdown", "values", "growReport"]
-    };
-
-    const result = await executeWithRetry(() => model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: evaluationPrompt }] }],
-      generationConfig: {
-        responseMimeType: 'application/json',
-        responseSchema: responseSchema
-      }
+    const result = await executeWithRetry(() => auditDialogue({
+      history,
+      scenario,
+      playbookSettings,
+      apiKey
     }));
-    const parsed = JSON.parse(result.response.text());
+    
+    const parsed = result.data as any;
+    
     return {
       overallScore: parsed?.overallScore || 0,
       passed: parsed?.passed ?? false,

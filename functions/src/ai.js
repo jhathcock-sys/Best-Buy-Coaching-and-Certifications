@@ -29,7 +29,7 @@ exports.generateCoaching = functions.https.onRequest((req, res) => {
         return res.status(403).json({ error: 'Forbidden: Invalid Token' });
       }
 
-      const { name, gapType, gapDetails, positives, rawObservation, playbookSettings, selectedDiscSteps, apiKey } = req.body;
+      const { name, gapType, gapDetails, positives, rawObservation, playbookSettings, selectedDiscSteps, apiKey } = req.body || {};
       const aiInstance = getGeminiClient(apiKey);
       const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-flash' });
       
@@ -87,11 +87,18 @@ exports.generateCoaching = functions.https.onRequest((req, res) => {
       }, requestOptions);
 
       // AI Veto Fix: Safe parsing
+      let jsonStr = '';
       try {
-        const data = JSON.parse(result.response.text());
+        jsonStr = result.response.text();
+      } catch (safetyError) {
+        return res.status(500).json({ error: 'Safety block or empty response.' });
+      }
+
+      try {
+        const data = JSON.parse(jsonStr);
         return res.status(200).json(data);
       } catch (parseError) {
-        return res.status(500).json({ error: 'AI returned invalid JSON', raw: result.response.text() });
+        return res.status(500).json({ error: 'AI returned invalid JSON', raw: jsonStr });
       }
     } catch (error) {
       console.error('Error generating coaching log:', error);
@@ -114,7 +121,7 @@ exports.auditDialogue = functions.https.onRequest((req, res) => {
       try { await admin.auth().verifyIdToken(authHeader.split('Bearer ')[1]); } 
       catch { return res.status(403).json({ error: 'Forbidden' }); }
 
-      const { history, scenario, playbookSettings, apiKey } = req.body;
+      const { history, scenario, playbookSettings, apiKey } = req.body || {};
       
       // QA Veto Fix: Null guards
       const messages = history?.messages || [];
@@ -154,11 +161,18 @@ exports.auditDialogue = functions.https.onRequest((req, res) => {
         }
       }, requestOptions);
 
+      let jsonStr = '';
       try {
-        const data = JSON.parse(result.response.text());
+        jsonStr = result.response.text();
+      } catch (safetyError) {
+        return res.status(500).json({ error: 'Safety block or empty response.' });
+      }
+
+      try {
+        const data = JSON.parse(jsonStr);
         return res.status(200).json(data);
       } catch (parseError) {
-        return res.status(500).json({ error: 'Invalid JSON', raw: result.response.text() });
+        return res.status(500).json({ error: 'Invalid JSON', raw: jsonStr });
       }
     } catch (error) {
       console.error('Error auditing dialogue:', error);
@@ -170,11 +184,11 @@ exports.auditDialogue = functions.https.onRequest((req, res) => {
 // 4. Generic Callable AI generation function
 exports.generateAIContent = functions.https.onCall(async (data, context) => {
   // Security Veto Fix: Context Auth
-  // if (!context.auth) {
-  //   throw new functions.https.HttpsError('unauthenticated', 'Endpoint requires authentication.');
-  // }
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'Endpoint requires authentication.');
+  }
 
-  const payload = data.data || data;
+  const payload = (data.data || data) || {};
   try {
     const { prompt, systemInstruction, modelConfig, isJSON, isVision, base64Image, mimeType, isProMode, apiKey } = payload;
     if (!prompt || prompt.trim() === '') {
@@ -186,7 +200,12 @@ exports.generateAIContent = functions.https.onCall(async (data, context) => {
     const model = aiInstance.getGenerativeModel({ model: modelName });
     
     const generationConfig = { maxOutputTokens: 8192 };
-    if (isJSON) generationConfig.responseMimeType = 'application/json';
+    if (isJSON) {
+      generationConfig.responseMimeType = 'application/json';
+      if (!modelConfig?.responseSchema) {
+        throw new functions.https.HttpsError('invalid-argument', 'JSON generation requires a valid responseSchema.');
+      }
+    }
     if (modelConfig?.responseSchema) generationConfig.responseSchema = modelConfig.responseSchema;
     
     const parts = [];
@@ -223,7 +242,7 @@ exports.auditStoreFloor = functions.https.onCall(async (data, context) => {
   }
 
   try {
-    const { base64Image, mimeType, playbookSettings } = data.data || data;
+    const { base64Image, mimeType, playbookSettings } = (data.data || data) || {};
     if (!base64Image) {
       throw new functions.https.HttpsError('invalid-argument', 'Image data is missing.');
     }
@@ -275,12 +294,18 @@ exports.auditStoreFloor = functions.https.onCall(async (data, context) => {
       }
     }, requestOptions);
     
-    const jsonStr = result.response.text();
+    let jsonStr = '';
+    try {
+      jsonStr = result.response.text();
+    } catch (e) {
+      throw new functions.https.HttpsError('internal', 'Safety violation or empty response from AI.');
+    }
+    
     try {
       const parsed = JSON.parse(jsonStr);
       return parsed;
     } catch (e) {
-      throw new functions.https.HttpsError('internal', 'AI returned invalid JSON');
+      throw new functions.https.HttpsError('internal', 'AI returned invalid JSON: ' + jsonStr);
     }
   } catch (error) {
     if (error instanceof functions.https.HttpsError) throw error;

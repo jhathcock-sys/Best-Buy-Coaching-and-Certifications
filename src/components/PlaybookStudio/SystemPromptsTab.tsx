@@ -15,6 +15,12 @@ export default function SystemPromptsTab() {
   const [isAddingLog, setIsAddingLog] = useState(false);
   const [newLogBody, setNewLogBody] = useState('');
 
+  React.useEffect(() => {
+    if (playbookSettings?.customSystemPrompt !== undefined) {
+      setCustomSystemPrompt(playbookSettings.customSystemPrompt);
+    }
+  }, [playbookSettings?.customSystemPrompt]);
+
   const trainingLogs = playbookSettings?.trainingLogs || [];
 
   const handleSaveSystemPrompt = () => {
@@ -56,7 +62,7 @@ export default function SystemPromptsTab() {
 
   return (
     <>
-        <div className="flex-column gap-2xl w-full max-w-[950px] mx-auto">
+        <div className="flex-column gap-2xl w-full max-w-[950px] mx-auto" data-testid="system-prompts-tab">
           <div className="glass-card">
             <h3 className="text-xl mb-md flex-center-y gap-sm">
               <BookOpen size={20} color="var(--info)" /> AI System Prompts Configurator

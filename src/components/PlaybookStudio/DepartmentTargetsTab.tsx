@@ -43,7 +43,7 @@ export default function DepartmentTargetsTab() {
 
   return (
     <>
-        <div className="w-full max-w-[850px] mx-auto">
+        <div className="w-full max-w-[850px] mx-auto" data-testid="department-targets-tab">
           <div className="glass-card flex-column gap-xl">
             <h3 className="text-xl flex-center-y gap-sm text-bby-yellow m-0">
               <Compass size={20} color="var(--bby-yellow)" /> Department Goals Configurator

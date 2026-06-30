@@ -13,6 +13,12 @@ export default function StorePinSecurityCard() {
 
   const [storePin, setStorePin] = useState(playbookSettings?.storePin || '1234');
 
+  React.useEffect(() => {
+    if (playbookSettings?.storePin) {
+      setStorePin(playbookSettings.storePin);
+    }
+  }, [playbookSettings?.storePin]);
+
   const handleSavePin = () => {
     if (!playbookSettings || !saveSettings || !apiKey) return;
     saveSettings({
@@ -26,7 +32,7 @@ export default function StorePinSecurityCard() {
   };
 
   return (
-    <div className="glass-card">
+    <div className="glass-card" data-testid="store-pin-security-card">
       <h3 className="text-xl mb-md flex-center-y gap-sm">
         <Key size={20} color="var(--bby-yellow)" /> Store Passcode PIN Security
       </h3>

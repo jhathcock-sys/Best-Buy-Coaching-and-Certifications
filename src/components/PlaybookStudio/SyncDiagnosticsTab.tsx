@@ -85,7 +85,7 @@ export default function SyncDiagnosticsTab() {
 
   return (
     <>
-      <div className="flex-column gap-xl">
+      <div className="flex-column gap-xl" data-testid="sync-diagnostics-tab">
         <div className="glass-card flex-column w-full gap-lg">
           <div>
             <h3 className={`flex-center justify-start mb-sm gap-sm text-xl ${dbConnected ? 'text-success' : 'text-bby-blue'}`}>

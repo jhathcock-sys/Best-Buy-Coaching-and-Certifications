@@ -6,10 +6,12 @@ import { Manager } from '../../../types/index';
 import { StoreState } from '../../../types/store';
 
 export default function SupervisorProfilesCard() {
-  const { managers, saveManagers } = useStore(useShallow((state: StoreState) => ({
-    managers: state.managers || [],
+  const { managers: rawManagers, saveManagers } = useStore(useShallow((state: StoreState) => ({
+    managers: state.managers,
     saveManagers: state.saveManagers
   })));
+  
+  const managers = rawManagers || [];
 
   const [newManagerName, setNewManagerName] = useState('');
   const [newManagerRole, setNewManagerRole] = useState('Experience Supervisor Sales');
@@ -74,7 +76,7 @@ export default function SupervisorProfilesCard() {
   };
 
   return (
-    <div className="glass-card">
+    <div className="glass-card" data-testid="supervisor-profiles-card">
       <h3 className="text-xl mb-md flex-center-y gap-sm">
         <Users size={20} color="var(--info)" /> Supervisor Profiles & PINs
       </h3>

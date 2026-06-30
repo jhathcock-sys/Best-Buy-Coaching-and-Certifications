@@ -64,7 +64,7 @@ export default function BbyVocabTab() {
 
   return (
     <>
-        <div className="w-full max-w-[800px] mx-auto">
+        <div className="w-full max-w-[800px] mx-auto" data-testid="bby-vocab-tab">
           <div className="glass-card flex-column gap-xl p-xl">
             <div>
               <h3 className="text-xl mb-sm flex-center-y gap-sm">

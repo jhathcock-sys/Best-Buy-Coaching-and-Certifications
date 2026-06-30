@@ -10,9 +10,21 @@ export default function AiEngineTab() {
   const [aiMode, setAiMode] = useState<'local' | 'flash' | 'pro'>((playbookSettings?.aiMode as 'local' | 'flash' | 'pro') || (playbookSettings?.useGemini ? 'flash' : 'local'));
   const [localApiKey, setLocalApiKey] = useState(apiKey || '');
 
+  React.useEffect(() => {
+    if (playbookSettings) {
+      setAiMode((playbookSettings.aiMode as 'local' | 'flash' | 'pro') || (playbookSettings.useGemini ? 'flash' : 'local'));
+    }
+  }, [playbookSettings]);
+
+  React.useEffect(() => {
+    if (apiKey) {
+      setLocalApiKey(apiKey);
+    }
+  }, [apiKey]);
+
   return (
     <>
-      <div className="w-full max-w-[800px] mx-auto">
+      <div className="w-full max-w-[800px] mx-auto" data-testid="ai-engine-tab">
         <div className="glass-card">
           <div className="flex-between align-center mb-lg">
             <h3 className="flex-center-y gap-sm text-lg m-0">

@@ -43,6 +43,13 @@ export default function RentsDueLedger({
   const [isSyncing, setIsSyncing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [successToast, setSuccessToast] = useState<string | null>(null);
+  const isMounted = React.useRef(true);
+
+  React.useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
   
   const addFollowUpTask = useStore(state => state.addFollowUpTask);
   const playbookSettings = useStore(state => state.playbookSettings);
@@ -54,7 +61,9 @@ export default function RentsDueLedger({
     try {
       await handleSyncToRoster();
     } finally {
-      setIsSyncing(false);
+      if (isMounted.current) {
+        setIsSyncing(false);
+      }
     }
   };
 
@@ -72,14 +81,20 @@ export default function RentsDueLedger({
     try {
       const tasks = await generateRentRecoveryPlans(offTrackEmployees, playbookSettings || {}, undefined);
       tasks.forEach(task => addFollowUpTask(task));
-      setSuccessToast(`Generated recovery plans for ${tasks.length} off-track employees.`);
-      setTimeout(() => setSuccessToast(null), 3000);
+      if (isMounted.current) {
+        setSuccessToast(`Generated recovery plans for ${tasks.length} off-track employees.`);
+        setTimeout(() => isMounted.current && setSuccessToast(null), 3000);
+      }
     } catch (err) {
       console.error(err);
-      setSuccessToast('Failed to generate recovery plans.');
-      setTimeout(() => setSuccessToast(null), 3000);
+      if (isMounted.current) {
+        setSuccessToast('Failed to generate recovery plans.');
+        setTimeout(() => isMounted.current && setSuccessToast(null), 3000);
+      }
     } finally {
-      setIsGenerating(false);
+      if (isMounted.current) {
+        setIsGenerating(false);
+      }
     }
   };
 
@@ -90,7 +105,7 @@ export default function RentsDueLedger({
   return (
     <>
         {/* AUDIT RESULTS VIEW */}
-        <div className="flex-column gap-xl">
+        <div className="flex-column gap-xl" data-testid="rents-due-ledger">
           
           {/* Top KPI Cards */}
           <div className="metrics-grid">
@@ -141,15 +156,10 @@ export default function RentsDueLedger({
             
             <div className="flex gap-sm">
               <button 
-                className={`btn btn-secondary px-md py-sm text-sm cursor-pointer ${isGenerating ? 'opacity-70' : ''}`}
+                className={`btn btn-secondary px-md py-sm text-sm cursor-pointer flex-center-y gap-xs transition-normal ${isGenerating ? 'opacity-90 border-bby-yellow shadow-[0_0_15px_var(--bby-yellow)]' : ''}`}
                 onClick={handleGenerateRecoveryPlans}
                 disabled={isGenerating || employees.length === 0}
                 data-testid="generate-recovery-plans-btn"
-                style={{
-                  borderColor: isGenerating ? 'var(--bby-yellow)' : '',
-                  boxShadow: isGenerating ? '0 0 15px var(--bby-yellow)' : '',
-                  transition: 'all 0.3s'
-                }}
               >
                 <Wand2 size={16} className={isGenerating ? 'animate-pulse text-bby-yellow' : ''} />
                 {isGenerating ? 'Generating...' : 'Generate AI Recovery Plans'}
@@ -172,7 +182,7 @@ export default function RentsDueLedger({
           )}
 
           {successToast && (
-            <div className="p-md rounded-xl text-sm text-white flex-center-y gap-xs animate-fade-in" style={{ backgroundColor: 'var(--bby-blue)', border: '1px solid rgba(0,70,190,0.3)' }} data-testid="ai-success-message">
+            <div className="p-md rounded-xl text-sm text-white flex-center-y gap-xs animate-fade-in bg-bby-blue border border-[rgba(0,70,190,0.3)]" data-testid="ai-success-message">
               <CheckCircle2 size={16} /> {successToast}
             </div>
           )}

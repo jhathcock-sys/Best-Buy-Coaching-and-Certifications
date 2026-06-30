@@ -1,6 +1,6 @@
 {
     "status":  "ACTIVE",
-    "current_checkpoint":  40,
+    "current_checkpoint":  50,
     "active_vetos":  [
 
                      ],
@@ -51,9 +51,7 @@
                             "src/components/layout/MobileNav.tsx",
                             "src/components/layout/Sidebar.tsx",
                             "src/components/LiveFloorShadow/ShadowStep1Employee.tsx",
-                            "src/components/LiveFloorShadow/ShadowStep2Observation.tsx"
-                        ],
-    "remaining_queue":  [
+                            "src/components/LiveFloorShadow/ShadowStep2Observation.tsx",
                             "src/components/LiveFloorShadow/ShadowStep3Coaching.tsx",
                             "src/components/PerformanceWizardModal/WizardStep1General.tsx",
                             "src/components/PerformanceWizardModal/WizardStep2Attach.tsx",
@@ -63,7 +61,9 @@
                             "src/components/Playbook/CustomScenario/ScenarioKeywordsFields.tsx",
                             "src/components/Playbook/CustomScenario/ScenarioObjectionsFields.tsx",
                             "src/components/Playbook/CustomScenarioForm.tsx",
-                            "src/components/Playbook/CustomScenariosTab.tsx",
+                            "src/components/Playbook/CustomScenariosTab.tsx"
+                        ],
+    "remaining_queue":  [
                             "src/components/PlaybookStudio/SupervisorProfiles/StorePinSecurityCard.tsx",
                             "src/components/PlaybookStudio/SupervisorProfiles/SupervisorProfilesCard.tsx",
                             "src/components/PlaybookStudio/AiEngineTab.tsx",

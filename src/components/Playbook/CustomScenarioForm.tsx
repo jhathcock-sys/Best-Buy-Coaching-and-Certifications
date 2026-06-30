@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Sparkles } from 'lucide-react';
 import { generateCustomScenario } from '../../services/ai';
 import { useStore } from '../../store/useStore';
@@ -33,6 +33,13 @@ export default function CustomScenarioForm() {
   const [aiError, setAiError] = useState('');
   const [formError, setFormError] = useState('');
   const [formSuccess, setFormSuccess] = useState('');
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const { apiKey, importCustomScenario } = useStore(useShallow((state: StoreState) => ({
     apiKey: state.apiKey,
@@ -45,24 +52,30 @@ export default function CustomScenarioForm() {
     setAiError('');
     try {
       const generated = await generateCustomScenario(aiPrompt, apiKey);
-      setScenTitle(generated?.title || '');
-      setScenName(generated?.name || '');
-      setScenCategory(generated?.category || 'Computing');
-      setScenDifficulty(generated?.difficulty || 'Medium');
-      setScenGreeting(generated?.greeting || '');
-      setScenNeeds(generated?.customerNeeds || '');
-      setScenMembObj(generated?.objections?.memberships || '');
-      setScenProtObj(generated?.objections?.protection || '');
-      setScenCardObj(generated?.objections?.creditCard || '');
-      setScenConnectKw(generated?.keywords?.connect || '');
-      setScenDiscoverKw(generated?.keywords?.discover || '');
-      setScenRecommendKw(generated?.keywords?.recommend || '');
-      setScenProtectKw(generated?.keywords?.protect || '');
-      setAiPrompt('');
+      if (isMounted.current) {
+        setScenTitle(generated?.title || '');
+        setScenName(generated?.name || '');
+        setScenCategory(generated?.category || 'Computing');
+        setScenDifficulty(generated?.difficulty || 'Medium');
+        setScenGreeting(generated?.greeting || '');
+        setScenNeeds(generated?.customerNeeds || '');
+        setScenMembObj(generated?.objections?.memberships || '');
+        setScenProtObj(generated?.objections?.protection || '');
+        setScenCardObj(generated?.objections?.creditCard || '');
+        setScenConnectKw(generated?.keywords?.connect || '');
+        setScenDiscoverKw(generated?.keywords?.discover || '');
+        setScenRecommendKw(generated?.keywords?.recommend || '');
+        setScenProtectKw(generated?.keywords?.protect || '');
+        setAiPrompt('');
+      }
     } catch (err: unknown) {
-      setAiError(err instanceof Error ? err.message : 'Generation failed');
+      if (isMounted.current) {
+        setAiError(err instanceof Error ? err.message : 'Generation failed');
+      }
     } finally {
-      setIsGenerating(false);
+      if (isMounted.current) {
+        setIsGenerating(false);
+      }
     }
   };
 

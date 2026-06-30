@@ -8,9 +8,11 @@ import { CustomScenario } from '../../types/index';
 
 export default function CustomScenariosTab() {
   const { customScenarios, deleteCustomScenario } = useStore(useShallow((state: StoreState) => ({
-    customScenarios: state.customScenarios || [],
+    customScenarios: state.customScenarios,
     deleteCustomScenario: state.deleteCustomScenario
   })));
+
+  const scenariosToRender = customScenarios || [];
 
   return (
     <div>
@@ -28,12 +30,12 @@ export default function CustomScenariosTab() {
             </div>
 
             <div className="flex-column gap-md">
-              {customScenarios.length === 0 ? (
+              {scenariosToRender.length === 0 ? (
                 <div className="text-center p-3xl border-2 border-dashed border-[var(--border-glass)] rounded-2xl text-muted text-sm">
                   No custom roleplay scenarios added yet. Use the form on the left to configure your first one!
                 </div>
               ) : (
-                customScenarios.map((scen: CustomScenario) => (
+                scenariosToRender.map((scen: CustomScenario) => (
                   <div 
                     key={scen.id}
                     className="flex-between items-center p-md bg-white/5 border border-[var(--border-glass)] rounded-xl"

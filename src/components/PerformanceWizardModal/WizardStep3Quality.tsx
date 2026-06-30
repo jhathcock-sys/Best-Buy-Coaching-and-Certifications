@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Wand2, Loader2, Sparkles } from 'lucide-react';
 import { generatePerformanceGap } from '../../services/ai';
 import { useStore } from '../../store/useStore';
@@ -23,6 +23,13 @@ export default function WizardStep3Quality({
   const [isGenerating, setIsGenerating] = useState(false);
   const [aiError, setAiError] = useState('');
   const apiKey = useStore((state: StoreState) => state.apiKey);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const handleAiAnalyze = async () => {
     if (!apiKey) {
@@ -42,11 +49,17 @@ export default function WizardStep3Quality({
         departmentGoals
       );
       
-      setEditForm(prev => ({ ...prev, gap: gapDesc }));
+      if (isMounted.current) {
+        setEditForm(prev => ({ ...prev, gap: gapDesc }));
+      }
     } catch (err: unknown) {
-      setAiError(err instanceof Error ? err.message : 'Failed to auto-generate gap.');
+      if (isMounted.current) {
+        setAiError(err instanceof Error ? err.message : 'Failed to auto-generate gap.');
+      }
     } finally {
-      setIsGenerating(false);
+      if (isMounted.current) {
+        setIsGenerating(false);
+      }
     }
   };
 

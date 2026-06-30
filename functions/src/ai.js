@@ -4,7 +4,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const cors = require('cors')({ origin: true });
 
 function getGeminiClient(clientApiKey = null) {
-  const apiKey = clientApiKey || process.env.GEMINI_API_KEY || functions.config().gemini?.key;
+  const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error('Gemini API key is not configured in Cloud Functions.');
   }
@@ -12,173 +12,152 @@ function getGeminiClient(clientApiKey = null) {
 }
 
 // 1. Generate Coaching Log via Gemini 3.5 Pro
-exports.generateCoaching = functions.https.onRequest((req, res) => {
-  return cors(req, res, async () => {
-    try {
-      if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
-      
-      // Security Veto Fix: Validate Firebase ID Token
-      const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Unauthorized: Missing Bearer Token' });
-      }
-      const token = authHeader.split('Bearer ')[1];
-      try {
-        await admin.auth().verifyIdToken(token);
-      } catch (err) {
-        return res.status(403).json({ error: 'Forbidden: Invalid Token' });
-      }
-
-      const { name, gapType, gapDetails, positives, rawObservation, playbookSettings, selectedDiscSteps, apiKey } = req.body || {};
-      const aiInstance = getGeminiClient(apiKey);
-      const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-flash' });
-      
-      const stepsText = Array.isArray(selectedDiscSteps) ? selectedDiscSteps.join(', ') : (selectedDiscSteps || 'Solve');
-      
-      let fewShotTrainingText = '';
-      if (playbookSettings?.trainingLogs?.length > 0) {
-        fewShotTrainingText = `
-          MATCH THESE EXEMPLARY COACHING LOGS EXACTLY:
-          ${playbookSettings.trainingLogs.map((log, idx) => `EXEMPLAR LOG #${idx + 1}:\n${log}`).join('\n\n')}
-        `;
-      }
-
-      const prompt = `
-        You are an expert Retail Management Performance Coach...
-        Employee Name: ${name || 'Unknown'}
-        Focus Area: ${gapType || 'General'}
-        Raw Input/Gap Details: ${gapDetails || 'Needs performance coaching'}
-        Observed Strengths: ${positives || 'None provided.'}
-        Raw Observation: ${rawObservation || 'None provided.'}
-        Selected DISC Steps: ${stepsText}
-        
-        ${fewShotTrainingText}
-        ${playbookSettings?.customSystemPrompt ? `ADDITIONAL CUSTOM COACHING GUIDELINES:\n${playbookSettings.customSystemPrompt}` : ''}
-        
-        Reply strictly in JSON matching:
-        { "what": "string", "how": "string", "why": "string", "strengths": "string", "metricGap": "string", "expectation": "string", "validation": "string", "discStep": "Discover" }
-      `;
-
-      // QA Veto Fix: Add strict 30s timeout
-      const requestOptions = { timeout: 30000 };
-      const result = await model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: 'OBJECT',
-            properties: {
-              what: { type: 'STRING' },
-              how: { type: 'STRING' },
-              why: { type: 'STRING' },
-              strengths: { type: 'STRING' },
-              metricGap: { type: 'STRING' },
-              expectation: { type: 'STRING' },
-              validation: { type: 'STRING' },
-              discStep: { type: 'STRING' }
-            },
-            required: ["what", "how", "why", "strengths", "metricGap", "expectation", "validation", "discStep"]
-          },
-          maxOutputTokens: 8192,
-          temperature: 0.3,
-          topK: 40,
-          topP: 0.8
-        }
-      }, requestOptions);
-
-      // AI Veto Fix: Safe parsing
-      let jsonStr = '';
-      try {
-        jsonStr = result.response.text();
-      } catch (safetyError) {
-        return res.status(500).json({ error: 'Safety block or empty response.' });
-      }
-
-      try {
-        const data = JSON.parse(jsonStr);
-        return res.status(200).json(data);
-      } catch (parseError) {
-        return res.status(500).json({ error: 'AI returned invalid JSON', raw: jsonStr });
-      }
-    } catch (error) {
-      console.error('Error generating coaching log:', error);
-      return res.status(500).json({ error: error.message });
+exports.generateCoaching = functions.https.onCall(async (data, context) => {
+  try {
+    if (!context.auth) {
+      throw new functions.https.HttpsError('unauthenticated', 'Endpoint requires authentication.');
     }
-  });
+
+    const payload = (data.data || data) || {};
+    const { name, gapType, gapDetails, positives, rawObservation, playbookSettings, selectedDiscSteps, apiKey } = payload;
+    const aiInstance = getGeminiClient(apiKey);
+    const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-flash' });
+    
+    const stepsText = Array.isArray(selectedDiscSteps) ? selectedDiscSteps.join(', ') : (selectedDiscSteps || 'Solve');
+    
+    let fewShotTrainingText = '';
+    if (playbookSettings?.trainingLogs?.length > 0) {
+      fewShotTrainingText = `
+        MATCH THESE EXEMPLARY COACHING LOGS EXACTLY:
+        ${playbookSettings.trainingLogs.map((log, idx) => `EXEMPLAR LOG #${idx + 1}:\n${log}`).join('\n\n')}
+      `;
+    }
+
+    const prompt = `
+      You are an expert Retail Management Performance Coach...
+      Employee Name: ${name || 'Unknown'}
+      Focus Area: ${gapType || 'General'}
+      Raw Input/Gap Details: ${gapDetails || 'Needs performance coaching'}
+      Observed Strengths: ${positives || 'None provided.'}
+      Raw Observation: ${rawObservation || 'None provided.'}
+      Selected DISC Steps: ${stepsText}
+      
+      ${fewShotTrainingText}
+      ${playbookSettings?.customSystemPrompt ? `ADDITIONAL CUSTOM COACHING GUIDELINES:\n${playbookSettings.customSystemPrompt}` : ''}
+      
+      Reply strictly in JSON matching:
+      { "what": "string", "how": "string", "why": "string", "strengths": "string", "metricGap": "string", "expectation": "string", "validation": "string", "discStep": "Discover" }
+    `;
+
+    const requestOptions = { timeout: 30000 };
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: 'OBJECT',
+          properties: {
+            what: { type: 'STRING' },
+            how: { type: 'STRING' },
+            why: { type: 'STRING' },
+            strengths: { type: 'STRING' },
+            metricGap: { type: 'STRING' },
+            expectation: { type: 'STRING' },
+            validation: { type: 'STRING' },
+            discStep: { type: 'STRING' }
+          },
+          required: ["what", "how", "why", "strengths", "metricGap", "expectation", "validation", "discStep"]
+        },
+        maxOutputTokens: 8192,
+        temperature: 0.3,
+        topK: 40,
+        topP: 0.8
+      }
+    }, requestOptions);
+
+    let jsonStr = '';
+    try {
+      jsonStr = result.response.text();
+    } catch (safetyError) {
+      throw new functions.https.HttpsError('internal', 'Safety block or empty response.');
+    }
+
+    try {
+      return JSON.parse(jsonStr);
+    } catch (parseError) {
+      throw new functions.https.HttpsError('internal', 'AI returned invalid JSON: ' + jsonStr);
+    }
+  } catch (error) {
+    console.error('Error generating coaching log:', error);
+    if (error instanceof functions.https.HttpsError) throw error;
+    throw new functions.https.HttpsError('internal', error.message);
+  }
 });
 
 // 2. Audit dialogue and evaluate soft skills via Gemini 3.5 Pro
-exports.auditDialogue = functions.https.onRequest((req, res) => {
-  return cors(req, res, async () => {
-    try {
-      if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
-
-      // Security Veto Fix
-      const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Unauthorized' });
-      }
-      try { await admin.auth().verifyIdToken(authHeader.split('Bearer ')[1]); } 
-      catch { return res.status(403).json({ error: 'Forbidden' }); }
-
-      const { history, scenario, playbookSettings, apiKey } = req.body || {};
-      
-      // QA Veto Fix: Null guards
-      const messages = history?.messages || [];
-      const dialogueStr = messages.map(m => `${m.sender}: ${m.text}`).join('\n');
-      const allowedPhrases = playbookSettings?.allowedPhrases?.join(', ') || 'My Best Buy Total/Plus, GSP';
-      const forbiddenPhrases = playbookSettings?.forbiddenPhrases?.join(', ') || 'warranty';
-
-      const aiInstance = getGeminiClient(apiKey);
-      const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-flash' });
-      
-      const evaluationPrompt = `
-        Evaluate sales roleplay transcript (${scenario?.name || 'Unknown Scenario'}).
-        Transcript:
-        ${dialogueStr}
-        Playbook standards: Allowed: ${allowedPhrases}. Prohibited: ${forbiddenPhrases}.
-        Reply strictly in JSON containing: overallScore, passed, breakdown, values, growReport.
-      `;
-
-      const requestOptions = { timeout: 30000 };
-      const result = await model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: evaluationPrompt }] }],
-        generationConfig: {
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: 'OBJECT',
-            properties: {
-              overallScore: { type: 'NUMBER' },
-              passed: { type: 'BOOLEAN' },
-              breakdown: { type: 'STRING' },
-              values: { type: 'STRING' },
-              growReport: { type: 'STRING' }
-            },
-            required: ["overallScore", "passed", "breakdown", "values", "growReport"]
-          },
-          maxOutputTokens: 8192,
-          temperature: 0.3
-        }
-      }, requestOptions);
-
-      let jsonStr = '';
-      try {
-        jsonStr = result.response.text();
-      } catch (safetyError) {
-        return res.status(500).json({ error: 'Safety block or empty response.' });
-      }
-
-      try {
-        const data = JSON.parse(jsonStr);
-        return res.status(200).json(data);
-      } catch (parseError) {
-        return res.status(500).json({ error: 'Invalid JSON', raw: jsonStr });
-      }
-    } catch (error) {
-      console.error('Error auditing dialogue:', error);
-      return res.status(500).json({ error: error.message });
+exports.auditDialogue = functions.https.onCall(async (data, context) => {
+  try {
+    if (!context.auth) {
+      throw new functions.https.HttpsError('unauthenticated', 'Endpoint requires authentication.');
     }
-  });
+
+    const payload = (data.data || data) || {};
+    const { history, scenario, playbookSettings, apiKey } = payload;
+    
+    const messages = history?.messages || [];
+    const dialogueStr = messages.map(m => `${m.sender}: ${m.text}`).join('\n');
+    const allowedPhrases = playbookSettings?.allowedPhrases?.join(', ') || 'My Best Buy Total/Plus, GSP';
+    const forbiddenPhrases = playbookSettings?.forbiddenPhrases?.join(', ') || 'warranty';
+
+    const aiInstance = getGeminiClient(apiKey);
+    const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-flash' });
+    
+    const evaluationPrompt = `
+      Evaluate sales roleplay transcript (${scenario?.name || 'Unknown Scenario'}).
+      Transcript:
+      ${dialogueStr}
+      Playbook standards: Allowed: ${allowedPhrases}. Prohibited: ${forbiddenPhrases}.
+      Reply strictly in JSON containing: overallScore, passed, breakdown, values, growReport.
+    `;
+
+    const requestOptions = { timeout: 30000 };
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: evaluationPrompt }] }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: 'OBJECT',
+          properties: {
+            overallScore: { type: 'NUMBER' },
+            passed: { type: 'BOOLEAN' },
+            breakdown: { type: 'STRING' },
+            values: { type: 'STRING' },
+            growReport: { type: 'STRING' }
+          },
+          required: ["overallScore", "passed", "breakdown", "values", "growReport"]
+        },
+        maxOutputTokens: 8192,
+        temperature: 0.3
+      }
+    }, requestOptions);
+
+    let jsonStr = '';
+    try {
+      jsonStr = result.response.text();
+    } catch (safetyError) {
+      throw new functions.https.HttpsError('internal', 'Safety block or empty response.');
+    }
+
+    try {
+      return JSON.parse(jsonStr);
+    } catch (parseError) {
+      throw new functions.https.HttpsError('internal', 'Invalid JSON: ' + jsonStr);
+    }
+  } catch (error) {
+    console.error('Error auditing dialogue:', error);
+    if (error instanceof functions.https.HttpsError) throw error;
+    throw new functions.https.HttpsError('internal', error.message);
+  }
 });
 
 // 4. Generic Callable AI generation function

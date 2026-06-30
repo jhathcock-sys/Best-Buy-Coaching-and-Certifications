@@ -72,7 +72,7 @@ export default function StoreRoster({
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
   return (
-    <div className="flex-column gap-xl">
+    <div className="flex-column gap-xl" data-testid="store-roster-page">
       
       {/* Header */}
       <div className="flex-between flex-wrap gap-lg w-full">

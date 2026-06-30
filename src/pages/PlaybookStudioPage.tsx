@@ -31,7 +31,7 @@ function PlaybookStudioContent({ playbookSettings }: { playbookSettings: Playboo
   const [activeTab, setActiveTab] = useState('engine');
 
   return (
-    <div className="flex-column gap-2xl">
+    <div className="flex-column gap-2xl" data-testid="playbook-studio-content">
       <div className="flex-between align-start flex-wrap gap-md">
         <div>
           <h1 className="text-2-5rem mb-xs flex-center justify-start gap-sm m-0">

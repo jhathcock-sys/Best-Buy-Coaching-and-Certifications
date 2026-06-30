@@ -34,7 +34,7 @@ export default function LiveFloorShadow({
     clearPreselectedEmployee
   });
   return (
-    <div className="flex-column gap-2xl h-full min-h-600">
+    <div className="flex-column gap-2xl h-full min-h-600" data-testid="live-floor-shadow-page">
       
       {/* Header */}
       <div className="flex-between align-center">

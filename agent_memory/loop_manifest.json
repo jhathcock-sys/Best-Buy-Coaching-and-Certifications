@@ -1,6 +1,6 @@
 {
     "status":  "ACTIVE",
-    "current_checkpoint":  130,
+    "current_checkpoint":  140,
     "active_vetos":  [
 
                      ],
@@ -141,9 +141,7 @@
                             "src/pages/CoachSimulatorPage.tsx",
                             "src/pages/CommandCenter.tsx",
                             "src/pages/DashboardPage.tsx",
-                            "src/pages/FloorLeaderTrackerPage.tsx"
-                        ],
-    "remaining_queue":  [
+                            "src/pages/FloorLeaderTrackerPage.tsx",
                             "src/pages/LiveFloorShadowPage.tsx",
                             "src/pages/MemberDealsPage.tsx",
                             "src/pages/PlaybookStudioPage.tsx",
@@ -153,7 +151,9 @@
                             "src/schemas/index.ts",
                             "src/services/ai/auraEngine.ts",
                             "src/services/ai/constants.ts",
-                            "src/services/ai/core.ts",
+                            "src/services/ai/core.ts"
+                        ],
+    "remaining_queue":  [
                             "src/services/ai/customerSimulator.ts",
                             "src/services/ai/employeeSimulator.ts",
                             "src/services/ai/floorSimulator.ts",

@@ -7,37 +7,41 @@ export const MemberDealsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchDeals = async () => {
+  const fetchDeals = async (isMounted = true) => {
     setLoading(true);
     setError(null);
     try {
       const data = await scrapeDeals();
-      setDeals(data);
+      if (isMounted) setDeals(data);
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch deals.');
+      if (isMounted) setError(err.message || 'Failed to fetch deals.');
     } finally {
-      setLoading(false);
+      if (isMounted) setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchDeals();
+    let isMounted = true;
+    fetchDeals(isMounted);
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="member-deals-page">
       <div className="flex-between">
         <div>
           <h2 className="text-2xl font-bold font-outfit text-white flex-align gap-2">
-            <Tag className="w-6 h-6 text-[#0046be]" />
+            <Tag className="w-6 h-6 text-bby-blue" />
             Best Buy Member Deals
           </h2>
           <p className="text-gray-400 mt-1">Live deals curated from Slickdeals RSS feed.</p>
         </div>
         <button 
-          onClick={fetchDeals} 
+          onClick={() => fetchDeals()} 
           disabled={loading}
-          className="glass-button flex-align gap-2 text-white hover:text-[#0046be] transition-colors"
+          className="glass-button flex-align gap-2 text-white hover:text-bby-blue transition-colors cursor-pointer"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           {loading ? 'Refreshing...' : 'Refresh'}
@@ -49,7 +53,7 @@ export const MemberDealsPage: React.FC = () => {
           <AlertCircle className="w-12 h-12 mb-2" />
           <h3 className="text-lg font-bold">Failed to load deals</h3>
           <p className="max-w-md">{error}</p>
-          <button onClick={fetchDeals} className="glass-button mt-4 cursor-pointer" data-testid="fetch-deals-btn">Try Again</button>
+          <button onClick={() => fetchDeals()} className="glass-button mt-4 cursor-pointer" data-testid="fetch-deals-btn">Try Again</button>
         </div>
       ) : loading && deals.length === 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -74,9 +78,10 @@ export const MemberDealsPage: React.FC = () => {
               href={deal.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="glass-card p-6 flex flex-col hover:border-[#0046be]/50 transition-all group block"
+              data-testid={`deal-item-${idx}`}
+              className="glass-card p-6 flex flex-col hover:border-bby-blue/50 transition-all group block"
             >
-              <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-[#0046be] transition-colors">
+              <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-bby-blue transition-colors">
                 {deal.title}
               </h3>
               
@@ -85,7 +90,7 @@ export const MemberDealsPage: React.FC = () => {
                 dangerouslySetInnerHTML={{ __html: deal.description }}
               />
 
-              <div className="mt-auto pt-4 border-t border-white/10 flex-between items-center text-sm font-medium text-[#0046be]">
+              <div className="mt-auto pt-4 border-t border-white/10 flex-between items-center text-sm font-medium text-bby-blue">
                 View Deal
                 <ExternalLink className="w-4 h-4" />
               </div>

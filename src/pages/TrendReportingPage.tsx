@@ -2,7 +2,7 @@ import { ConversationalAnalyticsWidget } from '../components/Analytics/Conversat
 
 export default function TrendReportingPage() {
   return (
-    <div className="flex-column mx-auto w-full pb-3xl" style={{ maxWidth: '1200px' }}>
+    <div className="flex-column mx-auto w-full pb-3xl max-w-[1200px]" data-testid="trend-reporting-page">
       <ConversationalAnalyticsWidget />
     </div>
   );

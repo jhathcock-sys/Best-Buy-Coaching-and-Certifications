@@ -65,7 +65,21 @@ exports.generateCoaching = functions.https.onRequest((req, res) => {
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
         generationConfig: {
           responseMimeType: 'application/json',
-          maxOutputTokens: 2048,
+          responseSchema: {
+            type: 'OBJECT',
+            properties: {
+              what: { type: 'STRING' },
+              how: { type: 'STRING' },
+              why: { type: 'STRING' },
+              strengths: { type: 'STRING' },
+              metricGap: { type: 'STRING' },
+              expectation: { type: 'STRING' },
+              validation: { type: 'STRING' },
+              discStep: { type: 'STRING' }
+            },
+            required: ["what", "how", "why", "strengths", "metricGap", "expectation", "validation", "discStep"]
+          },
+          maxOutputTokens: 8192,
           temperature: 0.3,
           topK: 40,
           topP: 0.8
@@ -124,7 +138,18 @@ exports.auditDialogue = functions.https.onRequest((req, res) => {
         contents: [{ role: 'user', parts: [{ text: evaluationPrompt }] }],
         generationConfig: {
           responseMimeType: 'application/json',
-          maxOutputTokens: 2048,
+          responseSchema: {
+            type: 'OBJECT',
+            properties: {
+              overallScore: { type: 'NUMBER' },
+              passed: { type: 'BOOLEAN' },
+              breakdown: { type: 'STRING' },
+              values: { type: 'STRING' },
+              growReport: { type: 'STRING' }
+            },
+            required: ["overallScore", "passed", "breakdown", "values", "growReport"]
+          },
+          maxOutputTokens: 8192,
           temperature: 0.3
         }
       }, requestOptions);
@@ -160,7 +185,7 @@ exports.generateAIContent = functions.https.onCall(async (data, context) => {
     const modelName = isProMode ? 'gemini-3.5-flash' : 'gemini-3.5-flash';
     const model = aiInstance.getGenerativeModel({ model: modelName });
     
-    const generationConfig = { maxOutputTokens: 4096 };
+    const generationConfig = { maxOutputTokens: 8192 };
     if (isJSON) generationConfig.responseMimeType = 'application/json';
     if (modelConfig?.responseSchema) generationConfig.responseSchema = modelConfig.responseSchema;
     
@@ -235,7 +260,17 @@ exports.auditStoreFloor = functions.https.onCall(async (data, context) => {
       ],
       generationConfig: {
         responseMimeType: 'application/json',
-        maxOutputTokens: 1024,
+        responseSchema: {
+          type: 'OBJECT',
+          properties: {
+            status: { type: 'STRING' },
+            statusDetails: { type: 'STRING' },
+            observations: { type: 'ARRAY', items: { type: 'STRING' } },
+            actionPlan: { type: 'ARRAY', items: { type: 'STRING' } }
+          },
+          required: ["status", "statusDetails", "observations", "actionPlan"]
+        },
+        maxOutputTokens: 8192,
         temperature: 0.2
       }
     }, requestOptions);

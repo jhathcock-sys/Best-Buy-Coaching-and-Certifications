@@ -89,37 +89,61 @@ export default function RentsDueAuditor() {
     setErrorMsg('');
     setParsedEmployees(null);
     setIsParsing(true);
-    handleArchiveUpload(file, file.name);
+    
+    // Unhandled promise rejection guard
+    handleArchiveUpload(file, file.name).catch(err => console.error("Failed to archive upload", err));
 
     const reader = new FileReader();
-    if (file.type.startsWith('image/')) {
-      reader.onload = async (e) => {
-        const base64Url = e.target?.result?.toString() || '';
-        const base64Data = base64Url.split(',')[1] || '';
-        runOcrParsing(base64Data, file.type, '');
-      };
-      reader.readAsDataURL(file);
-    } else if (file.name.endsWith('.csv') || file.type === 'text/csv' || file.type === 'text/plain') {
-      reader.onload = async (e) => {
-        const text = e.target?.result?.toString() || '';
-        
-        try {
-          const cloudParsed = await parseRentsDueCSVCloud(text);
-          if (cloudParsed && cloudParsed.length > 0) {
-            setParsedEmployees(cloudParsed as ParsedEmployee[]);
-            setIsParsing(false);
-            return;
-          }
-        } catch (err) {
-          console.warn("Cloud parse failed, falling back to Gemini", err);
-        }
 
-        runOcrParsing('', '', text);
-      };
-      reader.readAsText(file);
-    } else {
-      setErrorMsg('Error: Please upload a valid CSV file, text sheet copy-paste, or image screenshot.');
+    reader.onerror = () => {
+      setErrorMsg('Failed to read the uploaded file. The file may be corrupted or unavailable.');
       setIsParsing(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+    
+    reader.onabort = () => {
+      setErrorMsg('File reading was aborted.');
+      setIsParsing(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    try {
+      if (file.type.startsWith('image/')) {
+        reader.onload = async (e) => {
+          const base64Url = e.target?.result?.toString() || '';
+          const base64Data = base64Url.split(',')[1] || '';
+          runOcrParsing(base64Data, file.type, '');
+          if (fileInputRef.current) fileInputRef.current.value = '';
+        };
+        reader.readAsDataURL(file);
+      } else if (file.name.endsWith('.csv') || file.type === 'text/csv' || file.type === 'text/plain') {
+        reader.onload = async (e) => {
+          const text = e.target?.result?.toString() || '';
+          try {
+            const cloudParsed = await parseRentsDueCSVCloud(text);
+            if (cloudParsed && cloudParsed.length > 0) {
+              setParsedEmployees(cloudParsed as ParsedEmployee[]);
+              setIsParsing(false);
+              if (fileInputRef.current) fileInputRef.current.value = '';
+              return;
+            }
+          } catch (err) {
+            console.warn("Cloud parse failed, falling back to Gemini", err);
+          }
+          runOcrParsing('', '', text);
+          if (fileInputRef.current) fileInputRef.current.value = '';
+        };
+        reader.readAsText(file);
+      } else {
+        setErrorMsg('Error: Please upload a valid CSV file, text sheet copy-paste, or image screenshot.');
+        setIsParsing(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg('An unexpected error occurred while processing the file.');
+      setIsParsing(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -147,7 +171,7 @@ export default function RentsDueAuditor() {
       return;
     }
     const blob = new Blob([textInput], { type: 'text/plain' });
-    handleArchiveUpload(blob, 'pasted_rents_due.txt');
+    handleArchiveUpload(blob, 'pasted_rents_due.txt').catch(err => console.error("Failed to archive paste", err));
     
     try {
       setIsParsing(true);

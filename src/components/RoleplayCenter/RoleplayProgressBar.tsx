@@ -17,7 +17,7 @@ export default function RoleplayProgressBar({ completedSteps, currentActiveStep 
   };
 
   return (
-    <div className="glass-card p-xl">
+    <div className="glass-card p-xl" data-testid="roleplay-progress-bar">
       <div className="sales-flow-tracker">
         <div 
           className="sales-flow-progress-bar" 

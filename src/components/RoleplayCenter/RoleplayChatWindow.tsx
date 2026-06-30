@@ -24,8 +24,8 @@ export default function RoleplayChatWindow({
   messagesEndRef
 }: RoleplayChatWindowProps) {
   return (
-    <div className="chat-container">
-      <div className="chat-messages">
+    <div className="chat-container" data-testid="chat-container">
+      <div className="chat-messages" data-testid="chat-messages">
         {messages?.map((m, idx) => (
           <div 
             key={idx} 
@@ -56,14 +56,14 @@ export default function RoleplayChatWindow({
           data-testid="chat-input"
         />
         <button 
-          className={`btn btn-icon ${isListening ? 'bg-[rgba(239,68,68,0.2)] text-error animate-pulse' : 'bg-white-alpha-10 text-white'}`}
+          className={`btn btn-icon cursor-pointer ${isListening ? 'bg-[rgba(239,68,68,0.2)] text-error animate-pulse' : 'bg-white-alpha-10 text-white'}`}
           onClick={toggleMic} 
           disabled={isLoading}
           title="Speak response"
         >
           {isListening ? <MicOff size={18} /> : <Mic size={18} />}
         </button>
-        <button className="btn btn-primary btn-icon" onClick={handleSend} disabled={isLoading || isListening} data-testid="send-msg-btn">
+        <button className="btn btn-primary btn-icon cursor-pointer" onClick={handleSend} disabled={isLoading || isListening} data-testid="send-msg-btn">
           <Send size={18} />
         </button>
       </div>

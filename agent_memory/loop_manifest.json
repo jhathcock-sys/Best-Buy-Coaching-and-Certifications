@@ -1,6 +1,6 @@
 {
     "status":  "ACTIVE",
-    "current_checkpoint":  60,
+    "current_checkpoint":  70,
     "active_vetos":  [
 
                      ],
@@ -71,9 +71,7 @@
                             "src/components/PlaybookStudio/SyncDiagnosticsTab.tsx",
                             "src/components/PlaybookStudio/SystemPromptsTab.tsx",
                             "src/components/RentsDueAuditor/RentsDueArchiveList.tsx",
-                            "src/components/RentsDueAuditor/RentsDueLedger.tsx"
-                        ],
-    "remaining_queue":  [
+                            "src/components/RentsDueAuditor/RentsDueLedger.tsx",
                             "src/components/RentsDueAuditor/RentsDuePeriodSelector.tsx",
                             "src/components/RentsDueAuditor/RentsDueUploader.tsx",
                             "src/components/RoleplayCenter/RoleplayActiveSession.tsx",
@@ -83,7 +81,9 @@
                             "src/components/RoleplayCenter/RoleplayProgressBar.tsx",
                             "src/components/RoleplayCenter/RoleplayResults.tsx",
                             "src/components/RoleplayCenter/RoleplaySidebarCoach.tsx",
-                            "src/components/RosterImporter/useRosterImporter.ts",
+                            "src/components/RosterImporter/useRosterImporter.ts"
+                        ],
+    "remaining_queue":  [
                             "src/components/ShiftSimulator/ShiftScorecard.tsx",
                             "src/components/ShiftSimulator/ShiftTimeline.tsx",
                             "src/components/ShiftSimulator/StaffingBoard.tsx",

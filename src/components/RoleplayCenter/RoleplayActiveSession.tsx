@@ -57,6 +57,12 @@ export default function RoleplayActiveSession({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
+  const isMounted = useRef(true);
+  useEffect(() => {
+    isMounted.current = true;
+    return () => { isMounted.current = false; };
+  }, []);
+
   const toggleMic = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
       alert("Speech Recognition API not supported in this browser. Please use Chrome.");
@@ -106,13 +112,17 @@ export default function RoleplayActiveSession({
       } else {
         nextState = runOfflineSimulationStep(currentMsg, history, selectedScenario);
       }
-      setMessages(nextState.messages);
-      setCompletedSteps(nextState.completedSteps);
-      setCurrentActiveStep(nextState.currentActiveStep);
+      if (isMounted.current) {
+        setMessages(nextState.messages);
+        setCompletedSteps(nextState.completedSteps);
+        setCurrentActiveStep(nextState.currentActiveStep);
+      }
     } catch (err) {
       console.error(err);
     } finally {
-      setIsLoading(false);
+      if (isMounted.current) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -139,11 +149,15 @@ export default function RoleplayActiveSession({
         result = evaluateSessionOffline(history);
       }
       
-      onEvaluationComplete(result);
+      if (isMounted.current) {
+        onEvaluationComplete(result);
+      }
     } catch (err) {
       console.error(err);
-      setIsEvaluating(false);
-      setIsLoading(false);
+      if (isMounted.current) {
+        setIsEvaluating(false);
+        setIsLoading(false);
+      }
     }
   };
 
@@ -183,7 +197,7 @@ export default function RoleplayActiveSession({
             {/* Top Control Bar */}
           <div className="glass-card p-[1rem_1.5rem] flex flex-wrap justify-between items-center gap-md">
             <div className="flex-center-y gap-xl">
-              <button className="btn btn-secondary btn-icon" onClick={onExit} data-testid="back-btn">
+              <button className="btn btn-secondary btn-icon cursor-pointer" onClick={onExit} data-testid="back-btn">
                 <ArrowLeft size={16} />
               </button>
               <div className="flex-center-y gap-sm">
@@ -205,10 +219,10 @@ export default function RoleplayActiveSession({
                   Sandbox Simulator Active
                 </span>
               )}
-              <button className="btn btn-secondary" onClick={restartRoleplay} data-testid="restart-session-btn">
+              <button className="btn btn-secondary cursor-pointer" onClick={restartRoleplay} data-testid="restart-session-btn">
                 <RefreshCw size={14} /> Restart
               </button>
-              <button className="btn btn-accent" onClick={endAndEvaluate} disabled={isLoading} data-testid="complete-session-btn">
+              <button className="btn btn-accent cursor-pointer" onClick={endAndEvaluate} disabled={isLoading} data-testid="complete-session-btn">
                 Complete Session & Evaluate
               </button>
             </div>

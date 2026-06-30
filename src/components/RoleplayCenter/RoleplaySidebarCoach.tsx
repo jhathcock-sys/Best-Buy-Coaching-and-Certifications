@@ -13,7 +13,7 @@ interface RoleplaySidebarCoachProps {
 
 export default function RoleplaySidebarCoach({ stepHint, selectedScenario }: RoleplaySidebarCoachProps) {
   return (
-    <div className="flex-column gap-md">
+    <div className="flex-column gap-md" data-testid="sidebar-coach">
       <div className="glass-card border-[rgba(0,70,190,0.3)] bg-[rgba(0,70,190,0.05)]">
         <h4 className="text-base text-bby-yellow flex-center-y gap-sm mb-sm">
           <Sparkles size={16} /> Live Coaching Guide

@@ -19,14 +19,15 @@ export default function ProfileCoachingTab({
     };
   }, []);
 
-  const handlePlayTTS = (logId: string, text: string) => {
+  const handlePlayTTS = (logId: string, text?: string) => {
     if (playingLogId === logId) {
       window.speechSynthesis.cancel();
       setPlayingLogId(null);
       return;
     }
     window.speechSynthesis.cancel();
-    const cleanText = text
+    const safeText = text || 'No notes available.';
+    const cleanText = safeText
       .replace(/[#*`_-]/g, ' ')
       .replace(/DISC Focus:/gi, ' DISC Focus step is ')
       .replace(/WHAT:/gi, ' What needs to be done: ')

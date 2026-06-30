@@ -6,14 +6,14 @@
                      ],
     "processed_queue":  [
                             "src/components/Analytics/ConversationalAnalyticsWidget.tsx",
-                            "src/components/Analytics/DynamicChartRenderer.tsx"
-                        ],
-    "remaining_queue":  [
+                            "src/components/Analytics/DynamicChartRenderer.tsx",
                             "src/components/AssociateProfile/AssociateProfileHeader.tsx",
                             "src/components/AssociateProfile/ProfileAppraisalsTab.tsx",
                             "src/components/AssociateProfile/ProfileCoachingTab.tsx",
                             "src/components/AssociateProfile/ProfileCommitmentsTab.tsx",
-                            "src/components/AssociateProfile/ProfileTrendsTab.tsx",
+                            "src/components/AssociateProfile/ProfileTrendsTab.tsx"
+                        ],
+    "remaining_queue":  [
                             "src/components/AssociateProfile/ProfileTrophiesTab.tsx",
                             "src/components/AuraHUD/AuraActionCard.tsx",
                             "src/components/BreakroomTV/GoalsSlide.tsx",

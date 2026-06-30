@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FileText, Loader2 } from 'lucide-react';
 import { Employee, CoachingLog } from '../../types';
 import { useStore } from '../../store/useStore';
@@ -16,8 +16,11 @@ export default function ProfileAppraisalsTab({
 }: ProfileAppraisalsTabProps) {
   const [isGeneratingReview, setIsGeneratingReview] = useState(false);
   const [generatedReview, setGeneratedReview] = useState<string | null>(null);
+  
+  const activeEmployeeIdRef = useRef(employee?.id);
 
   useEffect(() => {
+    activeEmployeeIdRef.current = employee?.id;
     setGeneratedReview(null);
     setIsGeneratingReview(false);
   }, [employee?.id]);
@@ -29,12 +32,18 @@ export default function ProfileAppraisalsTab({
     try {
       const apiKey = useStore.getState().apiKey;
       const reviewText = await generateMonthlyOneOnOne(employee, associateLogs, apiKey);
-      setGeneratedReview(reviewText);
+      if (activeEmployeeIdRef.current === employee.id) {
+        setGeneratedReview(reviewText);
+      }
     } catch (err) {
       console.error(err);
-      setGeneratedReview("Error generating review. Please check your API key.");
+      if (activeEmployeeIdRef.current === employee.id) {
+        setGeneratedReview("Error generating review. Please check your API key.");
+      }
     } finally {
-      setIsGeneratingReview(false);
+      if (activeEmployeeIdRef.current === employee.id) {
+        setIsGeneratingReview(false);
+      }
     }
   };
 

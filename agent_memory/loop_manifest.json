@@ -1,6 +1,6 @@
 {
     "status":  "ACTIVE",
-    "current_checkpoint":  90,
+    "current_checkpoint":  100,
     "active_vetos":  [
 
                      ],
@@ -101,9 +101,7 @@
                             "src/components/ZoneScheduler/ZoneTimeline.tsx",
                             "src/components/AddEmployeeModal.tsx",
                             "src/components/AdvisorLogin.tsx",
-                            "src/components/AssociateProfileModal.tsx"
-                        ],
-    "remaining_queue":  [
+                            "src/components/AssociateProfileModal.tsx",
                             "src/components/AuditorInputForm.tsx",
                             "src/components/AuditorResults.tsx",
                             "src/components/AuthGate.tsx",
@@ -113,7 +111,9 @@
                             "src/components/FloorAudit.tsx",
                             "src/components/FloorAuditReport.tsx",
                             "src/components/FloorAuditUploader.tsx",
-                            "src/components/ImportScheduleModal.tsx",
+                            "src/components/ImportScheduleModal.tsx"
+                        ],
+    "remaining_queue":  [
                             "src/components/Login.tsx",
                             "src/components/LoginGate.tsx",
                             "src/components/MetricSparkline.tsx",

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { auditFiveStarSurveyGemini } from '../services/ai';
 import AuditorInputForm from './AuditorInputForm';
@@ -30,6 +30,14 @@ export default function FiveStarAuditor() {
   const [isAuditing, setIsAuditing] = useState<boolean>(false);
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
   const [isSaved, setIsSaved] = useState<boolean>(false);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -76,25 +84,31 @@ export default function FiveStarAuditor() {
         textInput,
         playbookSettings
       );
-      setAuditResult(result);
+      if (isMounted.current) {
+        setAuditResult(result);
+      }
     } catch (e) {
       console.error(e);
-      alert("An error occurred while auditing the survey. Running offline fallback.");
-      setAuditResult({
-        rating: 2,
-        comment: textInput || "The checkout line was extremely long and the cashier Jordan didn't even ask if I had a membership or thank me.",
-        associateName: "Jordan",
-        department: "Front End",
-        rootCause: "Operational queue bottleneck at checkout combined with transaction-focused cashier behavior (skipping customer greeting, membership inquiry, and closing appreciation).",
-        coachingScript: "Hey Jordan, I noticed we got some survey feedback about checkout speed and membership check-ins yesterday. How did you feel the checkout flow was during the afternoon rush? What do you think we could do to make sure we're acknowledging memberships even when there's a queue? Let's align on greeting every customer and handing out the receipt sleeve as our standard checkout process.",
-        checkItems: [
-          "Observe Jordan's checkout flow during the next afternoon rush to check queue management.",
-          "Validate that Jordan is actively using the receipt sleeve to frame survey and membership benefits.",
-          "Ensure secondary support cashiers are called promptly when checkout line exceeds 3 customers."
-        ]
-      });
+      if (isMounted.current) {
+        alert("An error occurred while auditing the survey. Running offline fallback.");
+        setAuditResult({
+          rating: 2,
+          comment: textInput || "The checkout line was extremely long and the cashier Jordan didn't even ask if I had a membership or thank me.",
+          associateName: "Jordan",
+          department: "Front End",
+          rootCause: "Operational queue bottleneck at checkout combined with transaction-focused cashier behavior (skipping customer greeting, membership inquiry, and closing appreciation).",
+          coachingScript: "Hey Jordan, I noticed we got some survey feedback about checkout speed and membership check-ins yesterday. How did you feel the checkout flow was during the afternoon rush? What do you think we could do to make sure we're acknowledging memberships even when there's a queue? Let's align on greeting every customer and handing out the receipt sleeve as our standard checkout process.",
+          checkItems: [
+            "Observe Jordan's checkout flow during the next afternoon rush to check queue management.",
+            "Validate that Jordan is actively using the receipt sleeve to frame survey and membership benefits.",
+            "Ensure secondary support cashiers are called promptly when checkout line exceeds 3 customers."
+          ]
+        });
+      }
     } finally {
-      setIsAuditing(false);
+      if (isMounted.current) {
+        setIsAuditing(false);
+      }
     }
   };
 

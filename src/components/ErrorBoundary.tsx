@@ -41,19 +41,14 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
   render() {
     if (this.state.hasError) {
       return (
-        <div data-testid="error-boundary-container" className="flex-center p-xxl text-white" style={{ minHeight: '100vh', background: 'var(--bg-obsidian)', fontFamily: 'sans-serif' }}>
-          <div className="glass-card flex-column align-center p-xxl text-center" style={{
+        <div data-testid="error-boundary-container" className="flex-center p-xxl text-white bg-obsidian-alpha" style={{ minHeight: '100vh' }}>
+          <div className="glass-card flex-column align-center p-xxl text-center alert-card-danger max-w-550 w-full" style={{
             maxWidth: '550px',
-            width: '100%',
-            border: '2px solid rgba(239, 68, 68, 0.25)',
-            background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(10, 13, 20, 0.7))',
             boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
           }}>
-            <div className="flex-center rounded-full mb-xl" style={{
+            <div className="flex-center rounded-full mb-xl bg-error-alpha-20 border-error-alpha-20" style={{
               width: '64px',
-              height: '64px',
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)'
+              height: '64px'
             }}>
               <AlertTriangle size={32} color="#ef4444" />
             </div>
@@ -67,11 +62,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
             </p>
 
             {this.state.error && (
-              <div data-testid="error-readout" className="text-left text-xs text-error rounded-md p-md mb-xl overflow-y-auto" style={{
-                background: 'rgba(0, 0, 0, 0.25)',
-                border: '1px solid var(--border-glass)',
-                fontFamily: 'monospace',
-                maxHeight: '150px',
+              <div data-testid="error-readout" className="text-left text-xs text-error rounded-md p-md mb-xl overflow-y-auto bg-black-alpha-30 border-glass font-mono max-h-250px" style={{
                 whiteSpace: 'pre-wrap'
               }}>
                 {this.state.error.toString()}
@@ -79,8 +70,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
             )}
 
             <button 
-              className="btn btn-primary flex-row align-center gap-sm px-xl py-md cursor-pointer"
-              style={{ fontWeight: 700 }}
+              className="btn btn-primary flex-row align-center gap-sm px-xl py-md cursor-pointer font-bold"
               onClick={this.handleReset}
               data-testid="error-boundary-reload-btn"
             >

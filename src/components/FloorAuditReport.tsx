@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { AlertCircle, Sparkles, FileText, CheckCircle, ClipboardCopy } from 'lucide-react';
 
 interface AuditResult {
@@ -17,6 +17,14 @@ interface Props {
 export default function FloorAuditReport({ isAuditing, auditResult, errorMsg }: Props) {
   const [huddleScript, setHuddleScript] = useState('');
   const [isGeneratingScript, setIsGeneratingScript] = useState(false);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const handleGenerateHuddleScript = useCallback(async () => {
     if (!auditResult) return;
@@ -36,12 +44,15 @@ export default function FloorAuditReport({ isAuditing, auditResult, errorMsg }: 
 3. ${auditResult.actionPlan?.[2] || 'Tidy up display tables.'}
 
 Let's move fast, get our customers greeted, and ensure checkout remains smooth. Thank you, let's crush the shift!"`;
-
-      setHuddleScript(script);
+      if (isMounted.current) {
+        setHuddleScript(script);
+      }
     } catch (e) {
       console.error(e);
     } finally {
-      setIsGeneratingScript(false);
+      if (isMounted.current) {
+        setIsGeneratingScript(false);
+      }
     }
   }, [auditResult]);
 

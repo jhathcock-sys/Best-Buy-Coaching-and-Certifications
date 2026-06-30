@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { httpsCallable } from 'firebase/functions';
 import { app } from '../services/firebase';
@@ -24,6 +24,14 @@ export default function FloorAudit() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
   const activeImageRef = useRef<string | null>(null);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const handleImageSelect = useCallback((image: string, mime: string) => {
     setSelectedImage(image);
@@ -63,12 +71,12 @@ export default function FloorAudit() {
       });
       
       // Abort if the user cleared the image or uploaded a new one while waiting
-      if (activeImageRef.current !== requestImage) return;
+      if (activeImageRef.current !== requestImage || !isMounted.current) return;
 
       const data = response.data as AuditResult;
       setAuditResult(data);
     } catch (e: unknown) {
-      if (activeImageRef.current !== requestImage) return;
+      if (activeImageRef.current !== requestImage || !isMounted.current) return;
       console.error(e);
       if (e instanceof Error) {
         setErrorMsg(e.message || 'An error occurred during the floor layout audit.');
@@ -76,7 +84,7 @@ export default function FloorAudit() {
         setErrorMsg('An unknown error occurred during the floor layout audit.');
       }
     } finally {
-      if (activeImageRef.current === requestImage) {
+      if (activeImageRef.current === requestImage && isMounted.current) {
         setIsAuditing(false);
       }
     }

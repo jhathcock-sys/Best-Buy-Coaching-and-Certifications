@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Clock, Trash2 } from 'lucide-react';
 import { Employee, BreakEntry } from '../types';
 
@@ -22,6 +22,14 @@ export default function BreakRunSheet({
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [preventOverlaps, setPreventOverlaps] = useState(false);
   const [staggerBreaks, setStaggerBreaks] = useState(false);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
   const [breakForm, setBreakForm] = useState({
     empId: '',
     time: '12:00 PM',
@@ -65,7 +73,7 @@ export default function BreakRunSheet({
 
   return (
     <div className="glass-card p-xl">
-      <h3 className="text-xl mb-sm flex align-center gap-sm font-heading" style={{ color: 'var(--info)' }}>
+      <h3 className="text-xl mb-sm flex align-center gap-sm font-heading text-info">
         <Clock size={20} /> Breaks & Lunches Run Sheet
       </h3>
       <div className="flex-between align-start mb-lg">
@@ -95,12 +103,18 @@ export default function BreakRunSheet({
                     completed: false
                   }));
 
-                  onOptimizeBreaks(validBreaks);
+                  if (isMounted.current) {
+                    onOptimizeBreaks(validBreaks);
+                  }
                 } catch (e) {
                   console.error('Optimization failed:', e);
-                  alert('Failed to optimize breaks.');
+                  if (isMounted.current) {
+                    alert('Failed to optimize breaks.');
+                  }
                 } finally {
-                  setIsOptimizing(false);
+                  if (isMounted.current) {
+                    setIsOptimizing(false);
+                  }
                 }
               }
             }}
@@ -110,7 +124,7 @@ export default function BreakRunSheet({
             {isOptimizing ? 'Optimizing...' : 'Optimize Breaks with AI'}
           </button>
           
-          <div className="flex-column gap-xs text-xs mt-xs" style={{ color: 'var(--text-secondary)' }}>
+          <div className="flex-column gap-xs text-xs mt-xs text-secondary">
             <label className="flex align-center gap-xs cursor-pointer">
               <input type="checkbox" checked={preventOverlaps} onChange={e => setPreventOverlaps(e.target.checked)} />
               Prevent zone overlaps
@@ -126,7 +140,7 @@ export default function BreakRunSheet({
       <div className="dashboard-grid">
         
         {/* Add Break Form */}
-        <div className="flex-column gap-lg" style={{ paddingRight: '1rem' }}>
+        <div className="flex-column gap-lg px-md">
           <h4 className="font-bold border-b-glass pb-sm">Schedule Break</h4>
           
           <form onSubmit={handleSubmit} className="flex-column gap-md" data-testid="break-form">
@@ -145,7 +159,7 @@ export default function BreakRunSheet({
               </select>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1rem' }}>
+            <div className="grid-cols-2 gap-md">
               <div className="form-group">
                 <label className="form-label text-sm">Target Time:</label>
                 <select 
@@ -183,34 +197,29 @@ export default function BreakRunSheet({
         <div>
           <h4 className="font-bold border-b-glass pb-sm mb-md">Today's Break Run Sheet</h4>
           
-          <div className="flex-column gap-sm" style={{ maxHeight: '320px', overflowY: 'auto' }}>
+          <div className="flex-column gap-sm overflow-y-auto max-h-350">
             {sortedBreaks.length === 0 ? (
-              <div className="p-xl text-center text-muted text-sm border-glass rounded-xl" style={{ borderStyle: 'dashed' }}>
+              <div className="p-xl text-center text-muted text-sm border-1-5-dashed-glass rounded-xl">
                 No breaks scheduled yet for today's run sheet.
               </div>
             ) : (
               sortedBreaks.map((b) => (
                 <div 
                   key={b.id} 
-                  className="flex align-center justify-between p-md rounded-xl"
-                  style={{ 
-                    background: b.completed ? 'var(--success-alpha-15)' : 'rgba(255, 255, 255, 0.01)', 
-                    border: `1px solid ${b.completed ? 'var(--success-alpha-15)' : 'var(--border-glass)'}`
-                  }}
+                  className={`flex align-center justify-between p-md rounded-xl ${b.completed ? 'bg-success-alpha-15 border-b-success-alpha-15' : 'bg-white-alpha-01 border-glass'}`}
                 >
                   <div className="flex align-center gap-md">
                     <input 
                       type="checkbox" 
                       checked={b.completed}
                       onChange={() => onToggleBreak(b.id)}
-                      className="cursor-pointer"
-                      style={{ width: '16px', height: '16px' }}
+                      className="cursor-pointer w-4 h-4"
                     />
                     <div>
-                      <div className="font-bold text-sm" style={{ color: b.completed ? 'var(--text-muted)' : '#fff', textDecoration: b.completed ? 'line-through' : 'none' }}>
+                      <div className={`font-bold text-sm ${b.completed ? 'text-muted line-through' : 'text-white'}`}>
                         {b.name}
                       </div>
-                      <div className="text-secondary mt-xs" style={{ fontSize: '0.725rem' }}>
+                      <div className="text-secondary mt-xs text-0-725rem">
                         {b.time} — <strong>{b.type}</strong>
                       </div>
                     </div>
@@ -218,8 +227,7 @@ export default function BreakRunSheet({
 
                   <button
                     type="button"
-                    className="bg-transparent border-none text-muted cursor-pointer flex-center"
-                    style={{ transition: 'color 0.2s', padding: 0 }}
+                    className="bg-transparent border-none text-muted cursor-pointer flex-center transition-color-2s btn-icon-transparent"
                     onClick={() => onDeleteBreak(b.id)}
                   >
                     <Trash2 size={16} />

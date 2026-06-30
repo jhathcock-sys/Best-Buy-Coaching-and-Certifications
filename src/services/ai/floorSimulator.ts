@@ -1,5 +1,4 @@
-import { SchemaType, type Schema } from '@google/generative-ai';
-import { getGeminiModel, executeWithRetry } from './core';
+import { callFirebaseAI } from './core';
 import type { PlaybookSettings } from '../../types';
 
 export interface RosterMetric {
@@ -14,8 +13,6 @@ export interface RosterMetric {
 
 export async function runStoreShiftSimulationGemini(apiKey: string | undefined, rosterData: RosterMetric[], zoneAssignments: Record<string, string>, playbookSettings: PlaybookSettings) {
   try {
-    const model = getGeminiModel(apiKey, playbookSettings);
-    
     const prompt = `
       You are a Retail Store Shift Simulator.
       Simulate an 8-hour retail shift at Best Buy based on:
@@ -53,49 +50,16 @@ export async function runStoreShiftSimulationGemini(apiKey: string | undefined, 
       Do not include markdown. Return only raw JSON.
     `;
 
-    const responseSchema: Schema = {
-      type: SchemaType.OBJECT,
-      properties: {
-        shiftLogs: {
-          type: SchemaType.ARRAY,
-          items: {
-            type: SchemaType.OBJECT,
-            properties: {
-              hour: { type: SchemaType.STRING },
-              zone: { type: SchemaType.STRING },
-              event: { type: SchemaType.STRING },
-              advisorResponse: { type: SchemaType.STRING },
-              impact: { type: SchemaType.STRING }
-            },
-            required: ["hour", "zone", "event", "advisorResponse", "impact"]
-          }
-        },
-        scorecard: {
-          type: SchemaType.OBJECT,
-          properties: {
-            revenue: { type: SchemaType.NUMBER },
-            revenueGoal: { type: SchemaType.NUMBER },
-            memberships: { type: SchemaType.NUMBER },
-            creditCards: { type: SchemaType.NUMBER },
-            csat: { type: SchemaType.NUMBER },
-            placementScore: { type: SchemaType.NUMBER },
-            placementReview: { type: SchemaType.STRING }
-          },
-          required: ["revenue", "revenueGoal", "memberships", "creditCards", "csat", "placementScore", "placementReview"]
-        }
-      },
-      required: ["shiftLogs", "scorecard"]
-    };
+    const result = await callFirebaseAI({
+      prompt: prompt,
+      isProMode: playbookSettings?.aiMode === 'pro',
+      isJSON: true,
+      isVision: false,
+      apiKey: apiKey,
+      schemaType: 'store_shift_simulation'
+    });
 
-    const result = await executeWithRetry(() => model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        responseMimeType: 'application/json',
-        responseSchema: responseSchema
-      }
-    }));
-
-    const parsed = JSON.parse(result.response.text());
+    const parsed = JSON.parse(result.text);
     return {
       shiftLogs: Array.isArray(parsed?.shiftLogs) ? parsed.shiftLogs : [],
       scorecard: {

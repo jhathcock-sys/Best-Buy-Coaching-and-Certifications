@@ -1,4 +1,4 @@
-import { getGeminiModel, executeWithRetry } from './core';
+import { callFirebaseAI } from './core';
 import type { Employee, PlaybookSettings } from '../../types';
 
 export interface CoachingTarget {
@@ -13,8 +13,6 @@ export async function generateCoachingTargets(
   playbookSettings: PlaybookSettings
 ): Promise<CoachingTarget[]> {
   if (!apiKey) throw new Error("Missing Gemini API Key");
-
-  const model = getGeminiModel(apiKey, playbookSettings);
 
   const rosterContext = roster.map(emp => 
     `- ${emp.name} (${emp.dept}): RPH: ${emp.rph || 0}, Memberships: ${emp.memberships || 0}, Apps: ${emp.apps || 0}`
@@ -33,19 +31,16 @@ Each object must have exactly these keys: "name", "reason", "recommendedAction".
 Do not include markdown wrappers.
   `.trim();
 
-  const request = {
-    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    generationConfig: {
-      responseMimeType: 'application/json'
-    }
-  };
-
   try {
-    const result = await executeWithRetry(async () => {
-      return await model.generateContent(request);
+    const result = await callFirebaseAI({
+      prompt,
+      isProMode: playbookSettings?.aiMode === 'pro',
+      isJSON: true,
+      apiKey,
+      schemaType: 'coaching_target'
     });
     
-    const text = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
+    const text = result.text.replace(/```json/g, '').replace(/```/g, '').trim();
     const parsed = JSON.parse(text);
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {

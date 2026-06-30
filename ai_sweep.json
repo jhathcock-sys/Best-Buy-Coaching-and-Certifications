@@ -1,0 +1,110 @@
+[
+  {
+    "file": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/auraEngine.ts",
+    "functionName": "generateAuraBatchInsights",
+    "hasGetGeminiModel": true,
+    "hasGenerateContent": true
+  },
+  {
+    "file": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/core.ts",
+    "functionName": "getGeminiModel",
+    "hasGetGeminiModel": true,
+    "hasGenerateContent": true
+  },
+  {
+    "file": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/customerSimulator.ts",
+    "functionName": "runGeminiSimulationStep",
+    "hasGetGeminiModel": true,
+    "hasGenerateContent": true
+  },
+  {
+    "file": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/employeeSimulator.ts",
+    "functionName": "runGeminiEmployeeCoachingStep",
+    "hasGetGeminiModel": true,
+    "hasGenerateContent": true
+  },
+  {
+    "file": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/employeeSimulator.ts",
+    "functionName": "evaluateCoachingSessionGemini",
+    "hasGetGeminiModel": true,
+    "hasGenerateContent": true
+  },
+  {
+    "file": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/floorSimulator.ts",
+    "functionName": "runStoreShiftSimulationGemini",
+    "hasGetGeminiModel": true,
+    "hasGenerateContent": true
+  },
+  {
+    "file": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/geminiAuditors.ts",
+    "functionName": "auditStoreFloorGemini",
+    "hasGetGeminiModel": true,
+    "hasGenerateContent": true
+  },
+  {
+    "file": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/geminiAuditors.ts",
+    "functionName": "auditPerformanceWorkbookGemini",
+    "hasGetGeminiModel": true,
+    "hasGenerateContent": true
+  },
+  {
+    "file": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/geminiAuditors.ts",
+    "functionName": "auditFiveStarSurveyGemini",
+    "hasGetGeminiModel": true,
+    "hasGenerateContent": true
+  },
+  {
+    "file": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/geminiBreaks.ts",
+    "functionName": "generateOptimizedBreaks",
+    "hasGetGeminiModel": true,
+    "hasGenerateContent": true
+  },
+  {
+    "file": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/geminiCoachingTarget.ts",
+    "functionName": "generateCoachingTargets",
+    "hasGetGeminiModel": true,
+    "hasGenerateContent": true
+  },
+  {
+    "file": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/geminiDocumentParsers.ts",
+    "functionName": "parseScheduleImage",
+    "hasGetGeminiModel": true,
+    "hasGenerateContent": true
+  },
+  {
+    "file": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/geminiDocumentParsers.ts",
+    "functionName": "parseRentsDueDocumentGemini",
+    "hasGetGeminiModel": true,
+    "hasGenerateContent": true
+  },
+  {
+    "file": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/geminiHandoff.ts",
+    "functionName": "generateHandoffBriefing",
+    "hasGetGeminiModel": true,
+    "hasGenerateContent": true
+  },
+  {
+    "file": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/geminiHuddle.ts",
+    "functionName": "generateHuddleScript",
+    "hasGetGeminiModel": true,
+    "hasGenerateContent": true
+  },
+  {
+    "file": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/geminiRentRecovery.ts",
+    "functionName": "generateRentRecoveryPlans",
+    "hasGetGeminiModel": true,
+    "hasGenerateContent": true
+  },
+  {
+    "file": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/geminiSmartZoning.ts",
+    "functionName": "generateSmartZoning",
+    "hasGetGeminiModel": true,
+    "hasGenerateContent": true
+  },
+  {
+    "file": "C:/Users/jhath/projects/Best Buy Coaching and Certifications/src/services/ai/scenarioGenerator.ts",
+    "functionName": "generateCustomScenario",
+    "hasGetGeminiModel": true,
+    "hasGenerateContent": true
+  }
+]

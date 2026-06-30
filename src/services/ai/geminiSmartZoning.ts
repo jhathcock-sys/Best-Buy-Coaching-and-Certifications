@@ -1,4 +1,4 @@
-import { getGeminiModel, executeWithRetry } from './core';
+import { callFirebaseAI } from './core';
 import type { PlaybookSettings, Employee } from '../../types';
 
 export async function generateSmartZoning(
@@ -9,8 +9,6 @@ export async function generateSmartZoning(
   enforceMinimumCoverage: boolean = false
 ) {
   if (!apiKey) throw new Error("Missing Gemini API Key");
-  
-  const model = getGeminiModel(apiKey, playbookSettings);
 
   const prompt = `
     You are an AI Floor Leader for Best Buy. 
@@ -32,14 +30,14 @@ export async function generateSmartZoning(
   `;
 
   try {
-    const result = await executeWithRetry(() => model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: {
-        responseMimeType: 'application/json',
-      }
-    }));
-    const response = await result.response;
-    const text = response.text().replace(/```json/g, '').replace(/```/g, '').trim();
+    const result = await callFirebaseAI({
+      prompt,
+      isProMode: playbookSettings?.aiMode === 'pro',
+      isJSON: true,
+      apiKey,
+      schemaType: 'smart_zoning'
+    });
+    const text = result.text.replace(/```json/g, '').replace(/```/g, '').trim();
     const parsed = JSON.parse(text);
     return typeof parsed === 'object' && parsed !== null ? parsed : {};
   } catch (err) {

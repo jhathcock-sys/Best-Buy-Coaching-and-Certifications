@@ -1,4 +1,4 @@
-import { getGeminiModel } from './core';
+import { callFirebaseAI } from './core';
 import type { ShiftEvent, FollowUpTask, PlaybookSettings } from '../../types';
 import type { ParsedEmployee } from '../../components/RentsDueAuditor/RentsDueLedger';
 
@@ -11,8 +11,6 @@ export async function generateHandoffBriefing(
   playbookSettings: PlaybookSettings,
   apiKey: string | undefined
 ): Promise<string> {
-  const model = getGeminiModel(apiKey, playbookSettings);
-
   const offTrackEmployees = roster.filter((emp) => 
     emp.revenueStatus === 'off-track' || 
     emp.appsStatus === 'off-track' || 
@@ -37,8 +35,13 @@ REQUIREMENTS:
 Keep the tone professional, urgent, and focused on retail execution. Format as Markdown.`;
 
   try {
-    const result = await model.generateContent(prompt);
-    return result.response.text();
+    const result = await callFirebaseAI({
+      prompt,
+      isProMode: playbookSettings?.aiMode === 'pro',
+      apiKey,
+      schemaType: 'handoff'
+    });
+    return result.text;
   } catch (error) {
     console.error('Failed to generate handoff briefing:', error);
     return `### ⚠️ Shift Handoff Unreachable

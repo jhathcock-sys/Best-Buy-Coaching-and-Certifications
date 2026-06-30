@@ -1,5 +1,4 @@
-import { SchemaType } from '@google/generative-ai';
-import { getGeminiModel, executeWithRetry } from './core';
+import { callFirebaseAI } from './core';
 import { OFFLINE_DIALOGUES } from './offlineSimulators';
 import type { PlaybookScenario } from './constants';
 import type { PlaybookSettings } from '../../types';
@@ -211,7 +210,6 @@ export function evaluateSessionOffline(history: SimulationHistory) {
 export async function runGeminiSimulationStep(apiKey: string | undefined, message: string, history: SimulationHistory, scenario: PlaybookScenario, playbookSettings: PlaybookSettings) {
   try {
     if (!history || !scenario) return runOfflineSimulationStep(message, history, scenario);
-    const model = getGeminiModel(apiKey, playbookSettings);
     
     // Format conversation history
     const historyString = (history?.messages || []).map(m => {
@@ -269,37 +267,16 @@ export async function runGeminiSimulationStep(apiKey: string | undefined, messag
       Provide your JSON response matching the customer role:
     `;
 
-    const responseSchema = {
-      type: SchemaType.OBJECT,
-      properties: {
-        responseText: { type: SchemaType.STRING },
-        currentActiveStep: { type: SchemaType.STRING },
-        completedSteps: {
-          type: SchemaType.OBJECT,
-          properties: {
-            connect: { type: SchemaType.BOOLEAN },
-            discover: { type: SchemaType.BOOLEAN },
-            recommend: { type: SchemaType.BOOLEAN },
-            protect: { type: SchemaType.BOOLEAN },
-            close: { type: SchemaType.BOOLEAN }
-          },
-          required: ["connect", "discover", "recommend", "protect", "close"]
-        }
-      },
-      required: ["responseText", "currentActiveStep", "completedSteps"]
-    };
+    const result = await callFirebaseAI({
+      prompt: systemPrompt + '\\n' + prompt,
+      isProMode: playbookSettings?.aiMode === 'pro',
+      isJSON: true,
+      isVision: false,
+      apiKey: apiKey,
+      schemaType: 'customer_simulation_step'
+    });
 
-    const result = await executeWithRetry(() => model.generateContent({
-      contents: [
-        { role: 'user', parts: [{ text: systemPrompt + '\n' + prompt }] }
-      ],
-      generationConfig: {
-        responseMimeType: 'application/json',
-        responseSchema: responseSchema
-      }
-    }));
-
-    const responseText = result.response.text();
+    const responseText = result.text;
     const parsedData = JSON.parse(responseText);
     
     const data = {
@@ -354,12 +331,12 @@ export async function evaluateSessionGemini(apiKey: string | undefined, history:
     const functions = getFunctions(app);
     const auditDialogue = httpsCallable(functions, 'auditDialogue');
 
-    const result = await executeWithRetry(() => auditDialogue({
+    const result = await auditDialogue({
       history,
       scenario,
       playbookSettings,
       apiKey
-    }));
+    });
     
     const parsed = result.data as any;
     

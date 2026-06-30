@@ -1,4 +1,4 @@
-import { getGeminiModel } from './core';
+import { callFirebaseAI } from './core';
 import type { PlaybookSettings, FollowUpTask } from '../../types';
 import type { ParsedEmployee } from '../../components/RentsDueAuditor/RentsDueLedger';
 
@@ -8,8 +8,6 @@ export async function generateRentRecoveryPlans(
   apiKey: string | undefined
 ): Promise<FollowUpTask[]> {
   if (!employees || employees.length === 0) return [];
-
-  const model = getGeminiModel(apiKey, playbookSettings);
 
   const employeesData = employees.map(employee => {
     const metricGaps = [];
@@ -42,18 +40,15 @@ Return ONLY the raw JSON array, without markdown formatting.`;
   const prompt = `Employee Data:
 ${JSON.stringify(employeesData, null, 2)}`;
 
-  const request = {
-    contents: [
-      { role: 'user', parts: [{ text: systemPrompt + '\n\n' + prompt }] }
-    ],
-    generationConfig: {
-      responseMimeType: 'application/json'
-    }
-  };
-
   try {
-    const result = await model.generateContent(request);
-    const text = result.response.text() || '[]';
+    const result = await callFirebaseAI({
+      prompt: systemPrompt + '\n\n' + prompt,
+      isProMode: playbookSettings?.aiMode === 'pro',
+      isJSON: true,
+      apiKey,
+      schemaType: 'rent_recovery'
+    });
+    const text = result.text || '[]';
     
     let tasks: FollowUpTask[] = JSON.parse(text);
     if (!Array.isArray(tasks)) {

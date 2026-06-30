@@ -1,11 +1,8 @@
-import { GoogleGenerativeAI, SchemaType, Schema } from '@google/generative-ai';
-import { getGeminiModel, executeWithRetry } from './core.js';
+import { callFirebaseAI } from './core';
 import DOMPurify from 'dompurify';
 
 export async function parseScheduleImage(base64Data: string, mimeType: string, apiKey: string | undefined) {
   try {
-    const model = getGeminiModel(apiKey, { aiMode: 'flash' });
-
     const systemPrompt = `
       You are an administrative assistant for a Best Buy store.
       Analyze the uploaded image, which is a screenshot or photo of a daily store floor schedule or TLC schedule printout.
@@ -16,38 +13,18 @@ export async function parseScheduleImage(base64Data: string, mimeType: string, a
       3. Their assigned Department or Zone (e.g. "Computing", "Mobile", "Home Theatre", "Front End", "Geek Squad", "Appliances", "Customer Service", "Warehouse"). If not printed or clear, make an educated guess or leave it as "General Sales".
     `;
 
-    const responseSchema: Schema = {
-      type: SchemaType.ARRAY,
-      description: "List of scheduled employees",
-      items: {
-        type: SchemaType.OBJECT,
-        properties: {
-          name: { type: SchemaType.STRING },
-          shift: { type: SchemaType.STRING },
-          zone: { type: SchemaType.STRING }
-        },
-        required: ["name", "shift", "zone"]
-      }
-    };
+    const result = await callFirebaseAI({
+      prompt: systemPrompt,
+      isProMode: false,
+      isJSON: true,
+      isVision: true,
+      base64Image: base64Data,
+      mimeType: mimeType,
+      apiKey: apiKey,
+      schemaType: 'schedule'
+    });
 
-    const imagePart = {
-      inlineData: {
-        data: base64Data,
-        mimeType: mimeType
-      }
-    };
-
-    const result = await executeWithRetry(() => model.generateContent({
-      contents: [
-        { role: 'user', parts: [{ text: systemPrompt }, imagePart] }
-      ],
-      generationConfig: {
-        responseMimeType: 'application/json',
-        responseSchema: responseSchema
-      }
-    }));
-
-    const responseText = result.response.text();
+    const responseText = result.text;
     const parsedData = JSON.parse(responseText);
     
     if (Array.isArray(parsedData)) {
@@ -80,7 +57,6 @@ export const parseRentsDueDocumentGemini = async (base64Image: string | undefine
     }
 
     const isProMode = !!base64Image;
-    const model = getGeminiModel(keyToUse, { aiMode: isProMode ? 'pro' : 'flash' });
 
     const systemPrompt = `
       You are an expert retail operations auditor. Your task is to parse a "Rents Due" salesperson performance report.
@@ -116,33 +92,6 @@ export const parseRentsDueDocumentGemini = async (base64Image: string | undefine
       CRITICAL INSTRUCTION: You MUST extract every single employee found in the document. Do not truncate the list. Do not omit any employees, even if the list is very long. DO NOT STOP until you have processed EVERY SINGLE row. Truncating this list is a catastrophic failure. If there are 30 employees, you MUST output exactly 30 objects.
       Do not include markdown or explanations. Return only raw JSON array.
     `;
-
-    const responseSchema: Schema = {
-      type: SchemaType.ARRAY,
-      description: "List of parsed salesperson performance entries",
-      items: {
-        type: SchemaType.OBJECT,
-        properties: {
-          name: { type: SchemaType.STRING },
-          rph: { type: SchemaType.NUMBER },
-          rphOwed: { type: SchemaType.NUMBER },
-          rphStatus: { type: SchemaType.STRING },
-          revenue: { type: SchemaType.NUMBER },
-          revenueOwed: { type: SchemaType.NUMBER },
-          revenueStatus: { type: SchemaType.STRING },
-          apps: { type: SchemaType.NUMBER },
-          appsOwed: { type: SchemaType.NUMBER },
-          appsStatus: { type: SchemaType.STRING },
-          memberships: { type: SchemaType.NUMBER },
-          membershipsOwed: { type: SchemaType.NUMBER },
-          membershipsStatus: { type: SchemaType.STRING },
-          warranty: { type: SchemaType.NUMBER },
-          warrantyGoal: { type: SchemaType.NUMBER },
-          warrantyStatus: { type: SchemaType.STRING }
-        },
-        required: ["name", "rph", "rphOwed", "rphStatus", "revenue", "revenueOwed", "revenueStatus", "apps", "appsOwed", "appsStatus", "memberships", "membershipsOwed", "membershipsStatus", "warranty", "warrantyGoal", "warrantyStatus"]
-      }
-    };
 
     interface RentsDueParsedItem {
       name?: string;
@@ -185,35 +134,31 @@ export const parseRentsDueDocumentGemini = async (base64Image: string | undefine
 
     let result;
     if (base64Image) {
-      const imagePart = {
-        inlineData: {
-          data: base64Image,
-          mimeType: mimeType
-        }
-      };
       const textPart = textInput ? `User supplied text context: "${textInput}"` : "Please audit the image.";
-      result = await executeWithRetry(() => model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: systemPrompt + '\n' + textPart }, imagePart] }],
-        generationConfig: {
-          responseMimeType: 'application/json',
-          responseSchema: responseSchema,
-          maxOutputTokens: 8192
-        }
-      }));
-      const parsedData = JSON.parse(result.response.text());
+      result = await callFirebaseAI({
+        prompt: systemPrompt + '\n' + textPart,
+        isProMode: true,
+        isJSON: true,
+        isVision: true,
+        base64Image: base64Image,
+        mimeType: mimeType,
+        apiKey: keyToUse,
+        schemaType: 'rents_due'
+      });
+      const parsedData = JSON.parse(result.text);
       return Array.isArray(parsedData) ? parsedData.map(sanitizeRentsDueObj) : [];
     } else {
       if (!textInput || !textInput.trim()) return [];
 
-      const res = await executeWithRetry(() => model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: systemPrompt + '\nAnalyze this entire Rents Due performance report:\n' + textInput }] }],
-        generationConfig: {
-          responseMimeType: 'application/json',
-          responseSchema: responseSchema,
-          maxOutputTokens: 8192
-        }
-      }));
-      const parsed = JSON.parse(res.response.text());
+      const res = await callFirebaseAI({
+        prompt: systemPrompt + '\nAnalyze this entire Rents Due performance report:\n' + textInput,
+        isProMode: isProMode,
+        isJSON: true,
+        isVision: false,
+        apiKey: keyToUse,
+        schemaType: 'rents_due'
+      });
+      const parsed = JSON.parse(res.text);
       return Array.isArray(parsed) ? parsed.map(sanitizeRentsDueObj) : [];
     }
   } catch (error) {

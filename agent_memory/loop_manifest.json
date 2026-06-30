@@ -1,26 +1,22 @@
 {
-    "active_vetos":  [
-
-                     ],
-    "status":  "COMPLETED",
-    "remaining_queue":  null,
-    "current_checkpoint":  16,
-    "processed_queue":  [
-                            "src/components/FiveStarAuditor.tsx",
-                            "src/components/ImportScheduleModal.tsx",
-                            "src/components/AdvisorLogin.tsx",
-                            "src/components/BreakRunSheet.tsx",
-                            "src/components/Analytics/ConversationalAnalyticsWidget.tsx",
-                            "src/components/FloorLeader/ShiftSetupForm.tsx",
-                            "src/components/FloorAuditReport.tsx",
-                            "src/components/RoleplayCenter/RoleplayActiveSession.tsx",
-                            "src/components/SyncManager.tsx",
-                            "src/services/firebase.ts",
-                            "src/components/RentsDueAuditor.tsx",
-                            "src/components/Playbook/CustomScenarioForm.tsx",
-                            "src/components/PlaybookStudio/SupervisorProfilesTab.tsx",
-                            "src/pages/CoachSimulatorPage.tsx",
-                            "src/components/AuditorResults.tsx",
-                            "src/components/Analytics/DynamicChartRenderer.tsx"
-                        ]
+  "current_checkpoint": "completed",
+  "remaining_queue": [],
+  "processed_queue": [
+    "functions/src/ai.js",
+    "src/services/ai/core.ts",
+    "src/services/ai/geminiAuditors.ts",
+    "src/services/ai/geminiDocumentParsers.ts",
+    "src/services/ai/auraEngine.ts",
+    "src/services/ai/customerSimulator.ts",
+    "src/services/ai/employeeSimulator.ts",
+    "src/services/ai/floorSimulator.ts",
+    "src/services/ai/geminiBreaks.ts",
+    "src/services/ai/geminiCoachingTarget.ts",
+    "src/services/ai/geminiHandoff.ts",
+    "src/services/ai/geminiHuddle.ts",
+    "src/services/ai/geminiRentRecovery.ts",
+    "src/services/ai/geminiSmartZoning.ts",
+    "src/services/ai/scenarioGenerator.ts"
+  ],
+  "active_vetos": []
 }

@@ -1,4 +1,4 @@
-import { getGeminiModel, executeWithRetry } from './core';
+import { callFirebaseAI } from './core';
 import type { Employee, PlaybookSettings } from '../../types';
 
 export async function generateHuddleScript(
@@ -6,8 +6,6 @@ export async function generateHuddleScript(
   apiKey: string | undefined, 
   playbookSettings: PlaybookSettings
 ): Promise<string> {
-  const model = getGeminiModel(apiKey, playbookSettings);
-
   const rosterContext = roster.map(emp => 
     `- ${emp.name} (${emp.dept}): RPH: ${emp.rph || 0}, Memberships: ${emp.memberships || 0}`
   ).join('\n');
@@ -25,9 +23,12 @@ ${rosterContext}
 Generate the plain text huddle script.
   `.trim();
 
-  const result = await executeWithRetry(async () => {
-    return await model.generateContent(prompt);
+  const result = await callFirebaseAI({
+    prompt,
+    isProMode: playbookSettings?.aiMode === 'pro',
+    apiKey,
+    schemaType: 'huddle'
   });
 
-  return result.response.text();
+  return result.text;
 }

@@ -1,4 +1,4 @@
-import { getGeminiModel, executeWithRetry } from './core';
+import { callFirebaseAI } from './core';
 
 export const generateOptimizedBreaks = async (
   roster: any[],
@@ -9,8 +9,6 @@ export const generateOptimizedBreaks = async (
   preventOverlaps: boolean = false,
   staggerBreaks: boolean = false
 ) => {
-  const model = getGeminiModel(apiKey, playbookSettings);
-
   const prompt = `
 You are an intelligent scheduling assistant for Best Buy.
 Your task is to generate an optimized break schedule for the current roster of employees.
@@ -38,25 +36,16 @@ Please return a JSON array of break objects. Each break object should have:
 Return ONLY valid JSON.
   `.trim();
 
-  const request = {
-    contents: [
-      {
-        role: 'user',
-        parts: [{ text: prompt }]
-      }
-    ],
-    generationConfig: {
-      responseMimeType: 'application/json',
-      maxOutputTokens: 2048,
-    }
-  };
-
   let responseText = '';
   try {
-    responseText = await executeWithRetry(async () => {
-      const res = await model.generateContent(request);
-      return res.response.text();
+    const result = await callFirebaseAI({
+      prompt,
+      isProMode: playbookSettings?.aiMode === 'pro',
+      isJSON: true,
+      apiKey,
+      schemaType: 'break_schedule'
     });
+    responseText = result.text;
   } catch (error) {
     console.error('Failed to generate breaks via AI:', error);
     return [];

@@ -1,5 +1,4 @@
-import { SchemaType, type Schema } from '@google/generative-ai';
-import { getGeminiModel, executeWithRetry } from './core';
+import { callFirebaseAI } from './core';
 import type { PlaybookScenario } from './constants';
 import type { PlaybookSettings } from '../../types';
 
@@ -226,7 +225,6 @@ export function generateCoachingLogLocal(name: string, gapType: string, gapDetai
 export async function runGeminiEmployeeCoachingStep(apiKey: string | undefined, message: string, history: CoachingHistory, employeeScenario: PlaybookScenario, playbookSettings: PlaybookSettings, pastCoachingSummary: string, onStream?: (text: string) => void) {
   try {
     if (!history || !employeeScenario) return runOfflineEmployeeCoachingStep(message, history, employeeScenario);
-    const model = getGeminiModel(apiKey, playbookSettings);
     
     // Format conversation history
     const historyString = (history?.messages || []).map(m => {
@@ -292,82 +290,25 @@ export async function runGeminiEmployeeCoachingStep(apiKey: string | undefined, 
       Provide your JSON response matching the employee role:
     `;
 
-    const responseSchema: Schema = {
-      type: SchemaType.OBJECT,
-      properties: {
-        responseText: { type: SchemaType.STRING },
-        currentCoachStep: { type: SchemaType.STRING },
-        completedCoachSteps: {
-          type: SchemaType.OBJECT,
-          properties: {
-            goal: { type: SchemaType.BOOLEAN },
-            reality: { type: SchemaType.BOOLEAN },
-            options: { type: SchemaType.BOOLEAN },
-            will: { type: SchemaType.BOOLEAN }
-          },
-          required: ["goal", "reality", "options", "will"]
-        }
-      },
-      required: ["responseText", "currentCoachStep", "completedCoachSteps"]
-    };
-
-    let finalResponseText = '';
+    const result = await callFirebaseAI({
+      prompt: systemPrompt + '\\n' + prompt,
+      isProMode: playbookSettings?.aiMode === 'pro',
+      isJSON: true,
+      isVision: false,
+      apiKey: apiKey,
+      schemaType: 'employee_coaching_step'
+    });
+    
+    const finalResponseText = result.text;
     
     if (onStream) {
-      const result = await model.generateContentStream({
-        contents: [
-          { role: 'user', parts: [{ text: systemPrompt + '\n' + prompt }] }
-        ],
-        generationConfig: {
-          responseMimeType: 'application/json',
-          responseSchema: responseSchema
-        }
-      });
-      
-      let fullJson = '';
-      for await (const chunk of result.stream) {
-        fullJson += chunk.text();
-        
-        // Extract partial responseText for streaming
-        const startIndex = fullJson.indexOf('"responseText"');
-        if (startIndex !== -1) {
-          const colonIndex = fullJson.indexOf(':', startIndex);
-          if (colonIndex !== -1) {
-            const quoteIndex = fullJson.indexOf('"', colonIndex);
-            if (quoteIndex !== -1) {
-              const contentStart = quoteIndex + 1;
-              let inEscape = false;
-              let i = contentStart;
-              for (; i < fullJson.length; i++) {
-                const char = fullJson[i];
-                if (inEscape) {
-                  inEscape = false;
-                } else {
-                  if (char === '\\') inEscape = true;
-                  else if (char === '"') break;
-                }
-              }
-              const rawString = fullJson.substring(contentStart, i);
-              const unescaped = rawString.replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
-              if (unescaped.trim().length > 0) {
-                onStream(unescaped);
-              }
-            }
-          }
-        }
-      }
-      finalResponseText = fullJson;
-    } else {
-      const result = await executeWithRetry(() => model.generateContent({
-        contents: [
-          { role: 'user', parts: [{ text: systemPrompt + '\n' + prompt }] }
-        ],
-        generationConfig: {
-          responseMimeType: 'application/json',
-          responseSchema: responseSchema
-        }
-      }));
-      finalResponseText = result.response.text();
+       try {
+         const tempParsed = JSON.parse(finalResponseText);
+         if (tempParsed.responseText) {
+           onStream(tempParsed.responseText);
+         }
+       } catch (e) {
+       }
     }
 
     let data: any;
@@ -442,7 +383,6 @@ export async function runGeminiEmployeeCoachingStep(apiKey: string | undefined, 
 export async function evaluateCoachingSessionGemini(apiKey: string | undefined, history: CoachingHistory, scenario: PlaybookScenario, playbookSettings: PlaybookSettings) {
   try {
     if (!history || !scenario) return evaluateCoachingSession(history);
-    const model = getGeminiModel(apiKey, playbookSettings);
     
     const dialogueStr = (history?.messages || []).map(m => `${m.sender === 'coach' ? 'Supervisor' : 'Employee'}: ${m.text}`).join('\n');
     
@@ -479,33 +419,15 @@ export async function evaluateCoachingSessionGemini(apiKey: string | undefined, 
       }
     `;
 
-    const responseSchema: Schema = {
-      type: SchemaType.OBJECT,
-      properties: {
-        score: { type: SchemaType.NUMBER },
-        passed: { type: SchemaType.BOOLEAN },
-        feedback: { type: SchemaType.STRING },
-        details: {
-          type: SchemaType.OBJECT,
-          properties: {
-            empathy: { type: SchemaType.NUMBER },
-            structure: { type: SchemaType.NUMBER },
-            actionable: { type: SchemaType.NUMBER }
-          },
-          required: ["empathy", "structure", "actionable"]
-        }
-      },
-      required: ["score", "passed", "feedback", "details"]
-    };
-
-    const result = await executeWithRetry(() => model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: evaluationPrompt }] }],
-      generationConfig: {
-        responseMimeType: 'application/json',
-        responseSchema: responseSchema
-      }
-    }));
-    const parsed = JSON.parse(result.response.text());
+    const result = await callFirebaseAI({
+      prompt: evaluationPrompt,
+      isProMode: playbookSettings?.aiMode === 'pro',
+      isJSON: true,
+      isVision: false,
+      apiKey: apiKey,
+      schemaType: 'evaluate_coaching_session'
+    });
+    const parsed = JSON.parse(result.text);
     return {
       score: parsed?.score || 0,
       passed: parsed?.passed ?? false,

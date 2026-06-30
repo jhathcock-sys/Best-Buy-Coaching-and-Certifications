@@ -1,11 +1,8 @@
-import { GoogleGenerativeAI, SchemaType, type Schema } from '@google/generative-ai';
-import { getGeminiModel, isGeminiAvailable, executeWithRetry } from './core';
+import { isGeminiAvailable, executeWithRetry, callFirebaseAI } from './core';
 import type { PlaybookSettings } from '../../types';
 
 export async function auditStoreFloorGemini(apiKey: string | undefined, base64Image: string, mimeType: string) {
   try {
-    const model = getGeminiModel(apiKey, { aiMode: 'pro' } as PlaybookSettings);
-    
     const systemPrompt = `
       You are a Best Buy Store General Manager.
       Analyze the uploaded image of the store sales floor. Look for:
@@ -15,35 +12,18 @@ export async function auditStoreFloorGemini(apiKey: string | undefined, base64Im
       4. Staffing levels and zone coverage.
     `;
 
-    const responseSchema: Schema = {
-      type: SchemaType.OBJECT,
-      properties: {
-        status: { type: SchemaType.STRING },
-        statusDetails: { type: SchemaType.STRING },
-        observations: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-        actionPlan: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
-      },
-      required: ["status", "statusDetails", "observations", "actionPlan"]
-    };
+    const result = await callFirebaseAI({
+      prompt: systemPrompt,
+      isProMode: true,
+      isJSON: true,
+      isVision: true,
+      base64Image: base64Image,
+      mimeType: mimeType,
+      apiKey: apiKey,
+      schemaType: 'audit_floor'
+    });
 
-    const imagePart = {
-      inlineData: {
-        data: base64Image,
-        mimeType: mimeType
-      }
-    };
-
-    const result = await executeWithRetry(() => model.generateContent({
-      contents: [
-        { role: 'user', parts: [{ text: systemPrompt }, imagePart] }
-      ],
-      generationConfig: {
-        responseMimeType: 'application/json',
-        responseSchema: responseSchema
-      }
-    }));
-
-    const parsed = JSON.parse(result.response.text());
+    const parsed = JSON.parse(result.text);
     return {
       status: parsed?.status || "Unknown",
       statusDetails: parsed?.statusDetails || "No details generated.",
@@ -74,8 +54,6 @@ export async function auditStoreFloorGemini(apiKey: string | undefined, base64Im
 
 export async function auditPerformanceWorkbookGemini(apiKey: string | undefined, workbookText: string, playbookSettings: PlaybookSettings) {
   try {
-    const model = getGeminiModel(apiKey, playbookSettings);
-    
     const systemPrompt = `
       You are a Store General Manager auditing employee performance metrics.
       Analyze the following CSV or tabular employee metrics data.
@@ -85,38 +63,16 @@ export async function auditPerformanceWorkbookGemini(apiKey: string | undefined,
       3. Concrete floor actions and scripts to help each group.
     `;
 
-    const responseSchema: Schema = {
-      type: SchemaType.OBJECT,
-      properties: {
-        overallSummary: { type: SchemaType.STRING },
-        topPerformers: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-        gapClusters: {
-          type: SchemaType.ARRAY,
-          items: {
-            type: SchemaType.OBJECT,
-            properties: {
-              name: { type: SchemaType.STRING },
-              employees: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-              focusBehavior: { type: SchemaType.STRING },
-              coachingTip: { type: SchemaType.STRING }
-            },
-            required: ["name", "employees", "focusBehavior", "coachingTip"]
-          }
-        },
-        recommendedActionTimeline: { type: SchemaType.STRING }
-      },
-      required: ["overallSummary", "topPerformers", "gapClusters", "recommendedActionTimeline"]
-    };
+    const result = await callFirebaseAI({
+      prompt: systemPrompt + '\\n\\nData:\\n' + (workbookText || ''),
+      isProMode: playbookSettings?.aiMode === 'pro',
+      isJSON: true,
+      isVision: false,
+      apiKey: apiKey,
+      schemaType: 'audit_performance_workbook'
+    });
 
-    const result = await executeWithRetry(() => model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: systemPrompt + '\n\nData:\n' + (workbookText || '') }] }],
-      generationConfig: {
-        responseMimeType: 'application/json',
-        responseSchema: responseSchema
-      }
-    }));
-
-    const parsed = JSON.parse(result.response.text());
+    const parsed = JSON.parse(result.text);
     return {
       overallSummary: parsed?.overallSummary || "No summary provided.",
       topPerformers: Array.isArray(parsed?.topPerformers) ? parsed.topPerformers : [],
@@ -159,8 +115,6 @@ export async function auditFiveStarSurveyGemini(apiKey: string | undefined, base
       throw new Error("Gemini API Key is not available");
     }
 
-    const model = getGeminiModel(apiKey, playbookSettings);
-
     const systemPrompt = `
       You are a Best Buy Store General Manager auditing a 5-Star customer survey (ratings 1 to 5, where 1-3 are detractors, 4 is passive, 5 is promoter).
       
@@ -175,47 +129,31 @@ export async function auditFiveStarSurveyGemini(apiKey: string | undefined, base
       7. List 2-3 specific floor action steps for the supervisor to validate.
     `;
 
-    const responseSchema: Schema = {
-      type: SchemaType.OBJECT,
-      properties: {
-        rating: { type: SchemaType.NUMBER },
-        comment: { type: SchemaType.STRING },
-        associateName: { type: SchemaType.STRING },
-        department: { type: SchemaType.STRING },
-        rootCause: { type: SchemaType.STRING },
-        coachingScript: { type: SchemaType.STRING },
-        checkItems: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
-      },
-      required: ["rating", "comment", "associateName", "department", "rootCause", "coachingScript", "checkItems"]
-    };
-
     let result;
     if (base64Image && mimeType) {
-      const imagePart = {
-        inlineData: {
-          data: base64Image,
-          mimeType: mimeType
-        }
-      };
       const textPart = textInput ? `User supplied text context: "${textInput}"` : "Please audit the image.";
-      result = await executeWithRetry(() => model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: systemPrompt + '\n' + textPart }, imagePart] }],
-        generationConfig: {
-          responseMimeType: 'application/json',
-          responseSchema: responseSchema
-        }
-      }));
+      result = await callFirebaseAI({
+        prompt: systemPrompt + '\n' + textPart,
+        isProMode: playbookSettings?.aiMode === 'pro',
+        isJSON: true,
+        isVision: true,
+        base64Image: base64Image,
+        mimeType: mimeType,
+        apiKey: apiKey,
+        schemaType: 'audit_five_star_survey'
+      });
     } else {
-      result = await executeWithRetry(() => model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: systemPrompt + '\nAnalyze this customer survey feedback: "' + (textInput || '') + '"' }] }],
-        generationConfig: {
-          responseMimeType: 'application/json',
-          responseSchema: responseSchema
-        }
-      }));
+      result = await callFirebaseAI({
+        prompt: systemPrompt + '\nAnalyze this customer survey feedback: "' + (textInput || '') + '"',
+        isProMode: playbookSettings?.aiMode === 'pro',
+        isJSON: true,
+        isVision: false,
+        apiKey: apiKey,
+        schemaType: 'audit_five_star_survey'
+      });
     }
 
-    const parsed = JSON.parse(result.response.text());
+    const parsed = JSON.parse(result.text);
     return {
       rating: parsed?.rating || 0,
       comment: parsed?.comment || "No comment provided.",

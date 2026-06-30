@@ -1,4 +1,4 @@
-import { getGeminiModel, executeWithRetry } from './core';
+import { callFirebaseAI } from './core';
 import type { Employee, DeptGoal, PlaybookSettings } from '../../types';
 
 export type AuraStatus = 'excellent' | 'needs_coaching' | 'steady' | 'pending';
@@ -24,10 +24,7 @@ export async function generateAuraBatchInsights(
 ): Promise<Record<string, AuraInsight>> {
   if (!roster || roster.length === 0) return {};
   
-  // Force Flash model for high-speed batch processing
-  const fastSettings = { ...playbookSettings, aiMode: 'flash' };
-  const model = getGeminiModel(apiKey, fastSettings);
-  
+
   const rosterStats = roster.map(emp => ({
     id: emp.id,
     name: emp.name,
@@ -56,14 +53,16 @@ Do not include any other text, markdown formatting, or explanations. Only the ra
 `;
 
   const apiCall = async () => {
-    const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        responseMimeType: 'application/json'
-      }
+    const result = await callFirebaseAI({
+      prompt,
+      isProMode: false,
+      isJSON: true,
+      isVision: false,
+      apiKey: apiKey,
+      schemaType: 'aura_batch_insights'
     });
 
-    const responseText = result.response.text();
+    const responseText = result.text;
     try {
       const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
       const parsedArray = JSON.parse(cleanJson) as AuraResponseItem[];
@@ -95,5 +94,5 @@ Do not include any other text, markdown formatting, or explanations. Only the ra
     }
   };
 
-  return executeWithRetry(apiCall, 1);
+  return apiCall();
 }

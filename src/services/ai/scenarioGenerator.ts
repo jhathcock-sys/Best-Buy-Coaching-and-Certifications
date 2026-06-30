@@ -1,6 +1,5 @@
 // Custom Scenario Generator (Gemini)
-import { SchemaType, type Schema } from '@google/generative-ai';
-import { getGeminiModel, isGeminiAvailable, executeWithRetry } from './core';
+import { callFirebaseAI, isGeminiAvailable } from './core';
 import type { PlaybookSettings } from '../../types';
 
 export const generateCustomScenario = async (prompt: string, apiKey: string | undefined) => {
@@ -8,54 +7,18 @@ export const generateCustomScenario = async (prompt: string, apiKey: string | un
     throw new Error('Gemini API key is required to generate scenarios.');
   }
 
-  const model = getGeminiModel(apiKey, { aiMode: 'pro' } as PlaybookSettings);
-
   const systemInstruction = `You are an expert Best Buy store manager and scenario designer. Generate a realistic retail training scenario based on the user's prompt.`;
 
-  const responseSchema: Schema = {
-    type: SchemaType.OBJECT,
-    properties: {
-      title: { type: SchemaType.STRING },
-      name: { type: SchemaType.STRING },
-      category: { type: SchemaType.STRING },
-      difficulty: { type: SchemaType.STRING },
-      greeting: { type: SchemaType.STRING },
-      customerNeeds: { type: SchemaType.STRING },
-      objections: {
-        type: SchemaType.OBJECT,
-        properties: {
-          memberships: { type: SchemaType.STRING },
-          protection: { type: SchemaType.STRING },
-          creditCard: { type: SchemaType.STRING }
-        },
-        required: ["memberships", "protection", "creditCard"]
-      },
-      keywords: {
-        type: SchemaType.OBJECT,
-        properties: {
-          connect: { type: SchemaType.STRING },
-          discover: { type: SchemaType.STRING },
-          recommend: { type: SchemaType.STRING },
-          protect: { type: SchemaType.STRING }
-        },
-        required: ["connect", "discover", "recommend", "protect"]
-      }
-    },
-    required: ["title", "name", "category", "difficulty", "greeting", "customerNeeds", "objections", "keywords"]
-  };
-
   try {
-    const result = await executeWithRetry(() => model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      systemInstruction: { role: 'system', parts: [{ text: systemInstruction }] },
-      generationConfig: { 
-        temperature: 0.7,
-        responseMimeType: 'application/json',
-        responseSchema: responseSchema
-      }
-    }));
+    const result = await callFirebaseAI({
+      prompt: systemInstruction + '\n\n' + prompt,
+      isProMode: true,
+      isJSON: true,
+      apiKey,
+      schemaType: 'scenario'
+    });
     
-    const responseText = result.response.text();
+    const responseText = result.text;
     const cleanJson = responseText.replace(/```json/gi, '').replace(/```/g, '').trim();
     const parsed = JSON.parse(cleanJson);
     

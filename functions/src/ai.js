@@ -1,7 +1,239 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenerativeAI, SchemaType } = require('@google/generative-ai');
 const cors = require('cors')({ origin: true });
+
+function getSchemaForType(schemaType) {
+  switch (schemaType) {
+    case 'schedule':
+      return {
+        type: SchemaType.ARRAY,
+        description: "List of scheduled employees",
+        items: {
+          type: SchemaType.OBJECT,
+          properties: {
+            name: { type: SchemaType.STRING },
+            shift: { type: SchemaType.STRING },
+            zone: { type: SchemaType.STRING }
+          },
+          required: ["name", "shift", "zone"]
+        }
+      };
+    case 'rents_due':
+      return {
+        type: SchemaType.ARRAY,
+        description: "List of parsed salesperson performance entries",
+        items: {
+          type: SchemaType.OBJECT,
+          properties: {
+            name: { type: SchemaType.STRING },
+            rph: { type: SchemaType.NUMBER },
+            rphOwed: { type: SchemaType.NUMBER },
+            rphStatus: { type: SchemaType.STRING },
+            revenue: { type: SchemaType.NUMBER },
+            revenueOwed: { type: SchemaType.NUMBER },
+            revenueStatus: { type: SchemaType.STRING },
+            apps: { type: SchemaType.NUMBER },
+            appsOwed: { type: SchemaType.NUMBER },
+            appsStatus: { type: SchemaType.STRING },
+            memberships: { type: SchemaType.NUMBER },
+            membershipsOwed: { type: SchemaType.NUMBER },
+            membershipsStatus: { type: SchemaType.STRING },
+            warranty: { type: SchemaType.NUMBER },
+            warrantyGoal: { type: SchemaType.NUMBER },
+            warrantyStatus: { type: SchemaType.STRING }
+          },
+          required: ["name", "rph", "rphOwed", "rphStatus", "revenue", "revenueOwed", "revenueStatus", "apps", "appsOwed", "appsStatus", "memberships", "membershipsOwed", "membershipsStatus", "warranty", "warrantyGoal", "warrantyStatus"]
+        }
+      };
+    case 'action_plan':
+      return {
+        type: SchemaType.OBJECT,
+        properties: {
+          type: { type: SchemaType.STRING },
+          status: { type: SchemaType.STRING },
+          reason: { type: SchemaType.STRING },
+          dateCreated: { type: SchemaType.STRING },
+          planText: { type: SchemaType.STRING }
+        },
+        required: ["type", "status", "reason", "dateCreated", "planText"]
+      };
+    case 'scenario':
+      return {
+        type: SchemaType.OBJECT,
+        properties: {
+          title: { type: SchemaType.STRING },
+          name: { type: SchemaType.STRING },
+          category: { type: SchemaType.STRING },
+          difficulty: { type: SchemaType.STRING },
+          greeting: { type: SchemaType.STRING },
+          customerNeeds: { type: SchemaType.STRING },
+          objections: {
+            type: SchemaType.OBJECT,
+            properties: {
+              memberships: { type: SchemaType.STRING },
+              protection: { type: SchemaType.STRING },
+              creditCard: { type: SchemaType.STRING }
+            },
+            required: ["memberships", "protection", "creditCard"]
+          },
+          keywords: {
+            type: SchemaType.OBJECT,
+            properties: {
+              connect: { type: SchemaType.STRING },
+              discover: { type: SchemaType.STRING },
+              recommend: { type: SchemaType.STRING },
+              protect: { type: SchemaType.STRING }
+            },
+            required: ["connect", "discover", "recommend", "protect"]
+          }
+        },
+        required: ["title", "name", "category", "difficulty", "greeting", "customerNeeds", "objections", "keywords"]
+      };
+    case 'audit_floor':
+      return {
+        type: SchemaType.OBJECT,
+        properties: {
+          status: { type: SchemaType.STRING },
+          statusDetails: { type: SchemaType.STRING },
+          observations: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          actionPlan: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
+        },
+        required: ["status", "statusDetails", "observations", "actionPlan"]
+      };
+    case 'audit_performance':
+      return {
+        type: SchemaType.OBJECT,
+        properties: {
+          overallSummary: { type: SchemaType.STRING },
+          topPerformers: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          gapClusters: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                name: { type: SchemaType.STRING },
+                employees: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+                focusBehavior: { type: SchemaType.STRING },
+                coachingTip: { type: SchemaType.STRING }
+              },
+              required: ["name", "employees", "focusBehavior", "coachingTip"]
+            }
+          },
+          recommendedActionTimeline: { type: SchemaType.STRING }
+        },
+        required: ["overallSummary", "topPerformers", "gapClusters", "recommendedActionTimeline"]
+      };
+    case 'audit_nps':
+      return {
+        type: SchemaType.OBJECT,
+        properties: {
+          rating: { type: SchemaType.NUMBER },
+          comment: { type: SchemaType.STRING },
+          associateName: { type: SchemaType.STRING },
+          department: { type: SchemaType.STRING },
+          rootCause: { type: SchemaType.STRING },
+          coachingScript: { type: SchemaType.STRING },
+          checkItems: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
+        },
+        required: ["rating", "comment", "associateName", "department", "rootCause", "coachingScript", "checkItems"]
+      };
+    case 'floor_simulator':
+      return {
+        type: SchemaType.OBJECT,
+        properties: {
+          shiftLogs: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                hour: { type: SchemaType.STRING },
+                zone: { type: SchemaType.STRING },
+                event: { type: SchemaType.STRING },
+                advisorResponse: { type: SchemaType.STRING },
+                impact: { type: SchemaType.STRING }
+              },
+              required: ["hour", "zone", "event", "advisorResponse", "impact"]
+            }
+          },
+          scorecard: {
+            type: SchemaType.OBJECT,
+            properties: {
+              revenue: { type: SchemaType.NUMBER },
+              revenueGoal: { type: SchemaType.NUMBER },
+              memberships: { type: SchemaType.NUMBER },
+              creditCards: { type: SchemaType.NUMBER },
+              csat: { type: SchemaType.NUMBER },
+              placementScore: { type: SchemaType.NUMBER },
+              placementReview: { type: SchemaType.STRING }
+            },
+            required: ["revenue", "revenueGoal", "memberships", "creditCards", "csat", "placementScore", "placementReview"]
+          }
+        },
+        required: ["shiftLogs", "scorecard"]
+      };
+    case 'customer_simulator':
+      return {
+        type: SchemaType.OBJECT,
+        properties: {
+          responseText: { type: SchemaType.STRING },
+          currentActiveStep: { type: SchemaType.STRING },
+          completedSteps: {
+            type: SchemaType.OBJECT,
+            properties: {
+              connect: { type: SchemaType.BOOLEAN },
+              discover: { type: SchemaType.BOOLEAN },
+              recommend: { type: SchemaType.BOOLEAN },
+              protect: { type: SchemaType.BOOLEAN },
+              close: { type: SchemaType.BOOLEAN }
+            },
+            required: ["connect", "discover", "recommend", "protect", "close"]
+          }
+        },
+        required: ["responseText", "currentActiveStep", "completedSteps"]
+      };
+    case 'employee_simulator_response':
+      return {
+        type: SchemaType.OBJECT,
+        properties: {
+          responseText: { type: SchemaType.STRING },
+          currentCoachStep: { type: SchemaType.STRING },
+          completedCoachSteps: {
+            type: SchemaType.OBJECT,
+            properties: {
+              goal: { type: SchemaType.BOOLEAN },
+              reality: { type: SchemaType.BOOLEAN },
+              options: { type: SchemaType.BOOLEAN },
+              will: { type: SchemaType.BOOLEAN }
+            },
+            required: ["goal", "reality", "options", "will"]
+          }
+        },
+        required: ["responseText", "currentCoachStep", "completedCoachSteps"]
+      };
+    case 'employee_simulator_evaluation':
+      return {
+        type: SchemaType.OBJECT,
+        properties: {
+          score: { type: SchemaType.NUMBER },
+          passed: { type: SchemaType.BOOLEAN },
+          feedback: { type: SchemaType.STRING },
+          details: {
+            type: SchemaType.OBJECT,
+            properties: {
+              empathy: { type: SchemaType.NUMBER },
+              structure: { type: SchemaType.NUMBER },
+              actionable: { type: SchemaType.NUMBER }
+            },
+            required: ["empathy", "structure", "actionable"]
+          }
+        },
+        required: ["score", "passed", "feedback", "details"]
+      };
+    default:
+      return null;
+  }
+}
 
 function getGeminiClient(clientApiKey = null) {
   const apiKey = clientApiKey || process.env.GEMINI_API_KEY;
@@ -169,7 +401,7 @@ exports.generateAIContent = functions.https.onCall(async (data, context) => {
 
   const payload = (data.data || data) || {};
   try {
-    const { prompt, systemInstruction, modelConfig, isJSON, isVision, base64Image, mimeType, isProMode, apiKey } = payload;
+    const { prompt, systemInstruction, modelConfig, isJSON, isVision, base64Image, mimeType, isProMode, apiKey, schemaType } = payload;
     if (!prompt || prompt.trim() === '') {
       throw new functions.https.HttpsError('invalid-argument', 'Prompt is empty.');
     }
@@ -181,11 +413,15 @@ exports.generateAIContent = functions.https.onCall(async (data, context) => {
     const generationConfig = { maxOutputTokens: 8192 };
     if (isJSON) {
       generationConfig.responseMimeType = 'application/json';
-      if (!modelConfig?.responseSchema) {
-        throw new functions.https.HttpsError('invalid-argument', 'JSON generation requires a valid responseSchema.');
+      if (schemaType) {
+        generationConfig.responseSchema = getSchemaForType(schemaType);
+      } else if (modelConfig?.responseSchema) {
+        // Fallback for backwards compatibility during migration
+        generationConfig.responseSchema = modelConfig.responseSchema;
+      } else {
+        throw new functions.https.HttpsError('invalid-argument', 'JSON generation requires a valid schemaType or modelConfig.responseSchema.');
       }
     }
-    if (modelConfig?.responseSchema) generationConfig.responseSchema = modelConfig.responseSchema;
     
     const parts = [];
     if (isVision && base64Image) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import DOMPurify from 'dompurify';
 import { Award, Star, ShieldCheck, CreditCard, AlertTriangle, CheckCircle, FileText, Loader2, Sparkles } from 'lucide-react';
 import { renderMarkdown } from '../../utils/profileUtils';
@@ -34,25 +34,30 @@ interface ProfileTrophiesTabProps {
 export default function ProfileTrophiesTab({ employee, associateLogs }: ProfileTrophiesTabProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedPlan, setGeneratedPlan] = useState<GeneratedPlan | null>(null);
+  const activeEmployeeIdRef = useRef<string | undefined>(employee?.id);
 
   useEffect(() => {
+    activeEmployeeIdRef.current = employee?.id;
     setGeneratedPlan(null);
     setIsGenerating(false);
   }, [employee?.id]);
 
   const onGenerate = async () => {
     if (!employee) return;
+    const currentId = employee.id;
     setIsGenerating(true);
     try {
       const apiKey = useStore.getState().apiKey;
       const plan = await generateActionPlan(employee, associateLogs, apiKey);
-      if (plan) {
+      if (activeEmployeeIdRef.current === currentId && plan) {
         setGeneratedPlan(plan);
       }
     } catch (err) {
       console.error(err);
     } finally {
-      setIsGenerating(false);
+      if (activeEmployeeIdRef.current === currentId) {
+        setIsGenerating(false);
+      }
     }
   };
 

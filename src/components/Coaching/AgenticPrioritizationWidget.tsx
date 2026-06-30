@@ -49,7 +49,7 @@ export default function AgenticPrioritizationWidget() {
   };
 
   return (
-    <div className="glass-card w-full flex-column gap-md mb-xl">
+    <div className="glass-card w-full flex-column gap-md mb-xl" data-testid="agentic-prioritization-widget">
       <div className="flex-between align-center">
         <h3 className="font-heading text-lg m-0 flex-row align-center gap-sm">
           <Target size={20} className="text-error" /> Coaching Priorities
@@ -79,25 +79,24 @@ export default function AgenticPrioritizationWidget() {
       )}
 
       {!loading && targets.length > 0 && (
-        <div className="dashboard-grid mt-sm" style={{ gap: '1rem', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
+        <div className="dashboard-grid mt-sm gap-md" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
           {targets.map((target, idx) => (
             <div 
               key={idx} 
               data-testid={`coaching-target-card-${idx}`}
-              className="p-md rounded-xl flex-column gap-sm"
-              style={{ background: 'var(--bg-obsidian)', border: '1px solid var(--border-glass)' }}
+              className="p-md rounded-xl flex-column gap-sm bg-obsidian border border-glass"
             >
               <div className="font-bold text-lg text-bby-blue flex-between">
                 <span>{target.name}</span>
-                <span className="text-xs px-sm py-xs rounded-full" style={{ background: 'var(--error-alpha-15)', color: 'var(--error)' }}>
+                <span className="text-xs px-sm py-xs rounded-full bg-error-alpha-15 text-error">
                   Intervention Required
                 </span>
               </div>
               <p className="text-sm text-primary m-0">
                 <strong className="text-muted">Reason:</strong> {target.reason}
               </p>
-              <p className="text-sm text-success m-0 p-sm rounded-xl" style={{ background: 'var(--success-alpha-15)' }}>
-                <strong style={{ color: 'var(--success)' }}>Action:</strong> {target.recommendedAction}
+              <p className="text-sm text-success m-0 p-sm rounded-xl bg-success-alpha-15">
+                <strong className="text-success">Action:</strong> {target.recommendedAction}
               </p>
             </div>
           ))}

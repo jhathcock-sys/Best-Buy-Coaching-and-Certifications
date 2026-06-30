@@ -42,19 +42,19 @@ export default function LogPreview({
       </div>
 
       {isGeneratingLog ? (
-        <div className="flex-column gap-xl p-xl bg-obsidian-alpha border border-glass rounded-xl justify-center" style={{ minHeight: '400px' }}>
+        <div data-testid="log-loading-skeleton" className="flex-column gap-xl p-xl bg-obsidian-alpha border border-glass rounded-xl justify-center min-h-[400px]">
           {/* Pulsing skeleton bars */}
-          <div className="skeleton-pulse rounded-md" style={{ height: '24px', width: '60%', background: 'rgba(255,255,255,0.08)' }}></div>
-          <div className="skeleton-pulse rounded-sm mt-sm" style={{ height: '14px', width: '90%', background: 'rgba(255,255,255,0.05)' }}></div>
-          <div className="skeleton-pulse rounded-sm" style={{ height: '14px', width: '85%', background: 'rgba(255,255,255,0.05)' }}></div>
-          <div className="skeleton-pulse rounded-sm" style={{ height: '14px', width: '40%', background: 'rgba(255,255,255,0.05)' }}></div>
+          <div className="skeleton-pulse rounded-md h-[24px] w-[60%] bg-white-alpha-10"></div>
+          <div className="skeleton-pulse rounded-sm mt-sm h-[14px] w-[90%] bg-white-alpha-05"></div>
+          <div className="skeleton-pulse rounded-sm h-[14px] w-[85%] bg-white-alpha-05"></div>
+          <div className="skeleton-pulse rounded-sm h-[14px] w-[40%] bg-white-alpha-05"></div>
           
-          <div className="skeleton-pulse rounded-md mt-xl" style={{ height: '20px', width: '45%', background: 'rgba(255,255,255,0.08)' }}></div>
-          <div className="skeleton-pulse rounded-sm mt-sm" style={{ height: '14px', width: '95%', background: 'rgba(255,255,255,0.05)' }}></div>
-          <div className="skeleton-pulse rounded-sm" style={{ height: '14px', width: '70%', background: 'rgba(255,255,255,0.05)' }}></div>
+          <div className="skeleton-pulse rounded-md mt-xl h-[20px] w-[45%] bg-white-alpha-10"></div>
+          <div className="skeleton-pulse rounded-sm mt-sm h-[14px] w-[95%] bg-white-alpha-05"></div>
+          <div className="skeleton-pulse rounded-sm h-[14px] w-[70%] bg-white-alpha-05"></div>
           
-          <div className="skeleton-pulse rounded-md mt-xl" style={{ height: '20px', width: '50%', background: 'rgba(255,255,255,0.08)' }}></div>
-          <div className="skeleton-pulse rounded-sm mt-sm" style={{ height: '14px', width: '88%', background: 'rgba(255,255,255,0.05)' }}></div>
+          <div className="skeleton-pulse rounded-md mt-xl h-[20px] w-[50%] bg-white-alpha-10"></div>
+          <div className="skeleton-pulse rounded-sm mt-sm h-[14px] w-[88%] bg-white-alpha-05"></div>
         </div>
       ) : (
         <div className="flex-column flex-1">
@@ -76,8 +76,7 @@ export default function LogPreview({
             </button>
           </div>
 
-          <div className="markdown-body p-xl bg-obsidian-alpha border border-glass rounded-xl text-sm leading-relaxed whitespace-pre-wrap flex-1" style={{
-            minHeight: '400px',
+          <div className="markdown-body p-xl bg-obsidian-alpha border border-glass rounded-xl text-sm leading-relaxed whitespace-pre-wrap flex-1 min-h-[400px]" style={{
             fontFamily: outputViewMode === 'grow' ? 'monospace' : 'inherit'
           }}>
             <ReactMarkdown>{safeText}</ReactMarkdown>
@@ -85,12 +84,7 @@ export default function LogPreview({
 
           <div className="flex-row gap-sm mt-md">
             <button 
-              className="btn btn-secondary flex-1 p-md flex-center gap-sm cursor-pointer" 
-              style={{
-                background: copySuccess ? 'rgba(16, 185, 129, 0.1)' : 'var(--bg-obsidian)',
-                color: copySuccess ? 'var(--success-glow)' : '#fff',
-                borderColor: copySuccess ? 'rgba(16, 185, 129, 0.3)' : 'var(--border-glass)'
-              }}
+              className={`btn btn-secondary flex-1 p-md flex-center gap-sm cursor-pointer ${copySuccess ? 'bg-success-alpha-15 text-success border-success' : 'bg-obsidian text-white border-glass'}`}
               onClick={() => handleCopyToClipboard(safeText)}
               data-testid="btn-copy-clipboard"
             >
@@ -98,12 +92,7 @@ export default function LogPreview({
               {copySuccess ? 'Copied to Clipboard!' : 'Copy Document to Clipboard'}
             </button>
             <button 
-              className="btn btn-secondary px-md py-md flex-center gap-sm cursor-pointer" 
-              style={{
-                borderColor: 'var(--bby-yellow)',
-                color: 'var(--bby-yellow)',
-                background: isPlayingSpeech ? 'rgba(255, 230, 0, 0.1)' : 'transparent'
-              }}
+              className={`btn btn-secondary px-md py-md flex-center gap-sm cursor-pointer border text-bby-yellow border-bby-yellow ${isPlayingSpeech ? 'bg-white-alpha-05' : 'bg-transparent'}`}
               title="Read Aloud"
               onClick={() => handleSpeech(safeText)}
               data-testid="btn-read-aloud"
@@ -124,8 +113,7 @@ export default function LogPreview({
             </button>
             {isPlayingSpeech && (
               <button 
-                className="btn btn-secondary px-md py-md cursor-pointer" 
-                style={{ borderColor: 'var(--error)', color: 'var(--error)' }}
+                className="btn btn-secondary px-md py-md cursor-pointer border border-error text-error" 
                 onClick={handleStopSpeech}
                 title="Stop Audio"
                 data-testid="btn-stop-audio"

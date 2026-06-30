@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Users, Send, Check } from 'lucide-react';
 import { Employee } from '../../types';
 
@@ -20,6 +20,14 @@ export default function GrowSimulatorTab({
   const [importText, setImportText] = useState('');
   const [importSuccess, setImportSuccess] = useState(false);
   const [parseLogs, setParseLogs] = useState<{name: string; gap: string} | null>(null);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const handleImportPastCoaching = () => {
     if (!importText.trim()) {
@@ -79,7 +87,9 @@ export default function GrowSimulatorTab({
     setImportSuccess(true);
     setImportText('');
     setTimeout(() => {
-      setImportSuccess(false);
+      if (isMounted.current) {
+        setImportSuccess(false);
+      }
     }, 5000);
   };
 

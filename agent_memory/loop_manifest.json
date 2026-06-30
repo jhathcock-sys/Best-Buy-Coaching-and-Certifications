@@ -1,6 +1,6 @@
 {
     "status":  "ACTIVE",
-    "current_checkpoint":  null,
+    "current_checkpoint":  10,
     "active_vetos":  [
 
                      ],
@@ -11,9 +11,7 @@
                             "src/components/AssociateProfile/ProfileAppraisalsTab.tsx",
                             "src/components/AssociateProfile/ProfileCoachingTab.tsx",
                             "src/components/AssociateProfile/ProfileCommitmentsTab.tsx",
-                            "src/components/AssociateProfile/ProfileTrendsTab.tsx"
-                        ],
-    "remaining_queue":  [
+                            "src/components/AssociateProfile/ProfileTrendsTab.tsx",
                             "src/components/AssociateProfile/ProfileTrophiesTab.tsx",
                             "src/components/AuraHUD/AuraActionCard.tsx",
                             "src/components/BreakroomTV/GoalsSlide.tsx",
@@ -23,7 +21,9 @@
                             "src/components/CoachSimulator/ActiveSession.tsx",
                             "src/components/CoachSimulator/GrowSimulatorTab.tsx",
                             "src/components/CoachSimulator/LogPreview.tsx",
-                            "src/components/CoachSimulator/templates.ts",
+                            "src/components/CoachSimulator/templates.ts"
+                        ],
+    "remaining_queue":  [
                             "src/components/CoachSimulator/useAiCoaching.ts",
                             "src/components/CoachSimulator/useAudioEngine.ts",
                             "src/components/Dashboard/CircularGauge.tsx",

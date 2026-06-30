@@ -29,7 +29,9 @@ exports.parseRentsDueCSV = functions.https.onCall(async (data, context) => {
     let headerRowIndex = 0;
     for (let i = 0; i < Math.min(10, csvLines.length); i++) {
       const lineLower = csvLines[i].toLowerCase();
-      if (lineLower.includes('name') || lineLower.includes('employee') || lineLower.includes('advisor')) {
+      const hasNameCol = lineLower.includes('name') || lineLower.includes('employee') || lineLower.includes('advisor');
+      const hasMetricCol = lineLower.includes('rph') || lineLower.includes('revenue') || lineLower.includes('rev') || lineLower.includes('apps') || lineLower.includes('warranty');
+      if (hasNameCol && hasMetricCol) {
         headerRowIndex = i;
         break;
       }

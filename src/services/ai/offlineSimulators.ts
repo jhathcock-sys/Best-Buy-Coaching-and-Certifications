@@ -184,7 +184,7 @@ export function runOfflineSimulationStep(message: string, history: Record<string
   }
   
   const updatedHistory = [
-    ...history.messages,
+    ...(history.messages || []),
     { sender: 'advisor', text: message },
     { sender: 'customer', text: responseText }
   ];
@@ -356,7 +356,7 @@ export function runOfflineEmployeeCoachingStep(message: string, history: Record<
   }
   
   const updatedHistory = [
-    ...history.messages,
+    ...(history.messages || []),
     { sender: 'coach', text: message },
     { sender: 'employee', text: responseText }
   ];

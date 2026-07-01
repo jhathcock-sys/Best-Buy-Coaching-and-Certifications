@@ -24,7 +24,7 @@ export default function RentsDueAuditor() {
   const addDailySnapshot = useStore((state) => state.addDailySnapshot);
   
   const rawRoster = rosterHistory[activePeriod];
-  const roster = React.useMemo<Employee[]>(() => rawRoster ? Object.values(rawRoster as Record<string, Employee>).sort((a: Employee, b: Employee) => a.name.localeCompare(b.name)) : [], [rawRoster]);
+  const roster = React.useMemo<Employee[]>(() => Object.values((rawRoster || {}) as Record<string, Employee>).sort((a: Employee, b: Employee) => a.name.localeCompare(b.name)), [rawRoster]);
 
   const [activeTab, setActiveTab] = useState<'audit' | 'archives'>('audit');
   const [archives, setArchives] = useState<RentsDueArchive[]>([]);
@@ -216,7 +216,7 @@ export default function RentsDueAuditor() {
   };
 
   // Sync parsed metrics back to the store roster (updates active roster metrics or imports new ones)
-  const handleSyncToRoster = () => {
+  const handleSyncToRoster = async () => {
     if (!parsedEmployees || parsedEmployees.length === 0) return;
     if (!bulkImportEmployees) {
       alert("Error: Store action to bulk import employees is missing.");
@@ -225,7 +225,7 @@ export default function RentsDueAuditor() {
     
     const { importList } = mapParsedRentsToRoster(parsedEmployees, comparisonRoster);
     
-    bulkImportEmployees(importList, selectedPeriod);
+    await bulkImportEmployees(importList, selectedPeriod);
     
     const gaps = getGapsSummary();
     if (snapshotDate) {
@@ -245,13 +245,13 @@ export default function RentsDueAuditor() {
     if (!parsedEmployees) return { rev: 0, apps: 0, pms: 0 };
     return parsedEmployees.reduce((acc, curr) => {
       if (curr.revenueStatus === 'off-track') {
-        acc.rev += Math.max(0, curr.revenueOwed - curr.revenue);
+        acc.rev += Math.max(0, (curr.revenueOwed || 0) - (curr.revenue || 0));
       }
       if (curr.appsStatus === 'off-track') {
-        acc.apps += Math.max(0, curr.appsOwed - curr.apps);
+        acc.apps += Math.max(0, (curr.appsOwed || 0) - (curr.apps || 0));
       }
       if (curr.membershipsStatus === 'off-track') {
-        acc.pms += Math.max(0, curr.membershipsOwed - curr.memberships);
+        acc.pms += Math.max(0, (curr.membershipsOwed || 0) - (curr.memberships || 0));
       }
       return acc;
     }, { rev: 0, apps: 0, pms: 0 });

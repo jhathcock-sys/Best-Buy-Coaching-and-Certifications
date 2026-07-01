@@ -100,7 +100,7 @@ export interface MetricsSlice {
   editEmployee: (empId: string, updatedFields: Partial<Employee>) => void;
   deleteEmployee: (empId: string) => void;
   updateEmployeeDept: (empId: string, newDept: string) => void;
-  bulkImportEmployees: (importedEmployees: Partial<Employee>[], targetPeriod?: string) => void;
+  bulkImportEmployees: (importedEmployees: Partial<Employee>[], targetPeriod?: string) => Promise<void>;
   changePeriod: (p: string) => void;
   createPeriodArchive: (newPeriodName: string, copyOption: string) => void;
   addTrophy: (empId: string, trophy: Trophy) => void;

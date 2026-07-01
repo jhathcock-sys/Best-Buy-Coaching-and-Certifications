@@ -6,7 +6,7 @@ export async function generateHuddleScript(
   apiKey: string | undefined, 
   playbookSettings: PlaybookSettings
 ): Promise<string> {
-  const rosterContext = roster.map(emp => 
+  const rosterContext = (roster || []).map(emp => 
     `- ${emp.name} (${emp.dept}): RPH: ${emp.rph || 0}, Memberships: ${emp.memberships || 0}`
   ).join('\n');
 

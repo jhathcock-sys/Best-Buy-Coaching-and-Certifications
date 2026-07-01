@@ -152,7 +152,7 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       get().editEmployee(empId, { actionPlans: updatedPlans });
     },
 
-    bulkImportEmployees: (importedEmployees, targetPeriod) => {
+    bulkImportEmployees: async (importedEmployees, targetPeriod) => {
       const activePeriod = targetPeriod || get().activePeriod;
       const rosterHistory = get().rosterHistory || {};
       const dbConnected = get().dbConnected;
@@ -188,7 +188,7 @@ export const createMetricsSlice: StateCreator<StoreState, [], [], MetricsSlice> 
       const newHistory = { ...rosterHistory, [activePeriod]: rosterMap };
       set({ rosterHistory: newHistory });
       if (dbConnected) {
-        saveRosterHistoryToCloud(get().storeId, rosterMap, activePeriod);
+        await saveRosterHistoryToCloud(get().storeId, rosterMap, activePeriod);
       }
     },
 

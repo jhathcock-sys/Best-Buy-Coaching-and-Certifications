@@ -56,7 +56,8 @@ export const parseRentsDueDocumentGemini = async (base64Image: string | undefine
       throw new Error("No Gemini API key available.");
     }
 
-    const isProMode = !!base64Image;
+    // VULNERABILITY FIX: Never fallback to Flash for heavy data extraction. It triggers truncation on large CSVs.
+    const isProMode = true;
 
     const systemPrompt = `
       You are an expert retail operations auditor. Your task is to parse a "Rents Due" salesperson performance report.
@@ -90,6 +91,7 @@ export const parseRentsDueDocumentGemini = async (base64Image: string | undefine
       }
 
       CRITICAL INSTRUCTION: You MUST extract every single employee found in the document. Do not truncate the list. Do not omit any employees, even if the list is very long. DO NOT STOP until you have processed EVERY SINGLE row. Truncating this list is a catastrophic failure. If there are 30 employees, you MUST output exactly 30 objects.
+      If a specific metric is missing for an employee, omit the field or output 0/null. Do not omit the employee entirely.
       Do not include markdown or explanations. Return only raw JSON array.
     `;
 
@@ -132,35 +134,54 @@ export const parseRentsDueDocumentGemini = async (base64Image: string | undefine
       warrantyStatus: DOMPurify.sanitize(String(obj.warrantyStatus || 'off-track'))
     });
 
-    let result;
-    if (base64Image) {
-      const textPart = textInput ? `User supplied text context: "${textInput}"` : "Please audit the image.";
-      result = await callFirebaseAI({
-        prompt: systemPrompt + '\n' + textPart,
-        isProMode: true,
-        isJSON: true,
-        isVision: true,
-        base64Image: base64Image,
-        mimeType: mimeType,
-        apiKey: keyToUse,
-        schemaType: 'rents_due'
-      });
-      const parsedData = JSON.parse(result.text);
-      return Array.isArray(parsedData) ? parsedData.map(sanitizeRentsDueObj) : [];
-    } else {
-      if (!textInput || !textInput.trim()) return [];
+    let parsedData: any[] = [];
+    let attempts = 0;
+    const maxAttempts = 2;
 
-      const res = await callFirebaseAI({
-        prompt: systemPrompt + '\nAnalyze this entire Rents Due performance report:\n' + textInput,
-        isProMode: isProMode,
-        isJSON: true,
-        isVision: false,
-        apiKey: keyToUse,
-        schemaType: 'rents_due'
-      });
-      const parsed = JSON.parse(res.text);
-      return Array.isArray(parsed) ? parsed.map(sanitizeRentsDueObj) : [];
+    while (attempts < maxAttempts) {
+      try {
+        attempts++;
+        let resultText = "";
+        
+        if (base64Image) {
+          const textPart = textInput ? `User supplied text context: "${textInput}"` : "Please audit the image.";
+          const result = await callFirebaseAI({
+            prompt: systemPrompt + '\n' + textPart,
+            isProMode: true,
+            isJSON: true,
+            isVision: true,
+            base64Image: base64Image,
+            mimeType: mimeType,
+            apiKey: keyToUse,
+            schemaType: 'rents_due'
+          });
+          resultText = result.text;
+        } else {
+          if (!textInput || !textInput.trim()) return [];
+          const res = await callFirebaseAI({
+            prompt: systemPrompt + '\nAnalyze this entire Rents Due performance report:\n' + textInput,
+            isProMode: true,
+            isJSON: true,
+            isVision: false,
+            apiKey: keyToUse,
+            schemaType: 'rents_due'
+          });
+          resultText = res.text;
+        }
+
+        parsedData = JSON.parse(resultText);
+        if (Array.isArray(parsedData)) {
+          break; // Success
+        } else {
+          throw new Error("AI response was not a JSON array");
+        }
+      } catch (err) {
+        console.warn(`Rents Due parse attempt ${attempts} failed:`, err);
+        if (attempts >= maxAttempts) throw new Error("Failed to parse Rents Due document after multiple AI attempts.");
+      }
     }
+
+    return Array.isArray(parsedData) ? parsedData.map(sanitizeRentsDueObj) : [];
   } catch (error) {
     console.error('Rents Due Document Parsing Error:', error);
     throw error;

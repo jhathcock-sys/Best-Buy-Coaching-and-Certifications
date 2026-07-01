@@ -144,7 +144,7 @@ export function runOfflineSimulationStep(message: string, history: SimulationHis
 // Offline Session Evaluator
 
 export function evaluateSessionOffline(history: SimulationHistory) {
-  if (!history) return { overallScore: 0, passed: false, breakdown: {}, values: {}, growReport: {} };
+  if (!history) return { overallScore: 0, passed: false, breakdown: { connect: 0, discover: 0, recommend: 0, protect: 0, close: 0 }, values: { beHuman: 0, makeItEasy: 0, showWhatPossible: 0 }, growReport: {} };
   const steps = history?.completedSteps || {};
   
   // Calculate scores

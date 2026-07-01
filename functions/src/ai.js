@@ -43,7 +43,7 @@ function getSchemaForType(schemaType) {
             warrantyGoal: { type: SchemaType.NUMBER },
             warrantyStatus: { type: SchemaType.STRING }
           },
-          required: ["name", "rph", "rphOwed", "rphStatus", "revenue", "revenueOwed", "revenueStatus", "apps", "appsOwed", "appsStatus", "memberships", "membershipsOwed", "membershipsStatus", "warranty", "warrantyGoal", "warrantyStatus"]
+          required: ["name"]
         }
       };
     case 'action_plan':

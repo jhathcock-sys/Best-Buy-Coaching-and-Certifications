@@ -5,11 +5,15 @@ import { Employee } from '../types';
 export interface ParsedRentsData {
   name?: string;
   rph?: number;
-  revenue?: number;
   rphOwed?: number;
+  revenue?: number;
+  revenueOwed?: number;
   apps?: number;
+  appsOwed?: number;
   memberships?: number;
+  membershipsOwed?: number;
   warranty?: number;
+  warrantyGoal?: number;
 }
 
 export const parseRentsDueCSVCloud = async (text: string): Promise<ParsedRentsData[] | null> => {
@@ -57,14 +61,15 @@ export const mapParsedRentsToRoster = (parsedEmployees: ParsedRentsData[], compa
       name: parsedEmp.name || 'Unknown Employee',
       hours: calculatedHours,
       rph: parsedRPH,
+      rphOwed: parsedEmp.rphOwed ?? (existing ? existing.rphOwed : 640),
       creditCards: parsedEmp.apps || 0,
       memberships: parsedEmp.memberships || 0,
       warranty: parsedEmp.warranty || 0,
       revenue: parsedRev,
       apps: parsedEmp.apps || 0,
-      revenueOwed: parsedRev,
-      appsOwed: parsedEmp.apps || 0,
-      membershipsOwed: parsedEmp.memberships || 0
+      revenueOwed: parsedEmp.revenueOwed ?? (existing ? existing.revenueOwed : parsedRev),
+      appsOwed: parsedEmp.appsOwed ?? (existing ? existing.appsOwed : (parsedEmp.apps || 0)),
+      membershipsOwed: parsedEmp.membershipsOwed ?? (existing ? existing.membershipsOwed : (parsedEmp.memberships || 0))
     } as Employee;
   });
   

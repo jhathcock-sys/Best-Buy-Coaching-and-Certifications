@@ -26,15 +26,19 @@ exports.parseRentsDueCSV = functions.https.onCall(async (data, context) => {
 
   try {
     const csvLines = text.trim().split(/\r?\n/);
-    let headerRowIndex = 0;
-    for (let i = 0; i < Math.min(10, csvLines.length); i++) {
+    let headerRowIndex = -1;
+    for (let i = 0; i < Math.min(50, csvLines.length); i++) {
       const lineLower = csvLines[i].toLowerCase();
       const hasNameCol = lineLower.includes('name') || lineLower.includes('employee') || lineLower.includes('advisor');
       const hasMetricCol = lineLower.includes('rph') || lineLower.includes('revenue') || lineLower.includes('rev') || lineLower.includes('apps') || lineLower.includes('warranty');
-      if (hasNameCol && hasMetricCol) {
+      if (hasNameCol && hasMetricCol && lineLower.includes(',')) {
         headerRowIndex = i;
         break;
       }
+    }
+    
+    if (headerRowIndex === -1) {
+      throw new functions.https.HttpsError('invalid-argument', 'Could not locate a valid header row containing employee and metric columns.');
     }
     
     const cleanedText = csvLines.slice(headerRowIndex).join('\n');
@@ -45,8 +49,11 @@ exports.parseRentsDueCSV = functions.https.onCall(async (data, context) => {
       dynamicTyping: true
     });
 
-    if (result.errors.length > 0 && result.data.length === 0) {
-      throw new functions.https.HttpsError('invalid-argument', 'Failed to parse CSV: ' + JSON.stringify(result.errors));
+    if (result.errors.length > 0) {
+      console.warn("PapaParse encountered errors, attempting to salvage:", result.errors);
+      if (result.data.length === 0) {
+        throw new functions.https.HttpsError('invalid-argument', 'Failed to parse CSV: ' + JSON.stringify(result.errors));
+      }
     }
 
     const rows = result.data;
@@ -55,15 +62,15 @@ exports.parseRentsDueCSV = functions.https.onCall(async (data, context) => {
     const parsedData = rows.map((row) => {
       const getVal = (possibleKeys, defaultVal = 0) => {
         for (const pk of possibleKeys) {
-          const matchingKey = Object.keys(row).find(k => k.toLowerCase().includes(pk));
+          const regex = new RegExp(`\\b${pk.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'i');
+          const matchingKey = Object.keys(row).find(k => regex.test(k) || k.toLowerCase().trim() === pk);
           if (matchingKey && row[matchingKey] != null) {
             let val = row[matchingKey];
             if (typeof val === 'string') {
               val = parseFloat(val.replace(/[^0-9.-]+/g, ''));
-              if (isNaN(val)) continue;
             }
-            // Data Ops Veto Fix: explicit type checking for numbers to avoid boolean coercion
-            if (typeof val === 'number') {
+            // Strict boundary check for NaN and boolean coercion
+            if (typeof val === 'number' && !Number.isNaN(val)) {
               return val;
             }
           }

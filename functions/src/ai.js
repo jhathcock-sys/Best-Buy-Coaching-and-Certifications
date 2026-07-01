@@ -28,20 +28,10 @@ function getSchemaForType(schemaType) {
           properties: {
             name: { type: SchemaType.STRING },
             rph: { type: SchemaType.NUMBER },
-            rphOwed: { type: SchemaType.NUMBER },
-            rphStatus: { type: SchemaType.STRING },
             revenue: { type: SchemaType.NUMBER },
-            revenueOwed: { type: SchemaType.NUMBER },
-            revenueStatus: { type: SchemaType.STRING },
             apps: { type: SchemaType.NUMBER },
-            appsOwed: { type: SchemaType.NUMBER },
-            appsStatus: { type: SchemaType.STRING },
             memberships: { type: SchemaType.NUMBER },
-            membershipsOwed: { type: SchemaType.NUMBER },
-            membershipsStatus: { type: SchemaType.STRING },
-            warranty: { type: SchemaType.NUMBER },
-            warrantyGoal: { type: SchemaType.NUMBER },
-            warrantyStatus: { type: SchemaType.STRING }
+            warranty: { type: SchemaType.NUMBER }
           },
           required: ["name"]
         }

@@ -85,6 +85,31 @@ test.describe('Rents Due Auditor', () => {
     await expect(page.getByTestId('dashboard-page')).toBeVisible({ timeout: 5000 });
   });
 
+  test('Interactive Column Mapping UI: Shows when headers are unrecognized and successfully maps data', async ({ page }) => {
+    await loginAndNavigateToRentsDue(page, '1022');
+
+    // Paste weird CSV
+    await page.getByTestId('paste-textarea').fill('ColA,ColB,ColC\nJohn,120,5');
+    await page.getByTestId('parse-text-btn').click();
+
+    // Verify Mapping UI appears
+    await expect(page.locator('text=Column Mapping Required')).toBeVisible({ timeout: 5000 });
+
+    // Select mappings
+    await page.getByTestId('mapping-select-name').selectOption('ColA');
+    await page.getByTestId('mapping-select-revenue').selectOption('ColB');
+
+    // Confirm Mapping
+    await page.getByTestId('confirm-mapping-btn').click();
+
+    // Verify ledger appears with John
+    const ledger = page.getByTestId('rents-due-ledger');
+    await expect(ledger).toBeVisible({ timeout: 10000 });
+    
+    // John should be rendered in the table
+    await expect(page.locator('text=John')).toBeVisible();
+  });
+
   test('Multi-Persona: Real Manager can access and view Rents Due archives', async ({ page }) => {
     await loginAndNavigateToRentsDue(page, '2001'); // Corey T. (Real Manager)
 

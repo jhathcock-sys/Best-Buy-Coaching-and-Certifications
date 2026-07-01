@@ -7,7 +7,7 @@ import RentsDueArchiveList from './RentsDueAuditor/RentsDueArchiveList';
 import { parseRentsDueDocumentGemini } from '../services/ai';
 import { useStore } from '../store/useStore';
 import { mockRentsDuePayload } from '../data/mockRentsDue';
-import { mapParsedRentsToRoster, parseRentsDueCSVCloud } from '../utils/rentsDueUtils';
+import { mapParsedRentsToRoster, parseRentsDueCSVLocal } from '../utils/rentsDueUtils';
 import { Employee, type RentsDueArchive } from '../types';
 import { uploadRentsDueArchive, saveRentsDueArchiveMetadata, subscribeToRentsDueArchives } from '../services/firebase';
 
@@ -36,6 +36,18 @@ export default function RentsDueAuditor() {
   const [textInput, setTextInput] = useState('');
   const [parsedEmployees, setParsedEmployees] = useState<ParsedEmployee[] | null>(null);
   const [syncSuccess, setSyncSuccess] = useState(false);
+  
+  const [mappingState, setMappingState] = useState<{
+    isMapping: boolean;
+    fields: string[];
+    prefilledMapping: Record<string, string>;
+    textData: string;
+  }>({
+    isMapping: false,
+    fields: [],
+    prefilledMapping: {},
+    textData: ''
+  });
   
   const todayStr = new Date().toISOString().split('T')[0];
   const [snapshotDate, setSnapshotDate] = useState(todayStr);
@@ -127,18 +139,33 @@ export default function RentsDueAuditor() {
       } else if (file.name.endsWith('.csv') || file.type === 'text/csv' || file.type === 'text/plain') {
         reader.onload = async (e) => {
           const text = e.target?.result?.toString() || '';
+          // We will store text in textInput just in case mapping needs to re-parse it
+          setTextInput(text);
           try {
-            const cloudParsed = await parseRentsDueCSVCloud(text);
+            const localParsed = await parseRentsDueCSVLocal(text);
             if (!isMounted.current) return;
-            if (cloudParsed && cloudParsed.length > 0) {
-              setParsedEmployees(cloudParsed as ParsedEmployee[]);
+            
+            if (localParsed?.requiresMapping) {
+              setMappingState({
+                isMapping: true,
+                fields: localParsed.fields || [],
+                prefilledMapping: localParsed.prefilledMapping || {},
+                textData: text
+              });
+              setIsParsing(false);
+              if (fileInputRef.current) fileInputRef.current.value = '';
+              return;
+            }
+
+            if (localParsed?.parsedData && localParsed.parsedData.length > 0) {
+              setParsedEmployees(localParsed.parsedData as ParsedEmployee[]);
               setIsParsing(false);
               if (fileInputRef.current) fileInputRef.current.value = '';
               return;
             }
           } catch (err) {
             if (!isMounted.current) return;
-            console.warn("Cloud parse failed, falling back to Gemini", err);
+            console.warn("Local parse failed, falling back to Gemini", err);
           }
           if (!isMounted.current) return;
           runOcrParsing('', '', text);
@@ -188,19 +215,53 @@ export default function RentsDueAuditor() {
     
     try {
       setIsParsing(true);
-      const cloudParsed = await parseRentsDueCSVCloud(textInput);
+      const localParsed = await parseRentsDueCSVLocal(textInput);
       if (!isMounted.current) return;
-      if (cloudParsed && cloudParsed.length > 0) {
-        setParsedEmployees(cloudParsed as ParsedEmployee[]);
+      
+      if (localParsed?.requiresMapping) {
+        setMappingState({
+          isMapping: true,
+          fields: localParsed.fields || [],
+          prefilledMapping: localParsed.prefilledMapping || {},
+          textData: textInput
+        });
+        setIsParsing(false);
+        return;
+      }
+
+      if (localParsed?.parsedData && localParsed.parsedData.length > 0) {
+        setParsedEmployees(localParsed.parsedData as ParsedEmployee[]);
         setIsParsing(false);
         return;
       }
     } catch (err) {
       if (!isMounted.current) return;
-      console.warn("Cloud parse failed, falling back to Gemini", err);
+      console.warn("Local parse failed, falling back to Gemini", err);
     }
     
     runOcrParsing('', '', textInput);
+  };
+
+  const handleConfirmMapping = async (userMapping: Record<string, string>) => {
+    try {
+      setIsParsing(true);
+      setMappingState(prev => ({ ...prev, isMapping: false }));
+      const localParsed = await parseRentsDueCSVLocal(mappingState.textData, userMapping);
+      if (!isMounted.current) return;
+      
+      if (localParsed?.parsedData && localParsed.parsedData.length > 0) {
+        setParsedEmployees(localParsed.parsedData as ParsedEmployee[]);
+        setIsParsing(false);
+        return;
+      }
+      
+      runOcrParsing('', '', mappingState.textData);
+    } catch (err) {
+      if (!isMounted.current) return;
+      console.error(err);
+      setErrorMsg('Failed to apply mapping. Falling back to Gemini...');
+      runOcrParsing('', '', mappingState.textData);
+    }
   };
 
   const loadDemoData = () => {
@@ -316,6 +377,9 @@ export default function RentsDueAuditor() {
             handleManualTextParse={handleManualTextParse}
             handleProcessFile={handleProcessFile}
             loadDemoData={loadDemoData}
+            mappingState={mappingState}
+            onCancelMapping={() => setMappingState(prev => ({ ...prev, isMapping: false }))}
+            onConfirmMapping={handleConfirmMapping}
           />
         ) : (
           <RentsDueLedger 

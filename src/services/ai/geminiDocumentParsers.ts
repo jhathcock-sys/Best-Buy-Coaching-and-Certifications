@@ -63,31 +63,21 @@ export const parseRentsDueDocumentGemini = async (base64Image: string | undefine
       You are an expert retail operations auditor. Your task is to parse a "Rents Due" salesperson performance report.
       This report is often weirdly laid out but contains details for several retail salespersons, including:
       - Salesperson Name
-      - Revenue Per Hour (RPH) (Actual and Owed/Goal)
-      - Total Revenue (Actual and Owed/Goal)
-      - Total Credit Card Apps (Actual and Owed/Goal)
-      - Members (Plus/Total memberships) (Actual and Owed/Goal)
-      - Warranty % (GSP attach rate percentage) (Actual and Owed/Goal)
+      - Revenue Per Hour (RPH)
+      - Total Revenue
+      - Total Credit Card Apps
+      - Members (Plus/Total memberships)
+      - Warranty % (GSP attach rate percentage)
       
       Read the document (which may be a raw CSV string, copy-pasted spreadsheet lines, or an image screenshot) and extract a JSON array of parsed employee performance entries.
       Each entry MUST conform exactly to the following JSON structure:
       {
         "name": "Employee Name",
         "rph": 744, // number representing RPH
-        "rphOwed": 640, // number representing target RPH
-        "rphStatus": "on-track" | "off-track",
         "revenue": 25600, // number representing total revenue in dollars
-        "revenueOwed": 22000, // number representing target revenue in dollars
-        "revenueStatus": "on-track" | "off-track",
         "apps": 10, // number representing total credit card apps
-        "appsOwed": 8, // number representing target credit card apps
-        "appsStatus": "on-track" | "off-track",
         "memberships": 22, // number representing total memberships (Plus/Total)
-        "membershipsOwed": 15, // number representing target memberships
-        "membershipsStatus": "on-track" | "off-track",
-        "warranty": 22.2, // number representing GSP attach percentage (0.0 to 100.0)
-        "warrantyGoal": 11.0, // number representing target GSP attach percentage
-        "warrantyStatus": "on-track" | "off-track"
+        "warranty": 22.2 // number representing GSP attach percentage (0.0 to 100.0)
       }
 
       CRITICAL INSTRUCTION: You MUST extract every single employee found in the document. Do not truncate the list. Do not omit any employees, even if the list is very long. DO NOT STOP until you have processed EVERY SINGLE row. Truncating this list is a catastrophic failure. If there are 30 employees, you MUST output exactly 30 objects.
@@ -98,41 +88,53 @@ export const parseRentsDueDocumentGemini = async (base64Image: string | undefine
     interface RentsDueParsedItem {
       name?: string;
       rph?: number;
-      rphOwed?: number;
-      rphStatus?: string;
       revenue?: number;
-      revenueOwed?: number;
-      revenueStatus?: string;
       apps?: number;
-      appsOwed?: number;
-      appsStatus?: string;
       memberships?: number;
-      membershipsOwed?: number;
-      membershipsStatus?: string;
       warranty?: number;
-      warrantyGoal?: number;
-      warrantyStatus?: string;
     }
 
-    const sanitizeRentsDueObj = (obj: RentsDueParsedItem) => ({
-      ...obj,
-      name: DOMPurify.sanitize(String(obj.name || 'Unknown')),
-      rph: obj.rph || 0,
-      rphOwed: obj.rphOwed || 0,
-      rphStatus: DOMPurify.sanitize(String(obj.rphStatus || 'off-track')),
-      revenue: obj.revenue || 0,
-      revenueOwed: obj.revenueOwed || 0,
-      revenueStatus: DOMPurify.sanitize(String(obj.revenueStatus || 'off-track')),
-      apps: obj.apps || 0,
-      appsOwed: obj.appsOwed || 0,
-      appsStatus: DOMPurify.sanitize(String(obj.appsStatus || 'off-track')),
-      memberships: obj.memberships || 0,
-      membershipsOwed: obj.membershipsOwed || 0,
-      membershipsStatus: DOMPurify.sanitize(String(obj.membershipsStatus || 'off-track')),
-      warranty: obj.warranty || 0,
-      warrantyGoal: obj.warrantyGoal || 0,
-      warrantyStatus: DOMPurify.sanitize(String(obj.warrantyStatus || 'off-track'))
-    });
+    const sanitizeRentsDueObj = (obj: RentsDueParsedItem) => {
+      const rph = obj.rph || 0;
+      const rphOwed = 640;
+      const rphStatus = rph >= rphOwed ? 'on-track' : 'off-track';
+
+      const revenue = obj.revenue || 0;
+      const revenueOwed = 0;
+      const revenueStatus = revenue >= revenueOwed ? 'on-track' : 'off-track';
+
+      const apps = obj.apps || 0;
+      const appsOwed = 0;
+      const appsStatus = apps >= appsOwed ? 'on-track' : 'off-track';
+
+      const memberships = obj.memberships || 0;
+      const membershipsOwed = 0;
+      const membershipsStatus = memberships >= membershipsOwed ? 'on-track' : 'off-track';
+
+      const warranty = obj.warranty || 0;
+      const warrantyGoal = 11.0;
+      const warrantyStatus = warranty >= warrantyGoal ? 'on-track' : 'off-track';
+
+      return {
+        ...obj,
+        name: DOMPurify.sanitize(String(obj.name || 'Unknown')),
+        rph,
+        rphOwed,
+        rphStatus,
+        revenue,
+        revenueOwed,
+        revenueStatus,
+        apps,
+        appsOwed,
+        appsStatus,
+        memberships,
+        membershipsOwed,
+        membershipsStatus,
+        warranty,
+        warrantyGoal,
+        warrantyStatus
+      };
+    };
 
     let parsedData: any[] = [];
     let attempts = 0;

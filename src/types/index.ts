@@ -57,6 +57,8 @@ export interface Employee {
   warranty: number;
   surveys: number;
   rph: number;
+  rphOwed?: number;
+  rphStatus?: 'on-track' | 'off-track' | 'none';
   transactions?: number;
   gap?: string;
   metricGap?: string;

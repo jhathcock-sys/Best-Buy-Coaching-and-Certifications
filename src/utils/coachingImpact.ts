@@ -20,7 +20,7 @@ export function calculateCoachingImpact(
       date: new Date(snap.date.split(' ')[0]).getTime(),
       employee: snap.employees.find(e => e.id === employeeId)
     }))
-    .filter(snap => snap.employee !== undefined && !isNaN(snap.date));
+    .filter((snap): snap is { date: number; employee: Employee } => snap.employee !== undefined && !isNaN(snap.date));
 
   const preSnapshots = snapshotsForEmployee.filter(s => {
     const diffDays = (coachingTime - s.date) / (1000 * 3600 * 24);
@@ -39,7 +39,7 @@ export function calculateCoachingImpact(
   const getAvg = (snaps: typeof snapshotsForEmployee) => {
     if (snaps.length === 0) return { memberships: 0, rph: 0 };
     const sum = snaps.reduce((acc, curr) => {
-      const emp = curr.employee!;
+      const emp = curr.employee;
       acc.memberships += (emp.memberships || 0);
       const hours = emp.hours || 0;
       const rph = emp.rph || 0;

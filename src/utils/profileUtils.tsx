@@ -6,7 +6,7 @@ export const renderMarkdown = (text: string | null | undefined): React.ReactNode
     
     return text.split('\n').map((line: string, i: number) => {
       if (line.startsWith('## ')) return <h3 key={i} className="text-white mt-5 mb-2">{line.replace('## ', '')}</h3>;
-      if (line.startsWith('# ')) return <h2 key={i} className="text-[var(--bby-blue)] mt-0 mb-4 border-b border-white/10 pb-2">{line.replace('# ', '')}</h2>;
+      if (line.startsWith('# ')) return <h2 key={i} className="text-[var(--bby-blue)] mt-0 mb-4 border-b border-[var(--border-glass)] pb-2">{line.replace('# ', '')}</h2>;
       if (line.trim().startsWith('* ') || line.trim().startsWith('- ')) return <li key={i} className="ml-6 mb-1" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(line.replace(/^[-*]\s/, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')) }} />;
       if (line.trim() === '') return <br key={i} />;
       

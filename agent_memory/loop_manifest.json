@@ -1,6 +1,6 @@
 {
   "status": "ACTIVE",
-  "current_checkpoint": 177,
+  "current_checkpoint": 180,
   "active_vetos": [],
   "processed_queue": [
     "src/components/Analytics/ConversationalAnalyticsWidget.tsx",
@@ -179,14 +179,14 @@
     "src/store/useStore.ts",
     "src/types/analytics.ts",
     "src/types/index.ts",
-    "src/types/store.ts"
-  ],
-  "remaining_queue": [
+    "src/types/store.ts",
     "src/utils/coachingImpact.ts",
     "src/utils/profileUtils.tsx",
+    "src/utils/scheduleParserUtils.ts"
+  ],
+  "remaining_queue": [
     "src/utils/rentsDueUtils.ts",
     "src/utils/rosterUtils.ts",
-    "src/utils/scheduleParserUtils.ts",
     "src/App.tsx",
     "src/main.tsx",
     "src/vite-env.d.ts"

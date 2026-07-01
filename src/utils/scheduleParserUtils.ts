@@ -56,7 +56,7 @@ export const parseShiftHours = (shiftStr: string | undefined | null): { duration
   const parts = shiftStr.split(/[-—to]/).map(p => p.trim());
   if (parts.length < 2) return { duration: 0, startTimeStr: '9:00 AM' };
 
-  const toMinutes = (timeStr: string): number | null => {
+  const toMinutes = (timeStr: string, isEnd: boolean = false): number | null => {
     const match = timeStr.match(/(\d+):?(\d+)?\s*(AM|PM|am|pm)?/i);
     if (!match) return null;
     let h = parseInt(match[1], 10);
@@ -64,9 +64,8 @@ export const parseShiftHours = (shiftStr: string | undefined | null): { duration
     let ampm = match[3] ? match[3].toUpperCase() : '';
 
     if (!ampm) {
-      // Guess PM for typical retail afternoon hours if not specified
       if (h >= 1 && h <= 7) ampm = 'PM';
-      else if (h >= 8 && h <= 11) ampm = 'AM';
+      else if (h >= 8 && h <= 11) ampm = isEnd ? 'PM' : 'AM';
       else if (h === 12) ampm = 'PM';
       else ampm = 'PM';
     }
@@ -76,8 +75,8 @@ export const parseShiftHours = (shiftStr: string | undefined | null): { duration
     return h * 60 + m;
   };
 
-  const startMin = toMinutes(parts[0]);
-  let endMin = toMinutes(parts[1]);
+  const startMin = toMinutes(parts[0], false);
+  let endMin = toMinutes(parts[1], true);
 
   if (startMin === null || endMin === null) {
     return { duration: 0, startTimeStr: '9:00 AM' };

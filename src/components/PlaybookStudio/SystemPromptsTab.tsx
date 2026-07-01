@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import { Sparkles, BookOpen, Trash2, Check } from 'lucide-react';
 import { useStore } from '../../store/useStore';
-import { useShallow } from 'zustand/react/shallow';
+
 import { StoreState } from '../../types/store';
 
 export default function SystemPromptsTab() {
-  const { playbookSettings, apiKey, saveSettings } = useStore(useShallow((state: StoreState) => ({
-    playbookSettings: state.playbookSettings,
-    apiKey: state.apiKey,
-    saveSettings: state.saveSettings
-  })));
+  const playbookSettings = useStore((state: StoreState) => state.playbookSettings);
+  const apiKey = useStore((state: StoreState) => state.apiKey);
+  const saveSettings = useStore((state: StoreState) => state.saveSettings);
 
   const [customSystemPrompt, setCustomSystemPrompt] = useState(playbookSettings?.customSystemPrompt || '');
   const [isAddingLog, setIsAddingLog] = useState(false);

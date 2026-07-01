@@ -2,13 +2,11 @@ import React, { useState } from 'react';
 import { BookOpen, ShieldAlert, Plus, Trash2 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { StoreState } from '../../types/store';
-import { useShallow } from 'zustand/react/shallow';
+
 
 export default function BbyVocabTab() {
-  const { playbookSettings, setPlaybookSettings } = useStore(useShallow((state: StoreState) => ({
-    playbookSettings: state.playbookSettings,
-    setPlaybookSettings: state.setPlaybookSettings
-  })));
+  const playbookSettings = useStore((state: StoreState) => state.playbookSettings);
+  const setPlaybookSettings = useStore((state: StoreState) => state.setPlaybookSettings);
 
   const [newAllowed, setNewAllowed] = useState('');
   const [newForbidden, setNewForbidden] = useState('');

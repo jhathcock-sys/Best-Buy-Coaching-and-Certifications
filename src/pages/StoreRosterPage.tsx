@@ -13,6 +13,7 @@ import RosterDisplaySettings from '../components/StoreRoster/RosterDisplaySettin
 import RosterAuditor from '../components/RosterAuditor';
 import RentsDueAuditor from '../components/RentsDueAuditor';
 import { useMediaQuery } from '../hooks/useMediaQuery';
+import { SkeletonCard } from '../components/ui/Skeleton';
 
 import { useStore } from '../store/useStore';
 import { DeptGoal, Employee, CoachingLog } from '../types';
@@ -70,6 +71,8 @@ export default function StoreRoster({
   };
 
   const isDesktop = useMediaQuery('(min-width: 768px)');
+
+  if (!rosterHistory) return <SkeletonCard />;
 
   return (
     <div className="flex-column gap-xl" data-testid="store-roster-page">

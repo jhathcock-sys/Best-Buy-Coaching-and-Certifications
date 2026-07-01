@@ -51,12 +51,12 @@ export default function CoachingSessionCard({ session, index, impact, onSelect, 
         <span className="flex-row align-center gap-xs"><Clock size={12} /> {session.date?.split(' ')[0]}</span>
         
         {impact === 'HIGH_IMPACT' && (
-          <span className="tag-pill tag-mini text-success bg-success-alpha-15" style={{ border: '1px solid var(--success)' }}>
+          <span className="tag-pill tag-mini text-success bg-success-alpha-15 border-success">
             High Impact 🟢
           </span>
         )}
         {impact === 'NEEDS_FOLLOW_UP' && (
-          <span className="tag-pill tag-mini text-error bg-error-alpha-20" style={{ border: '1px solid var(--error)' }}>
+          <span className="tag-pill tag-mini text-error bg-error-alpha-20 border-error">
             Needs Follow Up 🔴
           </span>
         )}

@@ -46,15 +46,15 @@ export default function AuraActionCard({ employee, insight, isScanning, onCoachE
 
       <div className="aura-insight-pill mb-md">
         {showSkeleton ? (
-          <div className="flex-row align-center gap-sm">
+          <div className="flex-row align-center gap-sm" data-testid="insight-skeleton">
             <div className="w-3 h-3 rounded-full bg-bby-yellow animate-pulse" />
             <span className="text-secondary">Gemini analyzing...</span>
           </div>
         ) : insight ? (
-          <>
+          <div data-testid="insight-content">
             <div className="font-semibold text-white mb-xs">{insight.action}</div>
             <div className="text-secondary">{insight.insight}</div>
-          </>
+          </div>
         ) : (
           <div className="text-secondary">Awaiting Scan...</div>
         )}

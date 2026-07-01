@@ -4,6 +4,7 @@ import { useStore } from '../store/useStore';
 import { generateAuraBatchInsights, AuraInsight } from '../services/ai/auraEngine';
 import AuraActionCard from '../components/AuraHUD/AuraActionCard';
 import { Employee } from '../types';
+import { Skeleton, SkeletonList } from '../components/ui/Skeleton';
 import '../components/AuraHUD/AuraHUD.css';
 
 interface AuraHUDPageProps {
@@ -14,11 +15,15 @@ const EMPTY_OBJ = {};
 
 export default function AuraHUDPage({ onCoachEmployee }: AuraHUDPageProps) {
   const activePeriod = useStore((state) => state.activePeriod);
-  const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
-  const deptGoals = useStore((state) => state.deptGoals) || EMPTY_OBJ;
+  const rosterHistory = useStore((state) => state.rosterHistory);
+  const deptGoals = useStore((state) => state.deptGoals);
   const apiKey = useStore((state) => state.apiKey);
   const playbookSettings = useStore((state) => state.playbookSettings);
   
+  if (!rosterHistory || !deptGoals || !playbookSettings) {
+    return <Skeleton width="100%" height="400px" />;
+  }
+
   const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
   const roster = useMemo(() => (Object.values(_rawroster) as Employee[]).sort((a, b) => (a?.name || '').localeCompare(b?.name || '')), [_rawroster]);
 

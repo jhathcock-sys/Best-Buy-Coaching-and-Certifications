@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Compass, ShieldAlert } from 'lucide-react';
-import { useShallow } from 'zustand/react/shallow';
+
 import { testLatency } from '../../services/firebase';
 import { useStore } from '../../store/useStore';
 import { FollowUpTask } from '../../types';
@@ -9,17 +9,12 @@ const EMPTY_OBJ = {};
 const EMPTY_ARR: never[] = [];
 
 export default function SyncDiagnosticsTab() {
-  const { 
-    rosterHistory, coachingLogs, followUpTasks, floorLeaderShifts, 
-    dbConnected, storeId 
-  } = useStore(useShallow(state => ({
-    rosterHistory: state.rosterHistory || EMPTY_OBJ,
-    coachingLogs: state.coachingLogs || EMPTY_ARR,
-    followUpTasks: state.followUpTasks || EMPTY_ARR,
-    floorLeaderShifts: state.floorLeaderShifts || EMPTY_ARR,
-    dbConnected: state.dbConnected,
-    storeId: state.storeId
-  })));
+  const rosterHistory = useStore(state => state.rosterHistory) || EMPTY_OBJ;
+  const coachingLogs = useStore(state => state.coachingLogs) || EMPTY_ARR;
+  const followUpTasks = useStore(state => state.followUpTasks) || EMPTY_ARR;
+  const floorLeaderShifts = useStore(state => state.floorLeaderShifts) || EMPTY_ARR;
+  const dbConnected = useStore(state => state.dbConnected);
+  const storeId = useStore(state => state.storeId);
   const [diagnosticsLogs, setDiagnosticsLogs] = useState<string[]>([]);
   const [isRunningDiagnostics, setIsRunningDiagnostics] = useState(false);
   const isMounted = useRef(true);

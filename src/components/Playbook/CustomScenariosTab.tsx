@@ -3,19 +3,17 @@ import { Trash2, Compass } from 'lucide-react';
 import CustomScenarioForm from './CustomScenarioForm';
 import { useStore } from '../../store/useStore';
 import { StoreState } from '../../types/store';
-import { useShallow } from 'zustand/react/shallow';
+
 import { CustomScenario } from '../../types/index';
 
 export default function CustomScenariosTab() {
-  const { customScenarios, deleteCustomScenario } = useStore(useShallow((state: StoreState) => ({
-    customScenarios: state.customScenarios,
-    deleteCustomScenario: state.deleteCustomScenario
-  })));
+  const customScenarios = useStore((state: StoreState) => state.customScenarios);
+  const deleteCustomScenario = useStore((state: StoreState) => state.deleteCustomScenario);
 
   const scenariosToRender = customScenarios || [];
 
   return (
-    <div>
+    <div data-testid="custom-scenarios-tab">
         <div className="grid grid-cols-[repeat(auto-fit,minmax(400px,1fr))] gap-xl">
           
           {/* Extracted Form Component */}

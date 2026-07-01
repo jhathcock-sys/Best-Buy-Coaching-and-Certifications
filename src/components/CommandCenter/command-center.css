@@ -1,0 +1,27 @@
+/* COMMAND CENTER UTILITIES */
+.bg-radial-hover {
+  background-image: radial-gradient(circle at 50% 0%, var(--bg-card-hover), transparent 70%);
+}
+.mix-blend-difference {
+  mix-blend-mode: difference;
+}
+.agent-icon-qa {
+  background-color: var(--error-alpha-15);
+  border-color: var(--error);
+}
+.agent-icon-tech_debt {
+  background-color: var(--warning-alpha-15);
+  border-color: var(--warning);
+}
+.agent-icon-ux {
+  background-color: var(--bby-yellow-alpha-15);
+  border-color: var(--bby-yellow);
+}
+.agent-icon-coder {
+  background-color: var(--success-alpha-15);
+  border-color: var(--success);
+}
+.agent-icon-default {
+  background-color: var(--bby-blue-alpha-20);
+  border-color: var(--bby-blue);
+}

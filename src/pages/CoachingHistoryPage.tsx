@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Trash2, Volume2, BookOpen, Clock } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { SkeletonList } from '../components/ui/Skeleton';
 import { CoachingLog } from '../types';
 import { calculateCoachingImpact } from '../utils/coachingImpact';
 import CoachingSessionCard from '../components/CoachingHistory/CoachingSessionCard';
@@ -9,7 +10,7 @@ import CoachingDetailsModal from '../components/CoachingHistory/CoachingDetailsM
 const EMPTY_ARR: CoachingLog[] = [];
 
 export default function CoachingHistory() {
-  const coachingLogs = useStore(state => state.coachingLogs) || EMPTY_ARR;
+  const coachingLogs = useStore(state => state.coachingLogs);
   const rawDailySnapshots = useStore(state => state.dailySnapshots);
   const onDeleteLog = useStore(state => state.deleteCoachingLog);
   const [searchTerm, setSearchTerm] = useState('');
@@ -85,7 +86,7 @@ export default function CoachingHistory() {
   };
 
   const filteredSessions = useMemo(() => {
-    return coachingLogs.filter(session => {
+    return (coachingLogs || EMPTY_ARR).filter(session => {
       const name = (session.employeeName || session.customerName || '').toLowerCase();
       const notes = (session.notes || '').toLowerCase();
       const matchesSearch = name.includes(searchTerm.toLowerCase()) || notes.includes(searchTerm.toLowerCase());
@@ -118,6 +119,22 @@ export default function CoachingHistory() {
       }
     }
   };
+
+  if (!coachingLogs) {
+    return (
+      <div className="flex-column gap-2xl">
+        <div>
+          <h1 className="text-3xl mb-xs">Coaching History Hub</h1>
+          <p className="text-secondary">
+            Review and manage archived coaching sessions, floor observations, and consulting roleplays.
+          </p>
+        </div>
+        <div className="glass-card p-3rem flex-column gap-md">
+          <SkeletonList count={3} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-column gap-2xl">

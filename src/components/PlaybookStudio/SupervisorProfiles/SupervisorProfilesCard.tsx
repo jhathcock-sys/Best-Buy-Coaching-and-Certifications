@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import { Edit2, Trash2, Eye, EyeOff, Users, UserPlus, Plus } from 'lucide-react';
 import { useStore } from '../../../store/useStore';
-import { useShallow } from 'zustand/react/shallow';
+
 import { Manager } from '../../../types/index';
 import { StoreState } from '../../../types/store';
 
 export default function SupervisorProfilesCard() {
-  const { managers: rawManagers, saveManagers } = useStore(useShallow((state: StoreState) => ({
-    managers: state.managers,
-    saveManagers: state.saveManagers
-  })));
+  const rawManagers = useStore((state: StoreState) => state.managers);
+  const saveManagers = useStore((state: StoreState) => state.saveManagers);
   
   const managers = rawManagers || [];
 

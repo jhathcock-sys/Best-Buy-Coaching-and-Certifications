@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Compass, Check } from 'lucide-react';
 import { useStore } from '../../store/useStore';
-import { useShallow } from 'zustand/react/shallow';
+
 import { StoreState } from '../../types/store';
 import { DeptGoal } from '../../types/index';
 
 export default function DepartmentTargetsTab() {
   const [selectedDept, setSelectedDept] = useState('Computers');
   
-  const { deptGoals, saveDeptGoals } = useStore(useShallow((state: StoreState) => ({
-    deptGoals: state.deptGoals,
-    saveDeptGoals: state.saveDeptGoals
-  })));
+  const deptGoals = useStore((state: StoreState) => state.deptGoals);
+  const saveDeptGoals = useStore((state: StoreState) => state.saveDeptGoals);
 
   const [editedGoals, setEditedGoals] = useState<Record<string, DeptGoal>>(deptGoals || {});
 

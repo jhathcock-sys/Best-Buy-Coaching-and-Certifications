@@ -7,24 +7,26 @@ export const MemberDealsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchDeals = async (isMounted = true) => {
+  const fetchDeals = async (signal?: AbortSignal) => {
     setLoading(true);
     setError(null);
     try {
       const data = await scrapeDeals();
-      if (isMounted) setDeals(data);
+      if (signal?.aborted) return;
+      setDeals(data);
     } catch (err: any) {
-      if (isMounted) setError(err.message || 'Failed to fetch deals.');
+      if (signal?.aborted) return;
+      setError(err.message || 'Failed to fetch deals.');
     } finally {
-      if (isMounted) setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   };
 
   useEffect(() => {
-    let isMounted = true;
-    fetchDeals(isMounted);
+    const controller = new AbortController();
+    fetchDeals(controller.signal);
     return () => {
-      isMounted = false;
+      controller.abort();
     };
   }, []);
 

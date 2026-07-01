@@ -19,7 +19,7 @@ describe('CustomScenariosTab', () => {
   });
 
   it('renders empty state when no custom scenarios exist', () => {
-    vi.mocked(useStore).mockImplementation(() => ({
+    vi.mocked(useStore).mockImplementation((selector: any) => selector({
       customScenarios: [],
       deleteCustomScenario: vi.fn()
     }));
@@ -30,7 +30,7 @@ describe('CustomScenariosTab', () => {
   });
 
   it('renders custom scenarios when they exist', () => {
-    vi.mocked(useStore).mockImplementation(() => ({
+    vi.mocked(useStore).mockImplementation((selector: any) => selector({
       customScenarios: [
         {
           id: 'test-scenario-1',
@@ -51,7 +51,7 @@ describe('CustomScenariosTab', () => {
 
   it('calls deleteCustomScenario when trash button is clicked', () => {
     const deleteCustomScenario = vi.fn();
-    vi.mocked(useStore).mockImplementation(() => ({
+    vi.mocked(useStore).mockImplementation((selector: any) => selector({
       customScenarios: [
         {
           id: 'test-scenario-1',

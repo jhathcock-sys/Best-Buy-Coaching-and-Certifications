@@ -358,7 +358,7 @@ exports.generateCoaching = functions.https.onCall(async (data, context) => {
       { "what": "string", "how": "string", "why": "string", "strengths": "string", "metricGap": "string", "expectation": "string", "validation": "string", "discStep": "Discover" }
     `;
 
-    const requestOptions = { timeout: 30000 };
+    const requestOptions = { timeout: 58000 };
     const result = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
@@ -429,7 +429,7 @@ exports.auditDialogue = functions.https.onCall(async (data, context) => {
       Reply strictly in JSON containing: overallScore, passed, breakdown, values, growReport.
     `;
 
-    const requestOptions = { timeout: 30000 };
+    const requestOptions = { timeout: 58000 };
     const result = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: evaluationPrompt }] }],
       generationConfig: {
@@ -527,7 +527,7 @@ exports.generateAIContent = functions.https.onCall(async (data, context) => {
     }
     parts.push({ text: prompt });
     
-    const requestOptions = { timeout: 30000 };
+    const requestOptions = { timeout: 58000 };
     const result = await model.generateContent({
       contents: [{ role: 'user', parts }],
       generationConfig
@@ -535,6 +535,9 @@ exports.generateAIContent = functions.https.onCall(async (data, context) => {
     
     return { text: result.response.text() };
   } catch (error) {
+    if (error.status === 429 || (error.message && error.message.includes('429'))) {
+      throw new functions.https.HttpsError('resource-exhausted', error.message);
+    }
     if (error instanceof functions.https.HttpsError) throw error;
     throw new functions.https.HttpsError('internal', error.message);
   }
@@ -575,7 +578,7 @@ exports.auditStoreFloor = functions.https.onCall(async (data, context) => {
       ${playbookSettings?.customSystemPrompt ? `ADDITIONAL PLAYBOOK RULES:\n${playbookSettings.customSystemPrompt}` : ''}
     `;
 
-    const requestOptions = { timeout: 30000 };
+    const requestOptions = { timeout: 58000 };
     const result = await model.generateContent({
       contents: [
         { 

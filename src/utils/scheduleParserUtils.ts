@@ -56,7 +56,7 @@ export const parseShiftHours = (shiftStr: string | undefined | null): { duration
   const parts = shiftStr.split(/[-—to]/).map(p => p.trim());
   if (parts.length < 2) return { duration: 0, startTimeStr: '9:00 AM' };
 
-  const toMinutes = (timeStr: string, isEnd: boolean = false): number | null => {
+  const toMinutes = (timeStr: string, startMins: number | null = null): number | null => {
     const match = timeStr.match(/(\d+):?(\d+)?\s*(AM|PM|am|pm)?/i);
     if (!match) return null;
     let h = parseInt(match[1], 10);
@@ -64,10 +64,30 @@ export const parseShiftHours = (shiftStr: string | undefined | null): { duration
     let ampm = match[3] ? match[3].toUpperCase() : '';
 
     if (!ampm) {
-      if (h >= 1 && h <= 7) ampm = 'PM';
-      else if (h >= 8 && h <= 11) ampm = isEnd ? 'PM' : 'AM';
-      else if (h === 12) ampm = 'PM';
-      else ampm = 'PM';
+      if (startMins !== null) {
+        // Calculate minutes for both AM and PM interpretations
+        const amMins = (h === 12 ? 0 : h) * 60 + m;
+        const pmMins = (h === 12 ? 12 : h + 12) * 60 + m;
+        
+        // Calculate resulting shift durations (accounting for midnight crossovers)
+        const amDuration = amMins < startMins ? amMins + 1440 - startMins : amMins - startMins;
+        const pmDuration = pmMins < startMins ? pmMins + 1440 - startMins : pmMins - startMins;
+
+        // If one interpretation causes an unrealistic shift (> 16 hours) and the other is valid (<= 16 hours), lock it in.
+        if (amDuration > 16 * 60 && pmDuration <= 16 * 60) {
+          ampm = 'PM';
+        } else if (pmDuration > 16 * 60 && amDuration <= 16 * 60) {
+          ampm = 'AM';
+        }
+      }
+      
+      // Fallback to existing logic if the heuristic above didn't confidently pick one
+      if (!ampm) {
+        if (h >= 1 && h <= 7) ampm = 'PM';
+        else if (h >= 8 && h <= 11) ampm = 'AM'; // Can safely revert to AM here since heuristic covers pm shift ends
+        else if (h === 12) ampm = 'PM';
+        else ampm = 'PM';
+      }
     }
 
     if (ampm === 'PM' && h !== 12) h += 12;
@@ -75,8 +95,8 @@ export const parseShiftHours = (shiftStr: string | undefined | null): { duration
     return h * 60 + m;
   };
 
-  const startMin = toMinutes(parts[0], false);
-  let endMin = toMinutes(parts[1], true);
+  const startMin = toMinutes(parts[0]);
+  let endMin = toMinutes(parts[1], startMin);
 
   if (startMin === null || endMin === null) {
     return { duration: 0, startTimeStr: '9:00 AM' };

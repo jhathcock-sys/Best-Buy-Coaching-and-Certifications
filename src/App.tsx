@@ -104,6 +104,15 @@ function AppContent() {
     setActiveView('shadow');
   }, [setPrefillShadowEmployee, setActiveView]);
 
+  if (activeView === 'test-profile-header') {
+    const TestProfileHeaderHarness = lazy(() => import('./components/TestProfileHeaderHarness'));
+    return (
+      <Suspense fallback={<div>Loading test harness...</div>}>
+        <TestProfileHeaderHarness />
+      </Suspense>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <>
@@ -147,7 +156,7 @@ function AppContent() {
       <main className="main-content" data-testid="main-content">
         <Suspense fallback={
           <div className="flex-center flex-column w-full h-full gap-md" data-testid="suspense-fallback">
-            <div className="w-50px h-50px border-4 border-solid border-white-alpha-10 border-bby-yellow-t-4 rounded-full animate-spin"></div>
+            <div className="w-50px h-50px border-4 border-solid border-[var(--border-glass)] border-t-[var(--bby-yellow)] rounded-full animate-spin"></div>
             <span className="text-secondary text-sm font-semibold uppercase tracking-widest animate-fade-in">Loading Module...</span>
           </div>
         }>

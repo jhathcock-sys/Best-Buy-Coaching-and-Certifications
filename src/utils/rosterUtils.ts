@@ -22,44 +22,44 @@ export const getMetricClass = (
   if (type === 'memberships') {
     if (isHoursType) {
       const pace = empHours / (safeVal || 0.001);
-      return pace <= target ? 'text-success' : pace <= target + 3.0 ? 'text-warning' : 'text-danger';
+      return pace <= target ? 'text-[var(--success-glow)]' : pace <= target + 3.0 ? 'text-[var(--bby-yellow)]' : 'text-danger';
     } else if (isDollarsType) {
       const revenue = empHours * empRph;
       const pace = revenue / (safeVal || 0.001);
-      return pace <= target ? 'text-success' : pace <= target + 2000 ? 'text-warning' : 'text-danger';
+      return pace <= target ? 'text-[var(--success-glow)]' : pace <= target + 2000 ? 'text-[var(--bby-yellow)]' : 'text-danger';
     }
-    return safeVal >= target ? 'text-success' : safeVal >= target - 1 ? 'text-warning' : 'text-danger';
+    return safeVal >= target ? 'text-[var(--success-glow)]' : safeVal >= target - 1 ? 'text-[var(--bby-yellow)]' : 'text-danger';
   }
 
   if (type === 'creditCards') {
     if (isHoursType) {
       const pace = empHours / (safeVal || 0.001);
-      return pace <= target ? 'text-success' : pace <= target + 4.0 ? 'text-warning' : 'text-danger';
+      return pace <= target ? 'text-[var(--success-glow)]' : pace <= target + 4.0 ? 'text-[var(--bby-yellow)]' : 'text-danger';
     } else if (isDollarsType) {
       const revenue = empHours * empRph;
       const pace = revenue / (safeVal || 0.001);
-      return pace <= target ? 'text-success' : pace <= target + 3000 ? 'text-warning' : 'text-danger';
+      return pace <= target ? 'text-[var(--success-glow)]' : pace <= target + 3000 ? 'text-[var(--bby-yellow)]' : 'text-danger';
     }
-    return safeVal >= target ? 'text-success' : safeVal >= target - 1 ? 'text-warning' : 'text-danger';
+    return safeVal >= target ? 'text-[var(--success-glow)]' : safeVal >= target - 1 ? 'text-[var(--bby-yellow)]' : 'text-danger';
   }
 
   if (type === 'warranty') {
-    return safeVal >= target ? 'text-success' : safeVal >= target - 3.0 ? 'text-warning' : 'text-danger';
+    return safeVal >= target ? 'text-[var(--success-glow)]' : safeVal >= target - 3.0 ? 'text-[var(--bby-yellow)]' : 'text-danger';
   }
   if (type === 'surveys') {
-    return safeVal >= target ? 'text-success' : 'text-danger';
+    return safeVal >= target ? 'text-[var(--success-glow)]' : 'text-danger';
   }
   if (type === 'rph') {
-    return safeVal >= target ? 'text-success' : safeVal >= target - 150 ? 'text-warning' : 'text-danger';
+    return safeVal >= target ? 'text-[var(--success-glow)]' : safeVal >= target - 150 ? 'text-[var(--bby-yellow)]' : 'text-danger';
   }
   if (type === 'basket') {
-    return safeVal >= target ? 'text-success' : safeVal >= target - 30 ? 'text-warning' : 'text-danger';
+    return safeVal >= target ? 'text-[var(--success-glow)]' : safeVal >= target - 30 ? 'text-[var(--bby-yellow)]' : 'text-danger';
   }
   if (type === 'm365') {
-    return safeVal >= target ? 'text-success' : safeVal >= target - 10 ? 'text-warning' : 'text-danger';
+    return safeVal >= target ? 'text-[var(--success-glow)]' : safeVal >= target - 10 ? 'text-[var(--bby-yellow)]' : 'text-danger';
   }
   if (type === 'audio') {
-    return safeVal >= target ? 'text-success' : safeVal >= target - 10 ? 'text-warning' : 'text-danger';
+    return safeVal >= target ? 'text-[var(--success-glow)]' : safeVal >= target - 10 ? 'text-[var(--bby-yellow)]' : 'text-danger';
   }
   return '';
 };

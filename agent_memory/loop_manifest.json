@@ -182,13 +182,12 @@
     "src/types/store.ts",
     "src/utils/coachingImpact.ts",
     "src/utils/profileUtils.tsx",
-    "src/utils/scheduleParserUtils.ts"
-  ],
-  "remaining_queue": [
+    "src/utils/scheduleParserUtils.ts",
     "src/utils/rentsDueUtils.ts",
     "src/utils/rosterUtils.ts",
     "src/App.tsx",
     "src/main.tsx",
     "src/vite-env.d.ts"
-  ]
+  ],
+  "remaining_queue": []
 }

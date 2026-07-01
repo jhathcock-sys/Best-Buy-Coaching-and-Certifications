@@ -20,7 +20,7 @@ import DOMPurify from 'dompurify';
 export const parseRentsDueCSVLocal = async (
   text: string, 
   userMapping?: Record<string, string>
-): Promise<{ parsedData?: ParsedRentsData[]; requiresMapping?: boolean; fields?: string[]; rawData?: any[]; prefilledMapping?: Record<string, string> } | null> => {
+): Promise<{ parsedData?: ParsedRentsData[]; requiresMapping?: boolean; fields?: string[]; rawData?: Record<string, any>[]; prefilledMapping?: Record<string, string> } | null> => {
   if (!text || (!text.includes(',') && !text.includes('\t'))) return null;
 
   try {
@@ -54,7 +54,7 @@ export const parseRentsDueCSVLocal = async (
     }
 
     const fields = result.meta.fields || [];
-    const rows = result.data as any[];
+    const rows = result.data as Record<string, any>[];
 
     // Heuristics to find columns
     const findField = (possibleKeys: string[]) => {

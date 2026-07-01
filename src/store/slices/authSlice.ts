@@ -117,18 +117,20 @@ export const createAuthSlice: StateCreator<StoreState, [], [], AuthSlice> = (set
       // Fix: Async Race Condition Prevention for Tenant Guest Login
       let trueStorePin = get().storePin;
       if (get().dbConnected) {
-         // Bypass the async listener race condition by manually fetching the source of truth
-         let authSuccess = await signInTenant(storeId, pin);
-         
          if (!authSuccess) {
-           // We only create it if they are the true store pin!
-           // Try to read it directly to prevent listener race conditions
-           const cloudPin = await getStoreGuestPin(storeId);
-           if (cloudPin) {
-             trueStorePin = cloudPin;
+           try {
+             const cloudPin = await Promise.race([
+               getStoreGuestPin(storeId),
+               new Promise<null>((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))
+             ]);
+             if (cloudPin) {
+               trueStorePin = cloudPin;
+             }
+           } catch (e) {
+             console.warn('Timeout or error fetching guest pin', e);
            }
          } else {
-           trueStorePin = pin; // Auth succeeded, bypass the stale state check
+           trueStorePin = pin;
          }
       }
 

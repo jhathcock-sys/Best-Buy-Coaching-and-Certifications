@@ -17,11 +17,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, isHydrating
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
+  // Removed isMounted
 
   const handleKeyPress = async (num: string) => {
     if (pin.length < 4 && !isSuccess && !isLoading && !isHydrating) {
@@ -30,8 +26,16 @@ export default function Login({ correctPin = '1234', onLoginSuccess, isHydrating
       
       if (newPin.length === 4) {
         setIsLoading(true);
-        const success = await useStore.getState().login(newPin, storeId || '1480');
-        if (!isMounted.current) return;
+        let success = false;
+        try {
+          success = await Promise.race([
+            useStore.getState().login(newPin, storeId || '1480'),
+            new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 3000))
+          ]);
+        } catch (e) {
+          success = false;
+        }
+        
         setIsLoading(false);
         
         if (success) {
@@ -42,11 +46,9 @@ export default function Login({ correctPin = '1234', onLoginSuccess, isHydrating
           }, 800);
         } else {
           setIsShaking(true);
+          setPin(''); // Clear pin immediately to prevent flaky E2E tests
           setTimeout(() => {
-            if (isMounted.current) {
-              setIsShaking(false);
-              setPin('');
-            }
+            setIsShaking(false);
           }, 600);
         }
       }

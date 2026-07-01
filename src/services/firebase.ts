@@ -1,6 +1,6 @@
 import { toast } from 'react-hot-toast';
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, onSnapshot, setDoc, getDoc, collection, addDoc, query, orderBy, limit, deleteDoc, getDocs, getDocsFromCache, type Firestore, type DocumentData, type DocumentReference, type QuerySnapshot, type DocumentSnapshot } from 'firebase/firestore';
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, onSnapshot, setDoc, getDoc, collection, addDoc, query, orderBy, limit, deleteDoc, getDocs, getDocsFromCache, getDocFromCache, type Firestore, type DocumentData, type DocumentReference, type QuerySnapshot, type DocumentSnapshot } from 'firebase/firestore';
 import { getAuth, signInWithEmailAndPassword, signOut, type Auth } from 'firebase/auth';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { getStorage, ref, uploadBytes, getDownloadURL, type FirebaseStorage } from 'firebase/storage';
@@ -104,9 +104,24 @@ export const createTenantAuth = async (storeId: string, pin: string) => {
 
 export const getStoreGuestPin = async (storeId: string): Promise<string | null> => {
   if (!db) return null;
+  
+  const withTimeout = <T>(promise: Promise<T>, ms = 4000): Promise<T> => {
+    return Promise.race([
+      promise,
+      new Promise<T>((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))
+    ]);
+  };
+  
   try {
     const docRef = doc(db, 'stores', storeId, 'settings', 'playbook');
-    const docSnap = await getDoc(docRef);
+    let docSnap;
+    try {
+      docSnap = await withTimeout(getDoc(docRef));
+    } catch (e: any) {
+      console.warn('Network timeout fetching playbook settings, falling back to cache');
+      docSnap = await getDocFromCache(docRef);
+    }
+    
     if (docSnap.exists()) {
       return docSnap.data()?.storePin || null;
     }

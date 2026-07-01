@@ -32,23 +32,27 @@ test.describe('AssociateProfileHeader Component', () => {
     // All test cases that have an employee will render the cvi-badge.
     const cviBadges = page.getByTestId('profile-header-cvi-badge');
 
-    // We expect 3 CVI badges on the test harness (Accelerating, Needs Review, Neutral)
-    await expect(cviBadges).toHaveCount(3);
+    // We expect 4 CVI badges on the test harness
+    await expect(cviBadges).toHaveCount(4);
 
-    // 1. Accelerating CVI (+100%)
-    const acceleratingBadge = cviBadges.nth(0);
+    // 1. Focus 5 badge (Neutral by default since it has no roster history)
+    const focus5Badge = cviBadges.nth(0);
+    await expect(focus5Badge).toContainText('CVI: 0% (Neutral)');
+
+    // 2. Accelerating CVI (+100%)
+    const acceleratingBadge = cviBadges.nth(1);
     await expect(acceleratingBadge).toContainText('CVI: +100% (Accelerating)');
     await expect(acceleratingBadge).toHaveClass(/bg-success-alpha-15/);
     await expect(acceleratingBadge).toHaveClass(/text-success/);
 
-    // 2. Needs Review CVI (-50%)
-    const needsReviewBadge = cviBadges.nth(1);
+    // 3. Needs Review CVI (-50%)
+    const needsReviewBadge = cviBadges.nth(2);
     await expect(needsReviewBadge).toContainText('CVI: -50% (Needs Review)');
     await expect(needsReviewBadge).toHaveClass(/bg-error-alpha-20/);
     await expect(needsReviewBadge).toHaveClass(/text-error/);
 
-    // 3. Neutral CVI (0%)
-    const neutralBadge = cviBadges.nth(2);
+    // 4. Neutral CVI (0%)
+    const neutralBadge = cviBadges.nth(3);
     await expect(neutralBadge).toContainText('CVI: 0% (Neutral)');
     await expect(neutralBadge).toHaveClass(/bg-warning-alpha/);
     await expect(neutralBadge).toHaveClass(/text-warning/);

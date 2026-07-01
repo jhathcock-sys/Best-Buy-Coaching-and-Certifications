@@ -4,12 +4,14 @@ import { useStore } from '../store/useStore';
 import RoleplayConfiguration, { Scenario } from '../components/RoleplayCenter/RoleplayConfiguration';
 import RoleplayActiveSession from '../components/RoleplayCenter/RoleplayActiveSession';
 import RoleplayResults, { RoleplayEvaluation } from '../components/RoleplayCenter/RoleplayResults';
+import { SkeletonCard } from '../components/ui/Skeleton';
 
 const EMPTY_ARR: Scenario[] = [];
 
 export default function RoleplayCenter() {
   const customScenarios = useStore((state) => state.customScenarios) || EMPTY_ARR;
   const completeRoleplay = useStore((state) => state.completeRoleplay);
+  const playbookSettings = useStore((state) => state.playbookSettings);
   
   const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(null);
   const [sessionActive, setSessionActive] = useState(false);
@@ -18,6 +20,14 @@ export default function RoleplayCenter() {
   const [evaluation, setEvaluation] = useState<RoleplayEvaluation | null>(null);
   
   const allScenarios = useMemo(() => [...STANDARD_SCENARIOS, ...customScenarios] as Scenario[], [customScenarios]);
+
+  if (!playbookSettings) {
+    return (
+      <div className="p-xl w-full h-full">
+        <SkeletonCard data-testid="hydration-skeleton" />
+      </div>
+    );
+  }
 
   const startRoleplay = (scenario: Scenario) => {
     setSelectedScenario(scenario);

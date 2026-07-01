@@ -176,13 +176,13 @@ export default function RentsDueLedger({
           </div>
 
           {syncSuccess && (
-            <div className="p-md bg-[var(--success-glow)] border border-[rgba(16,185,129,0.3)] rounded-xl text-sm text-[#a7f3d0] flex-center-y gap-xs" data-testid="sync-success-message">
+            <div className="p-md bg-success-glow border border-success rounded-xl text-sm text-success-light flex-center-y gap-xs" data-testid="sync-success-message">
               <CheckCircle2 size={16} /> Roster ledger values updated. All performance evaluations and sparklines will reflect these parsed values immediately.
             </div>
           )}
 
           {successToast && (
-            <div className="p-md rounded-xl text-sm text-white flex-center-y gap-xs animate-fade-in bg-bby-blue border border-[rgba(0,70,190,0.3)]" data-testid="ai-success-message">
+            <div className="p-md rounded-xl text-sm text-white flex-center-y gap-xs animate-fade-in bg-bby-blue border border-bby-blue" data-testid="ai-success-message">
               <CheckCircle2 size={16} /> {successToast}
             </div>
           )}
@@ -204,7 +204,7 @@ export default function RentsDueLedger({
                 {employees.map((emp, idx) => {
                   const isPaidAll = emp.rphStatus === 'on-track' && emp.revenueStatus === 'on-track' && emp.appsStatus === 'on-track' && emp.membershipsStatus === 'on-track';
                   return (
-                    <tr key={idx} className={`border-b border-[var(--border-glass)] ${isPaidAll ? 'bg-[rgba(16,185,129,0.02)]' : 'bg-transparent'}`}>
+                    <tr key={idx} className={`border-b border-[var(--border-glass)] ${isPaidAll ? 'bg-success-glow' : 'bg-transparent'}`}>
                       <td className="p-md font-bold">
                         <div className="flex-column">
                           <span>{emp.name}</span>

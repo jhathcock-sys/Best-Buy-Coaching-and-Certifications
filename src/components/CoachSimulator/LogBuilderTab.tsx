@@ -2,7 +2,6 @@ import React from 'react';
 import { Sparkles } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useStore } from '../../store/useStore';
-import { useShallow } from 'zustand/react/shallow';
 
 import LogBuilderFormFields, { LogBuilderForm } from './LogBuilderFormFields';
 import LogPreview from './LogPreview';
@@ -43,10 +42,8 @@ export default function LogBuilderTab({
   isPausedSpeech
 }: LogBuilderTabProps) {
 
-  const { playbookSettings, apiKey } = useStore(useShallow(state => ({
-    playbookSettings: state.playbookSettings,
-    apiKey: state.apiKey
-  })));
+  const playbookSettings = useStore(state => state.playbookSettings);
+  const apiKey = useStore(state => state.apiKey);
 
   const loadTemplate = (type: string) => {
     if (TEMPLATES && TEMPLATES[type]) {
@@ -231,7 +228,7 @@ Let's crush it! Let me know if you have any questions or need me to jump in and 
   };
 
   return (
-    <div className="grid gap-xl" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))' }}>
+    <div className="dashboard-grid">
       
       {/* Left Column: Input Form */}
       <div className="glass-card flex-column gap-xl">

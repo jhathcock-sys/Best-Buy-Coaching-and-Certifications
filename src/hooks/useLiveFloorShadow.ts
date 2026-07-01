@@ -3,6 +3,52 @@ import { generateCoachingLogGemini } from '../services/ai';
 import { useStore } from '../store/useStore';
 import { Employee } from '../types';
 
+const EMPTY_OBJ = {};
+
+function parseDISCChecklist(checklist: Record<string, boolean>) {
+  const discoverStrengths: string[] = [];
+  const discoverGaps: string[] = [];
+  if (checklist.greeting) discoverStrengths.push("Initiated a friendly, welcoming greeting within 10 seconds/10 feet"); else discoverGaps.push("Initiate friendly, welcoming greeting within 10 seconds/10 feet");
+  if (checklist.nameExchange) discoverStrengths.push("Exchanged names and introduced self"); else discoverGaps.push("Exchange names and introduce self");
+  if (checklist.setupProbe) discoverStrengths.push("Probed customer's setup/environment"); else discoverGaps.push("Probe environment setup/use case");
+  if (checklist.specQuestions) discoverStrengths.push("Asked open-ended lifestyle/spec questions"); else discoverGaps.push("Ask open-ended spec/lifestyle questions");
+  if (checklist.avoidedForbidden) discoverStrengths.push("Avoided forbidden retail words"); else discoverGaps.push("Avoid forbidden vocabulary (e.g., 'warranty', 'deal')");
+
+  const inspireStrengths: string[] = [];
+  const inspireGaps: string[] = [];
+  if (checklist.builtRapport) inspireStrengths.push("Connected personally / built human rapport"); else inspireGaps.push("Connect personally / build human rapport (Family, Occupation, Recreation)");
+  if (checklist.emotionalDriver) inspireStrengths.push("Uncovered customer emotional driver"); else inspireGaps.push("Uncover the emotional driver/purpose behind the purchase");
+  if (checklist.demoProduct) inspireStrengths.push("Demonstrated product/service features"); else inspireGaps.push("Demonstrate product/service features physically or digitally");
+  if (checklist.membershipBenefits) inspireStrengths.push("Shared membership benefits (Plus/Total) during demo"); else inspireGaps.push("Share membership benefits during the product demo");
+
+  const solveStrengths: string[] = [];
+  const solveGaps: string[] = [];
+  if (checklist.membershipPitched) solveStrengths.push("Pitched My Best Buy Plus/Total to support solution"); else solveGaps.push("Pitch My Best Buy Plus/Total to support the complete solution");
+  if (checklist.warrantyAttached) solveStrengths.push("Attached GSP protection / AppleCare+"); else solveGaps.push("Attach GSP protection or AppleCare+");
+  if (checklist.solutionMatched) solveStrengths.push("Matched the complete solution"); else solveGaps.push("Match the complete solution (hardware + services + accessories)");
+
+  const closeStrengths: string[] = [];
+  const closeGaps: string[] = [];
+  if (checklist.creditCardPitched) closeStrengths.push("Pitched Best Buy Credit Card financing/rewards"); else closeGaps.push("Pitch Best Buy Credit Card financing/rewards early");
+  if (checklist.handledObjections) closeStrengths.push("Handled customer objections professionally"); else closeGaps.push("Acknowledge and handle customer objections professionally");
+  if (checklist.surveyRequested) closeStrengths.push("Requested customer feedback via 5-Star Survey"); else closeGaps.push("Request customer feedback via 5-Star Survey");
+  if (checklist.sleeveReceipt) closeStrengths.push("Receipt in sleeve with written advisor name"); else closeGaps.push("Place receipt in sleeve with written advisor name and thank customer");
+
+  const allStrengths = [...discoverStrengths, ...inspireStrengths, ...solveStrengths, ...closeStrengths];
+  const allGaps = [...discoverGaps, ...inspireGaps, ...solveGaps, ...closeGaps];
+
+  let discFocus = 'Solve';
+  if (discoverGaps.length > inspireGaps.length && discoverGaps.length > solveGaps.length && discoverGaps.length > closeGaps.length) {
+    discFocus = 'Discover';
+  } else if (inspireGaps.length > discoverGaps.length && inspireGaps.length > solveGaps.length && inspireGaps.length > closeGaps.length) {
+    discFocus = 'Inspire';
+  } else if (closeGaps.length > discoverGaps.length && closeGaps.length > inspireGaps.length && closeGaps.length > solveGaps.length) {
+    discFocus = 'Close';
+  }
+
+  return { allStrengths, allGaps, discFocus };
+}
+
 export interface UseLiveFloorShadowProps {
   onNavigate?: (view: string) => void;
   preselectedEmployee?: Employee | null;
@@ -20,8 +66,8 @@ export function useLiveFloorShadow({
   const onAddFollowUpTask = useStore(state => state.addFollowUpTask);
   
   const activePeriod = useStore(state => state.activePeriod);
-  const rosterHistory = useStore(state => state.rosterHistory) || {};
-  const _rawroster = rosterHistory[activePeriod] || {};
+  const rosterHistory = useStore(state => state.rosterHistory) || EMPTY_OBJ;
+  const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
   const roster = useMemo(() => 
     (Object.values(_rawroster) as Employee[]).sort((a, b) => a.name.localeCompare(b.name)), 
   [_rawroster]);
@@ -115,46 +161,7 @@ export function useLiveFloorShadow({
     const empName = selectedEmployee ? selectedEmployee.name : 'Advisor';
     
     // Group checklist items for strengths/gaps output
-    const discoverStrengths = [];
-    const discoverGaps = [];
-    if (checklist.greeting) discoverStrengths.push("Initiated a friendly, welcoming greeting within 10 seconds/10 feet"); else discoverGaps.push("Initiate friendly, welcoming greeting within 10 seconds/10 feet");
-    if (checklist.nameExchange) discoverStrengths.push("Exchanged names and introduced self"); else discoverGaps.push("Exchange names and introduce self");
-    if (checklist.setupProbe) discoverStrengths.push("Probed customer's setup/environment"); else discoverGaps.push("Probe environment setup/use case");
-    if (checklist.specQuestions) discoverStrengths.push("Asked open-ended lifestyle/spec questions"); else discoverGaps.push("Ask open-ended spec/lifestyle questions");
-    if (checklist.avoidedForbidden) discoverStrengths.push("Avoided forbidden retail words"); else discoverGaps.push("Avoid forbidden vocabulary (e.g., 'warranty', 'deal')");
-
-    const inspireStrengths = [];
-    const inspireGaps = [];
-    if (checklist.builtRapport) inspireStrengths.push("Connected personally / built human rapport"); else inspireGaps.push("Connect personally / build human rapport (Family, Occupation, Recreation)");
-    if (checklist.emotionalDriver) inspireStrengths.push("Uncovered customer emotional driver"); else inspireGaps.push("Uncover the emotional driver/purpose behind the purchase");
-    if (checklist.demoProduct) inspireStrengths.push("Demonstrated product/service features"); else inspireGaps.push("Demonstrate product/service features physically or digitally");
-    if (checklist.membershipBenefits) inspireStrengths.push("Shared membership benefits (Plus/Total) during demo"); else inspireGaps.push("Share membership benefits during the product demo");
-
-    const solveStrengths = [];
-    const solveGaps = [];
-    if (checklist.membershipPitched) solveStrengths.push("Pitched My Best Buy Plus/Total to support solution"); else solveGaps.push("Pitch My Best Buy Plus/Total to support the complete solution");
-    if (checklist.warrantyAttached) solveStrengths.push("Attached GSP protection / AppleCare+"); else solveGaps.push("Attach GSP protection or AppleCare+");
-    if (checklist.solutionMatched) solveStrengths.push("Matched the complete solution"); else solveGaps.push("Match the complete solution (hardware + services + accessories)");
-
-    const closeStrengths = [];
-    const closeGaps = [];
-    if (checklist.creditCardPitched) closeStrengths.push("Pitched Best Buy Credit Card financing/rewards"); else closeGaps.push("Pitch Best Buy Credit Card financing/rewards early");
-    if (checklist.handledObjections) closeStrengths.push("Handled customer objections professionally"); else closeGaps.push("Acknowledge and handle customer objections professionally");
-    if (checklist.surveyRequested) closeStrengths.push("Requested customer feedback via 5-Star Survey"); else closeGaps.push("Request customer feedback via 5-Star Survey");
-    if (checklist.sleeveReceipt) closeStrengths.push("Receipt in sleeve with written advisor name"); else closeGaps.push("Place receipt in sleeve with written advisor name and thank customer");
-
-    const allStrengths = [...discoverStrengths, ...inspireStrengths, ...solveStrengths, ...closeStrengths];
-    const allGaps = [...discoverGaps, ...inspireGaps, ...solveGaps, ...closeGaps];
-
-    // Determine primary DISC focus
-    let discFocus = 'Solve';
-    if (discoverGaps.length > inspireGaps.length && discoverGaps.length > solveGaps.length && discoverGaps.length > closeGaps.length) {
-      discFocus = 'Discover';
-    } else if (inspireGaps.length > discoverGaps.length && inspireGaps.length > solveGaps.length && inspireGaps.length > closeGaps.length) {
-      discFocus = 'Inspire';
-    } else if (closeGaps.length > discoverGaps.length && closeGaps.length > inspireGaps.length && closeGaps.length > solveGaps.length) {
-      discFocus = 'Close';
-    }
+    const { allStrengths, allGaps, discFocus } = parseDISCChecklist(checklist);
 
     const todayDate = new Date().toLocaleDateString();
 
@@ -192,53 +199,16 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
     try {
       if (playbookSettings?.useGemini && (apiKey?.trim()?.length || 0) > 10) {
         // Assemble checklist details for prompt context
-        const discoverStrengths = [];
-        const discoverGaps = [];
-        if (checklist.greeting) discoverStrengths.push("Initiated a friendly, welcoming greeting within 10 seconds/10 feet"); else discoverGaps.push("Initiate friendly, welcoming greeting within 10 seconds/10 feet");
-        if (checklist.nameExchange) discoverStrengths.push("Exchanged names and introduced self"); else discoverGaps.push("Exchange names and introduce self");
-        if (checklist.setupProbe) discoverStrengths.push("Probed customer's setup/environment"); else discoverGaps.push("Probe environment setup/use case");
-        if (checklist.specQuestions) discoverStrengths.push("Asked open-ended lifestyle/spec questions"); else discoverGaps.push("Ask open-ended spec/lifestyle questions");
-        if (checklist.avoidedForbidden) discoverStrengths.push("Avoided forbidden retail words"); else discoverGaps.push("Avoid forbidden vocabulary (e.g., 'warranty', 'deal')");
+        const { allStrengths, allGaps, discFocus } = parseDISCChecklist(checklist);
 
-        const inspireStrengths = [];
-        const inspireGaps = [];
-        if (checklist.builtRapport) inspireStrengths.push("Connected personally / built human rapport"); else inspireGaps.push("Connect personally / build human rapport (Family, Occupation, Recreation)");
-        if (checklist.emotionalDriver) inspireStrengths.push("Uncovered customer emotional driver"); else inspireGaps.push("Uncover the emotional driver/purpose behind the purchase");
-        if (checklist.demoProduct) inspireStrengths.push("Demonstrated product/service features"); else inspireGaps.push("Demonstrate product/service features physically or digitally");
-        if (checklist.membershipBenefits) inspireStrengths.push("Shared membership benefits (Plus/Total) during demo"); else inspireGaps.push("Share membership benefits during the product demo");
-
-        const solveStrengths = [];
-        const solveGaps = [];
-        if (checklist.membershipPitched) solveStrengths.push("Pitched My Best Buy Plus/Total to support solution"); else solveGaps.push("Pitch My Best Buy Plus/Total to support the complete solution");
-        if (checklist.warrantyAttached) solveStrengths.push("Attached GSP protection / AppleCare+"); else solveGaps.push("Attach GSP protection or AppleCare+");
-        if (checklist.solutionMatched) solveStrengths.push("Matched the complete solution"); else solveGaps.push("Match the complete solution (hardware + services + accessories)");
-
-        const closeStrengths = [];
-        const closeGaps = [];
-        if (checklist.creditCardPitched) closeStrengths.push("Pitched Best Buy Credit Card financing/rewards"); else closeGaps.push("Pitch Best Buy Credit Card financing/rewards early");
-        if (checklist.handledObjections) closeStrengths.push("Handled customer objections professionally"); else closeGaps.push("Acknowledge and handle customer objections professionally");
-        if (checklist.surveyRequested) closeStrengths.push("Requested customer feedback via 5-Star Survey"); else closeGaps.push("Request customer feedback via 5-Star Survey");
-        if (checklist.sleeveReceipt) closeStrengths.push("Receipt in sleeve with written advisor name"); else closeGaps.push("Place receipt in sleeve with written advisor name and thank customer");
-
-        const allGaps = [...discoverGaps, ...inspireGaps, ...solveGaps, ...closeGaps];
-
-        let discFocus = 'Solve';
-        if (discoverGaps.length > inspireGaps.length && discoverGaps.length > solveGaps.length && discoverGaps.length > closeGaps.length) {
-          discFocus = 'Discover';
-        } else if (inspireGaps.length > discoverGaps.length && inspireGaps.length > solveGaps.length && inspireGaps.length > closeGaps.length) {
-          discFocus = 'Inspire';
-        } else if (closeGaps.length > discoverGaps.length && closeGaps.length > inspireGaps.length && closeGaps.length > solveGaps.length) {
-          discFocus = 'Close';
-        }
-
-        const rawObservation = `DISC Behavior Checklist Summary:\n- Checked (Strengths): ${[...discoverStrengths, ...inspireStrengths, ...solveStrengths, ...closeStrengths].join(', ') || 'None'}\n- Unchecked (Gaps): ${allGaps.join(', ') || 'None'}\n- Supervisor Raw Voice Dictation/Notes: ${notes || 'None'}`;
+        const rawObservation = `DISC Behavior Checklist Summary:\n- Checked (Strengths): ${allStrengths.join(', ') || 'None'}\n- Unchecked (Gaps): ${allGaps.join(', ') || 'None'}\n- Supervisor Raw Voice Dictation/Notes: ${notes || 'None'}`;
 
         const aiResponse = await generateCoachingLogGemini(
           apiKey,
           selectedEmployee.name,
           `Floor Shadowing: ${discFocus} Focus`,
           gapDetails || `Needs reinforcement in: ${allGaps.slice(0, 2).join(', ')}`,
-          strengths || [...discoverStrengths, ...inspireStrengths, ...solveStrengths, ...closeStrengths].slice(0, 3).join(', '),
+          strengths || allStrengths.slice(0, 3).join(', '),
           rawObservation,
           playbookSettings,
           discFocus
@@ -257,7 +227,7 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
 
 ---
 ### 🔍 Background & Performance Context
-* **Observed Strengths**: ${aiResponse.strengths || strengths || [...discoverStrengths, ...inspireStrengths, ...solveStrengths, ...closeStrengths].slice(0, 3).join(', ')}
+* **Observed Strengths**: ${aiResponse.strengths || strengths || allStrengths.slice(0, 3).join(', ')}
 * **Performance Gap / Metric Focus**: ${aiResponse.metricGap || gapDetails}
 * **Follow-up Action**: ${followUpAction || 'Verify behaviors on the sales floor.'}
 * **Coaching Date**: ${new Date().toLocaleDateString()}`;

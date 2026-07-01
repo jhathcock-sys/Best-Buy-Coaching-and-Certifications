@@ -5,10 +5,12 @@ import { Employee } from '../types';
 import ZoneCard from '../components/DailyLineupBuilder/ZoneCard';
 import AvailableRosterPanel from '../components/DailyLineupBuilder/AvailableRosterPanel';
 import HuddleBriefingWidget from '../components/DailyLineupBuilder/HuddleBriefingWidget';
+import { Skeleton } from '../components/ui/Skeleton';
 
 const EMPTY_OBJ = {};
 
 export default function DailyLineupBuilder() {
+  const playbookSettings = useStore(state => state.playbookSettings);
   const activePeriod = useStore((state) => state.activePeriod);
   const rosterHistory = useStore((state) => state.rosterHistory) || EMPTY_OBJ;
   const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
@@ -35,7 +37,6 @@ export default function DailyLineupBuilder() {
   const [isSmartAssigning, setIsSmartAssigning] = useState(false);
   const [enforceMinimumCoverage, setEnforceMinimumCoverage] = useState(false);
   const apiKey = useStore((state) => state.apiKey);
-  const playbookSettings = useStore(state => state.playbookSettings);
 
   const handleSmartAssign = async () => {
     if (!apiKey) {
@@ -98,6 +99,14 @@ export default function DailyLineupBuilder() {
     });
   };
 
+  if (!playbookSettings) {
+    return (
+      <div className="p-md">
+        <Skeleton width="100%" height="256px" className="rounded-md" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex-column gap-xl h-full min-h-[600px] animate-fade-in">
       
@@ -119,7 +128,7 @@ export default function DailyLineupBuilder() {
             value={date}
             onChange={(e) => setDate(e.target.value)}
           />
-          <label className="flex-row align-center gap-xs text-sm cursor-pointer" style={{ color: 'var(--text-secondary)' }}>
+          <label className="flex-row align-center gap-xs text-sm cursor-pointer text-secondary">
             <input 
               type="checkbox" 
               checked={enforceMinimumCoverage}
@@ -129,8 +138,7 @@ export default function DailyLineupBuilder() {
           </label>
           <button 
             data-testid="smart-assign-btn"
-            className="btn cursor-pointer flex-row align-center gap-xs text-success border-glass" 
-            style={{ background: 'var(--success-alpha-15)' }}
+            className="btn cursor-pointer flex-row align-center gap-xs text-success border-glass bg-success-alpha" 
             onClick={handleSmartAssign}
             disabled={isSmartAssigning || roster.length === 0}
           >
@@ -143,10 +151,10 @@ export default function DailyLineupBuilder() {
 
       <HuddleBriefingWidget />
 
-      <div className="grid gap-xl" style={{ gridTemplateColumns: '1fr 300px' }}>
+      <div className="grid gap-xl grid-cols-1-300">
         
         {/* Floor Zones Layout */}
-        <div className="grid gap-lg" style={{ gridTemplateColumns: '1fr 1fr', alignContent: 'start' }}>
+        <div className="grid gap-lg grid-cols-2 content-start">
           {zones.map(zone => (
             <ZoneCard 
               key={zone}

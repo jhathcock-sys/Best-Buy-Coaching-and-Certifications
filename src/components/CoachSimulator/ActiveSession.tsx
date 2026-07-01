@@ -103,7 +103,7 @@ export default function ActiveSession({
             </div>
           </div>
 
-          <div className="grid gap-xl" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+          <div className="grid-auto-fit-300 gap-xl">
             <div className="glass-card p-0 flex-column flex-2 h-65vh min-h-500px">
               <div className="p-lg border-b border-glass bg-white-alpha-05">
                 <h4 className="text-md text-secondary m-0">Roleplay Chat</h4>
@@ -240,7 +240,7 @@ export default function ActiveSession({
             <p className="text-secondary mt-sm">Roleplay complete. Here is the feedback on your coaching.</p>
           </div>
           
-          <div className="grid gap-md mb-xl" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))' }}>
+          <div className="grid-auto-fit-250 gap-md mb-xl">
             <div className="p-md bg-success-alpha-10 border border-success-alpha-20 rounded-lg">
               <h4 className="text-success text-sm mb-sm uppercase">Strengths</h4>
               <p className="text-base line-height-normal m-0">{evaluation.strengths || "Good effort."}</p>

@@ -6,6 +6,7 @@ import { useStore } from '../store/useStore';
 import { generateSmartZoning } from '../services/ai/geminiSmartZoning';
 import toast from 'react-hot-toast';
 import { Employee, BreakEntry } from '../types';
+import { Skeleton } from './ui/Skeleton';
 
 const EMPTY_OBJ: any = {};
 const EMPTY_ARR: any[] = [];
@@ -87,11 +88,19 @@ export default function ZoneScheduler({
     }
   };
 
+  if (!playbookSettings) {
+    return (
+      <div className="glass-card p-xl" data-testid="zone-scheduler-container">
+        <Skeleton width="100%" height="256px" className="rounded-md" />
+      </div>
+    );
+  }
+
   return (
     <div className="glass-card p-xl" data-testid="zone-scheduler-container">
-      <div className="flex justify-between items-start mb-xl gap-lg">
+      <div className="flex-between align-start mb-xl gap-lg">
         <div>
-          <h3 className="text-xl mb-sm flex items-center gap-sm text-bby-yellow font-bold">
+          <h3 className="text-xl mb-sm flex-row align-center gap-sm text-bby-yellow font-bold">
             <Users size={20} /> Sales Floor Zone Assignments
           </h3>
           <p className="text-secondary text-sm m-0">
@@ -99,28 +108,28 @@ export default function ZoneScheduler({
           </p>
         </div>
         
-        <div className="flex items-center gap-sm flex-wrap">
+        <div className="flex-row align-center gap-sm flex-wrap">
           <button
             data-testid="auto-deploy-btn"
             onClick={handleAutoDeploy}
             disabled={isDeploying}
-            className={`btn bg-bby-blue/20 text-bby-blue border border-bby-blue py-sm px-md rounded-md text-sm flex items-center gap-xs transition-all shadow-[0_0_10px_rgba(0,70,190,0.3)] mr-md ${isDeploying ? 'cursor-wait opacity-70' : 'cursor-pointer hover:bg-bby-blue hover:text-white'}`}
+            className={`btn bg-bby-blue-alpha-20 text-bby-blue border-bby-blue py-sm px-md rounded-xl text-sm flex-row align-center gap-xs transition-normal shadow-bby-blue-glow mr-md ${isDeploying ? 'cursor-wait opacity-70' : 'cursor-pointer hover:bg-bby-blue hover:text-white'}`}
           >
             <Zap size={16} /> {isDeploying ? 'Optimizing...' : 'Auto-Deploy (AI)'}
           </button>
 
-          <div className="flex gap-xs bg-black/20 p-xs rounded-lg border border-glass">
+          <div className="flex-row gap-xs bg-black-alpha-20 p-xs rounded-xl border-glass">
             <button
               onClick={() => setViewMode('grid')}
               data-testid="view-mode-grid"
-              className={`py-sm px-md rounded-md text-sm flex items-center gap-xs transition-all cursor-pointer border-none ${viewMode === 'grid' ? 'bg-bby-blue text-white shadow-md' : 'bg-transparent text-secondary hover:text-white'}`}
+              className={`py-sm px-md rounded-xl text-sm flex-row align-center gap-xs transition-normal cursor-pointer border-none ${viewMode === 'grid' ? 'bg-bby-blue text-white shadow-none' : 'bg-transparent text-secondary hover:text-white'}`}
             >
               <LayoutGrid size={16} /> Zones
             </button>
             <button
               onClick={() => setViewMode('timeline')}
               data-testid="view-mode-timeline"
-              className={`py-sm px-md rounded-md text-sm flex items-center gap-xs transition-all cursor-pointer border-none ${viewMode === 'timeline' ? 'bg-bby-blue text-white shadow-md' : 'bg-transparent text-secondary hover:text-white'}`}
+              className={`py-sm px-md rounded-xl text-sm flex-row align-center gap-xs transition-normal cursor-pointer border-none ${viewMode === 'timeline' ? 'bg-bby-blue text-white shadow-none' : 'bg-transparent text-secondary hover:text-white'}`}
             >
               <Clock size={16} /> Timeline
             </button>

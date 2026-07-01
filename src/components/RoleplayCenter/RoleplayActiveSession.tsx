@@ -211,11 +211,11 @@ export default function RoleplayActiveSession({
 
             <div className="flex-center-y gap-md">
               {apiKey && apiKey.trim().length > 10 ? (
-                <span className="tag-pill bg-[var(--info-glow)] border-[rgba(6,182,212,0.3)] text-[#67e8f9]">
-                  <Sparkles size={12} fill="#67e8f9" /> Gemini Generative Active
+                <span className="tag-pill bg-cyan-alpha border border-glass text-info-light">
+                  <Sparkles size={12} className="text-info-light" /> Gemini Generative Active
                 </span>
               ) : (
-                <span className="tag-pill bg-[var(--warning-glow)] border-[rgba(245,158,11,0.3)] text-[#fde047]">
+                <span className="tag-pill bg-warning-alpha border border-glass text-warning-light">
                   Sandbox Simulator Active
                 </span>
               )}

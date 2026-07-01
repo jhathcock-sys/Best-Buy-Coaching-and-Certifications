@@ -159,7 +159,7 @@ export default function RentsDueUploader({
               <FileText size={16} /> Copy-Paste Spreadsheet Rows:
             </h3>
             <textarea 
-              className="form-control resize-none text-xs font-mono bg-[rgba(11,15,25,0.4)]"
+              className="form-control resize-none text-xs font-mono bg-obsidian"
               rows={6}
               placeholder="Ricky,649,700,off-track,38000,42000,off-track,7,10,off-track,3,5,off-track..."
               value={textInput}
@@ -188,7 +188,7 @@ export default function RentsDueUploader({
           </div>
 
           {errorMsg && (
-            <div className="col-span-full p-md bg-[rgba(239,68,68,0.08)] border border-[rgba(239,68,68,0.25)] rounded-xl text-xs text-[#fca5a5]">
+            <div className="col-span-full p-md bg-obsidian border border-error rounded-xl text-xs text-error-light">
               {errorMsg}
             </div>
           )}

@@ -2,6 +2,9 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useStore } from '../store/useStore';
 import { Employee } from '../types';
 
+const EMPTY_OBJ: Record<string, any> = {};
+const EMPTY_ARR: Employee[] = [];
+
 export interface VisibleCols {
   hours: boolean;
   dept: boolean;
@@ -19,9 +22,9 @@ export function useStoreRoster() {
   const activePeriod = useStore(state => state.activePeriod);
   const rosterHistory = useStore(state => state.rosterHistory);
 
-  const _rawroster = activePeriod ? ((rosterHistory || {})[activePeriod] || {}) : {};
+  const _rawroster = activePeriod ? ((rosterHistory || EMPTY_OBJ)[activePeriod] || EMPTY_OBJ) : EMPTY_OBJ;
   const roster = useMemo(() => {
-    return (Object.values(_rawroster) as Employee[]).sort((a, b) => a.name.localeCompare(b.name));
+    return (Object.values(_rawroster) as Employee[]).sort((a, b) => (a?.name || '').localeCompare(b?.name || ''));
   }, [_rawroster]);
 
   const [selectedProfileEmployee, setSelectedProfileEmployee] = useState<Employee | null>(null);
@@ -84,7 +87,7 @@ export function useStoreRoster() {
   const DEPARTMENTS = ['All', 'Front End', 'General Sales', 'Appliances', 'Computing', 'Mobile', 'Home Theatre', 'Geek Squad'];
 
   const filteredRoster = useMemo(() => {
-    return (roster || []).filter(emp => {
+    return (roster || EMPTY_ARR).filter(emp => {
       if (!emp) return false;
       const matchesSearch = emp?.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) || false;
       const matchesDept = activeDept === 'All' || emp?.dept === activeDept;

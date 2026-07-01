@@ -49,6 +49,14 @@ export default function FloorLeaderTracker() {
     handleOptimizeBreaks
   } = useFloorLeaderTracker(activeManager, roster, onSaveShift);
 
+  if (!playbookSettings || !rosterHistory) {
+    return (
+      <div className="p-md" data-testid="floor-leader-tracker-page">
+        <div className="skeleton h-64 w-full rounded-md" />
+      </div>
+    );
+  }
+
   return (
     <div data-testid="floor-leader-tracker-page" className="flex-column gap-xl">
       {/* Header Panel */}
@@ -141,15 +149,7 @@ export default function FloorLeaderTracker() {
           activeShift={activeShift}
           roster={roster}
           followUpTasks={followUpTasks}
-          playbookSettings={playbookSettings || {
-            useGemini: true,
-            customSystemPrompt: '',
-            allowedPhrases: [],
-            forbiddenPhrases: [],
-            storePin: '0000',
-            trainingLogs: [],
-            aiMode: 'flash'
-          }}
+          playbookSettings={playbookSettings}
           apiKey={apiKey}
         />
       )}

@@ -5,6 +5,7 @@ import ShadowStep1Employee from '../components/LiveFloorShadow/ShadowStep1Employ
 import ShadowStep2Observation from '../components/LiveFloorShadow/ShadowStep2Observation';
 import ShadowStep3Coaching from '../components/LiveFloorShadow/ShadowStep3Coaching';
 import { useLiveFloorShadow, UseLiveFloorShadowProps } from '../hooks/useLiveFloorShadow';
+import { useStore } from '../store/useStore';
 
 export default function LiveFloorShadow({ 
   onNavigate, 
@@ -33,6 +34,18 @@ export default function LiveFloorShadow({
     preselectedEmployee,
     clearPreselectedEmployee
   });
+
+  const playbookSettings = useStore((state) => state.playbookSettings);
+  const rosterHistory = useStore((state) => state.rosterHistory);
+
+  if (!playbookSettings || !rosterHistory) {
+    return (
+      <div className="p-md" data-testid="live-floor-shadow-page">
+        <div className="skeleton h-64 w-full rounded-md" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex-column gap-2xl h-full min-h-600" data-testid="live-floor-shadow-page">
       

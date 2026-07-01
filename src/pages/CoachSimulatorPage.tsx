@@ -11,6 +11,7 @@ import { useAiCoaching } from '../components/CoachSimulator/useAiCoaching';
 import LogBuilderTab from '../components/CoachSimulator/LogBuilderTab';
 import GrowSimulatorTab from '../components/CoachSimulator/GrowSimulatorTab';
 import ActiveSession from '../components/CoachSimulator/ActiveSession';
+import { SkeletonCard } from '../components/ui/Skeleton';
 
 
 
@@ -78,6 +79,14 @@ export default function CoachSimulator({
   // Initialize Hooks
   const aiCoaching = useAiCoaching(apiKey, playbookSettings, coachingLogs, onLogCoachingSession);
   const audioEngine = useAudioEngine(aiCoaching.messages, setInputVal);
+
+  if (!playbookSettings) {
+    return (
+      <div className="p-xl w-full h-full">
+        <SkeletonCard data-testid="hydration-skeleton" />
+      </div>
+    );
+  }
 
   // Handle preselected coaching from Store Roster
   useEffect(() => {

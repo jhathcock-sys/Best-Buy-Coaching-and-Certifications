@@ -241,13 +241,16 @@ h1, h2, h3, h4, h5, h6 {
 
 .bg-error-alpha { background: var(--error-alpha-15); }
 .bg-warning-alpha { background: var(--warning-glow); }
+.bg-success-alpha { background: var(--success-alpha-15); }
 .bg-success { background: var(--success); }
 .bg-surface { background: var(--bg-card); }
 .bg-black-alpha-20 { background: var(--black-alpha-20); }
+.bg-bby-blue-alpha-20 { background: var(--bby-blue-alpha-20); }
 .bg-white-alpha-02 { background: rgba(255, 255, 255, 0.02); }
 .bg-transparent { background: transparent; }
 
 .border-glass { border: 1px solid var(--border-glass); }
+.border-bby-blue { border-color: var(--bby-blue); }
 .border-none { border: none; }
 .border-transparent { border-color: transparent; }
 .rounded-xl { border-radius: 12px; }
@@ -255,6 +258,7 @@ h1, h2, h3, h4, h5, h6 {
 .shadow-success-glow { box-shadow: 0 0 10px var(--success); }
 .shadow-warning-glow { box-shadow: 0 0 10px var(--warning); }
 .shadow-error-glow { box-shadow: 0 0 10px var(--error); }
+.shadow-bby-blue-glow { box-shadow: 0 0 10px rgba(0, 70, 190, 0.3); }
 .shadow-warning-btn { box-shadow: 0 4px 15px var(--warning-glow); }
 .shadow-none { box-shadow: none; }
 
@@ -2047,6 +2051,7 @@ input[type="checkbox"]:hover {
 
 .grid-cols-2-1 { display: grid; grid-template-columns: 2fr 1fr; }
 .grid-cols-1-3 { display: grid; grid-template-columns: 1fr 3fr; }
+.grid-cols-1-300 { display: grid; grid-template-columns: 1fr 300px; }
 .grid-cols-2 { display: grid; grid-template-columns: repeat(2, 1fr); }
 .grid-cols-4 { display: grid; grid-template-columns: repeat(4, 1fr); }
 .grid-cols-9 { display: grid; grid-template-columns: repeat(9, 1fr); }
@@ -2054,6 +2059,7 @@ input[type="checkbox"]:hover {
 .grid-auto-fit-220 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 .grid-timeline-header { display: grid; grid-template-columns: 150px repeat(9, 1fr); }
 .grid-timeline-row { display: grid; grid-template-columns: 150px 1fr; }
+.content-start { align-content: flex-start; }
 .grid-rows-auto { grid-template-rows: auto; }
 
 .font-black { font-weight: 900; }
@@ -2138,3 +2144,5 @@ input[type="checkbox"]:hover {
 .border-success { border: 1px solid var(--success); }
 .border-muted { border-color: var(--text-muted); }
 .opacity-70 { opacity: 0.7; }
+.grid-auto-fit-300 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.grid-auto-fit-250 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }

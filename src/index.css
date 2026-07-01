@@ -2147,31 +2147,30 @@ input[type="checkbox"]:hover {
 .opacity-70 { opacity: 0.7; }
 .grid-auto-fit-300 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
 .grid-auto-fit-250 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
-/ *   C O M M A N D   C E N T E R   U T I L I T I E S   * /  
- . b g - r a d i a l - h o v e r   {  
-     b a c k g r o u n d - i m a g e :   r a d i a l - g r a d i e n t ( c i r c l e   a t   5 0 %   0 % ,   v a r ( - - b g - c a r d - h o v e r ) ,   t r a n s p a r e n t   7 0 % ) ;  
- }  
- . m i x - b l e n d - d i f f e r e n c e   {  
-     m i x - b l e n d - m o d e :   d i f f e r e n c e ;  
- }  
- . a g e n t - i c o n - q a   {  
-     b a c k g r o u n d - c o l o r :   v a r ( - - e r r o r - a l p h a - 1 5 ) ;  
-     b o r d e r - c o l o r :   v a r ( - - e r r o r ) ;  
- }  
- . a g e n t - i c o n - t e c h _ d e b t   {  
-     b a c k g r o u n d - c o l o r :   v a r ( - - w a r n i n g - a l p h a - 1 5 ) ;  
-     b o r d e r - c o l o r :   v a r ( - - w a r n i n g ) ;  
- }  
- . a g e n t - i c o n - u x   {  
-     b a c k g r o u n d - c o l o r :   v a r ( - - b b y - y e l l o w - a l p h a - 1 5 ) ;  
-     b o r d e r - c o l o r :   v a r ( - - b b y - y e l l o w ) ;  
- }  
- . a g e n t - i c o n - c o d e r   {  
-     b a c k g r o u n d - c o l o r :   v a r ( - - s u c c e s s - a l p h a - 1 5 ) ;  
-     b o r d e r - c o l o r :   v a r ( - - s u c c e s s ) ;  
- }  
- . a g e n t - i c o n - d e f a u l t   {  
-     b a c k g r o u n d - c o l o r :   v a r ( - - b b y - b l u e - a l p h a - 2 0 ) ;  
-     b o r d e r - c o l o r :   v a r ( - - b b y - b l u e ) ;  
- }  
- 
+/* COMMAND CENTER UTILITIES */
+.bg-radial-hover {
+    background-image: radial-gradient(circle at 50% 0%, var(--bg-card-hover), transparent 70%);
+}
+.mix-blend-difference {
+    mix-blend-mode: difference;
+}
+.agent-icon-qa {
+    background-color: var(--error-alpha-15);
+    border-color: var(--error);
+}
+.agent-icon-tech_debt {
+    background-color: var(--warning-alpha-15);
+    border-color: var(--warning);
+}
+.agent-icon-ux {
+    background-color: var(--bby-yellow-alpha-15);
+    border-color: var(--bby-yellow);
+}
+.agent-icon-coder {
+    background-color: var(--success-alpha-15);
+    border-color: var(--success);
+}
+.agent-icon-default {
+    background-color: var(--bby-blue-alpha-20);
+    border-color: var(--bby-blue);
+}

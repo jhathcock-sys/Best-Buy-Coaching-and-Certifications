@@ -129,7 +129,7 @@ export default function AdvisorLogin({ onLoginSuccess, dbConnected }: AdvisorLog
   };
 
   return (
-    <div className="advisor-login-container">
+    <div className="advisor-login-container bg-cover bg-center" style={{ backgroundImage: "url('/assets/premium-bg.png')" }}>
       <div className="text-center">
         <div className="advisor-login-icon-wrapper">
           <Users size={32} color="var(--success-glow)" />

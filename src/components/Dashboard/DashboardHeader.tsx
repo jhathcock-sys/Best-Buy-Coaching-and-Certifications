@@ -1,6 +1,7 @@
 import { Compass } from 'lucide-react';
 import { calculateCVI } from '../../store/cviHelper';
 import { useCalculatedMetrics } from '../../hooks/useCalculatedMetrics';
+import FloorVisionLogo from '../FloorVisionLogo';
 
 import { useMemo } from 'react';
 
@@ -26,8 +27,8 @@ export default function DashboardHeader() {
   return (
     <div className="flex-between flex-wrap gap-md" data-testid="dashboard-header">
       <div>
-        <h1 className="m-0 mb-xs text-3xl font-bold tracking-tight flex-center gap-sm justify-start" data-testid="dashboard-header-title">
-          FloorVision
+        <h1 className="m-0 mb-xs text-3xl flex-center gap-sm justify-start" data-testid="dashboard-header-title">
+          <FloorVisionLogo iconSize={32} />
         </h1>
         <p className="m-0 text-secondary" data-testid="dashboard-header-welcome">Welcome back{activeManager?.name ? `, ${activeManager.name.split(' ')[0]}` : ''}. Here's what's happening on the floor today.</p>
       </div>

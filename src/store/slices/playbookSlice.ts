@@ -74,7 +74,7 @@ export const createPlaybookSlice: StateCreator<StoreState, [], [], PlaybookSlice
           employeeName: session.customerName || 'Unknown',
           customerName: session.customerName || 'Unknown',
           category: session.category || 'Coaching',
-          avatar: session.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+          avatar: session.avatar || '/avatars/victor.png',
           score: session.score || 100,
           date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           notes: session.notes || '',

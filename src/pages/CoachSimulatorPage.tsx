@@ -91,9 +91,9 @@ export default function CoachSimulator({
   // Handle preselected coaching from Store Roster
   useEffect(() => {
     if (preselectedEmployee) {
-      const displayAvatar = preselectedEmployee.dept === 'Computing' ? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150' : 
-                            preselectedEmployee.dept === 'Home Theatre' ? 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150' :
-                            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150';
+      const displayAvatar = preselectedEmployee.dept === 'Computing' ? '/avatars/david.png' : 
+                            preselectedEmployee.dept === 'Home Theatre' ? '/avatars/victor.png' :
+                            '/avatars/jordan.png';
       
       const dynamicScen = {
         id: `roster-${preselectedEmployee.id}`,

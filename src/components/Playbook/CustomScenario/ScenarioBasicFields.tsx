@@ -1,11 +1,11 @@
 import React from 'react';
 
 export const AVATAR_OPTIONS = [
-  { label: 'Sarah (Computing)', url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150' },
-  { label: 'David (Home Theater)', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150' },
-  { label: 'Elena (Geek Squad)', url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150' },
-  { label: 'Victor (General)', url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150' },
-  { label: 'Jordan (Mobile)', url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' }
+  { label: 'Sarah (Computing)', url: '/avatars/sarah.png' },
+  { label: 'David (Home Theater)', url: '/avatars/david.png' },
+  { label: 'Elena (Geek Squad)', url: '/avatars/elena.png' },
+  { label: 'Victor (General)', url: '/avatars/victor.png' },
+  { label: 'Jordan (Mobile)', url: '/avatars/jordan.png' }
 ];
 
 interface Props {

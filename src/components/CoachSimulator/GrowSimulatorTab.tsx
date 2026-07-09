@@ -71,7 +71,7 @@ export default function GrowSimulatorTab({
       title: `Imported: ${name} (${gap})`,
       role: 'Employee',
       name: `${name} (Imported)`,
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+      avatar: '/avatars/victor.png',
       description: `Custom scenario extracted from pasted coaching notes. Focus Area: ${gap}.`,
       metricGap: gap,
       initialGreeting: `Hey Boss. I read your feedback notes about my gap in ${gap}. I want to do better, but I'm really struggling on the floor. Can you help me figure out what I should do?`,

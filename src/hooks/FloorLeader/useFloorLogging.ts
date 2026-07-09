@@ -37,7 +37,7 @@ ${notes || 'No specific observation notes logged.'}`;
       employeeId: emp.id,
       category: 'OCV Observation',
       score: score,
-      avatar: emp.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+      avatar: emp.avatar || '/avatars/victor.png',
       notes: notesText
     });
 

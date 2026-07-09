@@ -261,7 +261,7 @@ ${allGaps.map(g => `  - ${g}`).join('\n') || '  - Maintaining current high perfo
         employeeId: selectedEmployee.id,
         customerName: selectedEmployee.name,
         category: 'Live Shadowing',
-        avatar: selectedEmployee.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+        avatar: selectedEmployee.avatar || '/avatars/victor.png',
         score: Math.round(
           (Object.values(checklist).filter(Boolean).length / Object.keys(checklist).length) * 100
         ),

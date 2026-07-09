@@ -14,7 +14,7 @@ import ScenarioKeywordsFields from './CustomScenario/ScenarioKeywordsFields';
 export default function CustomScenarioForm() {
   const [scenTitle, setScenTitle] = useState('');
   const [scenName, setScenName] = useState('');
-  const [scenAvatar, setScenAvatar] = useState('https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150');
+  const [scenAvatar, setScenAvatar] = useState('/avatars/sarah.png');
   const [scenDesc, setScenDesc] = useState('');
   const [scenCategory, setScenCategory] = useState('Computing');
   const [scenDifficulty, setScenDifficulty] = useState('Medium');

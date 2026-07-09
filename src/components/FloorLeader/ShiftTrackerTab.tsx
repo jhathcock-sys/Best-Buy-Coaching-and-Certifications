@@ -144,7 +144,7 @@ export default function ShiftTrackerTab({ roster = [] }: ShiftTrackerTabProps) {
       return {
         id: emp.id,
         name: emp.name,
-        avatar: emp.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.name)}&background=random&color=fff`,
+        avatar: emp.avatar || '/avatars/elena.png',
         role: emp.dept,
         apps,
         pms,

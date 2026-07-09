@@ -24,7 +24,7 @@ export default function CoachingDetailsModal({
       <div className="modal-content modal-border-bby cursor-auto" onClick={(e) => e.stopPropagation()} data-testid="coaching-history-modal">
         <div className="modal-header">
           <div className="flex-row align-center gap-sm">
-            <img src={session.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'} alt="" className="avatar-sm" />
+            <img src={session.avatar || '/avatars/victor.png'} alt="" className="avatar-sm" />
             <div>
               <h3 className="text-1-15rem text-white font-heading m-0">
                 Coaching Review: {session.employeeName || session.customerName}

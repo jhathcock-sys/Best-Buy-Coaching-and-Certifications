@@ -20,7 +20,7 @@ export default function CoachingSessionCard({ session, index, impact, onSelect, 
       <div>
         <div className="flex-between align-start gap-sm">
           <div className="flex-row align-center gap-sm">
-            <img src={session.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'} alt="" className="avatar-sm border-glass" />
+            <img src={session.avatar || '/avatars/victor.png'} alt="" className="avatar-sm border-glass" />
             <div>
               <h4 className="text-base font-bold text-white m-0">{session.employeeName || session.customerName}</h4>
               <span className={`tag-pill tag-mini ${session.category?.includes('Observation') ? 'tag-obs' : session.category?.includes('Practice') ? 'tag-prac' : 'tag-role'}`}>

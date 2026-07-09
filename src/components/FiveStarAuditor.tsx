@@ -139,7 +139,7 @@ ${auditResult.checkItems ? auditResult.checkItems.map((item, idx) => `${idx + 1}
       employeeId: matchedEmployee ? matchedEmployee.name.toLowerCase().replace(/\s+/g, '-') : `emp-${Date.now()}`,
       category: '5-Star Survey Feedback',
       score: auditResult.rating * 20,
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+      avatar: '/avatars/victor.png',
       notes: notes
     });
 

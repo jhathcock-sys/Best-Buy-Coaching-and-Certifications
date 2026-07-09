@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Shield, Delete } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import FloorVisionLogo from './FloorVisionLogo';
 
 interface LoginProps {
   correctPin?: string;
@@ -66,7 +67,7 @@ export default function Login({ correctPin = '1234', onLoginSuccess, isHydrating
   };
 
   return (
-    <div className="login-container">
+    <div className="login-container bg-cover bg-center" style={{ backgroundImage: "url('/assets/premium-bg.png')" }}>
       {/* Dynamic ambient background glows */}
       <div className="login-glow-blue" />
       <div className="login-glow-yellow" />
@@ -77,8 +78,8 @@ export default function Login({ correctPin = '1234', onLoginSuccess, isHydrating
           <div className={`login-logo ${isSuccess ? 'success' : ''}`}>
             <Shield size={32} color={isSuccess ? 'var(--success)' : 'var(--bby-yellow)'} />
           </div>
-          <h2 className="text-2xl font-bold m-0 mb-xs tracking-tight">
-            {isSuccess ? 'Access Granted' : 'FloorVision Login'}
+          <h2 className="text-2xl font-bold m-0 mb-xs tracking-tight flex-center justify-center gap-sm">
+            {isSuccess ? 'Access Granted' : <><FloorVisionLogo iconSize={24} /> Login</>}
           </h2>
           <p className="text-sm text-secondary m-0 mb-md">
             {isSuccess ? 'Initializing leadership hub...' : 'Enter your store number and passcode PIN'}

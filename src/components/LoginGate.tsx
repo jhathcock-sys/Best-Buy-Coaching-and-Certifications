@@ -4,6 +4,7 @@ import Login from './Login';
 import AdvisorLogin from './AdvisorLogin';
 import { useStore } from '../store/useStore';
 import { Employee } from '../types';
+import FloorVisionLogo from './FloorVisionLogo';
 import './LoginGate.css';
 
 interface LoginGateProps {
@@ -18,12 +19,14 @@ export default function LoginGate({ correctPin = '1234', onLoginSuccess, dbConne
 
   if (isHydrating) {
     return (
-      <div className="login-gate-wrapper">
+      <div className="login-gate-wrapper bg-cover bg-center" style={{ backgroundImage: "url('/assets/premium-bg.png')" }}>
         <div className="login-gate-bg-glow-1" />
         <div className="login-gate-bg-glow-2" />
         <div className="login-gate-card">
           <div className="text-center">
-            <h2 className="text-3xl font-bold m-0 mb-sm tracking-tight">FloorVision Portal</h2>
+            <h2 className="text-3xl font-bold m-0 mb-sm tracking-tight flex-center justify-center gap-sm">
+              <FloorVisionLogo iconSize={32} /> Portal
+            </h2>
             <p className="text-secondary m-0">Select your access level</p>
           </div>
           <div className="flex-column flex-center gap-md p-xl">
@@ -75,13 +78,15 @@ export default function LoginGate({ correctPin = '1234', onLoginSuccess, dbConne
   }
 
   return (
-    <div className="login-gate-wrapper">
+    <div className="login-gate-wrapper bg-cover bg-center" style={{ backgroundImage: "url('/assets/premium-bg.png')" }}>
       <div className="login-gate-bg-glow-1" />
       <div className="login-gate-bg-glow-2" />
 
       <div className="login-gate-card">
         <div className="text-center">
-          <h2 className="text-3xl font-bold m-0 mb-sm tracking-tight">FloorVision Portal</h2>
+          <h2 className="text-3xl font-bold m-0 mb-sm tracking-tight flex-center justify-center gap-sm">
+            <FloorVisionLogo iconSize={32} /> Portal
+          </h2>
           <p className="text-secondary m-0">Select your access level</p>
         </div>
 

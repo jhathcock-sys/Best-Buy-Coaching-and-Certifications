@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
 import { Sparkles } from 'lucide-react';
 import { useStore } from '../../store/useStore';
+import FloorVisionLogo from '../FloorVisionLogo';
 
 interface AdvisorLayoutProps {
   children: React.ReactNode;
@@ -14,10 +15,7 @@ export default function AdvisorLayout({ children }: AdvisorLayoutProps) {
     <div className="flex-column h-full w-full overflow-hidden bg-space text-white" data-testid="advisor-layout">
       <div className="flex-between p-md bg-white-alpha-05 border-b-glass">
         <div className="flex-center gap-sm">
-          <div className="p-sm bg-bby-blue rounded-8">
-            <Sparkles size={18} color="#fff" />
-          </div>
-          <span className="text-xl font-extrabold text-white tracking-tight">FloorVision</span>
+          <FloorVisionLogo iconSize={24} />
         </div>
         <div className="flex-center gap-md">
           {dbConnected ? (

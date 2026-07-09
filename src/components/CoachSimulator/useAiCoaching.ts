@@ -159,7 +159,7 @@ export function useAiCoaching(apiKey, playbookSettings, coachingLogs, onLogCoach
           employeeId: rosterEmpId,
           customerName: cleanName || 'Advisor',
           category: 'Coaching Practice',
-          avatar: selectedEmployee.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+          avatar: selectedEmployee.avatar || '/avatars/victor.png',
           score: evalResult.score,
           notes: evalResult.feedback || 'Completed GROW Coaching practice session.'
         });

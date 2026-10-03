@@ -240,13 +240,15 @@ function getSchemaForType(schemaType) {
           type: SchemaType.OBJECT,
           properties: {
             id: { type: SchemaType.STRING },
-            assignee: { type: SchemaType.STRING },
-            priority: { type: SchemaType.STRING },
-            type: { type: SchemaType.STRING },
-            description: { type: SchemaType.STRING },
-            status: { type: SchemaType.STRING }
+            employeeId: { type: SchemaType.STRING },
+            employeeName: { type: SchemaType.STRING },
+            topic: { type: SchemaType.STRING },
+            actionItem: { type: SchemaType.STRING },
+            category: { type: SchemaType.STRING },
+            dueDate: { type: SchemaType.STRING },
+            completed: { type: SchemaType.BOOLEAN }
           },
-          required: ["id", "assignee", "priority", "type", "description", "status"]
+          required: ["id", "employeeId", "employeeName", "topic", "actionItem", "category", "dueDate", "completed"]
         }
       };
     case 'break_schedule':
@@ -255,12 +257,12 @@ function getSchemaForType(schemaType) {
         items: {
           type: SchemaType.OBJECT,
           properties: {
-            employee: { type: SchemaType.STRING },
-            breakTime: { type: SchemaType.STRING },
-            type: { type: SchemaType.STRING },
-            coverage: { type: SchemaType.STRING }
+            employeeId: { type: SchemaType.STRING },
+            employeeName: { type: SchemaType.STRING },
+            startTime: { type: SchemaType.STRING },
+            duration: { type: SchemaType.NUMBER }
           },
-          required: ["employee", "breakTime", "type", "coverage"]
+          required: ["employeeId", "employeeName", "startTime", "duration"]
         }
       };
     case 'conversational_analytics':
@@ -320,7 +322,7 @@ exports.generateCoaching = functions.https.onCall(async (data, context) => {
     const payload = (data.data || data) || {};
     const { name, gapType, gapDetails, positives, rawObservation, playbookSettings, selectedDiscSteps, apiKey } = payload;
     const aiInstance = getGeminiClient(apiKey);
-    const model = aiInstance.getGenerativeModel({ model: 'gemini-pro-latest' });
+    const model = aiInstance.getGenerativeModel({ model: 'gemini-2.5-pro' });
     
     const stepsText = Array.isArray(selectedDiscSteps) ? selectedDiscSteps.join(', ') : (selectedDiscSteps || 'Solve');
     
@@ -409,7 +411,7 @@ exports.auditDialogue = functions.https.onCall(async (data, context) => {
     const forbiddenPhrases = playbookSettings?.forbiddenPhrases?.join(', ') || 'warranty';
 
     const aiInstance = getGeminiClient(apiKey);
-    const model = aiInstance.getGenerativeModel({ model: 'gemini-pro-latest' });
+    const model = aiInstance.getGenerativeModel({ model: 'gemini-2.5-pro' });
     
     const evaluationPrompt = `
       Evaluate sales roleplay transcript (${scenario?.name || 'Unknown Scenario'}).
@@ -474,7 +476,7 @@ exports.generateAIContent = functions.https.onCall(async (data, context) => {
     }
     
     const aiInstance = getGeminiClient(apiKey);
-    const modelName = isProMode ? 'gemini-pro-latest' : 'gemini-3.5-flash';
+    const modelName = isProMode ? 'gemini-2.5-pro' : 'gemini-2.5-flash';
     
     const modelOptions = { model: modelName };
     if (systemInstruction) {
@@ -550,7 +552,7 @@ exports.auditStoreFloor = functions.https.onCall(async (data, context) => {
     }
 
     const aiInstance = getGeminiClient(); // Use environment API key
-    const model = aiInstance.getGenerativeModel({ model: 'gemini-3.5-flash' });
+    const model = aiInstance.getGenerativeModel({ model: 'gemini-2.5-flash' });
     
     const prompt = `
       You are a strict but fair Best Buy General Manager conducting a visual floor layout audit.

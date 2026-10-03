@@ -38,23 +38,43 @@ export default defineConfig({
     exclude: ['tests/**', '**/node_modules/**']
   },
   build: {
+    target: 'esnext',
+    chunkSizeWarningLimit: 500,
     rollupOptions: {
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('firebase')) {
-              return 'vendor-firebase';
+            if (id.includes('@firebase/firestore') || id.includes('firebase/firestore')) {
+              return 'vendor-firestore';
             }
-            if (id.includes('@google/generative-ai')) {
+            if (id.includes('firebase') || id.includes('@firebase')) {
+              return 'vendor-firebase-core';
+            }
+            if (id.includes('framer-motion') || id.includes('motion-dom') || id.includes('motion-utils')) {
+              return 'vendor-motion';
+            }
+            if (id.includes('@dnd-kit')) {
+              return 'vendor-dnd';
+            }
+            if (id.includes('react-markdown') || id.includes('micromark') || id.includes('dompurify') || id.includes('unist') || id.includes('vfile') || id.includes('mdast') || id.includes('decode-named-character-reference')) {
+              return 'vendor-markdown';
+            }
+            if (id.includes('@google/generative-ai') || id.includes('@google/genai')) {
               return 'vendor-gemini';
             }
             if (id.includes('lucide-react')) {
               return 'vendor-icons';
             }
-            if (id.includes('react/') || id.includes('react-dom/')) {
+            if (id.includes('react/') || id.includes('react-dom/') || id.includes('scheduler')) {
               return 'vendor-react';
             }
-            return 'vendor';
+            if (id.includes('zod')) {
+              return 'vendor-zod';
+            }
+            if (id.includes('papaparse')) {
+              return 'vendor-papaparse';
+            }
+            return 'vendor-misc';
           }
         }
       }

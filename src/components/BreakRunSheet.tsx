@@ -199,14 +199,14 @@ export default function BreakRunSheet({
           
           <div className="flex-column gap-sm overflow-y-auto max-h-350">
             {sortedBreaks.length === 0 ? (
-              <div className="p-xl text-center text-muted text-sm border-1-5-dashed-glass rounded-xl">
+              <div className="p-xl text-center text-muted text-sm border-1-5-dashed-glass rounded-sm">
                 No breaks scheduled yet for today's run sheet.
               </div>
             ) : (
               sortedBreaks.map((b) => (
                 <div 
                   key={b.id} 
-                  className={`flex align-center justify-between p-md rounded-xl ${b.completed ? 'bg-success-alpha-15 border-b-success-alpha-15' : 'bg-white-alpha-01 border-glass'}`}
+                  className={`flex align-center justify-between p-md rounded-sm ${b.completed ? 'bg-success-alpha-15 border-b-success-alpha-15' : 'bg-white-alpha-01 border-glass'}`}
                 >
                   <div className="flex align-center gap-md">
                     <input 

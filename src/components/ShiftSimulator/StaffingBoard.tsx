@@ -40,7 +40,7 @@ export default function StaffingBoard({
           return (
             <div 
               key={zone} 
-              className="p-md bg-white/5 border border-glass rounded-xl flex justify-between items-center flex-wrap gap-md"
+              className="p-md bg-white/5 border border-glass rounded-sm flex justify-between items-center flex-wrap gap-md"
             >
               <div>
                 <span className="text-xs text-muted uppercase font-bold">{zone} Zone</span>

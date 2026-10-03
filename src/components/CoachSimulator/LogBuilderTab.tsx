@@ -234,7 +234,7 @@ Let's crush it! Let me know if you have any questions or need me to jump in and 
       <div className="glass-card flex-column gap-xl">
         
         {/* Template Loaders */}
-        <div className="p-md bg-white-alpha-02 rounded-xl border border-glass">
+        <div className="p-md bg-white-alpha-02 rounded-sm border border-glass">
           <p className="text-sm font-semibold mb-md text-white">Load Standard Templates:</p>
           <div className="flex-row gap-sm flex-wrap">
             <button className="tag-pill cursor-pointer" onClick={() => loadTemplate('memberships')} disabled={isGeneratingLog} data-testid="template-memberships-btn">Membership Gap</button>

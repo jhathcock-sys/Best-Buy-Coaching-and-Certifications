@@ -33,7 +33,7 @@ export default function ZoneCard({ zone, assignments, roster, handleAssign, hand
       
       <div 
         data-testid={`drop-zone-${zone.replace(/\s+/g, '-').toLowerCase()}`}
-        className="flex-column gap-sm p-sm rounded-lg"
+        className="flex-column gap-sm p-sm rounded-sm"
         style={{ minHeight: '100px', background: 'rgba(0,0,0,0.2)' }}
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => {

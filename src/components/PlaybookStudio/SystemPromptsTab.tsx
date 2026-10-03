@@ -105,12 +105,12 @@ export default function SystemPromptsTab() {
             <div className="flex-column gap-xl mt-xl">
               <div className="flex-column gap-lg">
                 {trainingLogs.length === 0 ? (
-                  <div className="text-center p-2xl border border-dashed border-[var(--border-glass)] rounded-xl text-muted text-sm" data-testid="empty-logs-message">
+                  <div className="text-center p-2xl border border-dashed border-[var(--border-glass)] rounded-sm text-muted text-sm" data-testid="empty-logs-message">
                     No custom training logs added. Preloading Best Buy default framework.
                   </div>
                 ) : (
                   trainingLogs.map((log, idx) => (
-                    <div key={idx} className="relative bg-black-alpha-20 border border-[var(--border-glass)] rounded-xl p-md pr-2xl" data-testid={`training-log-row-${idx}`}>
+                    <div key={idx} className="relative bg-black-alpha-20 border border-[var(--border-glass)] rounded-sm p-md pr-2xl" data-testid={`training-log-row-${idx}`}>
                       <button 
                         className="absolute top-md right-md bg-transparent border-none text-error cursor-pointer p-0 hover-text-white transition-normal"
                         onClick={() => handleRemoveTrainingLog(idx)}
@@ -131,7 +131,7 @@ export default function SystemPromptsTab() {
               </div>
 
               {isAddingLog ? (
-                <div className="flex-column gap-md p-lg border border-bby-blue rounded-xl bg-white-alpha-01" data-testid="add-log-form">
+                <div className="flex-column gap-md p-lg border border-bby-blue rounded-sm bg-white-alpha-01" data-testid="add-log-form">
                   <div className="form-group m-0">
                     <label className="form-label text-white" htmlFor="new-log-textarea">Paste Exemplar Coaching Log Text:</label>
                     <textarea 

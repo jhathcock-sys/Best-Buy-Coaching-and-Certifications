@@ -68,7 +68,7 @@ export default function ShadowStep1Employee({
         </div>
 
         {activeEmployee && (
-          <div className="mt-lg p-1-25rem rounded-xl bg-bby-blue-alpha-06 border-bby-blue-alpha-15 flex-column gap-sm" data-testid="shadow-active-employee">
+          <div className="mt-lg p-1-25rem rounded-sm bg-bby-blue-alpha-06 border-bby-blue-alpha-15 flex-column gap-sm" data-testid="shadow-active-employee">
             <div className="flex-between">
               <span className="font-bold text-base text-white">{activeEmployee.name}</span>
               <span className="tag-pill tag-pill-active">{activeEmployee.dept}</span>

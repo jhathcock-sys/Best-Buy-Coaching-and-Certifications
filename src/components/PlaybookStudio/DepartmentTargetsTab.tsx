@@ -65,14 +65,14 @@ export default function DepartmentTargetsTab() {
               </select>
             </div>
 
-            <div className="flex-column gap-md bg-white-alpha-01 border border-[var(--border-glass)] p-md rounded-xl">
+            <div className="flex-column gap-md bg-white-alpha-01 border border-[var(--border-glass)] p-md rounded-sm">
               <span className="text-xs text-muted uppercase font-bold tracking-wider">
                 Editing targets for {selectedDept}
               </span>
               
               <div className="flex-column gap-md mt-xs">
                 
-                <div className="p-sm bg-white-alpha-01 border border-[var(--border-glass)] rounded-lg">
+                <div className="p-sm bg-white-alpha-01 border border-[var(--border-glass)] rounded-sm">
                   <label className="form-label text-xs text-white block mb-sm">
                     Memberships (Plus/Total) Evaluation
                   </label>
@@ -101,7 +101,7 @@ export default function DepartmentTargetsTab() {
                   </div>
                 </div>
 
-                <div className="p-sm bg-white-alpha-01 border border-[var(--border-glass)] rounded-lg">
+                <div className="p-sm bg-white-alpha-01 border border-[var(--border-glass)] rounded-sm">
                   <label className="form-label text-xs text-white block mb-sm">
                     BBY Credit Cards (Apps) Evaluation
                   </label>
@@ -169,7 +169,7 @@ export default function DepartmentTargetsTab() {
               </div>
 
               {(selectedDept === 'Computers' || selectedDept === 'Home Theater') && (
-                <div className="grid grid-cols-2 gap-sm p-sm bg-white-alpha-01 border border-[var(--border-glass)] rounded-lg">
+                <div className="grid grid-cols-2 gap-sm p-sm bg-white-alpha-01 border border-[var(--border-glass)] rounded-sm">
                   <div className="form-group m-0">
                     <label className="form-label text-xs">Basket size Goal ($):</label>
                     <input 

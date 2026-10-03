@@ -52,7 +52,7 @@ export default function RosterDisplaySettings({
         </label>
       </div>
 
-      <div className="flex flex-wrap gap-y-3 gap-x-5 p-3 bg-black/15 rounded-lg border border-white/5">
+      <div className="flex flex-wrap gap-y-3 gap-x-5 p-3 bg-black/15 rounded-sm border border-white/5">
         {(Object.keys(visibleCols || {}) as Array<keyof VisibleCols>).map(col => {
           const label = 
             col === 'hours' ? 'Hours' :

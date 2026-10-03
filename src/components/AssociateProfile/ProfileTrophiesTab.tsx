@@ -85,14 +85,14 @@ export default function ProfileTrophiesTab({ employee, associateLogs }: ProfileT
         </h4>
         
         {trophies.length === 0 ? (
-          <div className="p-xl text-center bg-black-alpha-20 rounded-xl" data-testid="empty-trophies">
+          <div className="p-xl text-center bg-black-alpha-20 rounded-sm" data-testid="empty-trophies">
             <Award size={48} className="mb-md text-white opacity-20" />
             <p className="text-secondary m-0">No trophies earned yet. Start crushing goals on the floor or in the AI Arena!</p>
           </div>
         ) : (
           <div className="target-grid" data-testid="trophies-grid">
             {trophies.map((trophy: Trophy, idx: number) => (
-              <div key={`${trophy.type}-${idx}`} className="bg-white-alpha-05 border-glass-strong rounded-xl p-lg flex-column align-center text-center gap-md hover-lift cursor-default" data-testid={`trophy-item-${idx}`}>
+              <div key={`${trophy.type}-${idx}`} className="bg-white-alpha-05 border-glass-strong rounded-sm p-lg flex-column align-center text-center gap-md hover-lift cursor-default" data-testid={`trophy-item-${idx}`}>
                 <div className="trophy-icon-wrapper flex-center">
                   {getIcon(trophy.icon)}
                 </div>
@@ -125,7 +125,7 @@ export default function ProfileTrophiesTab({ employee, associateLogs }: ProfileT
         </div>
 
         {generatedPlan && (
-          <div className="bg-bby-blue-alpha-10 border-glass rounded-xl p-lg mb-lg" data-testid="generated-plan-container">
+          <div className="bg-bby-blue-alpha-10 border-glass rounded-sm p-lg mb-lg" data-testid="generated-plan-container">
             <div className="flex-between align-start mb-md">
               <div className="flex-row align-center gap-sm">
                 <Sparkles size={18} className="text-bby-blue" />
@@ -146,14 +146,14 @@ export default function ProfileTrophiesTab({ employee, associateLogs }: ProfileT
         )}
 
         {!generatedPlan && actionPlans.length === 0 ? (
-          <div className="p-md bg-success-alpha-15 rounded-lg flex-row align-center gap-sm" data-testid="empty-action-plans">
+          <div className="p-md bg-success-alpha-15 rounded-sm flex-row align-center gap-sm" data-testid="empty-action-plans">
             <CheckCircle size={20} color="var(--success)" />
             <span className="text-success font-semibold">No active performance improvement plans. Associate is in good standing.</span>
           </div>
         ) : !generatedPlan && (
           <div className="flex-column gap-xl" data-testid="action-plans-list">
             {actionPlans.map((plan: ActionPlan, idx: number) => (
-              <div key={`${plan.type}-${idx}`} className="bg-black-alpha-20 border-glass rounded-xl p-lg" data-testid={`action-plan-item-${idx}`}>
+              <div key={`${plan.type}-${idx}`} className="bg-black-alpha-20 border-glass rounded-sm p-lg" data-testid={`action-plan-item-${idx}`}>
                 <div className="flex-between align-start mb-sm">
                   <div className="flex-row align-center gap-sm">
                     <FileText size={16} color="var(--error)" />

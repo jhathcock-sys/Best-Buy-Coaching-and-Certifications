@@ -149,11 +149,11 @@ export default function ShiftTrackerHourlyRow({
       <td className="p-md text-center">
         <div className="inline-flex align-center gap-xs">
           {onTrack ? (
-            <span className="px-md py-xs bg-success-alpha-15 border border-success text-success rounded-xl text-xs font-bold inline-flex align-center gap-xs shadow-success-glow" data-testid={`status-on-track-${idx}`}>
+            <span className="px-md py-xs bg-success-alpha-15 border border-success text-success rounded-sm text-xs font-bold inline-flex align-center gap-xs shadow-success-glow" data-testid={`status-on-track-${idx}`}>
               <CheckCircle2 size={12} /> ON TRACK
             </span>
           ) : (
-            <span className="px-md py-xs bg-error-alpha border border-error text-error rounded-xl text-xs font-bold inline-flex align-center gap-xs" data-testid={`status-off-track-${idx}`}>
+            <span className="px-md py-xs bg-error-alpha border border-error text-error rounded-sm text-xs font-bold inline-flex align-center gap-xs" data-testid={`status-off-track-${idx}`}>
               <XCircle size={12} /> OFF TRACK
             </span>
           )}

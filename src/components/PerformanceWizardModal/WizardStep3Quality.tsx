@@ -173,7 +173,7 @@ export default function WizardStep3Quality({
         </div>
 
         {/* AI Auto-Analyze Gap Box */}
-        <div className="bg-yellow-500/5 border border-yellow-500/20 p-4 rounded-xl flex-column gap-sm mt-sm">
+        <div className="bg-yellow-500/5 border border-yellow-500/20 p-4 rounded-sm flex-column gap-sm mt-sm">
           <div className="flex-between items-center">
             <h4 className="m-0 text-sm text-[var(--bby-yellow)] flex-center justify-start gap-xs">
               <Wand2 size={16} /> AI Opportunity Analyzer

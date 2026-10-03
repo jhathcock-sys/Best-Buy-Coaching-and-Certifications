@@ -92,7 +92,7 @@ export default function SyncDiagnosticsTab() {
             </p>
           </div>
 
-          <div className="alert-card-danger p-md rounded-xl text-sm leading-relaxed text-error">
+          <div className="alert-card-danger p-md rounded-sm text-sm leading-relaxed text-error">
             <strong>🔒 Security & Production Guidelines:</strong>
             <ul className="mt-xs p-md">
               <li><strong>Domain Restrictions:</strong> In the Google Cloud Console (under Credentials), restrict your Firebase API Key to accept HTTP referrers only from your authorized hosting domain (e.g. <code>bbycoaching.web.app</code>).</li>
@@ -123,26 +123,26 @@ export default function SyncDiagnosticsTab() {
           </p>
 
           <div className="metrics-grid mb-lg">
-            <div className="p-md border-glass rounded-xl bg-white-alpha-10">
+            <div className="p-md border-glass rounded-sm bg-white-alpha-10">
               <div className="text-sm text-secondary">Persistence Status</div>
               <div className="text-xl font-bold text-success mt-xs flex-center justify-start gap-xs">
                 <span className="rounded-full bg-success w-2 h-2"></span>
                 IndexedDB Active
               </div>
             </div>
-            <div className="p-md border-glass rounded-xl bg-white-alpha-10">
+            <div className="p-md border-glass rounded-sm bg-white-alpha-10">
               <div className="text-sm text-secondary">Roster Periods Cache</div>
               <div className="text-xl font-bold text-white mt-xs">
                 {Object.keys(rosterHistory).length} Documents
               </div>
             </div>
-            <div className="p-md border-glass rounded-xl bg-white-alpha-10">
+            <div className="p-md border-glass rounded-sm bg-white-alpha-10">
               <div className="text-sm text-secondary">Coaching Logs Cache</div>
               <div className="text-xl font-bold text-white mt-xs">
                 {coachingLogs.length} Documents
               </div>
             </div>
-            <div className="p-md border-glass rounded-xl bg-white-alpha-10">
+            <div className="p-md border-glass rounded-sm bg-white-alpha-10">
               <div className="text-sm text-secondary">Commitments & Shifts</div>
               <div className="text-xl font-bold text-white mt-xs">
                 {followUpTasks.length} Commitments / {floorLeaderShifts.length} Shifts
@@ -161,7 +161,7 @@ export default function SyncDiagnosticsTab() {
 
           {diagnosticsLogs.length > 0 && (
             <div 
-              className="p-md rounded-xl flex-column gap-sm overflow-y-auto bg-black-alpha-20 border-glass text-sm text-secondary"
+              className="p-md rounded-sm flex-column gap-sm overflow-y-auto bg-black-alpha-20 border-glass text-sm text-secondary"
               data-testid="diagnostics-log-output"
             >
               {diagnosticsLogs.map((log, idx) => (

@@ -12,7 +12,7 @@ export default function ProfileCommitmentsTab({
   return (
     <div className="flex-column gap-md animate-fade-in" data-testid="profile-commitments-tab">
       {!associateTasks || associateTasks.length === 0 ? (
-        <div className="text-center p-xl bg-white-alpha-05 rounded-xl border-glass" data-testid="no-tasks-state">
+        <div className="text-center p-xl bg-white-alpha-05 rounded-sm border-glass" data-testid="no-tasks-state">
           <CheckCircle size={24} color="var(--text-muted)" className="mb-sm" />
           <p className="text-sm text-muted m-0">
             No pending shadowing commitments scheduled for this associate.
@@ -24,7 +24,7 @@ export default function ProfileCommitmentsTab({
             <div 
               key={task.id || task.action}
               data-testid="commitment-task-item"
-              className={`p-md rounded-xl flex-between align-center gap-md border-glass ${task.completed ? 'bg-success-alpha-15' : 'bg-white-alpha-05'}`}
+              className={`p-md rounded-sm flex-between align-center gap-md border-glass ${task.completed ? 'bg-success-alpha-15' : 'bg-white-alpha-05'}`}
             >
               <div className="flex-column gap-xs">
                 <span className={`text-sm text-white font-bold ${task.completed ? 'line-through opacity-60' : ''}`}>

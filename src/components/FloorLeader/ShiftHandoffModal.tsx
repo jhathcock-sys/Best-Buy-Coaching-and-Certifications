@@ -99,7 +99,7 @@ export default function ShiftHandoffModal({
           <X className="w-5 h-5" />
         </button>
 
-        <div className="p-6 border-b border-[--border-glass] flex items-center gap-3">
+        <div className="p-4 border-b border-[--border-glass] flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-[--bby-blue]/10 flex-center text-[--bby-blue]">
             <FileText className="w-5 h-5" />
           </div>
@@ -109,23 +109,23 @@ export default function ShiftHandoffModal({
           </div>
         </div>
 
-        <div className="p-6 flex-1 overflow-y-auto flex flex-col gap-4">
+        <div className="p-4 flex-1 overflow-y-auto flex flex-col gap-4">
           {error && (
-            <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+            <div className="p-4 rounded-sm bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
               {error}
             </div>
           )}
           
           <div className="flex-1 min-h-[300px] flex flex-col relative">
             {isGenerating ? (
-              <div className="absolute inset-0 flex-center flex-col gap-4 text-gray-400 z-10 bg-[--bg-space]/50 rounded-lg">
+              <div className="absolute inset-0 flex-center flex-col gap-4 text-gray-400 z-10 bg-[--bg-space]/50 rounded-sm">
                 <Loader2 className="w-8 h-8 animate-spin text-[--bby-blue]" />
                 <p className="text-sm">Analyzing shift data & writing briefing...</p>
               </div>
             ) : null}
             
             <textarea
-              className="w-full flex-1 min-h-[300px] p-4 rounded-lg bg-[--bg-space] border border-[--border-glass] text-white text-sm focus:outline-none focus:border-[--bby-blue] transition-colors resize-none placeholder:text-gray-500"
+              className="w-full flex-1 min-h-[300px] p-4 rounded-sm bg-[--bg-space] border border-[--border-glass] text-white text-sm focus:outline-none focus:border-[--bby-blue] transition-colors resize-none placeholder:text-gray-500"
               value={briefing}
               onChange={(e) => setBriefing(e.target.value)}
               placeholder="Your generated shift handoff briefing will appear here..."
@@ -134,11 +134,11 @@ export default function ShiftHandoffModal({
           </div>
         </div>
 
-        <div className="p-6 border-t border-[--border-glass] bg-[--bg-space]/30 flex items-center justify-between gap-4">
+        <div className="p-4 border-t border-[--border-glass] bg-[--bg-space]/30 flex items-center justify-between gap-4">
           <button
             onClick={handleCopy}
             disabled={!briefing || isGenerating}
-            className="px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2 text-white bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed border border-[--border-glass]"
+            className="px-4 py-2 rounded-sm font-medium text-sm transition-all flex items-center gap-2 text-white bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed border border-[--border-glass]"
           >
             {copied ? (
               <>

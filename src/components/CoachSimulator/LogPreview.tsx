@@ -42,7 +42,7 @@ export default function LogPreview({
       </div>
 
       {isGeneratingLog ? (
-        <div data-testid="log-loading-skeleton" className="flex-column gap-xl p-xl bg-obsidian-alpha border border-glass rounded-xl justify-center min-h-[400px]">
+        <div data-testid="log-loading-skeleton" className="flex-column gap-xl p-xl bg-obsidian-alpha border border-glass rounded-sm justify-center min-h-[400px]">
           {/* Pulsing skeleton bars */}
           <div className="skeleton-pulse rounded-md h-[24px] w-[60%] bg-white-alpha-10"></div>
           <div className="skeleton-pulse rounded-sm mt-sm h-[14px] w-[90%] bg-white-alpha-05"></div>
@@ -59,7 +59,7 @@ export default function LogPreview({
       ) : (
         <div className="flex-column flex-1">
           
-          <div className="flex-row mb-md p-xs bg-white-alpha-02 rounded-lg border border-glass">
+          <div className="flex-row mb-md p-xs bg-white-alpha-02 rounded-sm border border-glass">
             <button 
               className={`btn ${outputViewMode === 'grow' ? 'btn-primary' : 'btn-secondary'} flex-1 p-sm text-sm no-shadow cursor-pointer`}
               onClick={() => setOutputViewMode('grow')}
@@ -76,7 +76,7 @@ export default function LogPreview({
             </button>
           </div>
 
-          <div className="markdown-body p-xl bg-obsidian-alpha border border-glass rounded-xl text-sm leading-relaxed whitespace-pre-wrap flex-1 min-h-[400px]" style={{
+          <div className="markdown-body p-xl bg-obsidian-alpha border border-glass rounded-sm text-sm leading-relaxed whitespace-pre-wrap flex-1 min-h-[400px]" style={{
             fontFamily: outputViewMode === 'grow' ? 'monospace' : 'inherit'
           }}>
             <ReactMarkdown>{safeText}</ReactMarkdown>

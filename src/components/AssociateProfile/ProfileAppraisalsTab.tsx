@@ -81,7 +81,7 @@ export default function ProfileAppraisalsTab({
                   </div>
                 )}
                 {generatedReview && !isGeneratingReview && (
-                  <div className="bg-black-alpha-20 p-lg rounded-xl border-glass" data-testid="generated-review-content">
+                  <div className="bg-black-alpha-20 p-lg rounded-sm border-glass" data-testid="generated-review-content">
                     {renderMarkdown(generatedReview)}
                   </div>
                 )}

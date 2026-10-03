@@ -163,7 +163,7 @@ export default function CoachSimulator({
 
         {/* Tab Switcher */}
         {!aiCoaching.sessionActive && (
-          <div className="flex-row gap-xs bg-white-alpha-02 p-xs rounded-xl border-glass">
+          <div className="flex-row gap-xs bg-white-alpha-02 p-xs rounded-sm border-glass">
             <button 
               data-testid="tab-sim-btn"
               className={`btn btn-sm shadow-none cursor-pointer ${activeTab === 'sim' ? 'btn-primary' : 'btn-secondary'}`}

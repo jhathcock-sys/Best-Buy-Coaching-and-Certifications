@@ -80,7 +80,7 @@ export default function RoleplayConfiguration({
             ))}
             
             {(!allScenarios || allScenarios.length === 0) && (
-              <div className="col-span-full p-xl text-center text-secondary border border-dashed border-white-alpha-10 rounded-xl">
+              <div className="col-span-full p-xl text-center text-secondary border border-dashed border-white-alpha-10 rounded-sm">
                 No scenarios available. Add some in Playbook Studio.
               </div>
             )}

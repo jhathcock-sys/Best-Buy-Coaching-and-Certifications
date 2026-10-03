@@ -84,7 +84,7 @@ export default function ImportScheduleModal({ isOpen, onClose, onImportConfirm }
         <div className="p-xxl max-h-65vh overflow-y-auto">
           
           {errorMsg && (
-            <div className="bg-error-alpha-08 border-error-alpha-25 p-md rounded-xl text-error flex-row gap-sm mb-lg text-sm">
+            <div className="bg-error-alpha-08 border-error-alpha-25 p-md rounded-sm text-error flex-row gap-sm mb-lg text-sm">
               <AlertCircle size={18} className="flex-shrink-0" />
               <div>{errorMsg}</div>
             </div>

@@ -176,13 +176,13 @@ export default function RentsDueLedger({
           </div>
 
           {syncSuccess && (
-            <div className="p-md bg-success-glow border border-success rounded-xl text-sm text-success-light flex-center-y gap-xs" data-testid="sync-success-message">
+            <div className="p-md bg-success-glow border border-success rounded-sm text-sm text-success-light flex-center-y gap-xs" data-testid="sync-success-message">
               <CheckCircle2 size={16} /> Roster ledger values updated. All performance evaluations and sparklines will reflect these parsed values immediately.
             </div>
           )}
 
           {successToast && (
-            <div className="p-md rounded-xl text-sm text-white flex-center-y gap-xs animate-fade-in bg-bby-blue border border-bby-blue" data-testid="ai-success-message">
+            <div className="p-md rounded-sm text-sm text-white flex-center-y gap-xs animate-fade-in bg-bby-blue border border-bby-blue" data-testid="ai-success-message">
               <CheckCircle2 size={16} /> {successToast}
             </div>
           )}

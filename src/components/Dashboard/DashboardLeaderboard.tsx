@@ -38,7 +38,7 @@ export default function DashboardLeaderboard({
           </p>
         </div>
         <select 
-          className="bby-select p-sm border-glass text-primary text-sm bg-white-alpha-05 rounded-lg"
+          className="bby-select p-sm border-glass text-primary text-sm bg-white-alpha-05 rounded-sm"
           value={rankMetric}
           onChange={(e) => setRankMetric(e.target.value)}
           data-testid="rank-metric-select"
@@ -106,7 +106,7 @@ export default function DashboardLeaderboard({
           );
         })}
         {leaderboardData.length === 0 && (
-          <div className="p-xl flex-center text-secondary border-glass rounded-xl bg-white-alpha-05">
+          <div className="p-xl flex-center text-secondary border-glass rounded-sm bg-white-alpha-05">
             No active roster data available for this metric.
           </div>
         )}

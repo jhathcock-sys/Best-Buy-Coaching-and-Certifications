@@ -111,7 +111,7 @@ export default function ActiveSession({
               
               <div className="chat-container flex-1 p-xl overflow-y-auto flex-column gap-lg" data-testid="chat-history">
                 {(messages || []).map((msg, i) => (
-                  <div key={i} className={`p-lg rounded-2xl max-w-75 shadow-lg ${
+                  <div key={i} className={`p-lg rounded-md max-w-75 shadow-sm ${
                     msg.sender === 'coach' 
                       ? 'align-self-end bg-bby-blue rounded-br-sm' 
                       : 'align-self-start bg-white-alpha-10 rounded-bl-sm'
@@ -120,7 +120,7 @@ export default function ActiveSession({
                   </div>
                 ))}
                 {isThinking && (messages || [])[(messages || []).length - 1]?.sender === 'coach' && (
-                  <div className="align-self-start bg-white-alpha-05 p-lg rounded-2xl rounded-bl-sm">
+                  <div className="align-self-start bg-white-alpha-05 p-lg rounded-md rounded-bl-sm">
                     <div className="skeleton-pulse h-3 w-120px bg-white-alpha-20 rounded-full" />
                   </div>
                 )}
@@ -159,7 +159,7 @@ export default function ActiveSession({
                         data-testid="chat-input-field"
                       />
                       <button 
-                        className="btn btn-primary btn-icon w-48px h-48px rounded-xl cursor-pointer" 
+                        className="btn btn-primary btn-icon w-48px h-48px rounded-sm cursor-pointer" 
                         onClick={() => handleSend(inputVal, isVoiceMode, null)}
                         disabled={isThinking || !inputVal.trim()}
                         data-testid="btn-send-message"
@@ -213,14 +213,14 @@ export default function ActiveSession({
                 </div>
                 
                 {playbookSettings?.useGemini ? (
-                  <div className="mt-xl p-md bg-success-alpha-10 rounded-lg border border-success-alpha-20" data-testid="ai-progress-status-active">
+                  <div className="mt-xl p-md bg-success-alpha-10 rounded-sm border border-success-alpha-20" data-testid="ai-progress-status-active">
                     <h5 className="text-success m-0 text-sm flex align-center gap-sm">
                       <Check size={14} /> AI Progress Tracking Active
                     </h5>
                     <p className="text-xs mt-xs text-secondary m-0">Gemini is analyzing your conversation and advancing the GROW steps automatically.</p>
                   </div>
                 ) : (
-                  <div className="mt-xl p-md bg-white-alpha-05 rounded-lg border border-glass" data-testid="ai-progress-status-offline">
+                  <div className="mt-xl p-md bg-white-alpha-05 rounded-sm border border-glass" data-testid="ai-progress-status-offline">
                     <h5 className="m-0 text-sm flex align-center gap-sm text-secondary">
                       Offline Mode Active
                     </h5>
@@ -241,18 +241,18 @@ export default function ActiveSession({
           </div>
           
           <div className="grid-auto-fit-250 gap-md mb-xl">
-            <div className="p-md bg-success-alpha-10 border border-success-alpha-20 rounded-lg">
+            <div className="p-md bg-success-alpha-10 border border-success-alpha-20 rounded-sm">
               <h4 className="text-success text-sm mb-sm uppercase">Strengths</h4>
               <p className="text-base line-height-normal m-0">{evaluation.strengths || "Good effort."}</p>
             </div>
             
-            <div className="p-md bg-error-alpha-10 border border-error-alpha-20 rounded-lg">
+            <div className="p-md bg-error-alpha-10 border border-error-alpha-20 rounded-sm">
               <h4 className="text-error text-sm mb-sm uppercase">Opportunities</h4>
               <p className="text-base line-height-normal m-0">{evaluation.opportunities || "Focus on the GROW model."}</p>
             </div>
           </div>
           
-          <div className="p-xl bg-white-alpha-05 border border-glass rounded-lg mb-xl">
+          <div className="p-xl bg-white-alpha-05 border border-glass rounded-sm mb-xl">
             <h4 className="text-base mb-sm text-bby-blue m-0">Summary Feedback</h4>
             <p className="text-base line-height-normal m-0 mt-sm">{evaluation.feedback}</p>
           </div>

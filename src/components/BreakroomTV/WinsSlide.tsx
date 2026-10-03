@@ -25,7 +25,7 @@ export default function WinsSlide({ recentWins }: WinsSlideProps) {
         {recentWins.map((win, idx) => (
           <div 
             key={win.id || idx} 
-            className="flex-row align-center justify-start bg-white-alpha-05 border-glass rounded-2xl p-xl gap-xl opacity-0 animate-slide-in-right" 
+            className="flex-row align-center justify-start bg-white-alpha-05 border-glass rounded-md p-xl gap-xl opacity-0 animate-slide-in-right" 
             style={{ animationDelay: `${0.4 + idx * 0.2}s`, animationFillMode: 'forwards' }}
             data-testid={`win-item-${win.id || idx}`}
           >

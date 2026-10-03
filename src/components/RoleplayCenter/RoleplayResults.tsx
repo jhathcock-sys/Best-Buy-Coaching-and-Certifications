@@ -180,17 +180,17 @@ export default function RoleplayResults({
               <h3 className="text-lg">Best Buy Human-Centric Values</h3>
               
               <div className="flex gap-md flex-wrap">
-                <div className="flex-1 p-md bg-[#0046be]/5 border border-[#0046be]/15 rounded-xl text-center">
+                <div className="flex-1 p-md bg-[#0046be]/5 border border-[#0046be]/15 rounded-sm text-center">
                   <div className="text-2xl font-extrabold text-white font-heading">{evaluation.values?.beHuman || 0}</div>
                   <div className="text-xs text-secondary font-semibold mt-1">Be Human</div>
                 </div>
-                <div className="flex-1 p-md bg-[#ffe600]/5 border border-[#ffe600]/15 rounded-xl text-center">
+                <div className="flex-1 p-md bg-[#ffe600]/5 border border-[#ffe600]/15 rounded-sm text-center">
                   <div className="text-2xl font-extrabold text-white font-heading">{evaluation.values?.makeItEasy || 0}</div>
                   <div className="text-xs text-secondary font-semibold mt-1">Make it Easy</div>
                 </div>
               </div>
               
-              <div className="p-md bg-[#10b981]/5 border border-[#10b981]/15 rounded-xl text-center">
+              <div className="p-md bg-[#10b981]/5 border border-[#10b981]/15 rounded-sm text-center">
                 <div className="text-2xl font-extrabold text-white font-heading">{evaluation.values?.showWhatPossible || 0}</div>
                 <div className="text-xs text-secondary font-semibold mt-1">Show What's Possible</div>
               </div>

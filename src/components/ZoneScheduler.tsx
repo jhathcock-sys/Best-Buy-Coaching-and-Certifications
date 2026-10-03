@@ -113,23 +113,23 @@ export default function ZoneScheduler({
             data-testid="auto-deploy-btn"
             onClick={handleAutoDeploy}
             disabled={isDeploying}
-            className={`btn bg-bby-blue-alpha-20 text-bby-blue border-bby-blue py-sm px-md rounded-xl text-sm flex-row align-center gap-xs transition-normal shadow-bby-blue-glow mr-md ${isDeploying ? 'cursor-wait opacity-70' : 'cursor-pointer hover:bg-bby-blue hover:text-white'}`}
+            className={`btn bg-bby-blue-alpha-20 text-bby-blue border-bby-blue py-sm px-md rounded-sm text-sm flex-row align-center gap-xs transition-normal shadow-bby-blue-glow mr-md ${isDeploying ? 'cursor-wait opacity-70' : 'cursor-pointer hover:bg-bby-blue hover:text-white'}`}
           >
             <Zap size={16} /> {isDeploying ? 'Optimizing...' : 'Auto-Deploy (AI)'}
           </button>
 
-          <div className="flex-row gap-xs bg-black-alpha-20 p-xs rounded-xl border-glass">
+          <div className="flex-row gap-xs bg-black-alpha-20 p-xs rounded-sm border-glass">
             <button
               onClick={() => setViewMode('grid')}
               data-testid="view-mode-grid"
-              className={`py-sm px-md rounded-xl text-sm flex-row align-center gap-xs transition-normal cursor-pointer border-none ${viewMode === 'grid' ? 'bg-bby-blue text-white shadow-none' : 'bg-transparent text-secondary hover:text-white'}`}
+              className={`py-sm px-md rounded-sm text-sm flex-row align-center gap-xs transition-normal cursor-pointer border-none ${viewMode === 'grid' ? 'bg-bby-blue text-white shadow-none' : 'bg-transparent text-secondary hover:text-white'}`}
             >
               <LayoutGrid size={16} /> Zones
             </button>
             <button
               onClick={() => setViewMode('timeline')}
               data-testid="view-mode-timeline"
-              className={`py-sm px-md rounded-xl text-sm flex-row align-center gap-xs transition-normal cursor-pointer border-none ${viewMode === 'timeline' ? 'bg-bby-blue text-white shadow-none' : 'bg-transparent text-secondary hover:text-white'}`}
+              className={`py-sm px-md rounded-sm text-sm flex-row align-center gap-xs transition-normal cursor-pointer border-none ${viewMode === 'timeline' ? 'bg-bby-blue text-white shadow-none' : 'bg-transparent text-secondary hover:text-white'}`}
             >
               <Clock size={16} /> Timeline
             </button>

@@ -47,7 +47,7 @@ export default function ImportWizardStep1({
         // Screenshot Import View
         <div className="flex-column gap-xl">
           <div 
-            className="border-2-dashed-glass rounded-2xl p-3rem-2rem text-center bg-white-alpha-01 cursor-pointer transition-all hover-bg-white-alpha-05"
+            className="border-2-dashed-glass rounded-md p-3rem-2rem text-center bg-white-alpha-01 cursor-pointer transition-all hover-bg-white-alpha-05"
             onClick={() => !isProcessing && fileInputRef.current?.click()}
             data-testid="image-dropzone"
           >
@@ -87,7 +87,7 @@ export default function ImportWizardStep1({
         // CSV Import View
         <div className="flex-column gap-xl">
           <div 
-            className="border-2-dashed-glass rounded-2xl p-3rem-2rem text-center bg-white-alpha-01 cursor-pointer transition-all hover-bg-white-alpha-05"
+            className="border-2-dashed-glass rounded-md p-3rem-2rem text-center bg-white-alpha-01 cursor-pointer transition-all hover-bg-white-alpha-05"
             onClick={() => !isProcessing && fileInputRef.current?.click()}
             data-testid="csv-dropzone"
           >

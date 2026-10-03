@@ -90,7 +90,7 @@ export default function SupervisorProfilesCard() {
           return (
             <div 
               key={idx} 
-              className="flex-column gap-sm bg-white-alpha-01 border border-[var(--border-glass)] p-md rounded-xl transition-normal"
+              className="flex-column gap-sm bg-white-alpha-01 border border-[var(--border-glass)] p-md rounded-sm transition-normal"
               data-testid={`manager-row-${idx}`}
             >
               {isEditing ? (
@@ -168,7 +168,7 @@ export default function SupervisorProfilesCard() {
                   </div>
                   <div className="flex gap-sm">
                     <button 
-                      className="btn btn-secondary p-sm rounded-lg cursor-pointer" 
+                      className="btn btn-secondary p-sm rounded-sm cursor-pointer" 
                       onClick={() => startEditingManager(idx, mgr)}
                       title="Edit Supervisor"
                       data-testid={`edit-mgr-btn-${idx}`}
@@ -176,7 +176,7 @@ export default function SupervisorProfilesCard() {
                       <Edit2 size={14} />
                     </button>
                     <button 
-                      className="btn btn-secondary p-sm rounded-lg text-error cursor-pointer hover-bg-error hover-text-white transition-normal" 
+                      className="btn btn-secondary p-sm rounded-sm text-error cursor-pointer hover-bg-error hover-text-white transition-normal" 
                       onClick={() => handleDeleteManager(idx)}
                       title="Delete Supervisor"
                       data-testid={`delete-mgr-btn-${idx}`}

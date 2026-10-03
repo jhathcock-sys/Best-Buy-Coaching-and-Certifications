@@ -75,7 +75,7 @@ export default function ProfileTrendsTab({
       </div>
 
       {/* SVG Sparkline Comparative Section */}
-      <div className="p-lg rounded-xl bg-white-alpha-05 border-glass" data-testid="sparklines-section">
+      <div className="p-lg rounded-sm bg-white-alpha-05 border-glass" data-testid="sparklines-section">
         <h4 className="text-sm text-white font-heading m-0 mb-md">
           Metrics Trend Timeline (Across Active Periods)
         </h4>

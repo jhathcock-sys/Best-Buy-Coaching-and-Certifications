@@ -40,7 +40,7 @@ export default function ImportWizardStep2({
         </button>
       </div>
 
-      <div className="overflow-x-auto border-glass rounded-xl bg-black-alpha-20">
+      <div className="overflow-x-auto border-glass rounded-sm bg-black-alpha-20">
         <table className="w-full border-collapse text-xs text-left">
           <thead>
             <tr className="bg-obsidian-alpha-90 border-b-glass text-secondary">

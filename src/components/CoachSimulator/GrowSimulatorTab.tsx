@@ -109,7 +109,7 @@ export default function GrowSimulatorTab({
           {(allEmployees || []).map(employee => (
             <div 
               key={employee.id} 
-              className="p-xl bg-white-alpha-02 border border-glass rounded-2xl flex-column gap-md"
+              className="p-xl bg-white-alpha-02 border border-glass rounded-md flex-column gap-md"
               data-testid={`employee-scenario-card-${employee.id}`}
             >
               <div className="flex-row gap-md align-center">

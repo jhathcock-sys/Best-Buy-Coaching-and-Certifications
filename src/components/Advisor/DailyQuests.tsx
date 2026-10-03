@@ -45,7 +45,7 @@ export default function DailyQuests({ employee }: DailyQuestsProps) {
       </h2>
       <div className="flex-column gap-md">
         {dailyQuests.map((quest, idx) => (
-          <div key={idx} className={`flex-between align-center bg-white-alpha-02 p-md rounded-xl ${quest.completed ? 'border-success opacity-70' : 'border-glass'}`} data-testid="quest-item">
+          <div key={idx} className={`flex-between align-center bg-white-alpha-02 p-md rounded-sm ${quest.completed ? 'border-success opacity-70' : 'border-glass'}`} data-testid="quest-item">
             <div className="flex-center gap-md">
               <div className={`w-6 h-6 rounded-full flex-center ${quest.completed ? 'bg-success' : 'border-2 border-muted'}`} data-testid={quest.completed ? 'quest-status-completed' : 'quest-status-incomplete'}>
                 {quest.completed && <CheckCircle size={16} color="#fff" />}

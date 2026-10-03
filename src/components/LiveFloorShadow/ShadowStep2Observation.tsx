@@ -114,7 +114,7 @@ export default function ShadowStep2Observation({
         <div className="grid-cols-2 gap-lg">
           
           {/* Discover Section */}
-          <div className="bg-white-alpha-01 border-glass rounded-xl p-1-25rem">
+          <div className="bg-white-alpha-01 border-glass rounded-sm p-1-25rem">
             <h4 className="text-base text-bby-blue border-b-bby-blue-alpha-15 pb-sm mb-md m-0">
               Discover
             </h4>
@@ -143,7 +143,7 @@ export default function ShadowStep2Observation({
           </div>
 
           {/* Inspire Section */}
-          <div className="bg-white-alpha-01 border-glass rounded-xl p-1-25rem">
+          <div className="bg-white-alpha-01 border-glass rounded-sm p-1-25rem">
             <h4 className="text-base text-info border-b-cyan-alpha-15 pb-sm mb-md m-0">
               Inspire
             </h4>
@@ -168,7 +168,7 @@ export default function ShadowStep2Observation({
           </div>
 
           {/* Solve Section */}
-          <div className="bg-white-alpha-01 border-glass rounded-xl p-1-25rem">
+          <div className="bg-white-alpha-01 border-glass rounded-sm p-1-25rem">
             <h4 className="text-base text-success border-b-success-alpha-15 pb-sm mb-md m-0">
               Solve
             </h4>
@@ -189,7 +189,7 @@ export default function ShadowStep2Observation({
           </div>
 
           {/* Close Section */}
-          <div className="bg-white-alpha-01 border-glass rounded-xl p-1-25rem">
+          <div className="bg-white-alpha-01 border-glass rounded-sm p-1-25rem">
             <h4 className="text-base text-warning border-b-warning-alpha-15 pb-sm mb-md m-0">
               Close
             </h4>

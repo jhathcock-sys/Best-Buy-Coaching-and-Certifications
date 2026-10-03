@@ -13,7 +13,7 @@ export default function AiGenerator({
   aiPrompt, setAiPrompt, isGenerating, handleAiGenerate, aiError
 }: AiGeneratorProps) {
   return (
-    <div className="bg-yellow-500/5 border border-yellow-500/20 p-md rounded-xl flex-column gap-sm">
+    <div className="bg-yellow-500/5 border border-yellow-500/20 p-md rounded-sm flex-column gap-sm">
       <h4 className="m-0 text-sm text-[var(--bby-yellow)] flex-center justify-start gap-xs">
         <Wand2 size={16} /> Auto-Generate with AI
       </h4>

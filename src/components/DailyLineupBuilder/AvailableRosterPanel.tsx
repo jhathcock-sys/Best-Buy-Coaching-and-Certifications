@@ -45,7 +45,7 @@ export default function AvailableRosterPanel({
               data-testid={`available-emp-${emp.id}`}
               draggable
               onDragStart={(e) => e.dataTransfer.setData('text/plain', emp.id)}
-              className="p-sm rounded-lg cursor-pointer border-glass"
+              className="p-sm rounded-sm cursor-pointer border-glass"
               style={{ background: 'rgba(255,255,255,0.03)' }}
             >
               <div className="font-semibold text-white text-0-9rem mb-xxs">{emp.name}</div>

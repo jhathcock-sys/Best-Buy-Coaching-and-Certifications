@@ -79,7 +79,7 @@ export default function AgentCommLink() {
                   <span className="text-[10px] text-glass-40 font-mono">{msg.timestamp}</span>
                 </div>
                 <div 
-                  className={`p-sm rounded-lg text-sm ${
+                  className={`p-sm rounded-sm text-sm ${
                     msg.type === 'VETO' ? 'bg-error-alpha-10 border border-error text-error' :
                     msg.type === 'AGREE' ? 'bg-success-alpha-10 border border-success text-success' :
                     msg.agent === 'orchestrator' ? 'bg-bby-blue-alpha-20 border border-active text-white' :

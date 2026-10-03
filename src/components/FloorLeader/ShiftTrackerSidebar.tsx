@@ -69,7 +69,7 @@ export default function ShiftTrackerSidebar({
             return (
               <div 
                 key={emp.id} 
-                className={`flex-between align-center border rounded-lg px-md py-sm ${bgClass}`}
+                className={`flex-between align-center border rounded-sm px-md py-sm ${bgClass}`}
                 data-testid={`leaderboard-row-${emp.id}`}
               >
                 <div className="flex align-center gap-md">
@@ -121,7 +121,7 @@ export default function ShiftTrackerSidebar({
             [...activeShift.wins].reverse().map((win: any) => (
               <div 
                 key={win.id} 
-                className="flex-between align-center bg-black-alpha-15 border border-glass rounded-lg py-sm px-md text-sm"
+                className="flex-between align-center bg-black-alpha-15 border border-glass rounded-sm py-sm px-md text-sm"
                 data-testid={`win-entry-${win.id}`}
               >
                 <div className="flex-column gap-xs flex-1 pr-md">

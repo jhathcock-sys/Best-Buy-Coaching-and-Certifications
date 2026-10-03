@@ -40,7 +40,7 @@ export default function FloorAuditUploader({ selectedImage, isAuditing, onImageS
       </div>
 
       {selectedImage ? (
-        <div className="relative w-full min-h-200 flex-center overflow-hidden rounded-xl bg-black-alpha-20 border-glass-dashed">
+        <div className="relative w-full min-h-200 flex-center overflow-hidden rounded-sm bg-black-alpha-20 border-glass-dashed">
           {selectedImage.startsWith('data:image/png;base64,iVBORw0K') ? (
             <div className="p-xl text-center flex-column align-center gap-sm">
               <Camera size={38} color="var(--bby-yellow)" />
@@ -60,7 +60,7 @@ export default function FloorAuditUploader({ selectedImage, isAuditing, onImageS
         </div>
       ) : (
         <div className="flex-column gap-md">
-          <label className="flex-column align-center justify-center p-xl rounded-xl border-glass-dashed bg-white-alpha-01 transition-normal cursor-pointer hover-border-primary">
+          <label className="flex-column align-center justify-center p-xl rounded-sm border-glass-dashed bg-white-alpha-01 transition-normal cursor-pointer hover-border-primary">
             <Camera size={44} className="text-muted mb-md" />
             <span className="font-bold text-white mb-xs text-sm">Select Store Photo</span>
             <span className="text-secondary text-xs">PNG, JPG or WebP images</span>

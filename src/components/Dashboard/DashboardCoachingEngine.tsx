@@ -132,7 +132,7 @@ export default function DashboardCoachingEngine({
         <h3 className="m-0 flex-center gap-sm text-xl">
           <TrendingUp size={20} color="var(--error)" /> Daily Coaching Priorities
         </h3>
-        <span className="text-error font-bold flex-center gap-sm p-sm rounded-xl uppercase tracking-wide text-sm alert-card-danger">
+        <span className="text-error font-bold flex-center gap-sm p-sm rounded-sm uppercase tracking-wide text-sm alert-card-danger">
           <span className="bg-error rounded-full w-1.5 h-1.5"></span>
           Priority Engine Active
         </span>
@@ -150,7 +150,7 @@ export default function DashboardCoachingEngine({
             <div 
               key={employee.id || idx} 
               data-testid="coaching-recommendation-card"
-              className={`flex-column gap-md p-md rounded-xl transition-normal ${focus5 ? 'alert-card-danger' : 'bg-surface border-glass'} animate-fade-in`}
+              className={`flex-column gap-md p-md rounded-sm transition-normal ${focus5 ? 'alert-card-danger' : 'bg-surface border-glass'} animate-fade-in`}
             >
               <div className="flex-between flex-wrap gap-sm">
                 <span className="font-bold text-lg">

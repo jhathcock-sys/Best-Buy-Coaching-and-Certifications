@@ -55,7 +55,7 @@ export default function AiEngineTab() {
 
           <div className="flex-column gap-lg">
             
-            <div className="flex-column gap-md p-lg bg-white-alpha-02 border-glass rounded-xl border border-solid">
+            <div className="flex-column gap-md p-lg bg-white-alpha-02 border-glass rounded-sm border border-solid">
               <label className="flex-start gap-md cursor-pointer">
                 <input 
                   type="radio" 
@@ -74,7 +74,7 @@ export default function AiEngineTab() {
               </label>
             </div>
 
-            <div className="flex-column gap-md p-lg bg-white-alpha-02 border-glass rounded-xl border border-solid">
+            <div className="flex-column gap-md p-lg bg-white-alpha-02 border-glass rounded-sm border border-solid">
               <label className="flex-start gap-md cursor-pointer">
                 <input 
                   type="radio" 
@@ -95,7 +95,7 @@ export default function AiEngineTab() {
               </label>
             </div>
 
-            <div className="flex-column gap-md p-lg bg-white-alpha-02 border-glass rounded-xl border border-solid">
+            <div className="flex-column gap-md p-lg bg-white-alpha-02 border-glass rounded-sm border border-solid">
               <label className="flex-start gap-md cursor-pointer">
                 <input 
                   type="radio" 

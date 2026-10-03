@@ -113,7 +113,7 @@ export default function PerformanceWizardModal({
         <div className="modal-body flex-column gap-xl max-h-[80vh] overflow-y-auto">
           
           {/* Wizard Step Progress Indicator */}
-          <div className="flex-row align-center p-md justify-between bg-bby-blue/10 border border-[var(--border-glass)] rounded-xl mb-sm">
+          <div className="flex-row align-center p-md justify-between bg-bby-blue/10 border border-[var(--border-glass)] rounded-sm mb-sm">
             <div className={`flex-row align-center gap-sm ${currentEditStep === 1 ? 'opacity-100' : 'opacity-50'}`}>
               <span className={`flex-center text-xs font-bold text-white w-5 h-5 rounded-full ${currentEditStep === 1 ? 'bg-bby-blue' : 'bg-white/10'}`}>1</span>
               <span className="text-xs font-semibold">Profile</span>

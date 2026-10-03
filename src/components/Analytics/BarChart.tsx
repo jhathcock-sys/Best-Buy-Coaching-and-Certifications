@@ -18,7 +18,7 @@ export function BarChart({ config }: Props) {
   const maxValue = Math.max(1, ...dataPoints.map(d => d.value));
 
   return (
-    <div className="border-glass rounded-xl p-lg bg-black-alpha-20 w-full" data-testid="bar-chart-container">
+    <div className="border-glass rounded-sm p-lg bg-black-alpha-20 w-full" data-testid="bar-chart-container">
       <div className="mb-xl flex-column gap-sm">
         <h3 className="text-2xl font-bold text-white m-0" data-testid="bar-chart-title">{title}</h3>
         <p className="text-secondary text-lg m-0" data-testid="bar-chart-summary">{narrativeSummary}</p>

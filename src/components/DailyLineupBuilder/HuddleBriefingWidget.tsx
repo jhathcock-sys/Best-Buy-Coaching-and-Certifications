@@ -61,7 +61,7 @@ export default function HuddleBriefingWidget() {
       </div>
       
       {error && (
-        <div data-testid="huddle-error" className="alert-card-danger p-sm text-sm rounded-xl">
+        <div data-testid="huddle-error" className="alert-card-danger p-sm text-sm rounded-sm">
           {error}
         </div>
       )}
@@ -69,7 +69,7 @@ export default function HuddleBriefingWidget() {
       {script && !loading && (
         <div 
           data-testid="huddle-script-output"
-          className="p-md text-secondary rounded-xl border-glass"
+          className="p-md text-secondary rounded-sm border-glass"
           style={{ 
             background: 'var(--bg-obsidian)',
             whiteSpace: 'pre-wrap',

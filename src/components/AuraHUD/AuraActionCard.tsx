@@ -18,7 +18,7 @@ export default function AuraActionCard({ employee, insight, isScanning, onCoachE
   const showSkeleton = isScanning && !insight;
 
   return (
-    <div className={`glass-card rounded-xl p-md aura-card border-glass ${statusClass}`} data-testid={`aura-card-${employee.id}`}>
+    <div className={`glass-card rounded-sm p-md aura-card border-glass ${statusClass}`} data-testid={`aura-card-${employee.id}`}>
       
       <div className="flex-row justify-between align-center mb-md">
         <div>

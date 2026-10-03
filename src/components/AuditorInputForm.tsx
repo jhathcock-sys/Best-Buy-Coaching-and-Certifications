@@ -49,7 +49,7 @@ export default function AuditorInputForm({
       </div>
 
       {selectedImage ? (
-        <div className="relative w-full min-h-200 bg-black-alpha-20 border-glass-dashed rounded-xl flex-center overflow-hidden">
+        <div className="relative w-full min-h-200 bg-black-alpha-20 border-glass-dashed rounded-sm flex-center overflow-hidden">
           {selectedImage.startsWith('data:image/png;base64,iVBORw0K') ? (
             <div className="p-xl text-center flex-column align-center gap-md">
               <Camera size={38} color="var(--bby-yellow)" />
@@ -74,7 +74,7 @@ export default function AuditorInputForm({
       ) : (
         <div className="flex-column gap-md">
           <label 
-            className="cursor-pointer flex-column align-center justify-center border-glass-dashed rounded-xl p-xxl bg-white-alpha-01 hover-border-primary transition-normal commitment-card-hover"
+            className="cursor-pointer flex-column align-center justify-center border-glass-dashed rounded-sm p-xxl bg-white-alpha-01 hover-border-primary transition-normal commitment-card-hover"
             data-testid="image-upload-label"
           >
             <Upload size={38} color="var(--text-muted)" className="mb-md" />

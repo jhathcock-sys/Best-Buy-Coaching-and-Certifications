@@ -113,7 +113,7 @@ export default function OcvObservationForm({
         </div>
 
         {/* Checkbox Benchmarks */}
-        <div className="flex-column gap-sm bg-black-alpha-15 p-md rounded-lg border-glass">
+        <div className="flex-column gap-sm bg-black-alpha-15 p-md rounded-sm border-glass">
           <label className="flex-center gap-sm cursor-pointer text-xs text-white justify-start">
             <input 
               type="checkbox" 

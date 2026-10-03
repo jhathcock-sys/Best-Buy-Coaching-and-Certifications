@@ -19,7 +19,7 @@ export default function FloorLeaderHeader({ activeShift, activeSummary }: FloorL
             
             {/* Active Leader Details */}
             <div className="glass-card flex-center gap-md p-1-25rem justify-start">
-              <div className="p-md-sm rounded-xl bg-bby-blue-alpha-08 border-bby-blue-alpha-20">
+              <div className="p-md-sm rounded-sm bg-bby-blue-alpha-08 border-bby-blue-alpha-20">
                 <Clock size={24} color="var(--bby-blue)" />
               </div>
               <div>

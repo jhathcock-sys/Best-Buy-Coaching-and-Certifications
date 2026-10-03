@@ -29,14 +29,14 @@ export default function CustomScenariosTab() {
 
             <div className="flex-column gap-md">
               {scenariosToRender.length === 0 ? (
-                <div className="text-center p-3xl border-2 border-dashed border-[var(--border-glass)] rounded-2xl text-muted text-sm">
+                <div className="text-center p-3xl border-2 border-dashed border-[var(--border-glass)] rounded-md text-muted text-sm">
                   No custom roleplay scenarios added yet. Use the form on the left to configure your first one!
                 </div>
               ) : (
                 scenariosToRender.map((scen: CustomScenario) => (
                   <div 
                     key={scen.id}
-                    className="flex-between items-center p-md bg-white/5 border border-[var(--border-glass)] rounded-xl"
+                    className="flex-between items-center p-md bg-white/5 border border-[var(--border-glass)] rounded-sm"
                     data-testid={`custom-scenario-item-${scen.id}`}
                   >
                     <div className="flex-center justify-start gap-md">

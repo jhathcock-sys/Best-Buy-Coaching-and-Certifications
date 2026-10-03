@@ -66,7 +66,7 @@ export default function AssociateProfileHeader({
               <span 
                 data-testid="profile-header-cvi-badge"
                 title="Coaching Velocity Index (Month over Month growth velocity)"
-                className={`text-xxs font-bold flex-row align-center gap-xs rounded-lg p-xs ${badgeClasses}`}
+                className={`text-xxs font-bold flex-row align-center gap-xs rounded-sm p-xs ${badgeClasses}`}
               >
                 {cviIcon} CVI: {cvi}
               </span>

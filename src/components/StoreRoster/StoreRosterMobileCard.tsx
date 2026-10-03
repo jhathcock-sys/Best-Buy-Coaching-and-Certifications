@@ -47,7 +47,7 @@ const renderMobileMetricBadge = (
   const pace = (type === 'memberships' || type === 'creditCards') ? getPaceText(val, type, dept, emp, deptGoals) : '';
   
   return (
-    <div className={`flex-column flex-center text-center rounded-xl p-xs min-h-[62px] border ${pillClass}`}>
+    <div className={`flex-column flex-center text-center rounded-sm p-xs min-h-[62px] border ${pillClass}`}>
       <span className="text-[0.6rem] text-muted uppercase font-bold">{label}</span>
       <span className="text-sm font-bold mt-xs">
         {displayValue}
@@ -103,7 +103,7 @@ export default function StoreRosterMobileCard({
           const cardBorderLeftClass = isExceeding ? 'border-l-4 border-l-success' : emp.focus5 ? 'border-l-4 border-l-error' : 'border-l-4 border-l-transparent';
           
           return (
-            <div key={emp.id} className={`flex-column gap-sm p-md rounded-xl border border-glass mb-md shadow-lg ${cardBgClass} ${cardBorderLeftClass}`} data-testid={`mobile-card-emp-${emp.id}`}>
+            <div key={emp.id} className={`flex-column gap-sm p-md rounded-sm border border-glass mb-md shadow-sm ${cardBgClass} ${cardBorderLeftClass}`} data-testid={`mobile-card-emp-${emp.id}`}>
               
               {/* Header: Name, CVI, ID, Status */}
               <div className="flex-between align-start">
@@ -168,7 +168,7 @@ export default function StoreRosterMobileCard({
               </div>
 
               {/* Metrics Grid */}
-              <div className="grid grid-cols-[repeat(auto-fit,minmax(80px,1fr))] gap-sm bg-black-alpha-15 p-sm rounded-xl border border-white-05">
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(80px,1fr))] gap-sm bg-black-alpha-15 p-sm rounded-sm border border-white-05">
                 {renderMobileMetricBadge(emp.memberships, 'memberships', emp.dept || '', emp, 'PMs', emp.memberships || 0, deptGoals)}
                 {renderMobileMetricBadge(emp.creditCards, 'creditCards', emp.dept || '', emp, 'Apps', emp.creditCards || 0, deptGoals)}
                 {renderMobileMetricBadge(emp.warranty, 'warranty', emp.dept || '', emp, 'GSP', '%', deptGoals)}
@@ -179,7 +179,7 @@ export default function StoreRosterMobileCard({
                 ) : emp.dept === 'Home Theatre' ? (
                   renderMobileMetricBadge(emp.audio, 'audio', emp.dept, emp, 'Audio', '%', deptGoals)
                 ) : (
-                  <div className="flex-column flex-center text-center bg-white-alpha-05 border border-white-10 rounded-xl p-xs">
+                  <div className="flex-column flex-center text-center bg-white-alpha-05 border border-white-10 rounded-sm p-xs">
                     <span className="text-[0.65rem] text-muted uppercase font-bold">Pace</span>
                     <span className="text-[0.85rem] font-bold mt-xs text-white">
                       {emp.dept?.substring(0, 4) || 'Unk'}

@@ -52,7 +52,7 @@ export default function AdvisorDashboard({ employee, onNavigate }: AdvisorDashbo
         <div>
           <h1 className="flex-center gap-md text-2-5rem font-extrabold m-0 mb-sm justify-start">
             Welcome back, {employee.name.split(' ')[0]}!
-            <span className="flex-center gap-sm text-base bg-bby-yellow text-black px-md py-xs rounded-xl font-black">
+            <span className="flex-center gap-sm text-base bg-bby-yellow text-black px-md py-xs rounded-sm font-black">
               <Star size={16} /> Level {currentLevel}
             </span>
           </h1>

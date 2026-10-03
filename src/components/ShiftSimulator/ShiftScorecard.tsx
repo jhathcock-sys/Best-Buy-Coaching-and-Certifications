@@ -29,7 +29,7 @@ export default function ShiftScorecard({ scorecard }: ShiftScorecardProps) {
 
       {/* Grid Metrics */}
       <div className="grid grid-cols-2 gap-sm">
-        <div className="p-sm bg-white/5 border border-glass rounded-lg text-center flex flex-col items-center justify-center">
+        <div className="p-sm bg-white/5 border border-glass rounded-sm text-center flex flex-col items-center justify-center">
           <span className="text-[0.65rem] text-secondary uppercase block mb-xs">Estimated Revenue</span>
           <span className="text-lg font-extrabold text-success" data-testid="scorecard-revenue">
             ${(scorecard?.revenue ?? 0).toLocaleString()}
@@ -37,7 +37,7 @@ export default function ShiftScorecard({ scorecard }: ShiftScorecardProps) {
           <span className="text-[0.65rem] text-muted block mt-xs">Goal: ${(scorecard?.revenueGoal ?? 0).toLocaleString()}</span>
         </div>
         
-        <div className="p-sm bg-white/5 border border-glass rounded-lg text-center flex flex-col items-center justify-center">
+        <div className="p-sm bg-white/5 border border-glass rounded-sm text-center flex flex-col items-center justify-center">
           <span className="text-[0.65rem] text-secondary uppercase block mb-xs">CSAT Survey Rating</span>
           <span className="text-lg font-extrabold text-bby-yellow flex items-center justify-center gap-1" data-testid="scorecard-csat">
             {scorecard?.csat ?? 0} <Star size={14} fill="var(--bby-yellow)" color="var(--bby-yellow)" />
@@ -45,14 +45,14 @@ export default function ShiftScorecard({ scorecard }: ShiftScorecardProps) {
           <span className="text-[0.65rem] text-muted block mt-xs">Target: 4.8★</span>
         </div>
         
-        <div className="p-sm bg-white/5 border border-glass rounded-lg text-center flex flex-col items-center justify-center">
+        <div className="p-sm bg-white/5 border border-glass rounded-sm text-center flex flex-col items-center justify-center">
           <span className="text-[0.65rem] text-secondary uppercase block mb-xs">Paid Memberships</span>
           <span className="text-lg font-extrabold text-white" data-testid="scorecard-memberships">
             {scorecard?.memberships ?? 0}
           </span>
         </div>
         
-        <div className="p-sm bg-white/5 border border-glass rounded-lg text-center flex flex-col items-center justify-center">
+        <div className="p-sm bg-white/5 border border-glass rounded-sm text-center flex flex-col items-center justify-center">
           <span className="text-[0.65rem] text-secondary uppercase block mb-xs">Best Buy Cards</span>
           <span className="text-lg font-extrabold text-white" data-testid="scorecard-cards">
             {scorecard?.creditCards ?? 0}
@@ -61,7 +61,7 @@ export default function ShiftScorecard({ scorecard }: ShiftScorecardProps) {
       </div>
 
       {/* Placement Review Text */}
-      <div className="py-sm px-md bg-white/5 border border-glass rounded-lg text-sm text-secondary leading-relaxed mt-xs" data-testid="scorecard-review">
+      <div className="py-sm px-md bg-white/5 border border-glass rounded-sm text-sm text-secondary leading-relaxed mt-xs" data-testid="scorecard-review">
         <strong className="text-white">GM Placement Audit:</strong> {scorecard?.placementReview || 'No review generated.'}
       </div>
     </div>

@@ -45,7 +45,7 @@ export default function ProfileCoachingTab({
     <>
             <div className="flex-column gap-md animate-fade-in" data-testid="profile-coaching-tab">
               {!associateLogs || associateLogs.length === 0 ? (
-                <div className="text-center p-xl bg-white-alpha-05 rounded-xl border-glass">
+                <div className="text-center p-xl bg-white-alpha-05 rounded-sm border-glass">
                   <AlertCircle size={24} color="var(--text-muted)" className="mb-sm" />
                   <p className="text-sm text-muted m-0">
                     No coaching or shadowing logs recorded for this associate yet.
@@ -117,7 +117,7 @@ export default function ProfileCoachingTab({
                               </div>
                             </div>
                             
-                            <div className="bg-black-alpha-20 px-md py-sm rounded-xl border-glass overflow-x-auto">
+                            <div className="bg-black-alpha-20 px-md py-sm rounded-sm border-glass overflow-x-auto">
                               {formatMarkdownNotes(log.notes)}
                             </div>
 

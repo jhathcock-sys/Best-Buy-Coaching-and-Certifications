@@ -52,7 +52,7 @@ export default function RosterImporterModal({ isOpen, onClose, onImport }: { isO
         <div className="p-xl overflow-y-auto max-h-[70vh]">
           
           {errorMsg && (
-            <div className="bg-error-alpha border border-error rounded-xl p-md flex gap-sm mb-lg text-error">
+            <div className="bg-error-alpha border border-error rounded-sm p-md flex gap-sm mb-lg text-error">
               <AlertCircle size={18} className="flex-shrink-0" />
               <div className="text-sm">{errorMsg}</div>
             </div>
@@ -62,7 +62,7 @@ export default function RosterImporterModal({ isOpen, onClose, onImport }: { isO
             <div 
               onDragOver={handleDragOver}
               onDrop={handleDrop}
-              className="border-dashed border-2 border-glass rounded-xl p-xl flex-column align-center text-center cursor-pointer hover-scale bg-white-alpha-05 transition-normal"
+              className="border-dashed border-2 border-glass rounded-sm p-xl flex-column align-center text-center cursor-pointer hover-scale bg-white-alpha-05 transition-normal"
               onClick={() => fileInputRef.current?.click()}
               data-testid="dropzone-area"
             >
@@ -74,13 +74,13 @@ export default function RosterImporterModal({ isOpen, onClose, onImport }: { isO
               <p className="text-sm text-secondary mb-xl">
                 or click to browse your files. Excel/Google Sheets files should be exported/saved as **.csv** first.
               </p>
-              <div className="inline-flex align-center gap-sm bg-white-alpha-10 px-md py-sm rounded-lg text-xs text-muted">
+              <div className="inline-flex align-center gap-sm bg-white-alpha-10 px-md py-sm rounded-sm text-xs text-muted">
                 <FileText size={14} /> Expected Columns: Name, Department, Hours, Memberships, Cards, GSP, Surveys, RPH, Basket, M365 Attach, Audio Attach
               </div>
             </div>
           ) : (
             <div>
-              <div className="flex-between align-center bg-white-alpha-05 p-md rounded-xl border-glass mb-xl">
+              <div className="flex-between align-center bg-white-alpha-05 p-md rounded-sm border-glass mb-xl">
                 <div className="flex-center gap-sm">
                   <FileText size={18} className="text-bby-yellow" />
                   <span className="text-sm font-semibold text-primary">{fileName}</span>
@@ -98,14 +98,14 @@ export default function RosterImporterModal({ isOpen, onClose, onImport }: { isO
                 Our system automatically matched your spreadsheet columns. Verify below that each field aligns with the correct app parameter.
               </p>
 
-              <div className="dashboard-grid bg-white-alpha-05 p-lg rounded-xl border-glass mb-xl grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-md">
+              <div className="dashboard-grid bg-white-alpha-05 p-lg rounded-sm border-glass mb-xl grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-md">
                 {Object.keys(FUZZY_MAP).map(key => (
                   <div key={key} className="flex-column gap-xs">
                     <label className="text-xs font-semibold text-secondary capitalize">
                       {key.replace(/([A-Z])/g, ' $1')}:
                     </label>
                     <select
-                      className="bby-select text-sm p-sm bg-obsidian border-glass text-primary rounded-lg cursor-pointer"
+                      className="bby-select text-sm p-sm bg-obsidian border-glass text-primary rounded-sm cursor-pointer"
                       value={mappings[key] ?? -1}
                       onChange={(e) => handleMappingChange(key as keyof ParsedEmployeeRow, parseInt(e.target.value, 10))}
                       data-testid={`mapping-select-${key}`}
@@ -120,7 +120,7 @@ export default function RosterImporterModal({ isOpen, onClose, onImport }: { isO
               </div>
 
               <h4 className="text-base font-bold mb-sm text-primary">Data Preview Summary</h4>
-              <div className="overflow-x-auto border-glass rounded-xl bg-black-alpha-20 max-h-[250px]">
+              <div className="overflow-x-auto border-glass rounded-sm bg-black-alpha-20 max-h-[250px]">
                 <table className="w-full text-left text-sm border-collapse">
                   <thead className="bg-bg-card border-b border-glass sticky top-0">
                     <tr>
@@ -141,7 +141,7 @@ export default function RosterImporterModal({ isOpen, onClose, onImport }: { isO
                       <tr key={idx} className="border-b border-glass last:border-0 hover:bg-white-alpha-05">
                         <td className="p-md font-semibold text-primary">{row?.name}</td>
                         <td className="p-md">
-                          <span className="px-sm py-xs rounded-lg text-xs bg-white-alpha-05 border-glass">
+                          <span className="px-sm py-xs rounded-sm text-xs bg-white-alpha-05 border-glass">
                             {row?.dept}
                           </span>
                         </td>

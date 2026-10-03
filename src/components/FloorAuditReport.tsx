@@ -66,10 +66,10 @@ Let's move fast, get our customers greeted, and ensure checkout remains smooth. 
     <div className="flex-column gap-lg h-full">
       {isAuditing && (
         <div className="glass-card flex-column justify-center gap-lg p-xl h-full">
-          <div className="skeleton-pulse rounded-xl h-24px w-50 bg-white-alpha-08"></div>
-          <div className="skeleton-pulse rounded-xl h-14px w-90 bg-white-alpha-05"></div>
-          <div className="skeleton-pulse rounded-xl h-14px w-80 bg-white-alpha-05"></div>
-          <div className="skeleton-pulse rounded-xl h-14px w-85 bg-white-alpha-05"></div>
+          <div className="skeleton-pulse rounded-sm h-24px w-50 bg-white-alpha-08"></div>
+          <div className="skeleton-pulse rounded-sm h-14px w-90 bg-white-alpha-05"></div>
+          <div className="skeleton-pulse rounded-sm h-14px w-80 bg-white-alpha-05"></div>
+          <div className="skeleton-pulse rounded-sm h-14px w-85 bg-white-alpha-05"></div>
           <div className="flex-column align-center gap-sm mt-lg text-secondary">
             <Sparkles size={24} className="spin text-bby-yellow" />
             <span className="font-bold text-sm">Gemini is auditing visual floor layout...</span>
@@ -106,7 +106,7 @@ Let's move fast, get our customers greeted, and ensure checkout remains smooth. 
             </span>
           </div>
 
-          <div className="p-md rounded-xl border-glass bg-white-alpha-05">
+          <div className="p-md rounded-sm border-glass bg-white-alpha-05">
             <span className="text-muted font-bold uppercase tracking-wide text-xs">Summary State</span>
             <p className="text-white mt-xs text-sm line-height-relaxed">{auditResult.statusDetails}</p>
           </div>
@@ -128,7 +128,7 @@ Let's move fast, get our customers greeted, and ensure checkout remains smooth. 
             </span>
             <div className="flex-column gap-sm">
               {(auditResult.actionPlan || []).map((act, idx) => (
-                <div key={idx} className="flex-row gap-sm align-start p-md rounded-xl border-glass bg-success-alpha-15">
+                <div key={idx} className="flex-row gap-sm align-start p-md rounded-sm border-glass bg-success-alpha-15">
                   <div className="flex-center bg-success-glow text-success rounded-full p-xs">
                     <CheckCircle size={14} />
                   </div>
@@ -155,7 +155,7 @@ Let's move fast, get our customers greeted, and ensure checkout remains smooth. 
                   readOnly 
                   rows={6} 
                   data-testid="huddle-script-output"
-                  className="w-full p-md rounded-xl bg-white-alpha-05 text-white border-glass text-xs font-mono resize-none"
+                  className="w-full p-md rounded-sm bg-white-alpha-05 text-white border-glass text-xs font-mono resize-none"
                   value={huddleScript}
                 />
               </div>

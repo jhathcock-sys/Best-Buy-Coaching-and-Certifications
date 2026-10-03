@@ -188,7 +188,7 @@ export default function RentsDueUploader({
           </div>
 
           {errorMsg && (
-            <div className="col-span-full p-md bg-obsidian border border-error rounded-xl text-xs text-error-light">
+            <div className="col-span-full p-md bg-obsidian border border-error rounded-sm text-xs text-error-light">
               {errorMsg}
             </div>
           )}
@@ -200,7 +200,7 @@ export default function RentsDueUploader({
               </div>
               <div className="flex-column gap-sm">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="animate-pulse h-[56px] bg-white-alpha-02 border border-[var(--border-glass)] rounded-xl" />
+                  <div key={i} className="animate-pulse h-[56px] bg-white-alpha-02 border border-[var(--border-glass)] rounded-sm" />
                 ))}
               </div>
             </div>

@@ -44,7 +44,7 @@ export default function AdvisorLeaderboard() {
             }
 
             return (
-              <div key={champ.id} className={`flex-center gap-md p-md rounded-xl justify-start ${bgClass}`} data-testid="champion-card">
+              <div key={champ.id} className={`flex-center gap-md p-md rounded-sm justify-start ${bgClass}`} data-testid="champion-card">
                 <div className={`w-8 h-8 rounded-full flex-center font-bold ${badgeClass}`}>
                   {idx + 1}
                 </div>

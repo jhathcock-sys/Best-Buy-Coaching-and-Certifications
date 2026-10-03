@@ -192,7 +192,7 @@ export default function RosterAuditor() {
               </span>
               <div className="flex flex-col gap-md">
                 {auditResult?.gapClusters?.map((cluster, idx) => (
-                  <div key={idx} className="flex flex-col gap-sm p-md bg-white/5 border border-[var(--border-glass)] rounded-xl">
+                  <div key={idx} className="flex flex-col gap-sm p-md bg-white/5 border border-[var(--border-glass)] rounded-sm">
                     <div className="flex justify-between items-center flex-wrap gap-xs">
                       <span className="text-sm font-bold text-white">{cluster?.name}</span>
                       <span className="text-secondary text-xs bg-white/5 px-sm py-xs rounded-md">

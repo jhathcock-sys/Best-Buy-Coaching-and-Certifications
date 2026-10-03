@@ -34,7 +34,7 @@ export default function DashboardHeader() {
       </div>
 
       <div className="flex-center gap-md">
-        <div className="flex-column bg-surface p-md rounded-xl border-glass align-end" data-testid="store-health-metric">
+        <div className="flex-column bg-surface p-md rounded-sm border-glass align-end" data-testid="store-health-metric">
           <div className="text-xs text-secondary font-semibold uppercase tracking-wide mb-xs">Store Health</div>
           <div className="flex-center gap-sm items-baseline">
             <span className={`text-2xl font-bold ${acceleratingPct >= 50 ? 'text-success' : 'text-warning'}`} data-testid="store-health-value">{acceleratingPct}%</span>
@@ -42,7 +42,7 @@ export default function DashboardHeader() {
           </div>
         </div>
 
-        <div className="flex-column bg-surface p-md rounded-xl border-glass align-end" data-testid="most-shadowed-dept-metric">
+        <div className="flex-column bg-surface p-md rounded-sm border-glass align-end" data-testid="most-shadowed-dept-metric">
           <div className="text-xs text-secondary font-semibold uppercase tracking-wide mb-xs">Most Shadowed Dept</div>
           <div className="flex-center gap-sm">
             <Compass size={18} color="var(--bby-blue)" />

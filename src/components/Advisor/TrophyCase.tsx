@@ -28,7 +28,7 @@ export default function TrophyCase({ employee }: TrophyCaseProps) {
       ) : (
         <div className="grid-auto-fill-150 gap-md">
           {employee.trophies.map((trophy, idx) => (
-            <div key={idx} className="bg-white-alpha-02 p-md rounded-xl border-white-alpha-05 text-center" data-testid="trophy-item">
+            <div key={idx} className="bg-white-alpha-02 p-md rounded-sm border-white-alpha-05 text-center" data-testid="trophy-item">
               <div className="flex-center mb-sm">
                 {getTrophyIcon(trophy.icon)}
               </div>

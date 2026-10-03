@@ -66,7 +66,7 @@ export default function AgenticPrioritizationWidget() {
       </div>
       
       {error && (
-        <div data-testid="target-error" className="alert-card-danger p-sm text-sm rounded-xl mt-sm">
+        <div data-testid="target-error" className="alert-card-danger p-sm text-sm rounded-sm mt-sm">
           {error}
         </div>
       )}
@@ -84,7 +84,7 @@ export default function AgenticPrioritizationWidget() {
             <div 
               key={idx} 
               data-testid={`coaching-target-card-${idx}`}
-              className="p-md rounded-xl flex-column gap-sm bg-obsidian border border-glass"
+              className="p-md rounded-sm flex-column gap-sm bg-obsidian border border-glass"
             >
               <div className="font-bold text-lg text-bby-blue flex-between">
                 <span>{target.name}</span>
@@ -95,7 +95,7 @@ export default function AgenticPrioritizationWidget() {
               <p className="text-sm text-primary m-0">
                 <strong className="text-muted">Reason:</strong> {target.reason}
               </p>
-              <p className="text-sm text-success m-0 p-sm rounded-xl bg-success-alpha-15">
+              <p className="text-sm text-success m-0 p-sm rounded-sm bg-success-alpha-15">
                 <strong className="text-success">Action:</strong> {target.recommendedAction}
               </p>
             </div>

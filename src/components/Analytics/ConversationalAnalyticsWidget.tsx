@@ -71,7 +71,7 @@ export const ConversationalAnalyticsWidget: React.FC<ConversationalAnalyticsWidg
       {/* AI Input Area */}
       <div className="mb-lg">
         <form onSubmit={handleSubmit} className={`gap-md w-full ${compact ? 'flex-column align-stretch' : 'flex-row align-center'}`} data-testid="ai-trend-form">
-          <div className={`flex-1 flex-row align-center bg-black-alpha-30 border-glass rounded-lg transition-all focus-within-border-bby w-full ${compact ? 'py-sm px-sm' : 'py-sm px-md'}`}>
+          <div className={`flex-1 flex-row align-center bg-black-alpha-30 border-glass rounded-sm transition-all focus-within-border-bby w-full ${compact ? 'py-sm px-sm' : 'py-sm px-md'}`}>
             <Sparkles size={18} className="text-bby-blue opacity-70 flex-shrink-0 mx-sm" />
             <input
               type="text"
@@ -86,7 +86,7 @@ export const ConversationalAnalyticsWidget: React.FC<ConversationalAnalyticsWidg
           <button
             type="submit"
             disabled={isLoading || !query.trim()}
-            className={`bg-bby-blue text-white font-bold py-md px-xl rounded-lg border-none transition-all flex-row align-center justify-center gap-sm ${(isLoading || !query.trim()) ? 'opacity-50 cursor-not-allowed' : 'hover-opacity-80 cursor-pointer'}`}
+            className={`bg-bby-blue text-white font-bold py-md px-xl rounded-sm border-none transition-all flex-row align-center justify-center gap-sm ${(isLoading || !query.trim()) ? 'opacity-50 cursor-not-allowed' : 'hover-opacity-80 cursor-pointer'}`}
             data-testid="ai-trend-submit"
           >
             {isLoading ? 'Analyzing...' : 'Ask AI'}
@@ -104,7 +104,7 @@ export const ConversationalAnalyticsWidget: React.FC<ConversationalAnalyticsWidg
 
       {/* Error State */}
       {error && !isLoading && (
-        <div data-testid="ai-error-banner" className="border-glass border-error-alpha-20 bg-error-alpha-15 p-md rounded-lg flex-row gap-md align-center mb-md">
+        <div data-testid="ai-error-banner" className="border-glass border-error-alpha-20 bg-error-alpha-15 p-md rounded-sm flex-row gap-md align-center mb-md">
           <AlertCircle size={20} className="text-error flex-shrink-0" />
           <p className="text-white m-0 text-sm">{error}</p>
         </div>

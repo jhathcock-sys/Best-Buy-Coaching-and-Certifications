@@ -10,7 +10,7 @@ export default function FloorVisionLogo({ className = '', iconSize = 28 }: Floor
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <Eye size={iconSize} className="text-bby-blue drop-shadow-md" />
-      <span className="font-bold tracking-tight bg-gradient-to-r from-bby-blue to-purple-400 text-transparent bg-clip-text drop-shadow-sm">
+      <span className="font-bold tracking-tight bg-slate-900 from-bby-blue text-transparent bg-clip-text drop-shadow-sm">
         FloorVision
       </span>
     </div>

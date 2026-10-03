@@ -17,8 +17,8 @@ describe('scheduleParserUtils', () => {
 
   describe('fuzzyMatchName', () => {
     const roster: Employee[] = [
-      { id: '1', name: 'John Doe', dept: 'Sales', hours: 0, rph: 0, surveys: 0, avatar: '' },
-      { id: '2', name: 'Jane Smith', dept: 'Sales', hours: 0, rph: 0, surveys: 0, avatar: '' }
+      { id: '1', name: 'John Doe', dept: 'Sales', hours: 0, rph: 0, memberships: 0, creditCards: 0, warranty: 0, surveys: 0, avatar: '' },
+      { id: '2', name: 'Jane Smith', dept: 'Sales', hours: 0, rph: 0, memberships: 0, creditCards: 0, warranty: 0, surveys: 0, avatar: '' }
     ];
 
     it('matches exact names', () => {

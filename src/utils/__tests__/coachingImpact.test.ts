@@ -13,7 +13,7 @@ describe('calculateCoachingImpact', () => {
     const dailySnapshots: DailySnapshot[] = [
       {
         date: '2023-01-01',
-        employees: [{ id: employeeId, name: 'Emp', dept: 'Sales', hours: 4, rph: 100, surveys: 0, avatar: '' }]
+        employees: [{ id: employeeId, name: 'Emp', dept: 'Sales', hours: 4, rph: 100, memberships: 0, creditCards: 0, warranty: 0, surveys: 0, avatar: '' }]
       }
     ];
     // Coaching is on 2023-01-02, no snapshots after
@@ -25,11 +25,11 @@ describe('calculateCoachingImpact', () => {
     const dailySnapshots: DailySnapshot[] = [
       {
         date: '2023-01-01',
-        employees: [{ id: employeeId, name: 'Emp', dept: 'Sales', hours: 8, rph: 100, memberships: 1, revenue: 800, surveys: 0, avatar: '' }]
+        employees: [{ id: employeeId, name: 'Emp', dept: 'Sales', hours: 8, rph: 100, memberships: 1, creditCards: 0, warranty: 0, revenue: 800, surveys: 0, avatar: '' }]
       },
       {
         date: '2023-01-03', // After coaching on Jan 2
-        employees: [{ id: employeeId, name: 'Emp', dept: 'Sales', hours: 8, rph: 200, memberships: 2, revenue: 1600, surveys: 0, avatar: '' }]
+        employees: [{ id: employeeId, name: 'Emp', dept: 'Sales', hours: 8, rph: 200, memberships: 2, creditCards: 0, warranty: 0, revenue: 1600, surveys: 0, avatar: '' }]
       }
     ];
     const result = calculateCoachingImpact(employeeId, '2023-01-02', dailySnapshots);
@@ -40,11 +40,11 @@ describe('calculateCoachingImpact', () => {
     const dailySnapshots: DailySnapshot[] = [
       {
         date: '2023-01-01',
-        employees: [{ id: employeeId, name: 'Emp', dept: 'Sales', hours: 8, rph: 200, memberships: 2, revenue: 1600, surveys: 0, avatar: '' }]
+        employees: [{ id: employeeId, name: 'Emp', dept: 'Sales', hours: 8, rph: 200, memberships: 2, creditCards: 0, warranty: 0, revenue: 1600, surveys: 0, avatar: '' }]
       },
       {
         date: '2023-01-03',
-        employees: [{ id: employeeId, name: 'Emp', dept: 'Sales', hours: 8, rph: 100, memberships: 1, revenue: 800, surveys: 0, avatar: '' }]
+        employees: [{ id: employeeId, name: 'Emp', dept: 'Sales', hours: 8, rph: 100, memberships: 1, creditCards: 0, warranty: 0, revenue: 800, surveys: 0, avatar: '' }]
       }
     ];
     const result = calculateCoachingImpact(employeeId, '2023-01-02', dailySnapshots);
@@ -55,11 +55,11 @@ describe('calculateCoachingImpact', () => {
     const dailySnapshots: DailySnapshot[] = [
       {
         date: '2023-01-01',
-        employees: [{ id: employeeId, name: 'Emp', dept: 'Sales', hours: 8, rph: 100, memberships: 1, revenue: 800, surveys: 0, avatar: '' }]
+        employees: [{ id: employeeId, name: 'Emp', dept: 'Sales', hours: 8, rph: 100, memberships: 1, creditCards: 0, warranty: 0, revenue: 800, surveys: 0, avatar: '' }]
       },
       {
         date: '2023-01-03',
-        employees: [{ id: employeeId, name: 'Emp', dept: 'Sales', hours: 8, rph: 102, memberships: 1, revenue: 816, surveys: 0, avatar: '' }]
+        employees: [{ id: employeeId, name: 'Emp', dept: 'Sales', hours: 8, rph: 102, memberships: 1, creditCards: 0, warranty: 0, revenue: 816, surveys: 0, avatar: '' }]
       }
     ];
     const result = calculateCoachingImpact(employeeId, '2023-01-02', dailySnapshots);

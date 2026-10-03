@@ -20,8 +20,7 @@ describe('rosterUtils', () => {
   };
 
   const emp: Employee = {
-    id: '1', name: 'John', dept: 'Sales', hours: 8, rph: 100, avatar: '', surveys: 0
-  };
+    id: '1', name: 'John', dept: 'Sales', hours: 8, rph: 100, avatar: '', surveys: 0, memberships: 0, creditCards: 0, warranty: 0 };
 
   describe('getMetricClass', () => {
     it('returns text-[var(--success-glow)] when pace is met for hours type', () => {

@@ -40,7 +40,7 @@ John Doe,100`;
         { name: 'John Doe', rph: 150, revenue: 1500, apps: 2, memberships: 3 }
       ];
       const roster: Employee[] = [
-        { id: '1', name: 'John Doe', dept: 'Sales', hours: 10, rph: 100, surveys: 0, avatar: '' }
+        { id: '1', name: 'John Doe', dept: 'Sales', hours: 10, rph: 100, memberships: 0, creditCards: 0, warranty: 0, surveys: 0, avatar: '' }
       ];
 
       const result = mapParsedRentsToRoster(parsedData, roster);

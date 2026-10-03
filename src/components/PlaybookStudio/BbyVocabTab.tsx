@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BookOpen, ShieldAlert, Plus, Trash2 } from 'lucide-react';
+import { ShieldAlert, Plus, Trash2 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { StoreState } from '../../types/store';
 

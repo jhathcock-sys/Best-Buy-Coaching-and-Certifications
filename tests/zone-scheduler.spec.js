@@ -68,7 +68,6 @@ test.describe('Zone Scheduler E2E', () => {
     await expect(autoDeployBtn).toContainText('Optimizing...');
 
     // Wait for the success toast message
-    const toastMessage = page.locator('.go3958317564'); // Default hot-toast class, but we can look for text
     await expect(page.getByText('Roster optimized and Auto-Deployed!')).toBeVisible({ timeout: 5000 });
 
     // Should return to enabled

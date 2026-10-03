@@ -26,7 +26,7 @@ export interface LogBuilderTabProps {
 }
 
 export default function LogBuilderTab({
-  prefillBuilderData,
+  prefillBuilderData: _prefillBuilderData,
   clearPrefillBuilderData,
   builderForm,
   setBuilderForm,

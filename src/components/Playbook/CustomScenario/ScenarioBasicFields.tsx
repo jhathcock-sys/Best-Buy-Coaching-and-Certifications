@@ -1,5 +1,6 @@
 import React from 'react';
 
+// oxlint-disable-next-line react/only-export-components, react-refresh/only-export-components
 export const AVATAR_OPTIONS = [
   { label: 'Sarah (Computing)', url: '/avatars/sarah.png' },
   { label: 'David (Home Theater)', url: '/avatars/david.png' },

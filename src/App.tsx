@@ -18,6 +18,7 @@ const TrendReportingPage = lazy(() => import('./pages/TrendReportingPage'));
 const BreakroomTVPage = lazy(() => import('./pages/BreakroomTVPage'));
 const DailyLineupBuilderPage = lazy(() => import('./pages/DailyLineupBuilderPage'));
 const MemberDealsPage = lazy(() => import('./pages/MemberDealsPage').then(m => ({ default: m.MemberDealsPage })));
+const TestProfileHeaderHarness = lazy(() => import('./components/TestProfileHeaderHarness'));
 import { Compass, Users, BookOpen, LayoutDashboard, Sparkles, ShieldCheck, ClipboardList, Archive, Clock, ChevronDown, ChevronRight, TrendingUp } from 'lucide-react';
 import AssociateProfileHeader from './components/AssociateProfile/AssociateProfileHeader';
 import { subscribeToActivePeriod } from './services/firebase';
@@ -105,7 +106,6 @@ function AppContent() {
   }, [setPrefillShadowEmployee, setActiveView]);
 
   if (activeView === 'test-profile-header') {
-    const TestProfileHeaderHarness = lazy(() => import('./components/TestProfileHeaderHarness'));
     return (
       <Suspense fallback={<div>Loading test harness...</div>}>
         <TestProfileHeaderHarness />

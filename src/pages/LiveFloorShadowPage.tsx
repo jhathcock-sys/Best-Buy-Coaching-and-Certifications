@@ -1,6 +1,5 @@
 import React from 'react';
-import { useState } from 'react';
-import { ShieldCheck, ChevronLeft, ChevronRight, Check, Clipboard, Calendar, Users, AlertCircle } from 'lucide-react';
+import { ShieldCheck, ChevronLeft, ChevronRight, Check, Clipboard } from 'lucide-react';
 import ShadowStep1Employee from '../components/LiveFloorShadow/ShadowStep1Employee';
 import ShadowStep2Observation from '../components/LiveFloorShadow/ShadowStep2Observation';
 import ShadowStep3Coaching from '../components/LiveFloorShadow/ShadowStep3Coaching';
@@ -14,12 +13,12 @@ export default function LiveFloorShadow({
 }: UseLiveFloorShadowProps) {
   const {
     currentStep, setCurrentStep,
-    selectedEmpId, setSelectedEmpId,
+    selectedEmpId,
     selectedEmployee,
     handleSelectEmployee,
     department, setDepartment,
-    isGenerating, setIsGenerating,
-    checklist, setChecklist,
+    isGenerating,
+    checklist,
     notes, setNotes,
     strengths, setStrengths,
     gapDetails, setGapDetails,

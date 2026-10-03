@@ -31,7 +31,7 @@ export interface RoleplayActiveSessionProps {
 
 export default function RoleplayActiveSession({ 
   selectedScenario,
-  complexity,
+  complexity: _complexity,
   customerTone,
   onExit,
   onEvaluationComplete

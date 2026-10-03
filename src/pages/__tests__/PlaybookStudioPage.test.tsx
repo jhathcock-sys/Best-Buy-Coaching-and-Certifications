@@ -1,11 +1,11 @@
-﻿import React from 'react';
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { describe, it, expect, vi } from 'vitest';
 import PlaybookStudioPage from '../PlaybookStudioPage';
 
 vi.mock('../../store/useStore', () => ({
-  useStore: vi.fn((selector) => {
+  useStore: vi.fn(() => {
     // Return a mock playbookSettings object
     return {
       aiEngine: 'gemini',

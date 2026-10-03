@@ -27,7 +27,7 @@ export default function ZoneScheduler({
   zoneAssignments = EMPTY_OBJ, 
   onAssignZone, 
   onUnassignZone,
-  activeBreaks = EMPTY_OBJ,
+  _activeBreaks = EMPTY_OBJ,
   onToggleBreakState,
   onImportSchedule
 }: ZoneSchedulerProps) {

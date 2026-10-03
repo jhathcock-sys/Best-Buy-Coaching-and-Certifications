@@ -20,7 +20,7 @@ export async function generateAuraBatchInsights(
   roster: Employee[],
   deptGoals: Record<string, DeptGoal>,
   apiKey: string,
-  playbookSettings: PlaybookSettings
+  _playbookSettings: PlaybookSettings
 ): Promise<Record<string, AuraInsight>> {
   if (!roster || roster.length === 0) return {};
   

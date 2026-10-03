@@ -1,4 +1,4 @@
-import React, { ReactNode, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Volume2, Square, Clock, AlertCircle } from 'lucide-react';
 import { CoachingLog } from '../../types';
 import { formatMarkdownNotes } from '../../utils/profileUtils';

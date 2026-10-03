@@ -80,14 +80,6 @@ export default function CoachSimulator({
   const aiCoaching = useAiCoaching(apiKey, playbookSettings, coachingLogs, onLogCoachingSession);
   const audioEngine = useAudioEngine(aiCoaching.messages, setInputVal);
 
-  if (!playbookSettings) {
-    return (
-      <div className="p-xl w-full h-full">
-        <SkeletonCard data-testid="hydration-skeleton" />
-      </div>
-    );
-  }
-
   // Handle preselected coaching from Store Roster
   useEffect(() => {
     if (preselectedEmployee) {
@@ -151,6 +143,13 @@ export default function CoachSimulator({
     }
   }, [prefillBuilderData, clearPrefillBuilderData]);
 
+  if (!playbookSettings) {
+    return (
+      <div className="p-xl w-full h-full">
+        <SkeletonCard data-testid="hydration-skeleton" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex-column gap-2xl" data-testid="coach-simulator-page">

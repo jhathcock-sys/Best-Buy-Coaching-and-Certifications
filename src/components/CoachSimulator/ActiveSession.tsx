@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Mic, MicOff, Send, HelpCircle, FileText, RefreshCw, Check } from 'lucide-react';
+import { ArrowLeft, Mic, MicOff, Send, HelpCircle, FileText, Check } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { Employee } from '../../types';
 

@@ -37,11 +37,10 @@ export const StoreRosterTableRow = React.memo(({
   const activePeriod = useStore((state) => state.activePeriod);
   const deleteEmployee = useStore((state) => state.deleteEmployee);
 
-  if (!emp) return null;
-  const gap = getEmployeeGap(emp, deptGoals) || 'None';
-  const isExceeding = gap === 'None' || gap === '';
-  
   const { badgeClass, cviIcon, cviDisplay } = React.useMemo(() => {
+    if (!emp) {
+      return { badgeClass: 'cvi-badge-default', cviIcon: '?', cviDisplay: '' };
+    }
     const cvi = calculateCVI(emp, rosterHistory, activePeriod) || '';
     let bClass = 'cvi-badge-default';
     let icon = '?';
@@ -61,6 +60,10 @@ export const StoreRosterTableRow = React.memo(({
       cviDisplay: cvi.replace(/CVI/g, '').trim()
     };
   }, [emp, rosterHistory, activePeriod]);
+
+  if (!emp) return null;
+  const gap = getEmployeeGap(emp, deptGoals) || 'None';
+  const isExceeding = gap === 'None' || gap === '';
 
   const tdClass = (isCenter = false, isRight = false) => {
     return `roster-td ${isDense ? 'roster-td-dense' : 'roster-td-standard'} ${isCenter ? 'roster-td-center' : ''} ${isRight ? 'roster-td-right' : ''}`;

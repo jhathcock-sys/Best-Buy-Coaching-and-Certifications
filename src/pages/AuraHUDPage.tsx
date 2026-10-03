@@ -20,11 +20,7 @@ export default function AuraHUDPage({ onCoachEmployee }: AuraHUDPageProps) {
   const apiKey = useStore((state) => state.apiKey);
   const playbookSettings = useStore((state) => state.playbookSettings);
   
-  if (!rosterHistory || !deptGoals || !playbookSettings) {
-    return <Skeleton width="100%" height="400px" />;
-  }
-
-  const _rawroster = rosterHistory[activePeriod] || EMPTY_OBJ;
+  const _rawroster = (rosterHistory && rosterHistory[activePeriod]) || EMPTY_OBJ;
   const roster = useMemo(() => (Object.values(_rawroster) as Employee[]).sort((a, b) => (a?.name || '').localeCompare(b?.name || '')), [_rawroster]);
 
   const [insights, setInsights] = useState<Record<string, AuraInsight>>({});
@@ -37,6 +33,10 @@ export default function AuraHUDPage({ onCoachEmployee }: AuraHUDPageProps) {
       isMounted.current = false;
     };
   }, []);
+
+  if (!rosterHistory || !deptGoals || !playbookSettings) {
+    return <Skeleton width="100%" height="400px" />;
+  }
 
   const handleScanFloor = async () => {
     if (!apiKey) {

@@ -47,11 +47,12 @@ export const DEFAULT_PLAYBOOK_SETTINGS = {
 };
 
 export const MANAGERS = [
-  { name: 'Corey T.', role: 'Experience Manager Sales Focused', pin: '2001' },
-  { name: 'Joey Z', role: 'Experience Manager Ops Focused', pin: '2002' },
   { name: 'Sam E', role: 'Experience Manager Sales Focus', pin: '2003' },
+  { name: 'Joey Z', role: 'Experience Manager Ops Focused', pin: '2002' },
+  { name: 'James H', role: 'Experience Supervisor Sales', pin: '2005' },
+  { name: 'Bree', role: 'Front End Supervisor', pin: '1001' },
   { name: 'Lee R', role: 'Experience Supervisor Sales', pin: '2004' },
-  { name: 'James H', role: 'Experience Supervisor Sales and Front End', pin: '2005' },
+  { name: 'Charli', role: 'Shift Lead', pin: '2001' },
   { name: 'Sackett', role: 'GM', pin: '2006' },
   { name: 'Will C.', role: 'GM', pin: '2007' }
 ];

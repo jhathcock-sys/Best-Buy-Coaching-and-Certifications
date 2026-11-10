@@ -5,6 +5,7 @@ service cloud.firestore {
     
     // Function to verify true tenant isolation
     // Users are authenticated with Email/Password mapping: s{storeId}_p{pin}@bby.app
+    // Store 1480 floor devices (taps, PINs, Zebra handhelds) have zero friction
     function isTenantManager(storeId) {
       return storeId == '1480' || storeId == 'store_1480' ||
              (request.auth != null && 
@@ -18,65 +19,118 @@ service cloud.firestore {
       return true;
     }
 
+    // Defensive helper: ensures data payload is a valid map with bounded key size
+    function isValidMap(maxKeys) {
+      return request.resource.data is map &&
+             request.resource.data.keys().size() <= maxKeys;
+    }
+
+    // Live coaching collection used for Store 1480 cross-app sync
     match /bby_store_1480_live/{document=**} {
-      allow read, write: if true;
+      allow read: if true;
+      allow create, update: if isValidMap(500);
+      // Anti-Wipe Singleton Protection: live master state must NEVER be deleted
+      allow delete: if false;
     }
 
     match /stores/{storeId} {
-      
+      // Root store document protection
       allow read: if isTenantManager(storeId);
-      allow write: if isTenantManager(storeId) && isRoleManager();
+      allow create, update: if isTenantManager(storeId) && isRoleManager() && isValidMap(500);
+      // Anti-Wipe Singleton Delete Protection: root store document must NEVER be deleted
+      allow delete: if false;
       
       match /users/{userId} {
         allow read: if isTenantManager(storeId);
-        allow write: if isTenantManager(storeId) && isRoleManager();
+        allow create, update: if isTenantManager(storeId) && isRoleManager() && isValidMap(100);
+        allow delete: if isTenantManager(storeId) && isRoleManager();
       }
 
       match /settings/playbook {
         allow read: if true;
-        allow write: if isTenantManager(storeId) && isRoleManager();
+        allow create, update: if isTenantManager(storeId) && isRoleManager() && isValidMap(100);
+        // Anti-Wipe Singleton Protection: playbook settings cannot be deleted
+        allow delete: if false;
       }
 
       match /data/playbookSettings {
         allow read: if true;
-        allow write: if isTenantManager(storeId) && isRoleManager();
+        allow create, update: if isTenantManager(storeId) && isRoleManager() && isValidMap(250);
+        allow delete: if false;
       }
 
       match /data/managersSettings {
         allow read: if true;
-        allow write: if isTenantManager(storeId) && isRoleManager();
+        allow create, update: if isTenantManager(storeId) && isRoleManager() && isValidMap(250);
+        allow delete: if false;
       }
 
       match /data/{document=**} {
         allow read: if isTenantManager(storeId);
-        allow write: if isTenantManager(storeId) && isRoleManager();
+        allow create, update: if isTenantManager(storeId) && isRoleManager() && isValidMap(500);
+        allow delete: if false;
       }
       
       // Subcollections
       match /periods/{document=**} {
         allow read: if isTenantManager(storeId);
-        allow write: if isTenantManager(storeId) && isRoleManager();
+        allow create, update: if isTenantManager(storeId) && isRoleManager() && isValidMap(500);
+        allow delete: if false;
       }
       
       match /coachingLogs/{document=**} {
         allow read: if isTenantManager(storeId);
-        allow write: if isTenantManager(storeId) && isRoleManager();
+        allow create, update: if isTenantManager(storeId) && isRoleManager() && isValidMap(250);
+        allow delete: if isTenantManager(storeId) && isRoleManager();
       }
 
       match /dailySnapshots/{document=**} {
         allow read: if isTenantManager(storeId);
-        allow write: if isTenantManager(storeId) && isRoleManager();
+        allow create, update: if isTenantManager(storeId) && isRoleManager() && isValidMap(250);
+        allow delete: if false;
       }
 
       match /floorLeaderShifts/{document=**} {
         allow read: if isTenantManager(storeId);
-        allow write: if isTenantManager(storeId) && isRoleManager();
+        allow create, update: if isTenantManager(storeId) && isRoleManager() && isValidMap(250);
+        allow delete: if isTenantManager(storeId) && isRoleManager();
       }
 
       match /followUpTasks/{document=**} {
         allow read: if isTenantManager(storeId);
-        allow write: if isTenantManager(storeId) && isRoleManager();
+        allow create, update: if isTenantManager(storeId) && isRoleManager() && isValidMap(250);
+        allow delete: if isTenantManager(storeId) && isRoleManager();
       }
+
+      match /rentsDueArchives/{document=**} {
+        allow read: if isTenantManager(storeId);
+        allow create, update: if isTenantManager(storeId) && isRoleManager() && isValidMap(500);
+        allow delete: if false;
+      }
+
+      match /planner/{docId} {
+        allow read: if isTenantManager(storeId);
+        allow create, update: if isTenantManager(storeId) && isRoleManager() && isValidMap(500);
+        // Anti-Wipe Singleton Protection: planner/state must NEVER be deleted
+        allow delete: if isTenantManager(storeId) && isRoleManager() && docId != 'state';
+
+        match /{subcollection}/{subDoc=**} {
+          allow read: if isTenantManager(storeId);
+          allow create, update: if isTenantManager(storeId) && isRoleManager() && isValidMap(250);
+          allow delete: if isTenantManager(storeId) && isRoleManager();
+        }
+      }
+
+      match /certifications/{document=**} {
+        allow read: if isTenantManager(storeId);
+        allow create, update: if isTenantManager(storeId) && isRoleManager() && isValidMap(250);
+        allow delete: if isTenantManager(storeId) && isRoleManager();
+      }
+    }
+
+    // Default deny for unknown root collections to prevent arbitrary collection writes
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

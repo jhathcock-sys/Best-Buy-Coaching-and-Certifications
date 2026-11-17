@@ -83,7 +83,10 @@ export default function BbyVocabTab() {
                   placeholder="Add preferred word (e.g. My Best Buy Total)"
                   value={newAllowed}
                   onChange={(e) => setNewAllowed(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAddAllowed()}
+                  onKeyDown={(e) => {
+                    if (e.nativeEvent.isComposing || e.keyCode === 229) return;
+                    if (e.key === 'Enter') handleAddAllowed();
+                  }}
                   data-testid="vocab-allowed-input"
                 />
                 <button 
@@ -120,7 +123,10 @@ export default function BbyVocabTab() {
                   placeholder="Add forbidden word (e.g. warranty)"
                   value={newForbidden}
                   onChange={(e) => setNewForbidden(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAddForbidden()}
+                  onKeyDown={(e) => {
+                    if (e.nativeEvent.isComposing || e.keyCode === 229) return;
+                    if (e.key === 'Enter') handleAddForbidden();
+                  }}
                   data-testid="vocab-forbidden-input"
                 />
                 <button 

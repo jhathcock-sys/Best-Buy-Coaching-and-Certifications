@@ -51,7 +51,10 @@ export default function RoleplayChatWindow({
           placeholder={isListening ? "Listening... Speak your response" : "Type your response to the customer..."}
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+          onKeyDown={(e) => {
+            if (e.nativeEvent.isComposing || e.keyCode === 229) return;
+            if (e.key === 'Enter') handleSend();
+          }}
           disabled={isLoading}
           data-testid="chat-input"
         />

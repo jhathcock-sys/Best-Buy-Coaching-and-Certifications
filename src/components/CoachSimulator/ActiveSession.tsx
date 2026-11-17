@@ -154,7 +154,10 @@ export default function ActiveSession({
                         placeholder="Type your response..."
                         value={inputVal}
                         onChange={(e) => setInputVal(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSend(inputVal, isVoiceMode, null)}
+                        onKeyDown={(e) => {
+                          if (e.nativeEvent.isComposing || e.keyCode === 229) return;
+                          if (e.key === 'Enter') handleSend(inputVal, isVoiceMode, null);
+                        }}
                         disabled={isThinking}
                         data-testid="chat-input-field"
                       />

@@ -1,109 +1,32 @@
-# Agent Memory Rules
+# Best-Buy-Coaching-and-Certifications — Repo Rules
 
-These rules apply to all AI agents working in this workspace.
+Project-specific engineering guardrails for Store #1480 Leadership Coaching & Certifications (supplementing global rules and `REPO_MAP.md`).
 
-## RULE 0: ZERO-TRUST ORCHESTRATOR MANDATE
-The Master Orchestrator (the parent agent reading this file) is strictly FORBIDDEN from using code editing tools (like `replace_file_content`, `multi_replace_file_content`, or `write_to_file`) on any application source code in `src/` or `functions/`. The Master Orchestrator is purely a Project Manager and Planner. 
-To modify application code, the Master Orchestrator MUST use the `invoke_subagent` tool to summon the `expert_coder`. The Orchestrator's only permitted file modifications are to update Markdown artifacts, memory logs, and planning documents.
+> **Public Repository Firewall:** Keep commits free of internal hostnames, private LAN IPs, local workstation paths, and unrelated operational secrets.
 
-## Memory Logging
-You must maintain a "single source of truth" memory log of all actions taken and completed tasks.
-1. All logs are stored in the `agent_memory/` directory at the root of the project.
-2. The logs are split into daily markdown files, named `YYYY-MM-DD.md` (e.g., `2026-06-22.md`).
-3. Whenever you complete a significant task, implement a feature, fix a bug, or have a significant technical discussion, you must append an entry to the current day's log file.
-4. If the daily file does not exist, create it.
-5. Format your entries with a timestamp, the task or conversation ID, and a brief description of the actions taken and items completed.
+## 1. State, Hydration & Store Sync
+- **Single Zustand Store (`useStore`):** Pull application state strictly through `useStore` slices (`authSlice`, `metricsSlice`, `shiftSlice`, `playbookSlice`, `uiSlice`); never introduce parallel Contexts or competing manual `localStorage` sync managers alongside Firestore `persistentLocalCache`.
+- **Selector Atomicity:** Never allocate new object or array literals (`|| {}`, `|| []`) inside `useStore` / `useShallow` selectors; default outside the selector or use shared empty sentinels (`EMPTY_ARR` / `EMPTY_OBJ`).
+- **Pre-Auth & Hydration Guards:** Fetch custom PINs, store IDs, and tenant config prior to or outside the auth gate. Guard components against unhydrated store fields and disable async submissions (`disabled={isHydrating}`) until tenant data finishes loading.
+- **Shallow Prop Drilling:** Limit extracted child components to 5–7 props; pull deeper shared state directly from `useStore`.
 
-Example entry:
-### [14:30:00] Refactored Navigation Component
-- **Actions Taken**: Extracted `Sidebar` from `App.jsx`, applied premium glassmorphism tokens.
-- **Debate/Consensus**: `ux_designer` vetoed original layout due to padding asymmetry; resolved by wrapping metrics in a custom `--border-glass` grid.
-- **Completed**: The main app layout is now modular and meets aesthetic guidelines.
+## 2. Store #1480 Metric & Coaching Math
+- **Sum Raw Counts, Never Average Percentages:** Aggregate store-wide performance (`5-Star Surveys`, `PMs`, `Apps`, `Memberships`, `GSP`/`warranty` attach rates) by summing raw numerators and denominators across the roster before dividing — never average per-associate percentages.
 
-Ensure you update the memory log before ending your turn on major tasks.
+## 3. UI Tokens, Styling & Mobile Ergonomics
+- **Theme Tokens (`src/index.css`):** Use established CSS custom properties (`--bg-space`, `--bg-obsidian`, `--border-glass`, `--success-glow`, `--bby-yellow`, `--bby-blue`, `--transition-normal`) rather than sprawling `style={{...}}` blocks.
+- **iOS / Tablet Touch Binding:** Include `cursor: pointer` on clickable interactive elements for reliable iOS Safari and tablet touch recognition.
+- **Incremental Cleanup:** Refactor legacy inline styles to `src/index.css` utility classes opportunistically when editing a file.
 
-## Artifact Archiving
-To maintain a permanent history of our technical planning and analysis, all agents must archive their final planning artifacts into the project repository before ending their turn on major tasks.
-1. Create a directory for the current day if it doesn't exist: `agent_memory/archives/YYYY-MM-DD/`.
-2. Copy your final artifacts (e.g., `implementation_plan.md`, `task.md`, `walkthrough.md`, `tech_debt_analysis.md`, `health_check.md`) into this directory.
-3. Rename the copied files to include a descriptive prefix or timestamp (e.g., `agent_memory/archives/2026-06-22/14-30_tech_debt_analysis.md` or `feature_x_implementation_plan.md`).
-4. Commit and push these archives along with your other code changes.
+## 4. Server-Side AI Exclusivity (`functions/src/ai.js`)
+- **No Client-Side `@google/generative-ai`:** All Gemini AI calls must stay strictly server-side; never import `@google/generative-ai` in `src/`. Route all frontend AI requests exclusively via `callFirebaseAI` (`src/services/ai/core.ts`).
+- **Single-Call Batching:** Never run `Promise.all()` or loop over rosters with individual AI requests; batch multi-employee prompts into one structured JSON request.
+- **Strict `getSchemaForType` Registration:** Register every structured `schemaType` (or explicitly return `null` for intentional schema-less JSON prompts) inside `getSchemaForType` in `functions/src/ai.js`.
+- **Structured `generationConfig`:** Merge runtime `temperature`, `topK`, `topP`, and `systemInstruction` into `generationConfig` cleanly rather than concatenating them into prompt text, and use current maintained Gemini aliases.
 
-## Deployment & Version Control
-After every significant upgrade, change, or feature completion, you must:
-1. Commit the changes to version control using Git (`git add`, `git commit`).
-2. Push the changes to the remote GitHub repository.
-3. Deploy the updated application to the hosting environment (e.g., via `npm run build` and `firebase deploy`, or the appropriate deployment commands for this project).
-4. Log these deployment actions in the daily memory log.
-
-## Multi-Agent Debate, Collaboration & Consensus Gates
-1. **Cross-Agent Communication Mandate**: When working as part of a summoned team, agents MUST actively communicate with one another using the `send_message` tool. You are not working in a silo. Share your findings, ask the Architect for approval on structural changes, and request the QA Tester to review your logic *before* finalizing it.
-2. **Honor the Veto**: If another sub-agent has issued an explicit `VETO` on a proposed change or architecture in the current thread, you are FORBIDDEN from executing any write or edit tools on that file until you have explicitly addressed their critique and proposed a compromise.
-3. **Contextual Awareness**: Before executing a tool, read the last 3-4 agent turns to see if your peer (e.g., the BI Analyst on math, or the QA Tester on null-safety) has raised a blocker.
-4. **Mandatory Peer Review**: An Expert Coder may not declare a major feature refactor complete until the Lead QA Engineer has actively reviewed the code and confirmed there are no null traps or async race conditions.
-5. **Consensus Logging**: When writing code after a debate, include a brief 1-line comment above the refactored block noting the compromise (e.g., `// Consolidated per QA Veto on sync lifecycle`).
-
-## Refactoring & Component Extraction Safeguards
-1. **Verify Hook Signatures**: Always double-check the interface of custom hooks (e.g., `useApp()` vs `useStore()`) before destructing variables from them. Do not assume all global variables reside in the same hook.
-2. **Variable Scope & References**: Identify all variables, functions, and state referenced in the extracted block. Ensure every single one is explicitly passed as a prop, re-imported, or redefined in the new component to prevent `ReferenceError`s.
-3. **Props Verification**: Double-check that the parent component actually passes every prop that the new child component expects. Watch out for prop name mismatches.
-4. **Import Completeness**: Verify all required hooks, types, utilities, and external components are imported into the newly created file.
-5. **Initialization & Fallback Logic**: Preserve initial state logic, especially local storage or cached fallbacks. Do not silently drop caching logic or overwrite it with hardcoded defaults.
-6. **Null Safety**: When moving state or props, ensure you maintain optional chaining (`?.`) and fallback values to prevent null destructuring crashes.
-
-## Architectural & Implementation Guidelines
-1. **Authentication Data Hydration**: Any data required for authentication, initialization, or tenant configuration (e.g., custom PINs, store IDs) must be fetched *outside* or *prior* to the authentication gate. Never place cloud sync logic for login credentials inside components that require the user to already be authenticated.
-2. **Component Modularity (Anti-God Object)**: Prevent top-level files from becoming bloated God Objects. When adding significant new features, create discrete, modular child components rather than appending hundreds of lines of state and UI to an existing view.
-3. **Decoupled Routing & Callbacks**: Decouple form submissions and authentication from hardcoded routing redirects. Use explicit callbacks (e.g., `onLoginSuccess`) to ensure state is synchronized and finalized *before* triggering navigation changes.
-4. **Storage Hierarchy**: Prioritize Environment Variables (`.env`) for critical configuration and API keys. When hydrating state from `localStorage` on startup, implement explicit checks to ensure stale local data does not silently override `.env` values or required application defaults.
-5. **Mobile/Tablet Touch Event Recognition**: Always include `cursor: 'pointer'` in the CSS styles or class list for `<button>` elements or clickable `<div>`s that use an `onClick` handler. This ensures that iOS Safari and other tablet browsers correctly recognize and bind touch events to the element.
-6. **Gemini API Versioning**: Never hardcode deprecated or future AI models (like `gemini-1.5-pro` or `gemini-3.5-pro`). Always use dynamic model aliases (e.g. `gemini-pro-latest` or `gemini-1.5-flash-latest`) across backend functions and frontend services to prevent 400 Invalid Model API rejections.
-7. **Premium Design Tokens vs. Raw Tailwind/Inline Styles**: Avoid sprawling `style={{...}}` blocks. Furthermore, do not use generic Tailwind color utilities when custom tokens exist. All agents must strictly utilize the CSS theme variables defined in `src/index.css` via utility classes or arbitrary values matching:
-   - Backgrounds: `--bg-space`, `--bg-obsidian`, `--border-glass`
-   - Accents/States: `--success-glow`, `--bby-yellow`, `--bby-blue`
-   - Typography & Motion: Font families `Outfit` (headings) / `Inter` (body), and `--transition-normal`.
-   Incrementally refactor legacy inline styles to use these tokens whenever a file is opened.
-8. **Aggregated Metric Calculations**: Be highly cautious of how raw counts (like 5-Star Surveys, Applications, or Memberships) are aggregated. Do not inadvertently calculate an *average* of a count metric across the roster when evaluating total store-wide performance; you must sum the counts instead to get an accurate total.
-9. **PowerShell Compatibility**: The user's terminal environment uses Windows PowerShell. Use semicolons (`;`) instead of double ampersands (`&&`) when chaining terminal commands (e.g., `npm run build ; git add .`).
-10. **The Boy Scout Rule (CSS Utilities)**: Do not perform global, app-wide eradications of inline `style={{...}}` blocks, as this introduces high risk of visual regressions. Instead, whenever you open a component to add a feature or fix a bug, incrementally refactor its inline styles to use `index.css` utility classes (e.g. `className="flex-center p-md"`). Leave the file cleaner than you found it.
-11. **Zustand Selector Atomicity**: Never create new object or array references inside Zustand selectors (e.g., `useStore(useShallow(state => state.data || {}))`). This instantly destroys React's `useShallow` equality checks and causes infinite re-render loops. Default fallbacks must be handled *outside* the selector or at the component level.
-12. **Single Source of Offline Sync**: If the project uses Firebase's native `persistentLocalCache`, you must never build competing, manual `localStorage` sync managers. You cannot have two different offline engines trying to hydrate the same state simultaneously.
-13. **Strict Prop-Drilling Limits**: If an extracted child component requires more than 5-7 props to function, you must implement a scoped React `<Context.Provider>` or pull the data directly from the Zustand store instead of prop-drilling.
-14. **Asynchronous Race Condition Prevention**: Never attach synchronous form submission handlers to states that are actively waiting on a background network fetch. Forms must be explicitly disabled (`disabled={isHydrating}`) or fully `await` the required tenant data before evaluating.
-15. **AI Data Batching (Rate Limiting)**: The Gemini Free Tier has a strict limit of 15 Requests Per Minute (RPM). You are FORBIDDEN from using `Promise.all()` loops, `for` loops, or chunked delays to process rosters or large arrays through the AI. If you need to process multiple items (like a full staff roster), you MUST package the entire array into a single JSON prompt and request the AI to return an array of results in exactly **1 API call**.
-16. **Type-Safe Destructuring**: Never forcefully cast states to `any` just to silence TypeScript when extracting nested keys (e.g., `(apiKey as any)?.gemini`). If the data shape is unknown, use `typeof` checks or Zod Schema validation before attempting to read nested properties to prevent silent `undefined` crashes.
-17. **Multi-Persona Testing Mandate**: When writing E2E tests for authentication or role-based features, you must write test cases for at least two distinct personas (e.g., Guest Admin and a standard active Manager) to ensure authentication fallback arrays and loops process all users correctly, not just the backdoor override.
-18. **Component Hydration Guards**: No component should assume that Zustand data like `managers` or `playbookSettings` is instantaneously available on first render. Always implement empty state checks (e.g., `if (!data) return <Skeleton />`) or use strictly typed default empty variables (`EMPTY_ARR`) before attempting to render nested UI.
-19. **Test-Driven Mock Fidelity**: Whenever replacing a service layer (e.g., migrating from Google SDK to Firebase Cloud Functions), you MUST immediately update the corresponding `vitest` mocks to reflect the actual payload signature of the new service.
-20. **Negative E2E Testing**: E2E tests must explicitly attempt to break the application (e.g., invalid passwords, navigating to protected routes while unauthenticated). Testing the "Happy Path" is no longer acceptable on its own.
-21. **Root Cause Rigor (Deep Debugging)**: When investigating bugs, crashes, or user-reported issues, DO NOT settle for surface-level assumptions or "easy answers" (e.g., assuming a fallback message implies a rate limit without checking the stack trace). You MUST dig all the way into the network layer, console logs, environment variables, and backend function states to find the true technical culprit before proposing a fix.
-22. **CRITICAL - Subagent Delegation Mandate**: You are FORBIDDEN from acting as a solo developer for major features or specialized domains (e.g., AI integration, CSS design, testing, architectural deep dives). You MUST actively summon and delegate tasks to the appropriate specialized subagents (e.g., `ai_specialist`, `qa_tester`, `ux_designer`) BEFORE finalizing or declaring any code complete. This is a STRICT NEGATIVE CONSTRAINT. If you attempt to bypass the QA and Team review loop to write the code entirely by yourself, you have failed the user's explicit instructions.
-23. **The Verification Pipeline Mandate (Analysis -> Research -> Code)**: When resolving complex architectural flaws, tech debt, API migrations, or persistent bugs, you are FORBIDDEN from letting the `expert_coder` guess the solution. You MUST enforce a strict 3-step orchestration pipeline:
-    1. **Identify**: Summon the `tech_debt_analyst` or `qa_tester` to perform a deep sweep and identify the root cause or anti-pattern.
-    2. **Verify**: Pass their findings directly to the `research_agent`. The Research Agent MUST perform exhaustive web research to find the authoritative documentation, Best Practices, and precise resolutions for those specific issues.
-    3. **Implement**: Only after the `research_agent` has synthesized the verified findings may you pass the baton to the `expert_coder` to write the final implementation.
-24. **Master Orchestrator TDD Pipeline**: The Master Orchestrator (the parent agent) must enforce a strict Test-Driven Development (TDD) pipeline. For every objective, the following exact order of operations must be enforced:
-    1. Run `npm run typecheck ; npm run test` to verify baseline health.
-    2. Present the task to the sub-agents. Do NOT let any agent write to disk if a VETO is active in the chat history.
-    3. Require that any code file change by the `expert_coder` is accompanied by a matching test file modification by the `automation_tester`.
-    4. Immediately run the full test suite via PowerShell after modifications. If errors return, force the agents into an internal repair loop until the terminal output is 100% SUCCESS.
-    5. Only commit to Git and log to `agent_memory/` once the verification gate is completely green.
-
-## 25. STATEFUL LOOP MANIFEST & FINAL DEPLOYMENT MANDATES
-1. The Orchestrator is strictly FORBIDDEN from relying on chat message window history to recall its file queue sequence or position.
-2. At the absolute start of every single evaluation turn, the orchestrator MUST call its file tools to read `agent_memory/loop_manifest.json` to verify its active `current_checkpoint`.
-3. If any sub-agent issues an explicit `VETO` during the round-table debate, the orchestrator must append the veto reason to the manifest's `active_vetos` log before triggering the repair loop.
-4. The moment the PowerShell Quality Gate returns 100% SUCCESS (`npm run typecheck ; npm run test`), the orchestrator MUST call its manifest tracking tools to advance the file index, move the completed target to `processed_queue`, and stage the next file path before executing Phase 5 Git commits.
-5. The moment the manifest array shows that the `remaining_queue` has reached 0 files, the orchestrator MUST autonomously trigger the production build and deployment pipeline (`npm run build ; firebase deploy`) to sync all architectural modifications to Firebase Hosting and Firebase Cloud Functions, verifying live availability before officially spinning down.
-
- # #   2 6 .   S e r v e r - S i d e   A I   E x c l u s i v i t y   M a n d a t e 
- A l l   G e m i n i   A I   i n t e r a c t i o n s   M U S T   r e m a i n   s t r i c t l y   s e r v e r - s i d e .   A g e n t s   a r e   F O R B I D D E N   f r o m   i m p o r t i n g   @ g o o g l e / g e n e r a t i v e - a i   i n t o   a n y   s r c /   f r o n t e n d   c o m p o n e n t   o r   s e r v i c e .   A l l   f r o n t e n d   c o m p o n e n t s   m u s t   i n t e r f a c e   w i t h   A I   e x c l u s i v e l y   v i a   t h e   e s t a b l i s h e d   F i r e b a s e   h t t p s C a l l a b l e   R P C   e n d p o i n t s   ( e . g . ,   c a l l F i r e b a s e A I ) .   
- 
- # #   2 7 .   S t r i c t   B a c k e n d   S c h e m a   R e g i s t r a t i o n 
- W h e n e v e r   a   n e w   A I   c a p a b i l i t y   i s   a d d e d   t o   t h e   a p p l i c a t i o n   t h a t   e x p e c t s   a   s t r u c t u r e d   J S O N   r e s p o n s e ,   t h e   O r c h e s t r a t o r   o r   E x p e r t   C o d e r   M U S T   r e g i s t e r   t h e   c o r r e s p o n d i n g   S c h e m a T y p e   d e f i n i t i o n   i n s i d e   t h e   g e t S c h e m a F o r T y p e   s w i t c h   s t a t e m e n t   i n    u n c t i o n s / s r c / a i . j s . 
- I f   t h e   A I   p r o m p t   i s   i n t e n t i o n a l l y   d e s i g n e d   t o   o u t p u t   " s c h e m a - l e s s "   J S O N   ( r e l y i n g   p u r e l y   o n   p r o m p t   e n g i n e e r i n g   i n s t e a d   o f   a   r i g i d   d a t a   c o n t r a c t ) ,   i t   M U S T   s t i l l   b e   e x p l i c i t l y   d e c l a r e d   i n   t h e   s w i t c h   s t a t e m e n t   t o   r e t u r n   
- u l l   t o   p a s s   t h e   b a c k e n d   v a l i d a t i o n   g a t e .   U n r e g i s t e r e d   s c h e m a s   w i l l   t h r o w   a n   i n v a l i d - a r g u m e n t   c r a s h   i n   p r o d u c t i o n . 
- 
- # #   2 8 .   A I   S p e c i a l i s t   C o n f i g u r a t i o n   G a t e 
- W h e n   m o d i f y i n g   o r   m i g r a t i n g   b a c k e n d   A I   e n d p o i n t s ,   t h e   e x p e r t _ c o d e r   m u s t   e n s u r e   t h a t   d y n a m i c   r u n t i m e   v a r i a b l e s   ( 	 e m p e r a t u r e ,   	 o p K ,   	 o p P )   a n d   s y s t e m I n s t r u c t i o n   i n j e c t i o n s   f r o m   t h e   c l i e n t   a r e   p r o p e r l y   m e r g e d   i n t o   t h e   g e n e r a t i o n C o n f i g   b l o c k ,   r a t h e r   t h a n   c o n c a t e n a t e d   i n t o   s t r i n g s .   A n    i _ s p e c i a l i s t   m u s t   b e   i n v o k e d   t o   v e r i f y   t h e   f i d e l i t y   o f   t h e   m o d e l   c o n f i g u r a t i o n   b e f o r e   d e p l o y m e n t .  
- 
+## 5. Verification Gate
+- Keep Vitest mocks synchronized with `callFirebaseAI` payload contracts and test multi-persona and negative auth paths in E2E coverage.
+- Run before commit/land:
+  ```bash
+  npm run typecheck && npx oxlint src && npm run test && npm run build
+  ```

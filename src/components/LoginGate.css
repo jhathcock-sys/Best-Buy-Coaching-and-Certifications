@@ -1,6 +1,6 @@
 .login-gate-wrapper {
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   background: radial-gradient(circle at center, #0a0e17 0%, #03050a 100%);
   color: #fff;
   position: fixed;

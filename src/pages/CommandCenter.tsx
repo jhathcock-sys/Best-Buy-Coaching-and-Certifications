@@ -26,7 +26,7 @@ export default function CommandCenter() {
 
   if (!manifest) {
     return (
-      <div className="min-h-screen bg-space flex-center">
+      <div className="min-h-dvh bg-space flex-center">
         <div className="flex-column align-center gap-md">
           <Activity className="text-bby-blue animate-pulse" size={48} />
           <h2 className="text-xl text-white font-heading uppercase tracking-widest">Initializing Aegis Link...</h2>
@@ -38,7 +38,7 @@ export default function CommandCenter() {
   const progressPercent = Math.round((manifest.file_index / manifest.total_files) * 100);
 
   return (
-    <div className="min-h-screen bg-space p-xl bg-radial-hover" data-testid="command-center-page">
+    <div className="min-h-dvh bg-space p-xl bg-radial-hover" data-testid="command-center-page">
       
       {/* HEADER */}
       <motion.div 
@@ -76,7 +76,7 @@ export default function CommandCenter() {
       </motion.div>
 
       {/* THREE COLUMN GRID */}
-      <div className="grid grid-cols-12 gap-lg h-[calc(100vh-140px)]">
+      <div className="grid grid-cols-12 gap-lg h-[calc(100dvh-140px)]">
         <SystemStatusPanel />
         <AgentCommLink />
         <ProcessingQueue />

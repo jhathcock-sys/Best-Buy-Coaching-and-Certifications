@@ -65,8 +65,8 @@ export default function BreakroomTV({ onClose }: BreakroomTVProps) {
   };
 
   const topAdvisors = useMemo(() => {
-    return [...roster]
-      .sort((a, b) => ((b?.memberships || 0) + (b?.creditCards || 0)) - ((a?.memberships || 0) + (a?.creditCards || 0)))
+    return roster
+      .toSorted((a, b) => ((b?.memberships || 0) + (b?.creditCards || 0)) - ((a?.memberships || 0) + (a?.creditCards || 0)))
       .slice(0, 3);
   }, [roster]);
 

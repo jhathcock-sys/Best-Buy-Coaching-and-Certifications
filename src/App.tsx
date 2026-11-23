@@ -32,7 +32,7 @@ import AdvisorLayout from './components/layout/AdvisorLayout';
 import SyncManager from './components/SyncManager';
 import ServiceWorkerBanner from './components/ServiceWorkerBanner';
 import { useCategoryAutoExpand } from './hooks/useCategoryAutoExpand';
-import CommandCenter from './pages/CommandCenter';
+const CommandCenter = lazy(() => import('./pages/CommandCenter'));
 
 
 export default function App() {
@@ -105,11 +105,20 @@ function AppContent() {
     setActiveView('shadow');
   }, [setPrefillShadowEmployee, setActiveView]);
 
+  const routeFallback = (
+    <div className="flex-center flex-column w-full h-full gap-md" data-testid="suspense-fallback">
+      <div className="w-50px h-50px border-4 border-solid border-[var(--border-glass)] border-t-[var(--bby-yellow)] rounded-full animate-spin"></div>
+      <span className="text-secondary text-sm font-semibold uppercase tracking-widest animate-fade-in">Loading Module...</span>
+    </div>
+  );
+
   if (activeView === 'test-profile-header') {
     return (
-      <Suspense fallback={<div>Loading test harness...</div>}>
-        <TestProfileHeaderHarness />
-      </Suspense>
+      <ErrorBoundary key={location.pathname}>
+        <Suspense fallback={<div>Loading test harness...</div>}>
+          <TestProfileHeaderHarness />
+        </Suspense>
+      </ErrorBoundary>
     );
   }
 
@@ -135,16 +144,20 @@ function AppContent() {
   if (activeAdvisor && !activeManager) {
     return (
       <AdvisorLayout>
-        <Routes>
-          <Route path="/roster" element={<StoreRosterPage />} />
-          <Route path="/command-center" element={<CommandCenter />} />
-          <Route path="*" element={
-            <AdvisorDashboardPage 
-              employee={activeAdvisor}
-              onNavigate={setActiveView}
-            />
-          } />
-        </Routes>
+        <ErrorBoundary key={location.pathname}>
+          <Suspense fallback={routeFallback}>
+            <Routes>
+              <Route path="/roster" element={<StoreRosterPage />} />
+              <Route path="/command-center" element={<CommandCenter />} />
+              <Route path="*" element={
+                <AdvisorDashboardPage 
+                  employee={activeAdvisor}
+                  onNavigate={setActiveView}
+                />
+              } />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </AdvisorLayout>
     );
   }
@@ -154,13 +167,9 @@ function AppContent() {
       <Sidebar />
       {/* Main View Display Port */}
       <main className="main-content" data-testid="main-content">
-        <Suspense fallback={
-          <div className="flex-center flex-column w-full h-full gap-md" data-testid="suspense-fallback">
-            <div className="w-50px h-50px border-4 border-solid border-[var(--border-glass)] border-t-[var(--bby-yellow)] rounded-full animate-spin"></div>
-            <span className="text-secondary text-sm font-semibold uppercase tracking-widest animate-fade-in">Loading Module...</span>
-          </div>
-        }>
-          <Routes>
+        <ErrorBoundary key={location.pathname}>
+          <Suspense fallback={routeFallback}>
+            <Routes>
           <Route path="/command-center" element={<CommandCenter />} />
 
             <Route path="/" element={
@@ -234,8 +243,9 @@ function AppContent() {
                 onShadowEmployee={handleShadowEmployeeFromRoster}
               />
             } />
-          </Routes>
-        </Suspense>
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </main>
 
       <MobileNav />

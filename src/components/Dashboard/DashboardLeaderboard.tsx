@@ -16,8 +16,8 @@ export default function DashboardLeaderboard({
 
   const leaderboardData = useMemo(() => {
     if (!Array.isArray(roster)) return [];
-    return [...roster]
-      .sort((a, b) => {
+    return roster
+      .toSorted((a, b) => {
         const valA = rankMetric === 'surveys' && a.surveys === 0.2 ? 0 : parseFloat(String(a[rankMetric as keyof Employee] || 0)) || 0;
         const valB = rankMetric === 'surveys' && b.surveys === 0.2 ? 0 : parseFloat(String(b[rankMetric as keyof Employee] || 0)) || 0;
         return valB - valA;

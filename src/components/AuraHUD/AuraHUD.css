@@ -1,5 +1,5 @@
 .aura-hud-container {
-  min-height: 100vh;
+  min-height: 100dvh;
   padding: 2rem;
   background: radial-gradient(circle at center, var(--bg-space) 0%, var(--bg-obsidian) 100%);
   position: relative;

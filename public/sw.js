@@ -1,4 +1,4 @@
-const CACHE_NAME = 'floorvision-assets-v4';
+const CACHE_NAME = 'floorvision-assets-v5';
 
 // We pre-cache the root documents so they load immediately offline
 const PRECACHE_URLS = [
@@ -37,13 +37,10 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
   if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
+  if (url.origin !== self.location.origin) return;
 
-  // Exclude real-time synchronization channels (Firestore and Gemini AI API calls)
-  if (
-    url.hostname.includes('firestore.googleapis.com') ||
-    url.hostname.includes('firebase') ||
-    url.hostname.includes('generativelanguage.googleapis.com')
-  ) {
+  // Exclude same-origin API rewrites and Firebase Hosting reserved paths
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/__/')) {
     return;
   }
 
@@ -55,17 +52,19 @@ self.addEventListener('fetch', (event) => {
   if (isNavigation) {
     event.respondWith(
       fetch(event.request).then((networkResponse) => {
-        // Cache the latest index.html on success
-        if (networkResponse && networkResponse.status === 200) {
+        // Cache the latest index.html on success under the canonical '/index.html' key
+        if (networkResponse && networkResponse.ok && networkResponse.type === 'basic') {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+            return cache.put('/index.html', responseToCache);
+          }).catch(() => {});
         }
         return networkResponse;
       }).catch(() => {
-        // Offline: serve from cache
-        return caches.match(event.request);
+        // Offline: serve canonical '/index.html' from cache (never undefined)
+        return caches.match('/index.html')
+          .then((cached) => cached || caches.match('/'))
+          .then((cached) => cached || Response.error());
       })
     );
     return;
@@ -73,23 +72,21 @@ self.addEventListener('fetch', (event) => {
 
   // Stale-While-Revalidate for other static assets
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
+    caches.match(event.request).then((cached) => {
       // Fetch latest copy from the network in background
       const fetchPromise = fetch(event.request).then((networkResponse) => {
-        // Cache the newly retrieved asset
-        if (networkResponse && networkResponse.status === 200) {
+        // Cache the newly retrieved asset only if same-origin basic 2xx response
+        if (networkResponse && networkResponse.ok && networkResponse.type === 'basic') {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+            return cache.put(event.request, responseToCache);
+          }).catch(() => {});
         }
         return networkResponse;
-      }).catch(() => {
-        // Network failure (offline), return cachedResponse or let it fail gracefully
-      });
+      }).catch(() => cached || Response.error());
 
       // Return cached copy immediately (speed) or wait for network (fallback)
-      return cachedResponse || fetchPromise;
+      return cached || fetchPromise;
     })
   );
 });

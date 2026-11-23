@@ -58,7 +58,7 @@ export default function BreakRunSheet({
     setBreakForm(prev => ({ ...prev, empId: '' }));
   };
 
-  const sortedBreaks = [...breakSchedule].sort((a, b) => {
+  const sortedBreaks = breakSchedule.toSorted((a, b) => {
     const toMins = (t: string) => {
       const [hm, ampm] = t.split(' ');
       const parts = hm.split(':').map(Number);

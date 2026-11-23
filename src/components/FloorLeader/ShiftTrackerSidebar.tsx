@@ -118,7 +118,7 @@ export default function ShiftTrackerSidebar({
               No floor wins logged yet for this shift. Keep pushing cards & memberships!
             </div>
           ) : (
-            [...activeShift.wins].reverse().map((win: any) => (
+            activeShift.wins.toReversed().map((win: any) => (
               <div 
                 key={win.id} 
                 className="flex-between align-center bg-black-alpha-15 border border-glass rounded-sm py-sm px-md text-sm"

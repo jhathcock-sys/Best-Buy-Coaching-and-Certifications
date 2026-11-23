@@ -50,7 +50,7 @@ export default function AuraHUDPage({ onCoachEmployee }: AuraHUDPageProps) {
     setInsights({});
     
     // Sort employees by lowest performance first to prioritize coaching insights
-    const sortedRoster = [...roster].sort((a, b) => {
+    const sortedRoster = roster.toSorted((a, b) => {
       const aScore = (a.revenue || 0) + (a.memberships || 0) * 500;
       const bScore = (b.revenue || 0) + (b.memberships || 0) * 500;
       return aScore - bScore;

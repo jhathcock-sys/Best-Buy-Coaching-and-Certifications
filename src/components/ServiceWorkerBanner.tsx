@@ -13,7 +13,7 @@ export default function ServiceWorkerBanner() {
 
   return (
     <div 
-      className="glass-card flex-column gap-sm animate-fade-in fixed bottom-6 right-6 p-5 z-[9999] max-w-[320px]"
+      className="glass-card flex-column gap-sm animate-fade-in sw-update-banner"
       data-testid="sw-update-banner"
     >
       <div>

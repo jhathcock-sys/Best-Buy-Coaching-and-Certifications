@@ -126,6 +126,10 @@ export default function AiEngineTab() {
                   placeholder="Enter your Gemini API key (AIzaSy...)"
                   value={localApiKey || ''}
                   onChange={(e) => setLocalApiKey(e.target.value)}
+                  autoComplete="off"
+                  spellCheck={false}
+                  autoCapitalize="none"
+                  autoCorrect="off"
                   data-testid="api-key-input"
                 />
                 <p className="text-xs text-muted mt-xs">

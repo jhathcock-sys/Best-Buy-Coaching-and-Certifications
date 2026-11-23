@@ -41,7 +41,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
   render() {
     if (this.state.hasError) {
       return (
-        <div data-testid="error-boundary-container" className="flex-center p-xxl text-white bg-obsidian-alpha" style={{ minHeight: '100vh' }}>
+        <div data-testid="error-boundary-container" className="flex-center p-xxl text-white bg-obsidian-alpha min-h-dvh">
           <div className="glass-card flex-column align-center p-xxl text-center alert-card-danger max-w-550 w-full" style={{
             maxWidth: '550px',
             boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'

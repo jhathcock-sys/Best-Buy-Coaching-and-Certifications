@@ -101,7 +101,7 @@ export function useCalculatedMetrics() {
   const activeFocus5Alerts = useMemo(() => {
     if (!floorLeaderShifts || floorLeaderShifts.length === 0) return EMPTY_ARR;
     
-    const sortedShifts = [...floorLeaderShifts].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    const sortedShifts = floorLeaderShifts.toSorted((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     const mostRecentShift = sortedShifts[0];
     
     const todayStart = new Date();
